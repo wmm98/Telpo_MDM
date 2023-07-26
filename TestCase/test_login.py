@@ -36,6 +36,9 @@ class TestLogin:
 
         loc_agree = (By.XPATH, "//*[@id=\"agreeTerms\"]")
         WebDriverWait(self.driver, 10).until(EC.presence_of_element_located(loc_agree)).send_keys(Keys.SPACE)
+        print(self.driver.find_element(*loc_agree).is_selected())
+        time.sleep(2)
+        # WebDriverWait(self.driver, 10).until(EC.presence_of_element_located(loc_agree)).send_keys(Keys.SPACE)
 
         # res = self.driver.find_elements(By.CSS_SELECTOR, "#agreeTerms")
         # print(res)
