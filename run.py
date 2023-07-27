@@ -19,6 +19,7 @@ import os.path
 import time
 import shutil
 import datetime
+from utils.base_web_driver import BaseWeb
 
 
 if __name__ == '__main__':
@@ -30,9 +31,11 @@ if __name__ == '__main__':
     conf = Config.Config()
     log = Log.MyLog()
     shell = Shell.Shell()
-    # 先进行登录
 
     log.info('initialize Config, path=' + conf.conf_path)
+    # 先进行登录
+    web = BaseWeb()
+    web.open_web_site()
 
     # 获取报告地址
     xml_report_path = conf.xml_report_path

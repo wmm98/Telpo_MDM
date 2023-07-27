@@ -20,7 +20,7 @@ class TestLogin:
         # # 窗口最大化
         # self.driver.get(url)
 
-        self.driver = BaseWeb().driver
+        self.driver = BaseWeb().get_web_driver()
         self.element_func = ElementsOperations(self.driver)
         self.wait_times = 10
 
@@ -71,19 +71,7 @@ class TestLogin:
         # msg = self.driver.find_element(*loc)
         # print(msg.text)
 
-    # @allure.feature('MDM_test01')
-    # @allure.title("调试")
-    # @pytest.mark.dependency(depends=["login_ok"])
-    # def test_login_test(self):
-    #     pass
-        # print(self.driver.title)
-        # assert False
-        # res = self.element_func.wait_title_is("Telpo MDM")
-        # print(res)
-        # res = WebDriverWait(self.driver, 10).until(EC.title_is("Telpo MDM"))
-        # print(res)
 
-        # assert self.element_func.web_driver_wait_until(EC.title_is("Telpo MDM")), "@@@页面跳失败!!!"
 
 
 if __name__ == '__main__':

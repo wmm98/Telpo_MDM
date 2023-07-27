@@ -12,13 +12,22 @@ import pytest
 class BaseWeb:
 
     def __init__(self):
-        self.driver = webdriver.Chrome()
-        self.driver.implicitly_wait(30)
-        self.driver.maximize_window()
+        pass
+
+    def open_web_site(self):
+        global driver
+        driver = webdriver.Chrome()
+        driver.implicitly_wait(30)
+        driver.maximize_window()
         url = 'https://mdm.telpoai.com/login'
         # 窗口最大化
-        self.driver.get(url)
+        driver.get(url)
+
+    def get_web_driver(self):
+        return driver
 
 
 if __name__ == '__main__':
-    BaseWeb()
+    case = BaseWeb()
+    case.open_web_site()
+    case.get_web_driver()
