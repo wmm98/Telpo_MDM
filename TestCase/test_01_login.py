@@ -58,7 +58,7 @@ class TestLogin:
         self.element_func.web_driver_wait_until(EC.presence_of_element_located(loc_login_btn))
         self.element_func.element_click(loc_login_btn)
 
-        assert self.element_func.web_driver_wait_until(EC.url_changes(login_ok_url)), \
+        assert self.element_func.web_driver_wait_until(EC.url_to_be(login_ok_url)), \
             "@@@登录没有跳转成功， 页面加载过慢或者登录失败！！！"
 
         assert self.element_func.web_driver_wait_until(EC.title_is(login_ok_title)), "@@@页面跳失败!!!"

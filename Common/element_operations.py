@@ -18,6 +18,10 @@ class ElementsOperations:
         # self.driver.get(url)
         self.times = 10
 
+    def element_find(self, loc):
+        ele = self.driver.find_element(*loc)
+        return ele
+
     def element_click(self, loc):
         self.driver.find_element(*loc).click()
 
@@ -31,11 +35,19 @@ class ElementsOperations:
     def element_send_keys_checkbox(self, loc, operate):
         self.driver.find_element(*loc).send_keys(operate)
 
-    def web_driver_wait_until(self, condition):
-        return WebDriverWait(self.driver, self.times).until(condition)
+    def web_driver_wait_until(self, condition, times=0):
+        if times == 0:
+            wait_times = self.times
+        else:
+            wait_times = times
+        return WebDriverWait(self.driver, wait_times).until(condition)
 
-    def web_driver_wait_until_not(self, condition):
-        return WebDriverWait(self.driver, self.times).until_not(condition)
+    def web_driver_wait_until_not(self, condition,  times=0):
+        if times == 0:
+            wait_times = self.times
+        else:
+            wait_times = times
+        return WebDriverWait(self.driver, wait_times).until_not(condition)
 
 # if __name__ == '__main__':
 #     driver = webdriver.Chrome()
