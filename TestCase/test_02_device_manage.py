@@ -5,7 +5,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium import webdriver
 from Common.element_operations import ElementsOperations
-from utils.base_web_driver import BaseWeb
+from utils.base_web_driver import BaseWebDriver
 import pytest
 from Common import Log
 
@@ -15,8 +15,8 @@ log = Log.MyLog()
 class TestDeviceManage:
 
     def setup_class(self):
-        self.driver = BaseWeb().get_web_driver()
-        self.element_func = ElementsOperations(self.driver)
+        self.driver = BaseWebDriver().get_web_driver()
+        self.element_func = ElementsOperations()
 
     def teardown_class(self):
         pass
@@ -27,7 +27,7 @@ class TestDeviceManage:
     def test_go_to_devices_page(self):
         print(self.driver.title)
         log.info("当前页面标题为 %s" % self.driver.title)
-        loc_devices_page_btn = (By.XPATH, "/html/body/div[1]/aside[1]/div/div[4]/div/div/nav/ul/li[2]/a/p")
+        loc_devices_page_btn = (By.XPATH, "/html/body/div[1]/aside[1]/div/div[4]/div/div/nav/ul/li[2]")
         device_page_url = "https://mdm.telpoai.com/devices"
         loc_main_title = (By.CLASS_NAME, "m-0")
         exp_main_title = "Total Devices"
@@ -50,6 +50,5 @@ class TestDeviceManage:
             assert False
 
 
-    # def
 
 

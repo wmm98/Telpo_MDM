@@ -4,12 +4,14 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium import webdriver
 import time
+from utils.base_web_driver import BaseWebDriver
+
 
 
 class ElementsOperations:
 
-    def __init__(self, driver):
-        self.driver = driver
+    def __init__(self):
+        self.driver = BaseWebDriver().get_web_driver()
         # self.driver = webdriver.Chrome()
         # self.driver.implicitly_wait(30)
         # self.driver.maximize_window()

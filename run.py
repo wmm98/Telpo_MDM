@@ -19,7 +19,7 @@ import os.path
 import time
 import shutil
 import datetime
-from utils.base_web_driver import BaseWeb
+from utils.base_web_driver import BaseWebDriver
 
 
 if __name__ == '__main__':
@@ -34,7 +34,7 @@ if __name__ == '__main__':
 
     log.info('initialize Config, path=' + conf.conf_path)
     # 先进行登录
-    web = BaseWeb()
+    web = BaseWebDriver()
     web.open_web_site()
 
     # 获取报告地址

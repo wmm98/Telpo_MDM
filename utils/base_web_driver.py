@@ -1,16 +1,7 @@
-import time
-import allure
-from selenium.webdriver import Keys
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.wait import WebDriverWait
-from selenium.webdriver.common.by import By
 from selenium import webdriver
-from Common.element_operations import ElementsOperations
-import pytest
 
 
-class BaseWeb:
-
+class BaseWebDriver:
     def __init__(self):
         pass
 
@@ -28,6 +19,6 @@ class BaseWeb:
 
 
 if __name__ == '__main__':
-    case = BaseWeb()
+    case = BaseWebDriver()
     case.open_web_site()
     case.get_web_driver()
