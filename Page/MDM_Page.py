@@ -6,8 +6,8 @@ from selenium.webdriver.support import expected_conditions as EC
 
 class MDMPage(BasePage):
 
-    def __init__(self, driver):
-        BasePage.__init__(self, driver)
+    def __init__(self, driver, times):
+        BasePage.__init__(self, driver, times)
 
     agree_key = Keys.SPACE
     loc_pwd_btn = (By.ID, "password")
@@ -32,15 +32,15 @@ class MDMPage(BasePage):
         self.click(self.loc_login_btn)
 
 
-if __name__ == '__main__':
-    from selenium import webdriver
-    driver = webdriver.Chrome()
-    driver.implicitly_wait(30)
-    driver.maximize_window()
-    url = 'https://mdm.telpoai.com/login'
-    # 窗口最大化
-    MDMPage(driver)
-    driver.get(url)
+# if __name__ == '__main__':
+#     from selenium import webdriver
+#     driver = webdriver.Chrome()
+#     driver.implicitly_wait(30)
+#     driver.maximize_window()
+#     url = 'https://mdm.telpoai.com/login'
+#     # 窗口最大化
+#     MDMPage(driver)
+#     driver.get(url)
 
 
 

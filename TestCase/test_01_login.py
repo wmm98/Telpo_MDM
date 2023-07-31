@@ -13,7 +13,7 @@ class TestLogin:
 
     def setup_class(self):
         self.driver = BaseWebDriver().get_web_driver()
-        self.mdm_page = MDMPage(self.driver)
+        self.mdm_page = MDMPage(self.driver, 40)
         self.wait_times = 10
 
     def teardown_class(self):

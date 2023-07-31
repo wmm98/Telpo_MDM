@@ -1,11 +1,13 @@
 from selenium.webdriver.support.wait import WebDriverWait
+from selenium import webdriver
 
 
-class BasePage(object):
 
-    def __init__(self, driver):
+class BasePage:
+
+    def __init__(self, driver, times):
         self.driver = driver
-        self.times = 10
+        self.times = times
 
     def get_element(self, loc):
         return self.driver.find_element(*loc)
@@ -25,19 +27,17 @@ class BasePage(object):
     def get_title(self):
         return self.driver.title
 
-    def web_driver_wait_until(self, condition, times=0):
-        if times == 0:
-            wait_times = self.times
-        else:
-            wait_times = times
-        return WebDriverWait(self.driver, wait_times).until(condition)
+    def web_driver_wait_until(self, condition):
+        return WebDriverWait(self.driver, self.times).until(condition)
 
-    def web_driver_wait_until_not(self, condition, times=0):
-        if times == 0:
-            wait_times = self.times
-        else:
-            wait_times = times
-        return WebDriverWait(self.driver, wait_times).until_not(condition)
+    def web_driver_wait_until_not(self, condition):
+        return WebDriverWait(self.driver, self.times).until_not(condition)
+
+    def switch_to_alert(self):
+        alert = self.driver.switch_to.alert
+
+        # d = webdriver.Chrome()
+        # al = d.switch_to.alert
 
 
 
