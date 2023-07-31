@@ -8,7 +8,7 @@ class BaseWebDriver:
     def open_web_site(self):
         global driver
         driver = webdriver.Chrome()
-        driver.implicitly_wait(10)
+        driver.implicitly_wait(5)
         driver.maximize_window()
         url = 'https://mdm.telpoai.com/login'
         # 窗口最大化

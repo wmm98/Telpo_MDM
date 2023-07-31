@@ -1,8 +1,6 @@
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium import webdriver
 
-
-
 class BasePage:
 
     def __init__(self, driver, times):
@@ -34,7 +32,17 @@ class BasePage:
         return WebDriverWait(self.driver, self.times).until_not(condition)
 
     def switch_to_alert(self):
-        alert = self.driver.switch_to.alert
+        al = self.driver.switch_to.alert
+        return al
+
+    def alert_input_text(self, al, text):
+        al.send_keys(text)
+
+    def accept_alert(self, al):
+        al.accept()
+
+    def dismiss_alert(self, al):
+        al.dismiss()
 
         # d = webdriver.Chrome()
         # al = d.switch_to.alert

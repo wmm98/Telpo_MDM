@@ -8,20 +8,31 @@ class DevicesPage(TelpoMDMPage):
     def __init__(self, driver, times):
         TelpoMDMPage.__init__(self, driver, times)
 
-    category_cls_name = "btn btn-primary btn-block mb-3 add_new_category"
-    loc_category_btn = (By.CLASS_NAME, category_cls_name)
-    loc_input_cate_box = (By.CLASS_NAME, "category_name")
-    loc_save_btn = (By.CLASS_NAME, "btn btn-primary create_category_button")
+    loc_category_btn = (By.XPATH, "/html/body/div[1]/div[1]/section/div/div[1]/div[11]/div[1]/a[1]")
+    loc_input_cate_box = (By.XPATH, "//*[@id=\"category_name\"]")
+    loc_save_btn = (By.XPATH, "//*[@id=\"modal-add-category\"]/div/div/div[3]/button[2]")
 
     def click_category(self):
         self.web_driver_wait_until(EC.presence_of_element_located(self.loc_category_btn))
         self.click(self.loc_category_btn)
 
-    def input_category_name(self, cate_name):
+    def add_category(self, cate_name):
+        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_input_cate_box))
         self.input_text(self.loc_input_cate_box, cate_name)
-
-    def click_save(self):
         self.click(self.loc_save_btn)
+
+    # def click_save(self):
+    #     self.click(self.loc_save_btn)
+    #
+    # def add_category(self, text):
+    #     self.web_driver_wait_until(EC.alert_is_present())
+    #     # self.alert_input_text(text)
+    #     self.dismiss_alert()
+
+
+
+
+
 
 
 
