@@ -37,15 +37,18 @@ class TestDevicesPage:
 
     @allure.feature('MDM_test01')
     @allure.title("Devices-添加种类")  # 设置case的名字
-    def test_add_category(self):
-        text = "手持终端"
+    @pytest.mark.parametrize('cate_text, model_text', [["手持终端", "TPS900"], ["壁挂式", "TPS980P"]])
+    def test_add_category(self, cate_text, model_text):
+        # cate_text = "手持终端"
+        # model_text = "TPS900"
+
         self.page.click_category()
-        self.page.add_category(text)
-        time.sleep(5)
-        # loc_input_cate_box = (By.XPATH, "//*[@id=\"category_name\"]")
-        # ele = WebDriverWait(self.driver, 10).until(EC.presence_of_element_located(loc_input_cate_box))
-        # self.driver.find_element(*loc_input_cate_box).send_keys("手持终端")
-        # time.sleep(4)
+        self.page.add_category(cate_text)
+
+        self.page.click_model()
+        self.page.add_model(model_text)
+
+
 
 
 

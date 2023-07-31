@@ -10,7 +10,11 @@ class DevicesPage(TelpoMDMPage):
 
     loc_category_btn = (By.XPATH, "/html/body/div[1]/div[1]/section/div/div[1]/div[11]/div[1]/a[1]")
     loc_input_cate_box = (By.XPATH, "//*[@id=\"category_name\"]")
-    loc_save_btn = (By.XPATH, "//*[@id=\"modal-add-category\"]/div/div/div[3]/button[2]")
+    loc_save_btn_cate = (By.XPATH, "//*[@id=\"modal-add-category\"]/div/div/div[3]/button[2]")
+
+    loc_mode_btn = (By.XPATH, "/html/body/div[1]/div[1]/section/div/div[1]/div[11]/div[1]/a[2]")
+    loc_input_mode_box = (By.XPATH, "//*[@id=\"model_name\"]")
+    loc_save_btn_mode = (By.XPATH, "//*[@id=\"modal-add-model\"]/div/div/div[3]/button[2]")
 
     def click_category(self):
         self.web_driver_wait_until(EC.presence_of_element_located(self.loc_category_btn))
@@ -19,15 +23,19 @@ class DevicesPage(TelpoMDMPage):
     def add_category(self, cate_name):
         self.web_driver_wait_until(EC.presence_of_element_located(self.loc_input_cate_box))
         self.input_text(self.loc_input_cate_box, cate_name)
-        self.click(self.loc_save_btn)
+        self.click(self.loc_save_btn_cate)
 
-    # def click_save(self):
-    #     self.click(self.loc_save_btn)
-    #
-    # def add_category(self, text):
-    #     self.web_driver_wait_until(EC.alert_is_present())
-    #     # self.alert_input_text(text)
-    #     self.dismiss_alert()
+    def click_model(self):
+        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_mode_btn))
+        self.click(self.loc_mode_btn)
+
+    def add_model(self, model_name):
+        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_input_mode_box))
+        self.input_text(self.loc_input_mode_box, model_name)
+        self.click(self.loc_save_btn_mode)
+
+
+
 
 
 
