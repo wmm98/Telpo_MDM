@@ -10,6 +10,9 @@ class BasePage:
     def get_element(self, loc):
         return self.driver.find_element(*loc)
 
+    def get_elements(self, loc):
+        return self.driver.find_elements(*loc)
+
     def get_elements_in_range(self, loc_pre, loc_pos):
         return self.driver.find_element(*loc_pre).find_elements(*loc_pos)
 

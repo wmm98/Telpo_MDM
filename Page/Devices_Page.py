@@ -1,3 +1,5 @@
+from selenium.common import TimeoutException
+
 from Page.Telpo_MDM_Page import TelpoMDMPage
 from selenium.webdriver import Keys
 from selenium.webdriver.common.by import By
@@ -9,28 +11,46 @@ class DevicesPage(TelpoMDMPage):
         TelpoMDMPage.__init__(self, driver, times)
         self.driver = driver
 
-    loc_category_btn = (By.XPATH, "/html/body/div[1]/div[1]/section/div/div[1]/div[11]/div[1]/a[1]")
-    loc_input_cate_box = (By.XPATH, "//*[@id=\"category_name\"]")
-    loc_save_btn_cate = (By.XPATH, "//*[@id=\"modal-add-category\"]/div/div/div[3]/button[2]")
+    loc_category_btn = (By.LINK_TEXT, "Create New Category")
+    loc_input_cate_box = (By.ID, "category_name")
+    loc_save_btn_cate = (By.CSS_SELECTOR, "[class = 'btn btn-primary create_category_button']")
     loc_close_btn_cate = (By.XPATH, "//*[@id=\"modal-add-category\"]/div/div/div[3]/button[1]")
 
-    loc_mode_btn = (By.XPATH, "/html/body/div[1]/div[1]/section/div/div[1]/div[11]/div[1]/a[2]")
-    loc_input_mode_box = (By.XPATH, "//*[@id=\"model_name\"]")
-    loc_save_btn_mode = (By.XPATH, "//*[@id=\"modal-add-model\"]/div/div/div[3]/button[2]")
+    loc_mode_btn = (By.LINK_TEXT, "Create New Model")
+    loc_input_mode_box = (By.ID, "model_name")
+    loc_save_btn_mode = (By.CSS_SELECTOR, "[class = 'btn btn-primary create_model_button']")
     loc_close_btn_mode = (By.XPATH, "//*[@id=\"modal-add-model\"]/div/div/div[3]/button[1]")
+    loc_alert_show = (By.CSS_SELECTOR, "[class = 'modal fade show']")
 
-    # 重复提示框
-    loc_name_already_existed = (By.XPATH, "//*[@id=\"swal2-title\"]")
+    # 提示框
+    loc_cate_name_existed = (By.ID, "swal2-title")
+    loc_mode_name_success = (By.ID, "swal2-title")
 
-    # Model盒子
-    loc_models_box = (By.XPATH, "/html/body/div[1]/div[1]/section/div/div[1]/div[11]/div[1]/div[8]")
-    loc_model_list = (By.TAG_NAME, "a")
+    # Model盒子,model list
+    loc_models_box = (By.CSS_SELECTOR, "[class = 'modelSelectd model_list']")
 
+    # 创建设备
+    loc_new_btn = (By.LINK_TEXT, "New")
+    loc_input_dev_name = (By.ID, "device_name")
+    loc_input_SN = (By.ID, "device_sn")
+    loc_select_cate = (By.ID, "Category")
+    loc_select_mode = (By.ID, "Model")
+
+
+
+    def alert_fade(self):
+        self.web_driver_wait_until_not(EC.presence_of_element_located(self.loc_alert_show))
+
+    # 添加设备
     def get_models_list(self):
-        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_models_box))
-        eles = self.get_elements_in_range(self.loc_models_box, self.loc_model_list)
-        models_list = [ele.text for ele in eles]
-        return models_list
+        try:
+            self.web_driver_wait_until(EC.presence_of_all_elements_located(self.loc_models_box))
+            eles = self.get_elements(self.loc_models_box)
+            models_list = [ele.text for ele in eles]
+            print(models_list)
+            return models_list
+        except TimeoutException:
+            return []
 
     def find_category(self):
         self.web_driver_wait_until(EC.presence_of_element_located(self.loc_category_btn))
@@ -64,7 +84,6 @@ class DevicesPage(TelpoMDMPage):
         self.web_driver_wait_until(EC.presence_of_element_located(self.loc_close_btn_cate))
         self.click(self.loc_close_btn_cate)
 
-    def get_name_existed_text(self):
-        ele = self.web_driver_wait_until(EC.presence_of_element_located(self.loc_name_already_existed))
+    def get_alert_text(self):
+        ele = self.web_driver_wait_until(EC.presence_of_element_located(self.loc_cate_name_existed))
         return ele.text
-
