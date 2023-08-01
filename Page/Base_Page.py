@@ -1,11 +1,22 @@
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium import webdriver
+from selenium.webdriver.support.select import Select
+
 
 class BasePage:
 
     def __init__(self, driver, times):
         self.driver = driver
         self.times = times
+
+    def get_selector(self, loc):
+        ele = self.get_element(loc)
+        select = Select(ele)
+        return select
+
+    def select_by_val(self, loc, value):
+        select = self.get_selector(loc)
+        select.select_by_value(value)
 
     def get_element(self, loc):
         return self.driver.find_element(*loc)
@@ -52,23 +63,3 @@ class BasePage:
 
         # d = webdriver.Chrome()
         # al = d.switch_to.alert
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
