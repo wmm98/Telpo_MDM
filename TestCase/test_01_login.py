@@ -20,7 +20,7 @@ class TestLogin:
         pass
 
     @allure.feature('MDM_test01')
-    @allure.title("登录成功测试")  # 设置case的名字
+    @allure.title("login is ok")  # 设置case的名字
     @pytest.mark.dependency(name="test_login_ok", scope='package')
     def test_login_ok(self):
         username = "ceshibu03"

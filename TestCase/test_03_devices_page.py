@@ -10,9 +10,11 @@ from selenium.webdriver.support import expected_conditions as EC
 
 log = Log.MyLog()
 
+data_list = [{"cate": "手持终端", "model": "TPS900P"},
+             {"cate": "壁挂式", "model": "TPS980P"}]
+
 
 class TestDevicesPage:
-
     def setup_class(self):
         self.driver = BaseWebDriver().get_web_driver()
         self.page = DevicesPage(self.driver, 40)
@@ -21,7 +23,7 @@ class TestDevicesPage:
         pass
 
     @allure.feature('MDM_test01')
-    @allure.title("Devices页面")  # 设置case的名字
+    @allure.title("Devices main page")  # 设置case的名字
     @pytest.mark.dependency(depends=["test_TelpoMdM_Page"], scope='package')
     def test_go_to_devices_page(self):
         exp_main_title = "Total Devices"
@@ -35,21 +37,31 @@ class TestDevicesPage:
             log.error(str(e))
             assert False
 
-    @allure.feature('MDM_test01')
-    @allure.title("Devices-添加种类")  # 设置case的名字
-    @pytest.mark.parametrize('cate_text, model_text', [["手持终端", "TPS900"], ["壁挂式", "TPS980P"]])
-    def test_add_category(self, cate_text, model_text):
-        # cate_text = "手持终端"
-        # model_text = "TPS900"
+    @allure.feature('MDM_test01--no test now ')
+    @allure.title("Devices-add category and  model")  # 设置case的名字
+    @pytest.mark.parametrize('cate_model', data_list)
+    def test_add_category_model(self, cate_model):
+        exp_existed_name = "name already existed"
 
         self.page.click_category()
-        self.page.add_category(cate_text)
+        self.page.add_category(cate_model["cate"])
+        name = self.page.get_name_existed_text()
+        print(name)
+        if name == exp_existed_name:
+            self.page.close_btn_cate()
 
-        self.page.click_model()
-        self.page.add_model(model_text)
+        # self.page.click_model()
+        # self.page.add_model(cate_model["model"])
 
+        time.sleep(2)
+        self.page.get_loc_main_title()
+        self.page.find_category()
+        self.page.find_model()
 
-
+    @allure.feature('MDM_test01')
+    @allure.title("Devices-debug")  # 设置case的名字
+    def test_devices_test(self):
+        print(self.page.get_models_list())
 
 
 
