@@ -33,7 +33,7 @@ class DevicesPage(TelpoMDMPage):
     loc_cate_box = (By.CLASS_NAME, "category_list")
 
     # 创建设备
-    loc_new_btn = (By.LINK_TEXT, "New")
+    loc_new_btn = (By.CSS_SELECTOR, "[class = 'fas fa-plus-square text-black']")
     loc_input_dev_name = (By.ID, "device_name")
     loc_input_dev_SN = (By.ID, "device_sn")
     loc_select_dev_cate = (By.ID, "Category")
@@ -46,7 +46,7 @@ class DevicesPage(TelpoMDMPage):
     loc_td = (By.CLASS_NAME, "text-center")
 
     def click_new_btn(self):
-        self.web_driver_wait_until_not(EC.presence_of_element_located(self.loc_new_btn))
+        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_new_btn))
         self.click(self.loc_new_btn)
         self.alert_show()
 
@@ -57,9 +57,9 @@ class DevicesPage(TelpoMDMPage):
         # SN
         self.input_text(self.loc_input_dev_SN, dev_info['SN'])
         # cate
-        self.select_by_val(self.loc_select_dev_cate, dev_info['cate'])
+        self.select_by_text(self.loc_select_dev_cate, dev_info['cate'])
         # model
-        self.select_by_val(self.loc_select_dev_mode, dev_info['model'])
+        self.select_by_text(self.loc_select_dev_mode, dev_info['model'])
         # 保存
         self.click(self.loc_save_dev_btn)
         self.alert_fade()

@@ -14,9 +14,10 @@ class BasePage:
         select = Select(ele)
         return select
 
-    def select_by_val(self, loc, value):
+    def select_by_text(self, loc, value):
         select = self.get_selector(loc)
-        select.select_by_value(value)
+        # select.select_by_value(value)
+        select.select_by_visible_text(value)
 
     def get_element(self, loc):
         return self.driver.find_element(*loc)
