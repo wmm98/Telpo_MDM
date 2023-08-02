@@ -40,10 +40,14 @@ class DevicesPage(TelpoMDMPage):
     loc_select_dev_mode = (By.ID, "Model")
     loc_save_dev_btn = (By.CSS_SELECTOR, "[class = 'btn btn-primary comfirm_create_device_button']")
     loc_close_dev_btn = (By.XPATH, "//*[@id=\"modal-add-device\"]/div/div/div[3]/button[1]")
-
+    # 设备列表
     loc_devices_list = (By.ID, "device_list")
+    loc_label = (By.TAG_NAME, "label")
     loc_tr = (By.TAG_NAME, "tr")
     loc_td = (By.CLASS_NAME, "text-center")
+
+    # check box
+    loc_check_all = (By.ID, "checkall")
 
     def click_new_btn(self):
         self.web_driver_wait_until(EC.presence_of_element_located(self.loc_new_btn))
@@ -62,9 +66,12 @@ class DevicesPage(TelpoMDMPage):
         self.select_by_text(self.loc_select_dev_mode, dev_info['model'])
         # 保存
         self.click(self.loc_save_dev_btn)
+
+    def close_btn_add_dev_info(self):
+        self.click(self.loc_close_dev_btn)
         self.alert_fade()
 
-    # 只在一开始的时候运行
+    # return devices_list
     def get_dev_info_list(self):
         try:
             devices_list = []
@@ -73,12 +80,13 @@ class DevicesPage(TelpoMDMPage):
             tr_eles = eles.find_elements(*self.loc_tr)
             for tr_ele in tr_eles:
                 td_eles = tr_ele.find_elements(*self.loc_td)[1:8]
-                devices_list.append({"Name": td_eles[0].text, "SN": td_eles[4].text, "Status": td_eles[5].text, "Lock Status": td_eles[6].text})
+                devices_list.append({"Name": td_eles[0].text, "SN": td_eles[4].text, "Status": td_eles[5].text,
+                                     "Lock Status": td_eles[6].text})
             return devices_list
         except TimeoutException:
             return []
 
-    # 返回devics_list长度
+    # return length of devices_list
     def get_dev_info_length(self):
         try:
             self.web_driver_wait_until(EC.presence_of_element_located(self.loc_devices_list))
@@ -88,18 +96,41 @@ class DevicesPage(TelpoMDMPage):
         except TimeoutException:
             return 0
 
-    def search_device_serial(self, serial):
-        pass
+    def select_all_devices(self):
+        ele = self.web_driver_wait_until(EC.presence_of_element_located(self.loc_check_all))
+        self.exc_js_click(ele)
+        return ele
 
-    # 判断alert消失
+    def select_device(self, device_sn):
+        loc = (By.ID, device_sn)
+        ele = self.web_driver_wait_until(EC.presence_of_element_located(loc))
+        self.exc_js_click(ele)
+        return ele
+
+    def check_ele_is_selected(self, ele):
+        if not self.ele_is_selected(ele):
+            self.web_driver_wait_until(EC.element_to_be_selected(ele))
+
+    def check_ele_is_not_selected(self, ele):
+        if self.ele_is_selected(ele):
+            self.web_driver_wait_until_not(EC.element_to_be_selected(ele))
+
+    def get_devices_list_label_text_discard(self):
+        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_devices_list))
+        devices = self.get_element(self.loc_devices_list)
+        label_eles = devices.find_elements(*self.loc_label)
+        text = [label_ele.text for label_ele in label_eles]
+        return text
+
+    # check if alert would disappear
     def alert_fade(self):
         self.web_driver_wait_until_not(EC.presence_of_element_located(self.loc_alert_show))
 
-    # 判断alert出现
+    # check if alert would appear
     def alert_show(self):
         self.web_driver_wait_until(EC.presence_of_element_located(self.loc_alert_show))
 
-    # 添加设备
+    # add single device
     def get_models_list(self):
         try:
             self.web_driver_wait_until(EC.presence_of_all_elements_located(self.loc_models_box))
@@ -110,7 +141,7 @@ class DevicesPage(TelpoMDMPage):
         except TimeoutException:
             return []
 
-    # 获取所有的cate
+    # get all categories
     def get_categories_list(self):
         try:
             self.web_driver_wait_until(EC.presence_of_all_elements_located(self.loc_cate_box))
@@ -121,29 +152,31 @@ class DevicesPage(TelpoMDMPage):
         except TimeoutException:
             return []
 
-    # 查找cate, 此处用来作判断
+    # find cate element
     def find_category(self):
         self.web_driver_wait_until(EC.presence_of_element_located(self.loc_category_btn))
 
-    # 查找model, 此处用来作判断
+    # find model ele
     def find_model(self):
         self.web_driver_wait_until(EC.presence_of_element_located(self.loc_mode_btn))
 
-    # 点击cate
+    # click [Create New Category] btn
     def click_category(self):
         self.web_driver_wait_until(EC.presence_of_element_located(self.loc_category_btn))
         self.click(self.loc_category_btn)
 
-    # 添加cate
+    # add category
     def add_category(self, cate_name):
         self.web_driver_wait_until(EC.presence_of_element_located(self.loc_input_cate_box))
         self.input_text(self.loc_input_cate_box, cate_name)
         self.click(self.loc_save_btn_cate)
 
+    # click [Create New Model] btn
     def click_model(self):
         self.web_driver_wait_until(EC.presence_of_element_located(self.loc_mode_btn))
         self.click(self.loc_mode_btn)
 
+    # add model
     def add_model(self, model_name):
         self.web_driver_wait_until(EC.presence_of_element_located(self.loc_input_mode_box))
         self.input_text(self.loc_input_mode_box, model_name)
@@ -157,7 +190,7 @@ class DevicesPage(TelpoMDMPage):
         self.web_driver_wait_until(EC.presence_of_element_located(self.loc_close_btn_cate))
         self.click(self.loc_close_btn_cate)
 
-    # 获取弹窗文本
+    # get devices page alert text
     def get_alert_text(self):
         ele = self.web_driver_wait_until(EC.presence_of_element_located(self.loc_cate_name_existed))
         return ele.text

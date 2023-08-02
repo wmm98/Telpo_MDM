@@ -9,10 +9,19 @@ class BasePage:
         self.driver = driver
         self.times = times
 
+    def refresh_page(self):
+        self.driver.refresh()
+
     def get_selector(self, loc):
         ele = self.get_element(loc)
         select = Select(ele)
         return select
+
+    def exc_js_click(self, ele):
+        self.driver.execute_script("arguments[0].click();", ele)
+
+    def ele_is_selected(self, ele):
+        return ele.is_selected()
 
     def select_by_text(self, loc, value):
         select = self.get_selector(loc)
