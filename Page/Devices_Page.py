@@ -1,9 +1,11 @@
 from selenium.common import TimeoutException
-
+from Conf.Config import Config
 from Page.Telpo_MDM_Page import TelpoMDMPage
 from selenium.webdriver import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
+
+conf = Config()
 
 
 class DevicesPage(TelpoMDMPage):
@@ -32,7 +34,7 @@ class DevicesPage(TelpoMDMPage):
     # 种类text
     loc_cate_box = (By.CLASS_NAME, "category_list")
 
-    # 创建设备
+    # New device btn relate
     loc_new_btn = (By.CSS_SELECTOR, "[class = 'fas fa-plus-square text-black']")
     loc_input_dev_name = (By.ID, "device_name")
     loc_input_dev_SN = (By.ID, "device_sn")
@@ -48,6 +50,32 @@ class DevicesPage(TelpoMDMPage):
 
     # check box
     loc_check_all = (By.ID, "checkall")
+
+    # Import btn relate; import devices
+    loc_import_btn = (By.CSS_SELECTOR, "[class = 'fas fa-file-upload batch_upload_device']")
+    loc_download_template_btn = (By.LINK_TEXT, "Download Template Here")
+    loc_choose_file_btn = (By.ID, "file")
+    loc_import_cate_btn = (By.ID, "import_Category")
+    loc_import_model_btn = (By.ID, "import_Model")
+    loc_import_company_btn = (By.ID, "import_subcompany")
+    loc_import_save_btn = (By.CSS_SELECTOR, "[class = 'btn btn-primary comfirm_import_device_button']")
+    # just for find the close-btn
+    loc_import_devices_box = (By.ID, "modal-import-device")
+    loc_import_close_btn = (By.CSS_SELECTOR, "[class = 'btn btn-default']")
+    file_path = conf.project_path + "\\Param\\device import.xlsx"
+
+    def click_import_btn(self):
+        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_import_btn))
+        self.click(self.loc_import_btn)
+
+    def click_download_template_btn(self):
+        self.alert_show()
+        self.click(self.loc_download_template_btn)
+        # choose file path
+
+    def import_devices_info(self):
+        self.alert_show()
+        self.input_text(self.loc_choose_file_btn, self.file_path)
 
     def click_new_btn(self):
         self.web_driver_wait_until(EC.presence_of_element_located(self.loc_new_btn))

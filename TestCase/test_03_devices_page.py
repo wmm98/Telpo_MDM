@@ -13,8 +13,8 @@ log = Log.MyLog()
 data_cate_mode = [{"cate": "台式2", "model": "M1"},
                   {"cate": "壁挂式1", "model": "TPS980P"}]
 
-devices = [{"name": "TPS980-cc", "SN": "898543133", "cate": "壁挂式", "model": "TPS980P"},
-           {"name": "M1K-MM", "SN": "999921343", "cate": "手持终端", "model": "M1"}]
+devices = [{"name": "TPS980-cc", "SN": "898544444773133", "cate": "壁挂式", "model": "TPS980P"},
+           {"name": "M1K-MM", "SN": "999hhh921oo343", "cate": "手持终端", "model": "M1"}]
 
 
 class TestDevicesPage:
@@ -23,7 +23,7 @@ class TestDevicesPage:
         self.page = DevicesPage(self.driver, 40)
 
     def teardown_class(self):
-        pass
+        self.page.refresh_page()
 
     @allure.feature('MDM_test02')
     @allure.title("Devices main page")  # 设置case的名字
@@ -79,40 +79,45 @@ class TestDevicesPage:
         self.page.find_category()
         self.page.find_model()
 
-    @allure.feature('MDM_test02')
+    @allure.feature('MDM_test01')
     @allure.title("Devices-new devices")  # 设置case的名字
     @pytest.mark.parametrize('devices_list', devices)
     def test_new_devices(self, devices_list):
         exp_success_text = "Device created successfully,pls reboot device to active!"
         exp_existed_text = "sn already existed"
-        info_len_pre = self.page.get_dev_info_length()
-        print(info_len_pre)
-        self.page.click_new_btn()
-        self.page.add_devices_info(devices_list)
-        text = self.page.get_alert_text()
-        print(text)
-        if exp_existed_text in text:
-            self.page.close_btn_add_dev_info()
-            info_len_pos = self.page.get_dev_info_length()
-            print(info_len_pos)
-            assert info_len_pre == info_len_pos
-        elif exp_success_text in text:
-            # add-devices-alert fade
-            self.page.alert_fade()
-            # wait Warning alert show
-            self.page.alert_show()
-            # wait Warning alert fade
-            self.page.alert_fade()
-            # refresh current page
-            self.page.refresh_page()
-            info_len_pos = self.page.get_dev_info_length()
-            print(info_len_pos)
+        try:
+            info_len_pre = self.page.get_dev_info_length()
+            print(info_len_pre)
+            self.page.click_new_btn()
+            self.page.add_devices_info(devices_list)
+            text = self.page.get_alert_text()
+            print(text)
+            if exp_existed_text in text:
+                self.page.close_btn_add_dev_info()
+                # add-devices-alert fade
+                self.page.alert_fade()
+                info_len_pos = self.page.get_dev_info_length()
+                print(info_len_pos)
+                assert info_len_pre == info_len_pos
+            elif exp_success_text in text:
+                # wait Warning alert show
+                self.page.alert_show()
+                # wait Warning alert fade
+                # self.page.alert_fade()
 
-            assert info_len_pre == info_len_pos - 1
-        # print all devices info
-        print(self.page.get_dev_info_list())
+                # refresh current page
+                self.page.refresh_page()
+                info_len_pos = self.page.get_dev_info_length()
+                print(info_len_pos)
 
-    @allure.feature('MDM_test02')
+                assert info_len_pre == info_len_pos - 1
+            # print all devices info
+            print(self.page.get_dev_info_list())
+        except Exception as e:
+            print("发生的异常是", e)
+            assert False
+
+    @allure.feature('MDM_test01')
     @allure.title("Devices- test check box")  # 设置case的名字
     @pytest.mark.parametrize('devices_list', devices)
     def test_check_boxes(self, devices_list):
@@ -138,6 +143,11 @@ class TestDevicesPage:
                     time.sleep(2)
         except Exception:
             assert False, "@@@元素没有没选中, 请检查！！！"
+
+    @allure.feature('MDM_test02')
+    @allure.title("Devices- test import btn")
+    def test_
+
 
     @allure.feature('MDM_test011')
     @allure.title("Devices-debug")  # 设置case的名字
