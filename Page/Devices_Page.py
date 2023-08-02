@@ -4,6 +4,8 @@ from Page.Telpo_MDM_Page import TelpoMDMPage
 from selenium.webdriver import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
+import os
+import time
 
 conf = Config()
 
@@ -70,12 +72,19 @@ class DevicesPage(TelpoMDMPage):
 
     def click_download_template_btn(self):
         self.alert_show()
+        # download,
         self.click(self.loc_download_template_btn)
-        # choose file path
+        # need add step check if success to download
 
-    def import_devices_info(self):
+    def import_devices_info(self, info):
         self.alert_show()
+        if not os.path.exists(self.file_path):
+            raise FileNotFoundError
         self.input_text(self.loc_choose_file_btn, self.file_path)
+        self.select_by_text(self.loc_import_cate_btn, info['cate'])
+        self.select_by_text(self.loc_import_model_btn, info['model'])
+        time.sleep(3)
+        self.click(self.loc_import_save_btn)
 
     def click_new_btn(self):
         self.web_driver_wait_until(EC.presence_of_element_located(self.loc_new_btn))

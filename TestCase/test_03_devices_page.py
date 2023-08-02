@@ -1,3 +1,4 @@
+from selenium.webdriver.support import expected_conditions as EC
 import allure
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
@@ -6,7 +7,11 @@ import pytest
 from Common import Log
 from Page.Devices_Page import DevicesPage
 import time
-from selenium.webdriver.support import expected_conditions as EC
+from Common.excel_data import ExcelData
+from Conf.Config import Config
+
+conf = Config()
+excel = ExcelData()
 
 log = Log.MyLog()
 
@@ -146,10 +151,21 @@ class TestDevicesPage:
 
     @allure.feature('MDM_test02')
     @allure.title("Devices- test import btn")
-    def test_
+    def test_import_devices(self):
+        exp_success_text = "Add Device Success"
+        # devices_info = {"cate": "手持终端", "model": "TPS980P"}
+        file_path = conf.project_path + "\\Param\\device import.xlsx"
+        devices_info = excel.get_template_data(file_path, "cate_model")[0]
 
+        self.page.add_category(devices_info['cate'])
+        self.page.add_model(devices_info['model'])
+
+        self.page.click_import_btn()
+        self.page.import_devices_info(devices_info)
+        res = self.page.get_alert_text()
+        print(res)
 
     @allure.feature('MDM_test011')
-    @allure.title("Devices-debug")  # 设置case的名字
+    @allure.title("Devices-debug")  # case name
     def test_devices_test(self):
         print(self.page.get_models_list())
