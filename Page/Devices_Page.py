@@ -75,6 +75,19 @@ class DevicesPage(TelpoMDMPage):
     loc_msg_input_close_btn_large = (By.ID, "modal-device-message")   # just for serach the exact close btn
     loc_msg_input_close_btn = (By.CSS_SELECTOR, "[class = 'btn btn-default']")
 
+    # search device(sn)
+    loc_search_btn = (By.CSS_SELECTOR, "[class = 'fas fa-search']")
+    loc_search_input_box = (By.ID, "search_device_sn")
+    loc_search_search_btn = (By.CSS_SELECTOR, "[class = 'btn btn-primary comfirm_search_device_button']")
+
+    def search_device_by_sn(self, sn):
+        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_search_btn))
+        self.click(self.loc_search_btn)
+        self.alert_show()
+        self.input_text(self.loc_search_input_box, sn)
+        self.click(self.loc_search_search_btn)
+        self.alert_fade()
+
     def click_send_btn(self):
         self.web_driver_wait_until(EC.presence_of_element_located(self.loc_msg_btn))
         self.click(self.loc_msg_btn)

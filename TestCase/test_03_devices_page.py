@@ -179,36 +179,29 @@ class TestDevicesPage:
         now = time.strftime(date_time, time.localtime(time.time()))
         msg = "%s: 这是测试中" % now
         # confirm if device is online and execute next step, if not, end the case execution
+        self.page.search_device_by_sn(sn)
         devices_list = self.page.get_dev_info_list()
-        flag = 0
-
-        if len(devices_list) != 0:
-            for dev in devices_list:
-                if sn in dev["SN"]:
-                    flag += 1
-                    if not dev["Status"] == "On":
-                        err = "@@@@%s: 设备不在线， 请检查！！！" % sn
-                        log.error(err)
-                        assert False, err
-                    # select device and send msg
-                    self.page.select_device(sn)
-                    self.page.click_send_btn()
-                    self.page.msg_input_and_send(msg)
-                    if exp_success_send_text in self.page.get_alert_text():
-                        log.info("信息发送失败成功， 请检查设备信息")
-                        pass
-                    else:
-                        e = "@@@@信息发送失败！！！"
-                        log.error(e)
-                        assert False, e
-            if flag == 0:
-                e = "@@@@还没有添加该设备 %s， 请检查！！！" % sn
-                log.error(e)
-                assert False, e
-        else:
-            e = "@@@@页面还没有设备， 请检查！！！"
+        if len(devices_list) == 0:
+            e = "@@@@还没有添加该设备 %s， 请检查！！！" % sn
             log.error(e)
             assert False, e
+        if devices_list[0]["Status"] == "Off":
+            err = "@@@@%s: 设备不在线， 请检查！！！" % sn
+            log.error(err)
+            assert False, err
+
+        self.page.select_device(sn)
+        self.page.click_send_btn()
+        self.page.msg_input_and_send(msg)
+        text = self.page.get_alert_text()
+        if exp_success_send_text in text:
+            log.info("信息发送失败成功， 请检查设备信息")
+        else:
+            e = "@@@@信息发送失败成功， 请检查!!!"
+            log.error(e)
+            assert False, e
+
+
 
     @allure.feature('MDM_test011')
     @allure.title("Devices-debug")
