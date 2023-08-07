@@ -10,7 +10,7 @@ class BaseWebDriver:
         driver = webdriver.Chrome()
         driver.implicitly_wait(5)
         driver.maximize_window()
-        url = 'https://mdm.telpoai.com/login'
+        url = 'http://test.telpoai.com/login'
         # 窗口最大化
         driver.get(url)
 

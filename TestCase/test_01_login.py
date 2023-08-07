@@ -23,11 +23,11 @@ class TestLogin:
     @allure.title("login is ok")  # 设置case的名字
     @pytest.mark.dependency(name="test_login_ok", scope='package')
     def test_login_ok(self):
-        username = "ceshibu03"
+        username = "ceshibu"
         password = "123456"
 
         login_ok_title = "Telpo MDM"
-        login_ok_url = "https://mdm.telpoai.com/device/map"
+        login_ok_url = "http://test.telpoai.com/device/map"
         try:
             self.mdm_page.input_user_name(username)
             self.mdm_page.input_pwd_value(password)

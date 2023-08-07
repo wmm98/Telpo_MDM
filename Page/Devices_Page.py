@@ -14,6 +14,8 @@ class DevicesPage(TelpoMDMPage):
     def __init__(self, driver, times):
         TelpoMDMPage.__init__(self, driver, times)
         self.driver = driver
+    # Devices_list btn  --new add for test version
+    loc_devices_list_btn = (By.LINK_TEXT, "Devices List")
 
     loc_category_btn = (By.LINK_TEXT, "Create New Category")
     loc_input_cate_box = (By.ID, "category_name")
@@ -65,6 +67,26 @@ class DevicesPage(TelpoMDMPage):
     loc_import_devices_box = (By.ID, "modal-import-device")
     loc_import_close_btn = (By.CSS_SELECTOR, "[class = 'btn btn-default']")
     file_path = conf.project_path + "\\Param\\device import.xlsx"
+
+    # send message
+    loc_msg_btn = (By.CSS_SELECTOR, "[class = 'fas fa-envelope batch_message']")
+    loc_msg_input_box = (By.ID, "device_notification")
+    loc_msg_input_send_btn = (By.CSS_SELECTOR, "[class = 'btn btn-primary comfirm_send_device_message']")
+    loc_msg_input_close_btn_large = (By.ID, "modal-device-message")   # just for serach the exact close btn
+    loc_msg_input_close_btn = (By.CSS_SELECTOR, "[class = 'btn btn-default']")
+
+    def click_send_btn(self):
+        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_msg_btn))
+        self.click(self.loc_msg_btn)
+
+    def msg_input_and_send(self, msg):
+        self.alert_show()
+        self.input_text(self.loc_msg_input_box, msg)
+        self.click(self.loc_msg_input_send_btn)
+
+    def click_devices_list_btn(self):
+        self.web_driver_wait_until(EC.presence_of_element_located((self.loc_devices_list_btn)))
+        self.click(self.loc_devices_list_btn)
 
     def click_import_btn(self):
         self.web_driver_wait_until(EC.presence_of_element_located(self.loc_import_btn))

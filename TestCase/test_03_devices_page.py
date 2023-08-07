@@ -10,6 +10,7 @@ import time
 from Common.excel_data import ExcelData
 from Conf.Config import Config
 
+
 conf = Config()
 excel = ExcelData()
 
@@ -37,6 +38,8 @@ class TestDevicesPage:
         exp_main_title = "Total Devices"
         try:
             self.page.click_devices_btn()
+            # click devices list btn  -- just for test version
+            self.page.click_devices_list_btn()
             # check current page
             act_main_title = self.page.get_loc_main_title()
             assert exp_main_title in act_main_title
@@ -149,7 +152,7 @@ class TestDevicesPage:
         except Exception:
             assert False, "@@@元素没有没选中, 请检查！！！"
 
-    @allure.feature('MDM_test02')
+    @allure.feature('MDM_test01')
     @allure.title("Devices- test import btn")
     def test_import_devices(self):
         exp_success_text = "Add Device Success"
@@ -157,15 +160,57 @@ class TestDevicesPage:
         file_path = conf.project_path + "\\Param\\device import.xlsx"
         devices_info = excel.get_template_data(file_path, "cate_model")[0]
 
-        self.page.add_category(devices_info['cate'])
-        self.page.add_model(devices_info['model'])
-
+        # click import-btn
         self.page.click_import_btn()
         self.page.import_devices_info(devices_info)
-        res = self.page.get_alert_text()
-        print(res)
+        if exp_success_text in self.page.get_alert_text():
+            self.page.alert_fade()
+
+        # need to add check length of data list
+
+    @allure.feature('MDM_test02')
+    @allure.title("Devices- AIMDM send message")
+    def test_send_message_to_single_device(self):
+        exp_success_send_text = "Message Sent"
+        # sn would change after debug with devices
+        sn = "A250900P03100019"
+        date_time = '%Y-%m-%d %H:%M:%S'
+
+        now = time.strftime(date_time, time.localtime(time.time()))
+        msg = "%s: 这是测试中" % now
+        # confirm if device is online and execute next step, if not, end the case execution
+        devices_list = self.page.get_dev_info_list()
+        flag = 0
+
+        if len(devices_list) != 0:
+            for dev in devices_list:
+                if sn in dev["SN"]:
+                    flag += 1
+                    if not dev["Status"] == "On":
+                        err = "@@@@%s: 设备不在线， 请检查！！！" % sn
+                        log.error(err)
+                        assert False, err
+                    # select device and send msg
+                    self.page.select_device(sn)
+                    self.page.click_send_btn()
+                    self.page.msg_input_and_send(msg)
+                    if exp_success_send_text in self.page.get_alert_text():
+                        log.info("信息发送失败成功， 请检查设备信息")
+                        pass
+                    else:
+                        e = "@@@@信息发送失败！！！"
+                        log.error(e)
+                        assert False, e
+            if flag == 0:
+                e = "@@@@还没有添加该设备 %s， 请检查！！！" % sn
+                log.error(e)
+                assert False, e
+        else:
+            e = "@@@@页面还没有设备， 请检查！！！"
+            log.error(e)
+            assert False, e
 
     @allure.feature('MDM_test011')
-    @allure.title("Devices-debug")  # case name
+    @allure.title("Devices-debug")
     def test_devices_test(self):
         print(self.page.get_models_list())
