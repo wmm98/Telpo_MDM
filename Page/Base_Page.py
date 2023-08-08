@@ -52,11 +52,17 @@ class BasePage:
     def get_title(self):
         return self.driver.title
 
-    def web_driver_wait_until(self, condition):
-        return WebDriverWait(self.driver, self.times).until(condition)
+    def web_driver_wait_until(self, condition, wait_times=0):
+        if wait_times == 0:
+            return WebDriverWait(self.driver, self.times).until(condition)
+        else:
+            return WebDriverWait(self.driver, wait_times).until(condition)
 
-    def web_driver_wait_until_not(self, condition):
-        return WebDriverWait(self.driver, self.times).until_not(condition)
+    def web_driver_wait_until_not(self, condition, wait_times=0):
+        if wait_times == 0:
+            return WebDriverWait(self.driver, self.times).until_not(condition)
+        else:
+            return WebDriverWait(self.driver, wait_times).until_not(condition)
 
     def switch_to_alert(self):
         al = self.driver.switch_to.alert

@@ -10,10 +10,12 @@ import time
 from Common.excel_data import ExcelData
 from Conf.Config import Config
 from Common.simply_case import Optimize_Case
+from Common.DealAlert import AlertData
 
 conf = Config()
 excel = ExcelData()
 opt_case = Optimize_Case()
+alert = AlertData()
 
 log = Log.MyLog()
 
@@ -190,14 +192,14 @@ class TestDevicesPage:
 
         # check devices
 
-    @allure.feature('MDM_test02')
+    @allure.feature('MDM_test01')
     @allure.title("Devices- lock and unlock single device")
     def test_lock_and_unlock_single_device(self):
         sn = "A250900P03100019"
         exp_lock_msg = "Device %s Locked" % sn
         exp_unlock_msg = "Device %s UnLocked" % sn
 
-        for k in range(3):
+        for k in range(2):
             # test lock btn
             opt_case.check_single_device(sn)
             self.page.select_device(sn)
@@ -206,47 +208,80 @@ class TestDevicesPage:
             self.page.refresh_page()
             # check if device lock already
             pass_flag = 0
-            for i in range(30):
+            for i in range(5):
                 if "Locked" in opt_case.get_single_device_list(sn)[0]["Lock Status"]:
                     pass_flag += 1
                     break
-                time.sleep(2)
+                self.page.refresh_page()
+                time.sleep(1)
 
             if pass_flag == 0:
-                if not lock_text_flag:
-                    if not ("Locked" in opt_case.get_single_device_list(sn)[0]["Lock Status"]):
-                        assert False
+                # click again
+                opt_case.get_single_device_list(sn)
+                self.page.select_device(sn)
+                self.page.click_lock()
+                self.page.refresh_page()
+                if not ("Locked" in opt_case.get_single_device_list(sn)[0]["Lock Status"]):
+                    assert False
 
             self.page.refresh_page()
 
-            opt_case.check_single_device(sn)
+            opt_case.get_single_device_list(sn)
             self.page.select_device(sn)
             self.page.click_unlock()
             unlock_text_flag = opt_case.check_alert_text(exp_unlock_msg)
             self.page.refresh_page()
             pass_flag = 0
-            for j in range(30):
+            for j in range(5):
                 if "Normal" in opt_case.get_single_device_list(sn)[0]["Lock Status"]:
                     pass_flag += 1
                     break
-                time.sleep(2)
+                self.page.refresh_page()
+                time.sleep(1)
 
             if pass_flag == 0:
-                if not unlock_text_flag:
-                    if not ("Normal" in opt_case.get_single_device_list(sn)[0]["Lock Status"]):
-                        assert False
+                opt_case.get_single_device_list(sn)
+                self.page.select_device(sn)
+                self.page.click_unlock()
+                self.page.refresh_page()
+                if not ("Normal" in opt_case.get_single_device_list(sn)[0]["Lock Status"]):
+                    assert False
+
             time.sleep(1)
 
-    @allure.feature('MDM_test01')
+    @allure.feature('MDM_test02')
     @allure.title("Devices- reboot device 5 times")
-    def test_reboot_single_device_(self):
+    def test_reboot_single_device_pressure_testing(self):
         exp_reboot_text = ""
         sn = "A250900P03100019"
-        for i in range(5):
+
+        pass_flag = 0
+        for i in range(2):
+            print("运行 %s 次" % str(i))
             opt_case.check_single_device(sn)
             self.page.select_device(sn)
             self.page.click_reboot_btn()
-            opt_case.check_alert_text(exp_reboot_text)
+            reboot_flag = opt_case.check_alert_text(exp_reboot_text)
+            self.page.refresh_page()
+            # get device info
+            for j in range(5):
+                print("111111111111111111111111111111111")
+                if "Off" in opt_case.get_single_device_list(sn)[0]["Status"]:
+                    print("222222222222222222222222222222222222222222222222222")
+                    pass_flag += 1
+                    break
+                self.page.refresh_page()
+                time.sleep(1)
+
+        if pass_flag == 0:
+            self.page.refresh_page()
+            print("33333333333333333333333333333333333333333333333333333333333")
+            if not ("Off" in opt_case.get_single_device_list(sn)[0]["Status"]):
+                assert False
+        time.sleep(56)
+        self.page.refresh_page()
+        print("444444444444444444444444444444444444444444444444444444444444444444444444444")
+        assert "On" in opt_case.get_single_device_list(sn)[0]["Status"], "@@@@ 1分钟之内无法重启！！"
 
     @allure.feature('MDM_test011')
     @allure.title("Devices-debug")

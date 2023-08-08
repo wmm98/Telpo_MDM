@@ -14,6 +14,7 @@ class DevicesPage(TelpoMDMPage):
     def __init__(self, driver, times):
         TelpoMDMPage.__init__(self, driver, times)
         self.driver = driver
+
     # Devices_list btn  --new add for test version
     loc_devices_list_btn = (By.LINK_TEXT, "Devices List")
 
@@ -72,7 +73,7 @@ class DevicesPage(TelpoMDMPage):
     loc_msg_btn = (By.CSS_SELECTOR, "[class = 'fas fa-envelope batch_message']")
     loc_msg_input_box = (By.ID, "device_notification")
     loc_msg_input_send_btn = (By.CSS_SELECTOR, "[class = 'btn btn-primary comfirm_send_device_message']")
-    loc_msg_input_close_btn_large = (By.ID, "modal-device-message")   # just for serach the exact close btn
+    loc_msg_input_close_btn_large = (By.ID, "modal-device-message")  # just for serach the exact close btn
     loc_msg_input_close_btn = (By.CSS_SELECTOR, "[class = 'btn btn-default']")
 
     # search device(sn)
@@ -86,10 +87,17 @@ class DevicesPage(TelpoMDMPage):
 
     # reboot btn relate
     loc_reboot_btn = (By.CSS_SELECTOR, "[class = 'fas fa-retweet batch_reboot']")
+    loc_sure_btn = (By.CSS_SELECTOR, "[class = 'btn btn-outline-dark sure_batch_reboot']")
 
     def click_reboot_btn(self):
-        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_lock_btn))
-        self.click(self.loc_lock_btn)
+        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_reboot_btn))
+        self.click(self.loc_reboot_btn)
+        self.alert_show()
+        self.click(self.loc_sure_btn)
+        try:
+            self.alert_fade()
+        except Exception:
+            self.refresh_page()
 
     def click_lock(self):
         self.web_driver_wait_until(EC.presence_of_element_located(self.loc_lock_btn))
@@ -225,11 +233,11 @@ class DevicesPage(TelpoMDMPage):
 
     # check if alert would disappear
     def alert_fade(self):
-        self.web_driver_wait_until_not(EC.presence_of_element_located(self.loc_alert_show))
+        self.web_driver_wait_until_not(EC.presence_of_element_located(self.loc_alert_show), 6)
 
     # check if alert would appear
     def alert_show(self):
-        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_alert_show))
+        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_alert_show), 6)
 
     # add single device
     def get_models_list(self):
@@ -294,4 +302,3 @@ class DevicesPage(TelpoMDMPage):
     # get devices page alert text
     def get_alert_text(self):
         return self.web_driver_wait_until(EC.presence_of_element_located(self.loc_cate_name_existed)).text
-
