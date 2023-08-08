@@ -103,9 +103,19 @@ class DevicesPage(TelpoMDMPage):
         self.web_driver_wait_until(EC.presence_of_element_located(self.loc_search_btn))
         self.click(self.loc_search_btn)
         self.alert_show()
+        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_search_input_box))
+        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_search_search_btn))
         self.input_text(self.loc_search_input_box, sn)
+        time.sleep(1)
         self.click(self.loc_search_search_btn)
-        self.alert_fade()
+        time.sleep(1)
+        # ele_search = self.get_element(self.loc_search_search_btn)
+        # self.exc_js_click(ele_search)
+        try:
+            self.alert_fade()
+        except Exception:
+            self.click(self.loc_search_search_btn)
+            self.alert_fade()
 
     def click_send_btn(self):
         self.web_driver_wait_until(EC.presence_of_element_located(self.loc_msg_btn))
@@ -283,5 +293,5 @@ class DevicesPage(TelpoMDMPage):
 
     # get devices page alert text
     def get_alert_text(self):
-        ele = self.web_driver_wait_until(EC.presence_of_element_located(self.loc_cate_name_existed))
-        return ele.text
+        return self.web_driver_wait_until(EC.presence_of_element_located(self.loc_cate_name_existed)).text
+
