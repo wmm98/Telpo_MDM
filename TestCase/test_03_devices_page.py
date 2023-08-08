@@ -9,10 +9,11 @@ from Page.Devices_Page import DevicesPage
 import time
 from Common.excel_data import ExcelData
 from Conf.Config import Config
-
+from Common.simply_case import Optimize_Case
 
 conf = Config()
 excel = ExcelData()
+opt_case = Optimize_Case()
 
 log = Log.MyLog()
 
@@ -168,7 +169,7 @@ class TestDevicesPage:
 
         # need to add check length of data list
 
-    @allure.feature('MDM_test02')
+    @allure.feature('MDM_test01')
     @allure.title("Devices- AIMDM send message")
     def test_send_message_to_single_device(self):
         exp_success_send_text = "Message Sent"
@@ -177,30 +178,56 @@ class TestDevicesPage:
         date_time = '%Y-%m-%d %H:%M:%S'
 
         now = time.strftime(date_time, time.localtime(time.time()))
-        msg = "%s: 这是测试中" % now
+        msg = "%s: 12345#$**&&&&" % now
         # confirm if device is online and execute next step, if not, end the case execution
-        self.page.search_device_by_sn(sn)
-        devices_list = self.page.get_dev_info_list()
-        if len(devices_list) == 0:
-            e = "@@@@还没有添加该设备 %s， 请检查！！！" % sn
-            log.error(e)
-            assert False, e
-        if devices_list[0]["Status"] == "Off":
-            err = "@@@@%s: 设备不在线， 请检查！！！" % sn
-            log.error(err)
-            assert False, err
+        opt_case.check_single_device(sn)
 
         self.page.select_device(sn)
         self.page.click_send_btn()
         self.page.msg_input_and_send(msg)
-        text = self.page.get_alert_text()
-        if exp_success_send_text in text:
-            log.info("信息发送失败成功， 请检查设备信息")
-        else:
-            e = "@@@@信息发送失败成功， 请检查!!!"
-            log.error(e)
-            assert False, e
+        # check alert text
+        opt_case.check_alert_text(exp_success_send_text)
 
+        # check devices
+
+    @allure.feature('MDM_test02')
+    @allure.title("Devices- lock and unlock single device")
+    def test_lock_and_unlock_single_device(self):
+        exp_lock_msg = ""
+        exp_unlock_msg = ""
+        sn = "A250900P03100019"
+
+        # test lock btn
+        opt_case.check_single_device(sn)
+        self.page.select_device(sn)
+        self.page.click_lock()
+        print(self.page.get_alert_text())
+        # check if device lock already
+        for i in range(30):
+            time.sleep(2)
+            if "Lock" in opt_case.get_single_device_list(sn)[0]["Lock Status"]:
+                break
+        assert "Lock" in opt_case.get_single_device_list(sn)[0]["Lock Status"], "@@@@锁机失败！！！"
+
+        self.page.click_unlock()
+
+        print(self.page.get_alert_text())
+        for i in range(30):
+            time.sleep(2)
+            if "Normal" in opt_case.get_single_device_list(sn)[0]["Lock Status"]:
+                break
+        assert "Normal" in opt_case.get_single_device_list(sn)[0]["Lock Status"], "@@@@开锁失败！！！"
+
+    @allure.feature('MDM_test02')
+    @allure.title("Devices- reboot device 5 times")
+    def test_reboot_single_device(self):
+        exp_reboot_text = ""
+        sn = "A250900P03100019"
+        for i in range(5):
+            opt_case.check_single_device(sn)
+            self.page.select_device(sn)
+            self.page.click_reboot_btn()
+            opt_case.check_alert_text(exp_reboot_text)
 
 
     @allure.feature('MDM_test011')

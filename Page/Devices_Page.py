@@ -80,6 +80,25 @@ class DevicesPage(TelpoMDMPage):
     loc_search_input_box = (By.ID, "search_device_sn")
     loc_search_search_btn = (By.CSS_SELECTOR, "[class = 'btn btn-primary comfirm_search_device_button']")
 
+    # lock and unlock btn  relate
+    loc_lock_btn = (By.CSS_SELECTOR, "[class = 'fas fa-lock batch_lock']")
+    loc_unlock_btn = (By.CSS_SELECTOR, "[class = 'fas fa-lock-open batch_unlock']")
+
+    # reboot btn relate
+    loc_reboot_btn = (By.CSS_SELECTOR, "[class = 'fas fa-retweet batch_reboot']")
+
+    def click_reboot_btn(self):
+        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_lock_btn))
+        self.click(self.loc_lock_btn)
+
+    def click_lock(self):
+        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_lock_btn))
+        self.click(self.loc_lock_btn)
+
+    def click_unlock(self):
+        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_unlock_btn))
+        self.click(self.loc_unlock_btn)
+
     def search_device_by_sn(self, sn):
         self.web_driver_wait_until(EC.presence_of_element_located(self.loc_search_btn))
         self.click(self.loc_search_btn)
