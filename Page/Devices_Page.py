@@ -88,16 +88,61 @@ class DevicesPage(TelpoMDMPage):
     # reboot btn relate
     loc_reboot_btn = (By.CSS_SELECTOR, "[class = 'fas fa-retweet batch_reboot']")
     loc_sure_btn = (By.CSS_SELECTOR, "[class = 'btn btn-outline-dark sure_batch_reboot']")
+    loc_warning = (By.ID, "modal-device-reboot-message")
 
+    # Action button relate
+    # shutdown btn
+    loc_dropdown_btn = (By.CSS_SELECTOR, "[class = 'btn btn-warning dropdown-toggle dropdown-icon']")
+    loc_menu_show = (By.CSS_SELECTOR, "[class = 'dropdown-menu dropdown-menu-right show']")
+    loc_shutdown_btn = (By.CSS_SELECTOR, "[class = 'fas fa-power-off']")
+    loc_shutdown_sure_btn = (By.CSS_SELECTOR, "[class = 'btn btn-outline-dark sure_command_button']")
+
+    # cat log btn
+    loc_cat_log_btn = (By.CSS_SELECTOR, "[class = 'far fa-file-code']")
+
+    # psw btn relate
+    loc_psw_btn = (By.CSS_SELECTOR, "[class = 'fas fa-key batch_password']")
+
+
+
+
+    def click_dropdown_btn(self):
+        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_dropdown_btn))
+        self.click(self.loc_dropdown_btn)
+        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_menu_show), 10)
+
+    def click_shutdown_btn(self):
+        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_shutdown_btn), 10)
+        self.click(self.loc_shutdown_btn)
+        self.alert_show()
+        self.click(self.loc_shutdown_sure_btn)
+
+    def click_cat_log(self):
+        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_cat_log_btn), 10)
+        self.click(self.loc_cat_log_btn)
+        self.alert_show()
+        self.click(self.loc_shutdown_sure_btn)
+
+    # reboot relate
     def click_reboot_btn(self):
         self.web_driver_wait_until(EC.presence_of_element_located(self.loc_reboot_btn))
         self.click(self.loc_reboot_btn)
         self.alert_show()
         self.click(self.loc_sure_btn)
-        try:
-            self.alert_fade()
-        except Exception:
+        self.alert_fade()
+
+    def get_warning_alert_text(self, text):
+        if text in self.get_element(self.loc_warning).text:
+            # print(self.get_element(self.loc_warning).text)
             self.refresh_page()
+        else:
+            self.click(self.loc_sure_btn)
+            self.refresh_page()
+
+        # try:
+        #     self.alert_fade()
+        # except Exception:
+        #     self.refresh_page()
 
     def click_lock(self):
         self.web_driver_wait_until(EC.presence_of_element_located(self.loc_lock_btn))

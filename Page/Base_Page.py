@@ -9,6 +9,9 @@ class BasePage:
         self.driver = driver
         self.times = times
 
+    # def stop_page(self):
+    #     self.driver.
+
     def refresh_page(self):
         self.driver.refresh()
 

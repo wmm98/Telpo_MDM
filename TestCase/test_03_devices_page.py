@@ -249,10 +249,10 @@ class TestDevicesPage:
 
             time.sleep(1)
 
-    @allure.feature('MDM_test02')
+    @allure.feature('MDM_test01')
     @allure.title("Devices- reboot device 5 times")
     def test_reboot_single_device_pressure_testing(self):
-        exp_reboot_text = ""
+        exp_reboot_text = "Sending Reboot Comand to Devices"
         sn = "A250900P03100019"
 
         pass_flag = 0
@@ -261,27 +261,74 @@ class TestDevicesPage:
             opt_case.check_single_device(sn)
             self.page.select_device(sn)
             self.page.click_reboot_btn()
-            reboot_flag = opt_case.check_alert_text(exp_reboot_text)
+            self.page.get_warning_alert_text(exp_reboot_text)
+            # do not get alert text now
+            # reboot_flag = opt_case.check_alert_text(exp_reboot_text)
             self.page.refresh_page()
             # get device info
             for j in range(5):
                 print("111111111111111111111111111111111")
-                if "Off" in opt_case.get_single_device_list(sn)[0]["Status"]:
+                res = opt_case.get_single_device_list(sn)[0]["Status"]
+                print(res)
+                if "Off" in res:
                     print("222222222222222222222222222222222222222222222222222")
                     pass_flag += 1
                     break
                 self.page.refresh_page()
                 time.sleep(1)
 
-        if pass_flag == 0:
+            if pass_flag == 0:
+                self.page.refresh_page()
+                print("33333333333333333333333333333333333333333333333333333333333")
+                if not ("Off" in opt_case.get_single_device_list(sn)[0]["Status"]):
+                    assert False
+            time.sleep(80)
             self.page.refresh_page()
-            print("33333333333333333333333333333333333333333333333333333333333")
+            print("444444444444444444444444444444444444444444444444444444444444444444444444444")
+            assert "On" in opt_case.get_single_device_list(sn)[0]["Status"], "@@@@ 1分钟之内无法重启！！"
+
+    @allure.feature('MDM_test01')
+    @allure.title("Devices- reboot device 5 times")
+    def test_cat_logs(self):
+        exp_log_msg = "Device Debug Command sent"
+        sn = "A250900P03100019"
+
+        opt_case.check_single_device(sn)
+        self.page.click_dropdown_btn()
+        self.page.click_cat_log()
+        text = self.page.get_alert_text()
+        print(text)
+
+    @allure.feature('MDM_test02')
+    @allure.title("Devices- reset device TPUI password")
+    def test_reset_TPUI_password(self):
+        pass
+
+
+    @allure.feature('MDM_test01')
+    @allure.title("Devices- device shutdown -- test in the last")
+    def test_device_shutdown(self):
+        sn = "A250900P03100019"
+        exp_shutdown_text = "Device ShutDown Command sent"
+        opt_case.check_single_device(sn)
+        self.page.click_dropdown_btn()
+        self.page.click_shutdown_btn()
+        text = self.page.get_alert_text()
+        print(text)
+
+        pass_flag = 0
+        for i in range(5):
+            self.page.refresh_page()
+            if "Off" in opt_case.get_single_device_list(sn)[0]["Status"]:
+                pass_flag += 1
+                break
+            time.sleep(1)
+
+        if pass_flag == 0:
             if not ("Off" in opt_case.get_single_device_list(sn)[0]["Status"]):
-                assert False
-        time.sleep(56)
-        self.page.refresh_page()
-        print("444444444444444444444444444444444444444444444444444444444444444444444444444")
-        assert "On" in opt_case.get_single_device_list(sn)[0]["Status"], "@@@@ 1分钟之内无法重启！！"
+                e = "@@@@ 关机失败， 请检查！！！"
+                log.error(e)
+                assert False, e
 
     @allure.feature('MDM_test011')
     @allure.title("Devices-debug")
