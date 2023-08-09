@@ -102,9 +102,20 @@ class DevicesPage(TelpoMDMPage):
 
     # psw btn relate
     loc_psw_btn = (By.CSS_SELECTOR, "[class = 'fas fa-key batch_password']")
+    loc_TPUI_password = (By.ID, "device_tpui_password")
+    loc_lock_password = (By.ID, "device_password")
+    loc_save_psw_btn = (By.CSS_SELECTOR, "[class = 'btn btn-primary comfirm_update_device_password']")
 
+    def click_psw_btn(self):
+        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_psw_btn))
+        self.click(self.loc_psw_btn)
 
-
+    def change_TPUI_password(self, psw):
+        self.alert_show()
+        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_TPUI_password))
+        self.input_text(self.loc_TPUI_password, psw)
+        self.click(self.loc_save_psw_btn)
+        # self.alert_fade()
 
     def click_dropdown_btn(self):
         self.web_driver_wait_until(EC.presence_of_element_located(self.loc_dropdown_btn))

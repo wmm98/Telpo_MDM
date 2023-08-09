@@ -302,7 +302,42 @@ class TestDevicesPage:
     @allure.feature('MDM_test02')
     @allure.title("Devices- reset device TPUI password")
     def test_reset_TPUI_password(self):
-        pass
+        exp_psw_text = "Password changed"
+        sn = "A250900P03100019"
+        password = ["123456", "000000", "999999"]
+        for psw in password:
+            opt_case.check_single_device(sn)
+            self.page.select_device(sn)
+            self.page.click_psw_btn()
+            self.page.change_TPUI_password(psw)
+            text = self.page.get_alert_text()
+            print(text)
+            self.page.alert_fade()
+            self.page.refresh_page()
+
+    @allure.feature('MDM_test01')
+    @allure.title("Devices- AIMDM send msg and check the log in the Message Module")
+    def test_send_message_to_single_device(self):
+        exp_success_send_text = "Message Sent"
+        # sn would change after debug with devices
+        sn = "A250900P03100019"
+        date_time = '%Y-%m-%d %H:%M:%S'
+        # confirm if device is online and execute next step, if not, end the case execution
+        opt_case.check_single_device(sn)
+        self.page.select_device(sn)
+        for i in range(5):
+            now = time.strftime(date_time, time.localtime(time.time()))
+            msg = "%s: test send message" % now
+            self.page.click_send_btn()
+            self.page.msg_input_and_send(msg)
+            # check alert text
+            opt_case.check_alert_text(exp_success_send_text)
+            self.page.alert_fade()
+        # check devices
+        # no select
+        self.page.select_device(sn)
+
+        # Check result of device message in the Message Module
 
 
     @allure.feature('MDM_test01')
