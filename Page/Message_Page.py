@@ -32,51 +32,32 @@ class MessagePage(TelpoMDMPage):
     def choose_device(self, sn, cate):
         device_list = self.web_driver_wait_until(EC.presence_of_element_located(self.loc_device_list))
         self.web_driver_wait_until(EC.presence_of_element_located(self.loc_li_sn))
+        # devices_sn = device_list.find_elements(*self.loc_li_sn)
         # check if device is dispalyed
-        device = ""
-        devices_sn = device_list.find_elements(*self.loc_li_sn)
-        for dev in devices_sn:
-            if dev.get_attribute("data-sn") == sn:
-                device = dev
+        while True:
+            # if sn in res, ele is displayed
+            res = [dev.get_attribute("data-sn") for dev in device_list.find_elements(*self.loc_li_sn)]
+            if sn not in res:
+                self.drop_down_categories(cate)
+                time.sleep(1)
+            else:
+                break
 
-        if device.is_displayed():
-            self.exc_js_click(device)
-        else:
-            self.drop_down_categories(cate)
-            self.exc_js_click(device)
-
-
-        # self.web_driver_wait_until(EC.presence_of_element_located(self.loc_drop_down_menu_open))
-        # # self.web_driver_wait_until(EC.presence_of_all_elements_located(self.loc_cate_tag_name))
-        # ele = self.get_element(self.loc_drop_down_menu_open).find_element(*self.loc_js_link)
-        # # ele.click()
-        # self.exc_js_click(ele)
-        # # self.move_and_click(ele)
-
-
-    def get_device_message_list(self, length):
-        self.web_driver_wait_until(EC.presence_of_all_elements_located(self.loc_message_box))
-        message_boxes = self.get_elements(self.loc_message_box)[:length]
-        print(message_boxes)
-        print(len(message_boxes))
-        message_list = []
-        for box in message_boxes:
-            msg_text = box.find_element(*self.loc_message_text).text
-            msg_status = box.find_element(*self.loc_message_status).text
-            message = {"message": msg_text, "status": msg_status}
-            message_list.append(message)
-        return message_list
+        for device in device_list.find_elements(*self.loc_li_sn):
+            if sn == device.get_attribute("data-sn"):
+                self.exc_js_click(device)
 
     def drop_down_categories(self, cate):
         device_list = self.web_driver_wait_until(EC.presence_of_element_located(self.loc_device_list))
         eles = device_list.find_elements(*self.loc_cate_tag_name)
         for ele in eles:
             if cate in ele.text:
+                print(ele.text)
                 # ele.click()
                 self.exc_js_click(ele)
                 break
 
-    def click_related_device(self, sn):
+    def click_related_device_discard(self, sn):
         self.web_driver_wait_until(EC.presence_of_element_located(self.loc_drop_down_menu_open))
         eles = self.get_element(self.loc_drop_down_menu_open).find_elements(*self.loc_device_sn)
         for ele in eles:
@@ -90,3 +71,16 @@ class MessagePage(TelpoMDMPage):
             time.sleep(1)
         if flag == 0:
             assert False, "@@@@展开menu失败！！！， 请检查！！！"
+
+    def get_device_message_list(self, length):
+        self.web_driver_wait_until(EC.presence_of_all_elements_located(self.loc_message_box))
+        message_boxes = self.get_elements(self.loc_message_box)[:length]
+        print(message_boxes)
+        print(len(message_boxes))
+        message_list = []
+        for box in message_boxes:
+            msg_text = box.find_element(*self.loc_message_text).text
+            msg_status = box.find_element(*self.loc_message_status).text
+            message = {"message": msg_text, "status": msg_status}
+            message_list.append(message)
+        return message_list
