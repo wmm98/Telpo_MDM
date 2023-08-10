@@ -383,8 +383,12 @@ class TestDevicesPage:
         self.telpo_mdm_page.click_message_btn()
         if not (message_page_title in self.meg_page.get_loc_main_title()):
             self.telpo_mdm_page.click_message_btn()
+        time.sleep(1)
+        self.meg_page.choose_device(sn, "手持终端")
+        time.sleep(4)
+        # self.meg_page.drop_down_categories("手持终端")
+        # self.meg_page.click_related_device(sn)
+        # msg_list = self.meg_page.get_device_message_list(length)
+        # print(msg_list)
 
-        self.meg_page.close_menu()
-        self.meg_page.drop_down_categories("手持终端")
-        self.meg_page.click_related_device(sn)
-        time.sleep(10)
+

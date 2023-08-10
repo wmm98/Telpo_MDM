@@ -1,5 +1,5 @@
 from selenium.webdriver.support.wait import WebDriverWait
-from selenium import webdriver
+from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.select import Select
 
 
@@ -11,6 +11,9 @@ class BasePage:
 
     # def stop_page(self):
     #     self.driver.
+
+    def move_and_click(self, ele):
+        ActionChains(self.driver).move_to_element(ele).click().perform()
 
     def refresh_page(self):
         self.driver.refresh()
