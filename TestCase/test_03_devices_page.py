@@ -6,6 +6,8 @@ from utils.base_web_driver import BaseWebDriver
 import pytest
 from Common import Log
 from Page.Devices_Page import DevicesPage
+from Page.Message_Page import MessagePage
+from Page.Telpo_MDM_Page import TelpoMDMPage
 import time
 from Common.excel_data import ExcelData
 from Conf.Config import Config
@@ -30,6 +32,8 @@ class TestDevicesPage:
     def setup_class(self):
         self.driver = BaseWebDriver().get_web_driver()
         self.page = DevicesPage(self.driver, 40)
+        self.meg_page = MessagePage(self.driver, 40)
+        self.telpo_mdm_page = TelpoMDMPage(self.driver, 40)
 
     def teardown_class(self):
         self.page.refresh_page()
@@ -299,7 +303,7 @@ class TestDevicesPage:
         text = self.page.get_alert_text()
         print(text)
 
-    @allure.feature('MDM_test02')
+    @allure.feature('MDM_test01')
     @allure.title("Devices- reset device TPUI password")
     def test_reset_TPUI_password(self):
         exp_psw_text = "Password changed"
@@ -322,8 +326,11 @@ class TestDevicesPage:
         # sn would change after debug with devices
         sn = "A250900P03100019"
         date_time = '%Y-%m-%d %H:%M:%S'
+        message_page_title = "Device Message"
         # confirm if device is online and execute next step, if not, end the case execution
-        opt_case.check_single_device(sn)
+        data = opt_case.check_single_device(sn)
+        # get device category
+        device_cate = data['Category']
         self.page.select_device(sn)
         for i in range(5):
             now = time.strftime(date_time, time.localtime(time.time()))
@@ -338,7 +345,9 @@ class TestDevicesPage:
         self.page.select_device(sn)
 
         # Check result of device message in the Message Module
-
+        self.telpo_mdm_page.click_message_btn()
+        if not (message_page_title in self.meg_page.get_loc_main_title()):
+            self.telpo_mdm_page.click_message_btn()
 
     @allure.feature('MDM_test01')
     @allure.title("Devices- device shutdown -- test in the last")
@@ -365,7 +374,17 @@ class TestDevicesPage:
                 log.error(e)
                 assert False, e
 
-    @allure.feature('MDM_test011')
+    @allure.feature('MDM_test02')
     @allure.title("Devices-debug")
     def test_devices_test(self):
-        print(self.page.get_models_list())
+        sn = "A250900P03100019"
+        length = 3
+        message_page_title = "Device Message"
+        self.telpo_mdm_page.click_message_btn()
+        if not (message_page_title in self.meg_page.get_loc_main_title()):
+            self.telpo_mdm_page.click_message_btn()
+
+        self.meg_page.close_menu()
+        self.meg_page.drop_down_categories("手持终端")
+        self.meg_page.click_related_device(sn)
+        time.sleep(10)

@@ -22,6 +22,7 @@ class Optimize_Case:
             err = "@@@@%s: 设备不在线， 请检查！！！" % sn
             log.error(err)
             assert False, err
+        return devices_list
 
     def get_single_device_list(self, sn):
         self.page.search_device_by_sn(sn)
