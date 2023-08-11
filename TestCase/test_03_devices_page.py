@@ -1,7 +1,4 @@
-from selenium.webdriver.support import expected_conditions as EC
 import allure
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.wait import WebDriverWait
 from utils.base_web_driver import BaseWebDriver
 import pytest
 from Common import Log
@@ -13,6 +10,7 @@ from Common.excel_data import ExcelData
 from Conf.Config import Config
 from Common.simply_case import Optimize_Case
 from Common.DealAlert import AlertData
+from Page.Release_Device_Page import ReleaseDevicePage
 
 conf = Config()
 excel = ExcelData()
@@ -362,13 +360,22 @@ class TestDevicesPage:
         print(msg_list)
         time.sleep(4)
 
-    @allure.feature('MDM_test02')
+    @allure.feature('MDM_test01')
     @allure.title("Devices- AIMDM transfer api server ")
     def test_transfer_api_server(self):
         exp_success_msg = "Updated Device Setting"
         test_version_api = "http://test.telpopaas.com"
         release_version_api = "http://api.telpotms.com"
+        release_version_url = "https://mdm.telpoai.com/"
+        release_user_info = {"username": "ceshibu03", "password": "123456"}
         sn = "A250900P03100019"
+        release_main_title = "Total Devices"
+        release_login_ok_title = "Telpo MDM"
+
+        BaseWebDriver().open_web_site(release_version_url)
+        release_driver = BaseWebDriver().get_web_driver()
+        release_page = ReleaseDevicePage(release_driver, 40)
+
         opt_case.check_single_device(sn)
         self.page.select_device(sn)
         self.page.click_server_btn()
@@ -382,6 +389,36 @@ class TestDevicesPage:
         test_device_info = opt_case.get_single_device_list(sn)
         print(test_device_info)
 
+        # go to release version and check if device is online
+        release_page.login_release_version(release_user_info, release_login_ok_title)
+        release_page.go_to_device_page(release_main_title)
+        release_data_list = release_page.get_single_device_list_release(sn)
+        print(release_data_list)
+
+        # if release_data_list[0]["Status"] == "Off":
+        #     assert False
+
+        release_page.select_device(sn)
+        release_page.click_server_btn()
+        release_page.api_transfer(test_version_api)
+        release_text = release_page.get_alert_text()
+        print(release_text)
+        release_page.alert_fade()
+        # time.sleep(180)
+        # check if device is offline in release version
+        release_page.refresh_page()
+        release_data_info_again = release_page.get_single_device_list_release(sn)
+        print(release_data_info_again)
+        # if release_data_list[0]["Status"] == "On":
+        #     assert False
+        release_page.quit_browser()
+
+        # go to test version and check if device is online
+        self.page.refresh_page()
+        test_data_info = opt_case.get_single_device_list(sn)
+        print(test_data_info)
+        # if release_data_list[0]["Status"] == "Off":
+        #     assert False
 
     @allure.feature('MDM_test01')
     @allure.title("Devices- device shutdown -- test in the last")
@@ -422,7 +459,3 @@ class TestDevicesPage:
         msg_list = self.meg_page.get_device_message_list(length)
         print(msg_list)
         time.sleep(4)
-
-
-
-

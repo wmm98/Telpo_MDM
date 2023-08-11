@@ -5,12 +5,13 @@ class BaseWebDriver:
     def __init__(self):
         pass
 
-    def open_web_site(self):
+    def open_web_site(self, url):
         global driver
         driver = webdriver.Chrome()
         driver.implicitly_wait(5)
         driver.maximize_window()
-        url = 'http://test.telpoai.com/login'
+        # url = 'http://test.telpoai.com/login'
+        url = url
         # 窗口最大化
         driver.get(url)
 
@@ -20,5 +21,5 @@ class BaseWebDriver:
 
 if __name__ == '__main__':
     case = BaseWebDriver()
-    case.open_web_site()
+    case.open_web_site("")
     case.get_web_driver()

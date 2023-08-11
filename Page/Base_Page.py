@@ -1,7 +1,7 @@
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.select import Select
-
+import time
 
 class BasePage:
 
@@ -9,14 +9,21 @@ class BasePage:
         self.driver = driver
         self.times = times
 
-    # def stop_page(self):
-    #     self.driver.
+    def quit_browser(self):
+        self.driver.quit()
+
+    def return_end_time(self):
+        timeout = 180
+        timedelta = 1
+        end_time = time.time() + timeout
+        return end_time
 
     def move_and_click(self, ele):
         ActionChains(self.driver).move_to_element(ele).click().perform()
 
     def refresh_page(self):
         self.driver.refresh()
+        time.sleep(1)
 
     def get_selector(self, loc):
         ele = self.get_element(loc)

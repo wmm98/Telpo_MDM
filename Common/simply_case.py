@@ -2,11 +2,16 @@ from utils.base_web_driver import BaseWebDriver
 import pytest
 from Common import Log
 from Page.Devices_Page import DevicesPage
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium import webdriver
 
 log = Log.MyLog()
 
 
 class Optimize_Case:
+
     def __init__(self):
         self.driver = BaseWebDriver().get_web_driver()
         self.page = DevicesPage(self.driver, 40)
@@ -41,4 +46,6 @@ class Optimize_Case:
                 return False
         except Exception:
             return False
+
+
 
