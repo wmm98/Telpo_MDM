@@ -26,14 +26,15 @@ class MessagePage(TelpoMDMPage):
 
     # messages list relate
     loc_message_box = (By.CLASS_NAME, "message")
-    loc_message_text = (By.CLASS_NAME, "text")
-    loc_message_status = (By.CSS_SELECTOR, "[class = 'status text-danger']")
+    loc_msg_info = (By.TAG_NAME, "div")
+    # loc_message_text = (By.CLASS_NAME, "text")
+    # loc_message_status = (By.CSS_SELECTOR, "[class = 'status text-danger']")
 
     def choose_device(self, sn, cate):
         device_list = self.web_driver_wait_until(EC.presence_of_element_located(self.loc_device_list))
         self.web_driver_wait_until(EC.presence_of_element_located(self.loc_li_sn))
         # devices_sn = device_list.find_elements(*self.loc_li_sn)
-        # check if device is dispalyed
+        # check if device is displayed
         while True:
             # if sn in res, ele is displayed
             res = [dev.get_attribute("data-sn") for dev in device_list.find_elements(*self.loc_li_sn)]
@@ -42,7 +43,7 @@ class MessagePage(TelpoMDMPage):
                 time.sleep(1)
             else:
                 break
-
+        # device is displayed, click related device
         for device in device_list.find_elements(*self.loc_li_sn):
             if sn == device.get_attribute("data-sn"):
                 self.exc_js_click(device)
@@ -79,8 +80,9 @@ class MessagePage(TelpoMDMPage):
         print(len(message_boxes))
         message_list = []
         for box in message_boxes:
-            msg_text = box.find_element(*self.loc_message_text).text
-            msg_status = box.find_element(*self.loc_message_status).text
+            msg_total = box.find_elements(*self.loc_msg_info)
+            msg_text = msg_total[0].text
+            msg_status = msg_total[1].text
             message = {"message": msg_text, "status": msg_status}
             message_list.append(message)
         return message_list

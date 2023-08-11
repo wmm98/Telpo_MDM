@@ -321,18 +321,20 @@ class TestDevicesPage:
 
     @allure.feature('MDM_test01')
     @allure.title("Devices- AIMDM send msg and check the log in the Message Module")
-    def test_send_message_to_single_device(self):
+    def test_send_message_to_single_device(self, return_device_page):
         exp_success_send_text = "Message Sent"
         # sn would change after debug with devices
         sn = "A250900P03100019"
+        length = 3
         date_time = '%Y-%m-%d %H:%M:%S'
         message_page_title = "Device Message"
         # confirm if device is online and execute next step, if not, end the case execution
         data = opt_case.check_single_device(sn)
+        print(data)
         # get device category
-        device_cate = data['Category']
+        device_cate = data[0]['Category']
         self.page.select_device(sn)
-        for i in range(5):
+        for i in range(length):
             now = time.strftime(date_time, time.localtime(time.time()))
             msg = "%s: test send message" % now
             self.page.click_send_btn()
@@ -344,10 +346,42 @@ class TestDevicesPage:
         # no select
         self.page.select_device(sn)
 
-        # Check result of device message in the Message Module
+        # go to Message Module
         self.telpo_mdm_page.click_message_btn()
-        if not (message_page_title in self.meg_page.get_loc_main_title()):
-            self.telpo_mdm_page.click_message_btn()
+        while True:
+            if message_page_title in self.meg_page.get_loc_main_title():
+                break
+            else:
+                self.telpo_mdm_page.click_message_btn()
+            time.sleep(1)
+
+        # Check result of device message in the Message Module and msg status
+        time.sleep(1)
+        self.meg_page.choose_device(sn, device_cate)
+        msg_list = self.meg_page.get_device_message_list(length)
+        print(msg_list)
+        time.sleep(4)
+
+    @allure.feature('MDM_test02')
+    @allure.title("Devices- AIMDM transfer api server ")
+    def test_transfer_api_server(self):
+        exp_success_msg = "Updated Device Setting"
+        test_version_api = "http://test.telpopaas.com"
+        release_version_api = "http://api.telpotms.com"
+        sn = "A250900P03100019"
+        opt_case.check_single_device(sn)
+        self.page.select_device(sn)
+        self.page.click_server_btn()
+        self.page.api_transfer(release_version_api)
+        test_text = self.page.get_alert_text()
+        print(test_text)
+        self.page.alert_fade()
+        time.sleep(120)
+        # check if device is offline in test version
+        self.page.refresh_page()
+        test_device_info = opt_case.get_single_device_list(sn)
+        print(test_device_info)
+
 
     @allure.feature('MDM_test01')
     @allure.title("Devices- device shutdown -- test in the last")
@@ -374,7 +408,7 @@ class TestDevicesPage:
                 log.error(e)
                 assert False, e
 
-    @allure.feature('MDM_test02')
+    @allure.feature('MDM_test01')
     @allure.title("Devices-debug")
     def test_devices_test(self):
         sn = "A250900P03100019"

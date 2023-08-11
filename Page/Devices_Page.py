@@ -106,6 +106,21 @@ class DevicesPage(TelpoMDMPage):
     loc_lock_password = (By.ID, "device_password")
     loc_save_psw_btn = (By.CSS_SELECTOR, "[class = 'btn btn-primary comfirm_update_device_password']")
 
+    # server relate
+    lco_server_btn = (By.CSS_SELECTOR, "[class = 'fas fa-server batch_api']")
+    loc_api_box = (By.ID, "new_api")
+    loc_api_send_btn = (By.CSS_SELECTOR, "[class = 'btn btn-primary sure_update_server_api']")
+
+    def click_server_btn(self):
+        self.web_driver_wait_until(EC.presence_of_element_located(self.lco_server_btn))
+        self.click(self.lco_server_btn)
+
+    def api_transfer(self, api_url):
+        self.alert_show()
+        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_api_box))
+        self.input_text(self.loc_api_box, api_url)
+        self.click(self.loc_api_send_btn)
+
     def click_psw_btn(self):
         self.web_driver_wait_until(EC.presence_of_element_located(self.loc_psw_btn))
         self.click(self.loc_psw_btn)
@@ -245,7 +260,7 @@ class DevicesPage(TelpoMDMPage):
             tr_eles = eles.find_elements(*self.loc_tr)
             for tr_ele in tr_eles:
                 td_eles = tr_ele.find_elements(*self.loc_td)[1:8]
-                devices_list.append({"Name": td_eles[0].text, "SN": td_eles[4].text, "Status": td_eles[5].text,
+                devices_list.append({"Name": td_eles[0].text, "Category": td_eles[2].text, "Model": td_eles[3].text, "SN": td_eles[4].text, "Status": td_eles[5].text,
                                      "Lock Status": td_eles[6].text})
             return devices_list
         except TimeoutException:
@@ -358,3 +373,5 @@ class DevicesPage(TelpoMDMPage):
     # get devices page alert text
     def get_alert_text(self):
         return self.web_driver_wait_until(EC.presence_of_element_located(self.loc_cate_name_existed)).text
+
+
