@@ -260,7 +260,8 @@ class DevicesPage(TelpoMDMPage):
             tr_eles = eles.find_elements(*self.loc_tr)
             for tr_ele in tr_eles:
                 td_eles = tr_ele.find_elements(*self.loc_td)[1:8]
-                devices_list.append({"Name": td_eles[0].text, "Category": td_eles[2].text, "Model": td_eles[3].text, "SN": td_eles[4].text, "Status": td_eles[5].text,
+                devices_list.append({"Name": td_eles[0].text, "Category": td_eles[2].text, "Model": td_eles[3].text,
+                                     "SN": td_eles[4].text, "Status": td_eles[5].text,
                                      "Lock Status": td_eles[6].text})
             return devices_list
         except TimeoutException:
@@ -373,5 +374,3 @@ class DevicesPage(TelpoMDMPage):
     # get devices page alert text
     def get_alert_text(self):
         return self.web_driver_wait_until(EC.presence_of_element_located(self.loc_cate_name_existed)).text
-
-

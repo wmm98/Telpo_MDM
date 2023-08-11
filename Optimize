@@ -1,0 +1,8 @@
+1、 alert消失存在， while True 结合超时， 超时 BasePage 已完善
+2、其他if 判断条件， while True 结合超时
+3、alert close-btn 的 class name 不唯一， 需要缩小范围进行
+4、有些场景还没修改，需要先获取get alert text 再执行 alert fade
+5、打开新的Page,Tab, 考虑做while True 结合超时的判定， 同步骤1
+
+
+6、 release Package 不用搜索的方法， 无法搜索包名，直接用循环的方法
