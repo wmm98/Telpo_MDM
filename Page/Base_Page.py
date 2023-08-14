@@ -1,6 +1,7 @@
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.select import Select
+from selenium.webdriver.support import expected_conditions as EC
 import time
 
 class BasePage:
@@ -11,6 +12,19 @@ class BasePage:
 
     def quit_browser(self):
         self.driver.quit()
+
+    def alert_is_existed(self):
+        if EC.alert_is_present():
+            return True
+        else:
+            return False
+
+    def ele_is_existed(self, loc):
+        try:
+            self.driver.find_element(*loc)
+            return True
+        except Exception:
+            return False
 
     def return_end_time(self):
         timeout = 180
@@ -76,6 +90,14 @@ class BasePage:
             return WebDriverWait(self.driver, self.times).until_not(condition)
         else:
             return WebDriverWait(self.driver, wait_times).until_not(condition)
+
+    def check_ele_is_selected(self, ele):
+        if not self.ele_is_selected(ele):
+            self.web_driver_wait_until(EC.element_to_be_selected(ele))
+
+    def check_ele_is_not_selected(self, ele):
+        if self.ele_is_selected(ele):
+            self.web_driver_wait_until_not(EC.element_to_be_selected(ele))
 
     def switch_to_alert(self):
         al = self.driver.switch_to.alert

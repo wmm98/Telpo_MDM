@@ -1,3 +1,4 @@
+import time
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from Page.Base_Page import BasePage
@@ -14,6 +15,9 @@ class TelpoMDMPage(BasePage):
 
     loc_message_page_btn = (By.CSS_SELECTOR, "[class = 'nav-icon fas fa-envelope']")
 
+    loc_OTA_btn = (By.LINK_TEXT, "OTA")
+    loc_OTA_menu_open = (By.CSS_SELECTOR, "[class = 'nav-item menu-is-opening menu-open']")
+
     def get_loc_main_title(self):
         self.web_driver_wait_until(EC.presence_of_element_located(self.loc_main_title))
         main_title = self.get_element(self.loc_main_title)
@@ -27,6 +31,18 @@ class TelpoMDMPage(BasePage):
     def click_message_btn(self):
         self.web_driver_wait_until(EC.presence_of_element_located(self.loc_message_page_btn))
         self.click(self.loc_message_page_btn)
+
+    def click_OTA_btn(self):
+        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_OTA_btn))
+        self.click(self.loc_OTA_btn)
+        while True:
+            if self.ele_is_existed(self.loc_OTA_menu_open):
+                break
+            else:
+                self.click(self.loc_OTA_btn)
+            if time.time() > self.return_end_time():
+                assert False, "@@@@OTA页面打开出错！！！！"
+            time.sleep(1)
 
     def click_apps_btn(self):
         pass
