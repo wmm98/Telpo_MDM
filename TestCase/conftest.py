@@ -13,11 +13,12 @@
 """
 import pytest
 from utils.base_web_driver import BaseWebDriver
-from Page import Telpo_MDM_Page, Devices_Page
+from Page import Telpo_MDM_Page, Devices_Page, OTA_Page
 
 base_driver = BaseWebDriver()
 driver = base_driver.get_web_driver()
 device_page = Devices_Page.DevicesPage(driver, 40)
+ota_page = OTA_Page.OTAPage(driver, 40)
 
 
 @pytest.fixture()
@@ -26,4 +27,9 @@ def return_device_page():
     device_page.click_devices_btn()
     # click devices list btn  -- just for test version
     device_page.click_devices_list_btn()
-#
+
+
+@pytest.fixture()
+def go_to_ota_upgrade_logs_page():
+    ota_page.click_package_release_page()
+    yield

@@ -58,13 +58,13 @@ class TestOTAPage:
 
         # "loading-title txt-textOneRow"
 
-    @allure.feature('MDM_test02')
+    @allure.feature('MDM_test01')
     @allure.title("OTA-release OTA package")
     def test_release_OTA_package(self):
         exp_success_text = "success"
         exp_existed_text = "ota release already existed"
         release_info = {"package_name": "TPS900_msm8937_sv10_fv1.1.16_pv1.1.16-1.1.18.zip", "sn": "A250900P03100019",
-                        "silent": 0, "category": "NO Limit", "network": "NO Limit", }
+                        "silent": 0, "category": "NO Limit", "network": "NO Limit"}
 
         self.page.click_upgrade_packages()
         # search package
@@ -77,8 +77,36 @@ class TestOTAPage:
         # text = self.page.get_alert_text()
         if exp_success_text in text:
             self.page.click_package_release_page()
+            # check release log
+            self.page.check_single_release_info(release_info)
         elif exp_existed_text in text:
             self.page.refresh_page()
+
+    @allure.feature('MDM_test02')
+    @allure.title("OTA- release again")
+    def test_release_ota_again(self, go_to_ota_upgrade_logs_page):
+        exp_success_text = "Sync Ota Release Success"
+        # exp_existed_text = "ota release already existed"
+        release_info = {"package_name": "TPS900_msm8937_sv10_fv1.1.16_pv1.1.16-1.1.18.zip", "sn": "A250900P03100019",
+                        "silent": 0, "category": "NO Limit", "network": "NO Limit"}
+        # self.page.click_package_release_page()
+        self.page.search_single_release_log(release_info, count=True)
+        self.page.select_release_log()
+        text = self.page.release_again()
+        print(text)
+        if exp_success_text in text:
+            alert.getAlert("请点击下载，升级")
+
+    @allure.feature('MDM_test02')
+    @allure.title("OTA- delete all log")
+    def test_delete_all_ota_release_logs(self, go_to_ota_upgrade_logs_page):
+        # time.sleep(1)
+        if self.page.get_release_log_length() != 0:
+            self.page.delete_all_release_log()
+
+
+
+
 
 
 

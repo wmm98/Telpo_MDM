@@ -18,6 +18,9 @@ class TelpoMDMPage(BasePage):
     loc_OTA_btn = (By.LINK_TEXT, "OTA")
     loc_OTA_menu_open = (By.CSS_SELECTOR, "[class = 'nav-item menu-is-opening menu-open']")
 
+    loc_Apps_btn = (By.LINK_TEXT, "Apps")
+    loc_Apps_menu_open = (By.CSS_SELECTOR, "[class = 'nav-item menu-is-opening menu-open']")
+
     def get_loc_main_title(self):
         self.web_driver_wait_until(EC.presence_of_element_located(self.loc_main_title))
         main_title = self.get_element(self.loc_main_title)
@@ -33,8 +36,9 @@ class TelpoMDMPage(BasePage):
         self.click(self.loc_message_page_btn)
 
     def click_OTA_btn(self):
-        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_OTA_btn))
-        self.click(self.loc_OTA_btn)
+        if not self.ele_is_existed(self.loc_OTA_menu_open):
+            self.web_driver_wait_until(EC.presence_of_element_located(self.loc_OTA_btn))
+            self.click(self.loc_OTA_btn)
         while True:
             if self.ele_is_existed(self.loc_OTA_menu_open):
                 break
@@ -45,7 +49,17 @@ class TelpoMDMPage(BasePage):
             time.sleep(1)
 
     def click_apps_btn(self):
-        pass
+        if not self.ele_is_existed(self.loc_Apps_menu_open):
+            self.web_driver_wait_until(EC.presence_of_element_located(self.loc_Apps_btn))
+            self.click(self.loc_Apps_btn)
+        while True:
+            if self.ele_is_existed(self.loc_Apps_menu_open):
+                break
+            else:
+                self.click(self.loc_Apps_btn)
+            if time.time() > self.return_end_time():
+                assert False, "@@@@Apps页面打开出错！！！！"
+            time.sleep(1)
 
 
 
