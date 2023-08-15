@@ -13,8 +13,41 @@ class BasePage:
     def quit_browser(self):
         self.driver.quit()
 
+    def deal_alert_existed(self, loc, ex_js=0):
+        while True:
+            if self.alert_is_existed():
+                break
+            else:
+                # self.click(release_btn)
+                if ex_js == 1:
+                    self.exc_js_click_loc(loc)
+                else:
+                    self.click(loc)
+            time.sleep(1)
+            if time.time() > self.return_end_time():
+                assert False, "@@@@弹窗无法关闭 出错， 请检查！！！"
+
+    def deal_alert_not_existed(self, loc, ex_js=0):
+        while True:
+            if not self.alert_is_not_existed():
+                break
+            else:
+                if ex_js == 1:
+                    self.exc_js_click_loc(loc)
+                else:
+                    self.click(loc)
+            time.sleep(1)
+            if time.time() > self.return_end_time():
+                assert False, "@@@@弹窗无法打开 出错， 请检查！！！"
+
     def alert_is_existed(self):
         if EC.alert_is_present():
+            return True
+        else:
+            return False
+
+    def alert_is_not_existed(self):
+        if not EC.alert_is_present():
             return True
         else:
             return False
@@ -45,6 +78,10 @@ class BasePage:
         return select
 
     def exc_js_click(self, ele):
+        self.driver.execute_script("arguments[0].click();", ele)
+
+    def exc_js_click_loc(self, loc):
+        ele = self.get_element(loc)
         self.driver.execute_script("arguments[0].click();", ele)
 
     def ele_is_selected(self, ele):
