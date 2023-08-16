@@ -14,16 +14,20 @@ class BasePage:
         self.driver.quit()
 
     def confirm_alert_not_existed(self, loc, ex_js=0):
+        print("====到这里来了")
         while True:
             if self.alert_is_not_existed():
                 break
             else:
+                print("====else 里面")
                 # self.click(release_btn)
-                if ex_js == 1:
-                    self.exc_js_click_loc(loc)
-                else:
-                    self.click(loc)
-            time.sleep(1)
+            if ex_js == 1:
+                if self.alert_is_not_existed():
+                    break
+                self.exc_js_click_loc(loc)
+            else:
+                self.click(loc)
+                print("已经点击了")
             if time.time() > self.return_end_time():
                 assert False, "@@@@弹窗无法关闭 出错， 请检查！！！"
 
@@ -47,10 +51,10 @@ class BasePage:
             return False
 
     def alert_is_not_existed(self):
-        if not EC.alert_is_present():
-            return True
-        else:
+        if EC.alert_is_present():
             return False
+        else:
+            return True
 
     def ele_is_existed(self, loc):
         try:

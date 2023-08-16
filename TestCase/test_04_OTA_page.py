@@ -5,6 +5,7 @@ from Common import Log
 from Page.Devices_Page import DevicesPage
 from Page.Message_Page import MessagePage
 from Page.Telpo_MDM_Page import TelpoMDMPage
+from Page.System_Page import SystemPage
 from Page.OTA_Page import OTAPage
 import time
 from Common.excel_data import ExcelData
@@ -26,6 +27,7 @@ class TestOTAPage:
     def setup_class(self):
         self.driver = BaseWebDriver().get_web_driver()
         self.page = OTAPage(self.driver, 40)
+        self.system_page = SystemPage(self.driver, 40)
 
     def teardown_class(self):
         self.page.refresh_page()
@@ -85,6 +87,7 @@ class TestOTAPage:
     @allure.feature('MDM_test02')
     @allure.title("OTA- release again")
     def test_release_ota_again(self, go_to_ota_upgrade_logs_page):
+        time.sleep(1)
         exp_success_text = "Sync Ota Release Success"
         # exp_existed_text = "ota release already existed"
         release_info = {"package_name": "TPS900_msm8937_sv10_fv1.1.16_pv1.1.16-1.1.18.zip", "sn": "A250900P03100019",
@@ -92,12 +95,18 @@ class TestOTAPage:
         # self.page.click_package_release_page()
         self.page.search_single_release_log(release_info, count=True)
         self.page.select_release_log()
-        text = self.page.release_again()
-        print(text)
-        if exp_success_text in text:
-            alert.getAlert("请点击下载，升级")
+        self.page.release_again()
+        while True:
+            if exp_success_text in self.system_page.get_latest_action():
+                alert.getAlert("请点击下载，升级")
+                break
+            else:
+                self.page.release_again()
+            time.sleep(1)
+            if time.time() > self.page.return_end_time():
+                assert False, "@@@再一次释放失败， 请检查！！！"
 
-    @allure.feature('MDM_test02')
+    @allure.feature('MDM_test01')
     @allure.title("OTA- delete all log")
     def test_delete_all_ota_release_logs(self, go_to_ota_upgrade_logs_page):
         # time.sleep(1)

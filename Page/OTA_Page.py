@@ -1,6 +1,7 @@
 from selenium.common import TimeoutException
 from Conf.Config import Config
 from Page.Telpo_MDM_Page import TelpoMDMPage
+# from Page.System_Page import SystemPage
 from selenium.webdriver import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
@@ -102,10 +103,8 @@ class OTAPage(TelpoMDMPage):
 
     def search_single_release_log(self, info, count=True):
         ele = self.web_driver_wait_until(EC.presence_of_element_located(self.loc_release_search_btn))
-        # print(ele)
         self.click(self.loc_release_search_btn)
         self.confirm_alert_existed(self.loc_release_search_btn)
-        # self.alert_show()
         self.web_driver_wait_until(EC.presence_of_element_located(self.loc_search_release_package_name))
         self.web_driver_wait_until(EC.presence_of_element_located(self.loc_search_release_sn))
         self.web_driver_wait_until(EC.presence_of_element_located(self.loc_search_release_search))
@@ -113,8 +112,6 @@ class OTAPage(TelpoMDMPage):
         self.input_text(self.loc_search_release_sn, info["sn"])
         time.sleep(1)
         self.click(self.loc_search_release_search)
-        time.sleep(1)
-
         self.confirm_alert_not_existed(self.loc_search_release_search)
 
         if count:
@@ -128,8 +125,11 @@ class OTAPage(TelpoMDMPage):
     def release_again(self):
         self.web_driver_wait_until(EC.presence_of_element_located(self.loc_send_release_again_btn))
         self.click(self.loc_send_release_again_btn)
-        text = self.get_alert_text()
-        return text
+
+    # def
+    #     text = self.get_alert_text()
+    #     if not (exp_text in text):
+    #         self.click(self.loc_send_release_again_btn)
 
     def delete_all_release_log(self):
         ele = self.web_driver_wait_until(EC.presence_of_element_located(self.loc_release_check_all))
@@ -215,7 +215,6 @@ class OTAPage(TelpoMDMPage):
             return text
         except Exception:
             self.confirm_alert_not_existed(self.loc_release_package_btn, ex_js=1)
-        time.sleep(3)
 
     def search_device_by_pack_name(self, pack_name):
         self.web_driver_wait_until(EC.presence_of_element_located(self.loc_search_btn))
@@ -227,8 +226,7 @@ class OTAPage(TelpoMDMPage):
         self.input_text(self.loc_input_search_package, pack_name)
         time.sleep(1)
         self.click(self.loc_search_search_btn)
-        time.sleep(1)
-
+        self.confirm_alert_not_existed(self.loc_search_search_btn)
         if "NO Data" in self.get_element(self.loc_ota_list).text:
             assert False, "@@@@找不到此包 %s, 请检查！！！" % pack_name
 
@@ -267,11 +265,29 @@ class OTAPage(TelpoMDMPage):
 
     # check if alert would disappear
     def alert_fade(self):
-        self.web_driver_wait_until_not(EC.presence_of_element_located(self.loc_alert_show), 6)
+        try:
+            self.web_driver_wait_until_not(EC.presence_of_element_located(self.loc_alert_show), 6)
+            return True
+        except TimeoutException:
+            return False
 
     # check if alert would appear
     def alert_show(self):
-        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_alert_show), 6)
+        try:
+            self.web_driver_wait_until(EC.presence_of_element_located(self.loc_alert_show), 6)
+            return True
+        except TimeoutException:
+            return False
 
     def get_alert_text(self):
         return self.web_driver_wait_until(EC.presence_of_element_located(self.loc_cate_name_existed)).text
+
+    def confirm_alert_not_existed(self, loc, ex_js=0):
+        while True:
+            if self.alert_fade():
+                break
+            else:
+                if ex_js == 1:
+                    self.exc_js_click_loc(loc)
+                else:
+                    self.click(loc)

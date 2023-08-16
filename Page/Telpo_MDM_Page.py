@@ -21,6 +21,8 @@ class TelpoMDMPage(BasePage):
     loc_Apps_btn = (By.LINK_TEXT, "Apps")
     loc_Apps_menu_open = (By.CSS_SELECTOR, "[class = 'nav-item menu-is-opening menu-open']")
 
+    loc_system_btn = (By.LINK_TEXT, "System")
+
     def get_loc_main_title(self):
         self.web_driver_wait_until(EC.presence_of_element_located(self.loc_main_title))
         main_title = self.get_element(self.loc_main_title)
@@ -36,6 +38,7 @@ class TelpoMDMPage(BasePage):
         self.click(self.loc_message_page_btn)
 
     def click_OTA_btn(self):
+        # self.refresh_page()
         if not self.ele_is_existed(self.loc_OTA_menu_open):
             self.web_driver_wait_until(EC.presence_of_element_located(self.loc_OTA_btn))
             self.click(self.loc_OTA_btn)
@@ -49,6 +52,7 @@ class TelpoMDMPage(BasePage):
             time.sleep(1)
 
     def click_apps_btn(self):
+        # self.refresh_page()
         if not self.ele_is_existed(self.loc_Apps_menu_open):
             self.web_driver_wait_until(EC.presence_of_element_located(self.loc_Apps_btn))
             self.click(self.loc_Apps_btn)
@@ -60,6 +64,32 @@ class TelpoMDMPage(BasePage):
             if time.time() > self.return_end_time():
                 assert False, "@@@@Apps页面打开出错！！！！"
             time.sleep(1)
+
+    def click_system_btn(self):
+        # self.refresh_page()
+        # if not self.ele_is_existed(self.loc_Apps_menu_open):
+        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_system_btn))
+        self.click(self.loc_system_btn)
+        # while True:
+        #     if self.ele_is_existed(self.loc_Apps_menu_open):
+        #         break
+        #     else:
+        #         self.click(self.loc_system_btn)
+        #     if time.time() > self.return_end_time():
+        #         assert False, "@@@@Apps页面打开出错！！！！"
+        #     time.sleep(1)
+
+    def deal_main_title(self, loc, title):
+        while True:
+            self.web_driver_wait_until(EC.presence_of_element_located(self.loc_main_title))
+            if not (title in self.get_loc_main_title()):
+                self.click(loc)
+                time.sleep(1)
+            else:
+                break
+            if time.time() > self.return_end_time():
+                assert False, "@@@@加载页面失败！！！"
+
 
 
 
