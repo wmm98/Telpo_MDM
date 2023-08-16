@@ -4,6 +4,7 @@ from selenium.webdriver.support.select import Select
 from selenium.webdriver.support import expected_conditions as EC
 import time
 
+
 class BasePage:
 
     def __init__(self, driver, times):

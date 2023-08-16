@@ -39,31 +39,31 @@ class TelpoMDMPage(BasePage):
 
     def click_OTA_btn(self):
         # self.refresh_page()
-        if not self.ele_is_existed(self.loc_OTA_menu_open):
-            self.web_driver_wait_until(EC.presence_of_element_located(self.loc_OTA_btn))
-            self.click(self.loc_OTA_btn)
-        while True:
-            if self.ele_is_existed(self.loc_OTA_menu_open):
-                break
-            else:
-                self.click(self.loc_OTA_btn)
-            if time.time() > self.return_end_time():
-                assert False, "@@@@OTA页面打开出错！！！！"
-            time.sleep(1)
+        # if not self.ele_is_existed(self.loc_OTA_menu_open):
+        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_OTA_btn))
+        self.click(self.loc_OTA_btn)
+        # while True:
+        #     if self.ele_is_existed(self.loc_OTA_menu_open):
+        #         break
+        #     else:
+        #         self.click(self.loc_OTA_btn)
+        #     if time.time() > self.return_end_time():
+        #         assert False, "@@@@OTA页面打开出错！！！！"
+        #     time.sleep(1)
 
     def click_apps_btn(self):
         # self.refresh_page()
-        if not self.ele_is_existed(self.loc_Apps_menu_open):
-            self.web_driver_wait_until(EC.presence_of_element_located(self.loc_Apps_btn))
-            self.click(self.loc_Apps_btn)
-        while True:
-            if self.ele_is_existed(self.loc_Apps_menu_open):
-                break
-            else:
-                self.click(self.loc_Apps_btn)
-            if time.time() > self.return_end_time():
-                assert False, "@@@@Apps页面打开出错！！！！"
-            time.sleep(1)
+        # if not self.ele_is_existed(self.loc_Apps_menu_open):
+        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_Apps_btn))
+        self.click(self.loc_Apps_btn)
+        # while True:
+        #     if self.ele_is_existed(self.loc_Apps_menu_open):
+        #         break
+        #     else:
+        #         self.click(self.loc_Apps_btn)
+        #     if time.time() > self.return_end_time():
+        #         assert False, "@@@@Apps页面打开出错！！！！"
+        #     time.sleep(1)
 
     def click_system_btn(self):
         # self.refresh_page()
@@ -89,6 +89,20 @@ class TelpoMDMPage(BasePage):
                 break
             if time.time() > self.return_end_time():
                 assert False, "@@@@加载页面失败！！！"
+
+    def go_to_new_address(self, url):
+        address = "http://test.telpoai.com/%s" % url
+        self.driver.get(address)
+        if self.driver.url != address:
+            while True:
+                if self.driver.url == address:
+                    break
+                else:
+                    self.driver.get(address)
+                if time.time() > self.return_end_time():
+                    assert False, "@@@打开 %s 失败， 请检查！！！" % address
+                time.sleep(1)
+
 
 
 

@@ -32,7 +32,7 @@ class TestOTAPage:
     def teardown_class(self):
         self.page.refresh_page()
 
-    @allure.feature('MDM_test02')
+    @allure.feature('MDM_test01')
     @allure.title("OTA-Upgrade Packages Page")
     def test_upgrade_package_page(self):
         self.page.click_OTA_btn()
@@ -84,15 +84,17 @@ class TestOTAPage:
         elif exp_existed_text in text:
             self.page.refresh_page()
 
-    @allure.feature('MDM_test02')
+    @allure.feature('MDM_test01')
     @allure.title("OTA- release again")
     def test_release_ota_again(self, go_to_ota_upgrade_logs_page):
+        # self.page.refresh_page()
         time.sleep(1)
         exp_success_text = "Sync Ota Release Success"
         # exp_existed_text = "ota release already existed"
         release_info = {"package_name": "TPS900_msm8937_sv10_fv1.1.16_pv1.1.16-1.1.18.zip", "sn": "A250900P03100019",
                         "silent": 0, "category": "NO Limit", "network": "NO Limit"}
         # self.page.click_package_release_page()
+        self.page.check_single_release_info(release_info)
         self.page.search_single_release_log(release_info, count=True)
         self.page.select_release_log()
         self.page.release_again()
@@ -104,14 +106,30 @@ class TestOTAPage:
                 self.page.release_again()
             time.sleep(1)
             if time.time() > self.page.return_end_time():
-                assert False, "@@@再一次释放失败， 请检查！！！"
+                assert False, "@@@再一次释OTA package放失败， 请检查！！！"
 
     @allure.feature('MDM_test01')
     @allure.title("OTA- delete all log")
     def test_delete_all_ota_release_logs(self, go_to_ota_upgrade_logs_page):
-        # time.sleep(1)
+        time.sleep(1)
+        exp_del_text = "Delete ota release <[NO Limit]> :Success"
         if self.page.get_release_log_length() != 0:
             self.page.delete_all_release_log()
+
+    @allure.feature('MDM_test01')
+    @allure.title("OTA- delete single log")
+    def test_delete_single_ota_release_log(self, go_to_ota_upgrade_logs_page):
+        time.sleep(1)
+        exp_del_text = "Delete ota release <[NO Limit]> :Success"
+        release_info = {"package_name": "TPS900_msm8937_sv10_fv1.1.16_pv1.1.16-1.1.18.zip", "sn": "A250900P03100019",
+                        "silent": 0, "category": "NO Limit", "network": "NO Limit"}
+        if self.page.get_release_log_length() != 0:
+            org_log_length = self.page.get_release_log_length()
+            print(org_log_length)
+            self.page.search_single_release_log(release_info)
+            self.page.delete_all_release_log(org_len=org_log_length, del_all=False)
+
+
 
 
 

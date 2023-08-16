@@ -13,12 +13,13 @@
 """
 import pytest
 from utils.base_web_driver import BaseWebDriver
-from Page import Telpo_MDM_Page, Devices_Page, OTA_Page
+from Page import Telpo_MDM_Page, Devices_Page, OTA_Page, Apps_Page
 
 base_driver = BaseWebDriver()
 driver = base_driver.get_web_driver()
 device_page = Devices_Page.DevicesPage(driver, 40)
 ota_page = OTA_Page.OTAPage(driver, 40)
+app_page = Apps_Page.APPSPage(driver, 40)
 
 
 @pytest.fixture()
@@ -31,5 +32,12 @@ def return_device_page():
 
 @pytest.fixture()
 def go_to_ota_upgrade_logs_page():
+    ota_page.click_OTA_btn()
     ota_page.click_package_release_page()
+    yield
+
+
+@pytest.fixture()
+def go_to_app_page():
+    app_page.go_to_new_address("apps")
     yield
