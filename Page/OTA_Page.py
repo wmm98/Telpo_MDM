@@ -250,12 +250,11 @@ class OTAPage(TelpoMDMPage):
         boxes = self.get_elements(self.loc_packages_box)
         if len(boxes) != 1:
             assert False, "@@@@有多个相同的包 %s, 请检查！！！" % pack_name
-
-        try:
-            self.alert_fade()
-        except Exception:
-            self.click(self.loc_search_search_btn)
-            self.alert_fade()
+        # try:
+        #     self.alert_fade()
+        # except Exception:
+        #     self.click(self.loc_search_search_btn)
+        #     self.alert_fade()
 
     def click_add_btn(self):
         self.web_driver_wait_until(EC.presence_of_element_located(self.loc_add_package_btn))

@@ -93,9 +93,9 @@ class TelpoMDMPage(BasePage):
     def go_to_new_address(self, url):
         address = "http://test.telpoai.com/%s" % url
         self.driver.get(address)
-        if self.driver.url != address:
+        if self.driver.current_url != address:
             while True:
-                if self.driver.url == address:
+                if self.driver.current_url == address:
                     break
                 else:
                     self.driver.get(address)

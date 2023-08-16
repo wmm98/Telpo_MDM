@@ -19,19 +19,47 @@ class APPSPage(TelpoMDMPage):
     loc_private_app_btn = (By.LINK_TEXT, "Private Apps")
     private_app_main_title = "Private Apps"
 
+    # search relate
+    loc_search_btn = (By.CSS_SELECTOR, "[class = 'fas fa-search']")
+    loc_search_app_name = (By.ID, "search_app_name")
+    loc_search_search = (By.CSS_SELECTOR, "[class = 'btn btn-primary comfirm_search_app_button']")
+
     # new apk btn
     loc_new_btn = (By.CSS_SELECTOR, "[class = 'fas fa-plus-square']")
     loc_choose_file = (By.ID, "file")
     loc_choose_category = (By.ID, "Category")
     loc_developer_box = (By.ID, "developer")
     loc_des_box = (By.ID, "desc")
-    loc_apk_save_btn = (By.CSS_SELECTOR, "btn btn-primary comfirm_create_app_button")
+    loc_apk_save_btn = (By.CSS_SELECTOR, "[class = 'btn btn-primary comfirm_create_app_button']")
 
     # alert show
     loc_alert_show = (By.CSS_SELECTOR, "[class = 'modal fade show']")
 
     # 提示框
     loc_cate_name_existed = (By.ID, "swal2-title")
+
+    # app list relate
+    loc_apps_list = (By.ID, "apps_list")
+    loc_single_app_box = (
+        By.CSS_SELECTOR, "[class = 'col-12 col-sm-6 col-md-4 d-flex align-items-stretch flex-column']")
+
+    def get_apps_text_list(self):
+        if self.ele_is_existed(self.loc_single_app_box):
+            boxes = self.get_elements(self.loc_single_app_box)
+            return [box.text for box in boxes]
+        else:
+            return []
+
+    def search_app_by_name(self, app_name):
+        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_search_btn))
+        self.click(self.loc_search_btn)
+        self.confirm_alert_existed(self.loc_search_btn)
+        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_search_app_name))
+        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_search_search))
+        self.input_text(self.loc_search_app_name, app_name)
+        time.sleep(1)
+        self.click(self.loc_search_search)
+        self.confirm_alert_not_existed(self.loc_search_search)
 
     def click_private_app_btn(self):
         self.web_driver_wait_until(EC.presence_of_element_located(self.loc_private_app_btn))
@@ -59,14 +87,16 @@ class APPSPage(TelpoMDMPage):
         self.click(self.loc_apk_save_btn)
         self.confirm_alert_not_existed(self.loc_apk_save_btn)
 
-    def click_save_add_ota_pack(self):
-        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_apk_save_btn))
-        self.click(self.loc_apk_save_btn)
+    # def click_save_add_app(self):
+    #     ele = self.web_driver_wait_until(EC.presence_of_element_located(self.loc_apk_save_btn))
+    #     self.exc_js_click_loc(self.loc_apk_save_btn)
+
+    def check_add_app_save_btn(self):
         self.confirm_alert_not_existed(self.loc_apk_save_btn)
 
     def alert_fade(self):
         try:
-            self.web_driver_wait_until_not(EC.presence_of_element_located(self.loc_alert_show), 6)
+            self.web_driver_wait_until_not(EC.presence_of_element_located(self.loc_alert_show), 10)
             return True
         except TimeoutException:
             return False
@@ -75,7 +105,7 @@ class APPSPage(TelpoMDMPage):
 
     def alert_show(self):
         try:
-            self.web_driver_wait_until(EC.presence_of_element_located(self.loc_alert_show), 6)
+            self.web_driver_wait_until(EC.presence_of_element_located(self.loc_alert_show), 10)
             return True
         except TimeoutException:
             return False
