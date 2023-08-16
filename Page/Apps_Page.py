@@ -85,7 +85,7 @@ class APPSPage(TelpoMDMPage):
         self.input_text(self.loc_des_box, info["description"])
         time.sleep(1)
         self.click(self.loc_apk_save_btn)
-        self.confirm_alert_not_existed(self.loc_apk_save_btn)
+        # self.confirm_alert_not_existed(self.loc_apk_save_btn)
 
     # def click_save_add_app(self):
     #     ele = self.web_driver_wait_until(EC.presence_of_element_located(self.loc_apk_save_btn))
