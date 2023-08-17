@@ -46,42 +46,87 @@ class APPSPage(TelpoMDMPage):
     loc_app_delete_btn = (By.CSS_SELECTOR, "[class = 'btn btn-sm bg-danger']")
     loc_app_confirm_del_btn = (By.CSS_SELECTOR, "[class = 'btn btn-outline-light deleteapp_button']")
     # app release btn
-    loc_app_release_btn = (By.CSS_SELECTOR, "[class = 'fas fa-registered']")
     loc_app_release_alert = (By.ID, "modal-app-release")
+    loc_app_release_btn = (By.CSS_SELECTOR, "[class = 'fas fa-registered']")
     loc_silent_install = (By.ID, "setsilent")
     loc_device_selected_box = (By.CLASS_NAME, "label-selected")
     loc_device_list = (By.CLASS_NAME, "label-item")
-    loc_single_device = (By.TAG_NAME, "span")
+    loc_single_device = (By.TAG_NAME, "li")
     loc_app_package_name = (By.ID, "release_apk_package")
     loc_app_release_confirm = (By.CSS_SELECTOR, "[class = 'btn btn-primary confirm_release']")
+
+    # app release page
+    loc_release_check_all = (By.ID, "checkall")
+    loc_release_delete_btn = (By.CSS_SELECTOR, "[class = 'fas fa-trash-alt ']")
+    loc_release_confirm_del_btn = (By.CSS_SELECTOR, "[class = 'btn btn-outline-dark sure_delete_release']")
+    loc_release_list = (By.ID, "releases_list")
+    loc_single_release = (By.TAG_NAME, "tr")
+
+    # upgrade logs relate
+
+    def click_delete_btn(self):
+        self.click(self.loc_release_delete_btn)
+        self.confirm_alert_existed(self.loc_release_delete_btn)
+        self.click(self.loc_release_confirm_del_btn)
+        self.confirm_alert_not_existed(self.loc_release_confirm_del_btn)
+
+    def get_current_app_release_log_total(self):
+        release_list = self.get_element(self.loc_release_list)
+        if self.ele_is_existed_in_range(self.loc_release_list, self.loc_single_release):
+            release_count = len(release_list.find_elements(*self.loc_single_release))
+            return release_count
+        else:
+            return 0
+
+    def click_select_all_box(self):
+        ele = self.get_element(self.loc_release_check_all)
+        self.exc_js_click(ele)
+        self.deal_ele_selected(ele)
+
+    def check_release_log_info(self, info):
+        while True:
+            if self.get_current_app_release_log_total() != 0:
+                break
+            else:
+                self.refresh_page()
+            time.sleep(1)
+            if time.time() > self.return_end_time():
+                assert False, "@@@@ release app 失败, 没有相应得log， 请检查！！！"
+
+        text = self.get_element(self.loc_release_list).find_element(*self.loc_single_release).text
+        if not info["package"] in text and (info["silent"] in text) and (info["version"] in text):
+            assert False, "@@@@release app的log有误， 请检查！！！"
+
+    def delete_all_app_release_log(self):
+        if self.get_current_app_release_log_total() != 0:
+            self.click_select_all_box()
+            self.click_delete_btn()
+            self.refresh_page()
+            time.sleep(1)
+            if self.get_current_app_release_log_total() != 0:
+                self.click_select_all_box()
+                self.click_delete_btn()
 
     def click_release_app_btn(self):
         self.click(self.loc_app_release_btn)
         self.confirm_alert_existed(self.loc_app_release_btn)
 
-    def get_app_package_name(self):
-        name = self.get_element(self.loc_app_package_name).text
-        return name
-
     def input_release_app_info(self, info):
-        self.select_by_text(self.loc_silent_install, info["silent"])
-        time.sleep(3)
-        devices = self.get_element(self.loc_device_list).find_elements(*self.loc_single_device)
-        selected_text = self.get_element(self.loc_device_selected_box).text
+        release_box = self.get_element(self.loc_app_release_alert)
+        self.select_by_text(self.loc_silent_install, info["silent"].upper())
+        devices = release_box.find_element(*self.loc_device_list).find_elements(*self.loc_single_device)
         for device in devices:
             if info["sn"] in device.text:
-                if info["sn"] in selected_text:
+                if device.get_attribute("class") == "selected":
                     break
                 while True:
-                    if info["sn"] in selected_text:
+                    if device.get_attribute("class") == "selected":
                         break
                     else:
                         device.click()
-                        print("运行到这里")
                     if time.time() > self.return_end_time():
                         assert False, "@@@无法选中device sn, 请检查！！！"
                     time.sleep(1)
-        time.sleep(5)
         self.click(self.loc_app_release_confirm)
         self.confirm_alert_not_existed(self.loc_app_release_confirm)
 

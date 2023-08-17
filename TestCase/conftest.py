@@ -41,3 +41,10 @@ def go_to_ota_upgrade_logs_page():
 def go_to_app_page():
     app_page.go_to_new_address("apps")
     yield
+
+
+@pytest.fixture()
+def del_all_app_release_log():
+    app_page.go_to_new_address("apps/releases")
+    app_page.delete_all_app_release_log()
+    yield

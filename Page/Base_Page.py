@@ -64,6 +64,13 @@ class BasePage:
         except Exception:
             return False
 
+    def ele_is_existed_in_range(self, range_loc, loc):
+        try:
+            self.get_element(range_loc).find_elements(*loc)
+            return True
+        except Exception:
+            return False
+
     def return_end_time(self):
         timeout = 180
         timedelta = 1

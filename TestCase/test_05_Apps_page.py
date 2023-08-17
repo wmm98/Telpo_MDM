@@ -88,15 +88,22 @@ class TestAppPage:
 
     @allure.feature('MDM_test02')
     @allure.title("Apps-release app")
-    def test_release_app(self, go_to_app_page):
-        release_info = {"package_name": "APKEditor_1_7_2.apk", "sn": "A250900P03100019", "silent": "YES"}
+    def test_release_app(self, del_all_app_release_log, go_to_app_page):
+        app_release_address = "http://test.telpoai.com/apps/releases"
+        app_upgrade_address = "http://test.telpoai.com/apps/logs"
+        release_info = {"package_name": "APKEditor_1_7_2.apk", "sn": "A250900P03100019",
+                        "silent": "Yes", "version": "1.7.2", "package": "com.gmail.heagoo.apkeditor.pro"}
         self.page.search_app_by_name(release_info["package_name"])
+
         app_list = self.page.get_apps_text_list()
         if len(app_list) == 0:
             assert False, "@@@@没有 %s, 请检查！！！" % release_info["package_name"]
         self.page.click_release_app_btn()
-        print(self.page.get_app_package_name())
         self.page.input_release_app_info(release_info)
+        # go to app release log
+        self.page.go_to_new_address("apps/releases")
+        self.page.check_release_log_info(release_info)
+
 
 
 
