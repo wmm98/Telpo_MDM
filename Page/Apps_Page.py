@@ -42,6 +42,54 @@ class APPSPage(TelpoMDMPage):
     loc_apps_list = (By.ID, "apps_list")
     loc_single_app_box = (
         By.CSS_SELECTOR, "[class = 'col-12 col-sm-6 col-md-4 d-flex align-items-stretch flex-column']")
+    # app delete btn
+    loc_app_delete_btn = (By.CSS_SELECTOR, "[class = 'btn btn-sm bg-danger']")
+    loc_app_confirm_del_btn = (By.CSS_SELECTOR, "[class = 'btn btn-outline-light deleteapp_button']")
+    # app release btn
+    loc_app_release_btn = (By.CSS_SELECTOR, "[class = 'fas fa-registered']")
+    loc_app_release_alert = (By.ID, "modal-app-release")
+    loc_silent_install = (By.ID, "setsilent")
+    loc_device_selected_box = (By.CLASS_NAME, "label-selected")
+    loc_device_list = (By.CLASS_NAME, "label-item")
+    loc_single_device = (By.TAG_NAME, "span")
+    loc_app_package_name = (By.ID, "release_apk_package")
+    loc_app_release_confirm = (By.CSS_SELECTOR, "[class = 'btn btn-primary confirm_release']")
+
+    def click_release_app_btn(self):
+        self.click(self.loc_app_release_btn)
+        self.confirm_alert_existed(self.loc_app_release_btn)
+
+    def get_app_package_name(self):
+        name = self.get_element(self.loc_app_package_name).text
+        return name
+
+    def input_release_app_info(self, info):
+        self.select_by_text(self.loc_silent_install, info["silent"])
+        time.sleep(3)
+        devices = self.get_element(self.loc_device_list).find_elements(*self.loc_single_device)
+        selected_text = self.get_element(self.loc_device_selected_box).text
+        for device in devices:
+            if info["sn"] in device.text:
+                if info["sn"] in selected_text:
+                    break
+                while True:
+                    if info["sn"] in selected_text:
+                        break
+                    else:
+                        device.click()
+                        print("运行到这里")
+                    if time.time() > self.return_end_time():
+                        assert False, "@@@无法选中device sn, 请检查！！！"
+                    time.sleep(1)
+        time.sleep(5)
+        self.click(self.loc_app_release_confirm)
+        self.confirm_alert_not_existed(self.loc_app_release_confirm)
+
+    def click_delete_app_btn(self):
+        self.click(self.loc_app_delete_btn)
+        self.confirm_alert_existed(self.loc_app_delete_btn)
+        self.click(self.loc_app_confirm_del_btn)
+        self.confirm_alert_not_existed(self.loc_app_confirm_del_btn)
 
     def get_apps_text_list(self):
         if self.ele_is_existed(self.loc_single_app_box):
@@ -51,18 +99,14 @@ class APPSPage(TelpoMDMPage):
             return []
 
     def search_app_by_name(self, app_name):
-        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_search_btn))
         self.click(self.loc_search_btn)
         self.confirm_alert_existed(self.loc_search_btn)
-        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_search_app_name))
-        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_search_search))
         self.input_text(self.loc_search_app_name, app_name)
         time.sleep(1)
         self.click(self.loc_search_search)
         self.confirm_alert_not_existed(self.loc_search_search)
 
     def click_private_app_btn(self):
-        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_private_app_btn))
         self.click(self.loc_private_app_btn)
         while True:
             if self.private_app_main_title in self.get_loc_main_title():
@@ -73,12 +117,10 @@ class APPSPage(TelpoMDMPage):
                 assert False, "@@@@打开private app page 出错！！！"
 
     def click_add_btn(self):
-        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_new_btn))
         self.click(self.loc_new_btn)
         self.confirm_alert_existed(self.loc_new_btn)
 
     def input_app_info(self, info):
-        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_choose_file))
         self.input_text(self.loc_choose_file, info["file_name"])
         self.select_by_text(self.loc_choose_category, info["file_category"])
         self.input_text(self.loc_developer_box, info["developer"])

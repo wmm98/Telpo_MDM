@@ -86,6 +86,7 @@ class BasePage:
         self.driver.execute_script("arguments[0].click();", ele)
 
     def exc_js_click_loc(self, loc):
+        self.web_driver_wait_until(EC.presence_of_element_located(loc))
         ele = self.get_element(loc)
         self.driver.execute_script("arguments[0].click();", ele)
 
@@ -103,29 +104,35 @@ class BasePage:
         return ele.is_selected()
 
     def select_by_text(self, loc, value):
+        self.web_driver_wait_until(EC.presence_of_element_located(loc))
         select = self.get_selector(loc)
         # select.select_by_value(value)
         select.select_by_visible_text(value)
 
     def get_element(self, loc):
+        self.web_driver_wait_until(EC.presence_of_element_located(loc))
         return self.driver.find_element(*loc)
 
     def get_elements(self, loc):
+        self.web_driver_wait_until(EC.presence_of_all_elements_located(loc))
         return self.driver.find_elements(*loc)
 
     def get_elements_in_range(self, loc_pre, loc_pos):
         return self.driver.find_element(*loc_pre).find_elements(*loc_pos)
 
     def input_text(self, loc, text):
+        self.web_driver_wait_until(EC.presence_of_element_located(loc))
         ele = self.get_element(loc)
         ele.clear()
         ele.send_keys(text)
 
     def input_keyboard(self, loc, keyboard):
+        self.web_driver_wait_until(EC.presence_of_element_located(loc))
         ele = self.get_element(loc)
         ele.send_keys(keyboard)
 
     def click(self, loc):
+        self.web_driver_wait_until(EC.presence_of_element_located(loc))
         self.driver.find_element(*loc).click()
 
     def get_title(self):

@@ -31,12 +31,26 @@ class TestAppPage:
     def teardown_class(self):
         self.page.refresh_page()
 
-    @allure.feature('MDM_test02')
+    @allure.feature('MDM_test01')
+    @allure.title("Apps-delete apk package")
+    def test_delete_single_app(self, go_to_app_page):
+        package_info = {"package_name": "ComAssistant.apk", "file_category": "test",
+                        "developer": "engineer", "description": "test"}
+
+        org_length = len(self.page.get_apps_text_list())
+        self.page.search_app_by_name(package_info["package_name"])
+        if len(self.page.get_apps_text_list()) == 1:
+            self.page.click_delete_app_btn()
+            new_length = len(self.page.get_apps_text_list())
+            if org_length != (new_length + 1):
+                assert False, "@@@@删除失败请检查！！！"
+
+    @allure.feature('MDM_test01')
     @allure.title("Apps-add app apk package")
-    def test_add_apps(self, go_to_app_page):
+    def test_add_new_apps(self, go_to_app_page):
         exp_success_text = "Success"
         package_info = {"package_name": "ComAssistant.apk", "file_category": "test",
-                        "developer": "test engineer", "description": "just for test"}
+                        "developer": "engineer", "description": "test"}
 
         file_path = conf.project_path + "\\Param\\Package\\%s" % package_info["package_name"]
         info = {"file_name": file_path, "file_category": "test",
@@ -71,6 +85,30 @@ class TestAppPage:
                         assert False, "@@@添加apk失败， 请检查"
                 else:
                     assert False, "@@@添加apk失败， 请检查"
+
+    @allure.feature('MDM_test02')
+    @allure.title("Apps-release app")
+    def test_release_app(self, go_to_app_page):
+        release_info = {"package_name": "APKEditor_1_7_2.apk", "sn": "A250900P03100019", "silent": "YES"}
+        self.page.search_app_by_name(release_info["package_name"])
+        app_list = self.page.get_apps_text_list()
+        if len(app_list) == 0:
+            assert False, "@@@@没有 %s, 请检查！！！" % release_info["package_name"]
+        self.page.click_release_app_btn()
+        print(self.page.get_app_package_name())
+        self.page.input_release_app_info(release_info)
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
