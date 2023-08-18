@@ -17,7 +17,7 @@ class TestTelpoMDM:
     def teardown_class(self):
         pass
 
-    @allure.feature('MDM_test01')
+    @allure.feature('MDM_test01 -- not run right now')
     @allure.title("Telpo_MDM main page")  # 设置case的名字
     @pytest.mark.dependency(depends=["test_login_ok"], scope='package')
     @pytest.mark.dependency(name="test_TelpoMdM_Page", scope='package')

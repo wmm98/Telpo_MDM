@@ -50,8 +50,10 @@ class APPSPage(TelpoMDMPage):
     loc_app_release_btn = (By.CSS_SELECTOR, "[class = 'fas fa-registered']")
     loc_silent_install = (By.ID, "setsilent")
     loc_device_selected_box = (By.CLASS_NAME, "label-selected")
+    # device list and single device also work in app relate
     loc_device_list = (By.CLASS_NAME, "label-item")
     loc_single_device = (By.TAG_NAME, "li")
+
     loc_app_package_name = (By.ID, "release_apk_package")
     loc_app_release_confirm = (By.CSS_SELECTOR, "[class = 'btn btn-primary confirm_release']")
 
@@ -62,7 +64,64 @@ class APPSPage(TelpoMDMPage):
     loc_release_list = (By.ID, "releases_list")
     loc_single_release = (By.TAG_NAME, "tr")
 
+    # app release search btn relate
+    loc_release_search_btn = (By.CSS_SELECTOR, "[class = 'fas fa-search']")
+    loc_release_package_name = (By.ID, "search_package_name")
+    loc_release_sn = (By.ID, "search_device_sn")
+    loc_release_version = (By.ID, "version")
+    loc_release_search_confirm = (By.CSS_SELECTOR, "[class = 'btn btn-primary comfirm_search_app_release']")
+    loc_release_check_box = (By.NAME, "checkbox")
+    # send release again
+    loc_app_send_release_again = (By.CSS_SELECTOR, "[class = 'btn-witdh btn  btn-sm sync_release']")
+
+    # app uninstall relate
+    loc_uninstall_btn = (By.CSS_SELECTOR, "[class = 'fas fa-eraser']")
+    loc_app_uninstall_alert = (By.ID, "modal-appuninstall")
+
+    loc_app_uninstall_confirm = (By.CSS_SELECTOR, "[class = 'btn btn-warning confirm_uninstall']")
+    loc_uninstall_device_list = (By.ID, "labelItem1")
+
     # upgrade logs relate
+
+    def select_single_app_release_log(self):
+        ele = self.get_element(self.loc_release_check_box)
+        self.exc_js_click(ele)
+        self.deal_ele_selected(ele)
+
+    def search_app_release_log(self, info):
+        self.click(self.loc_release_search_btn)
+        self.confirm_alert_existed(self.loc_release_search_btn)
+        self.input_text(self.loc_release_package_name, info["package"])
+        self.input_text(self.loc_release_sn, info['sn'])
+        self.input_text(self.loc_release_version, info["version"])
+        self.confirm_alert_not_existed(self.loc_release_search_confirm)
+
+    def click_send_release_again(self):
+        self.click(self.loc_app_send_release_again)
+        text = self.get_alert_text()
+        return text
+
+    def click_uninstall_app_btn(self):
+        self.click(self.loc_uninstall_btn)
+        self.confirm_alert_existed(self.loc_uninstall_btn)
+
+    def input_uninstall_app_info(self, info):
+        uninstall_box = self.get_element(self.loc_app_uninstall_alert)
+        devices = uninstall_box.find_element(*self.loc_uninstall_device_list).find_elements(*self.loc_single_device)
+        for device in devices:
+            if info["sn"] in device.get_attribute("data"):
+                if device.get_attribute("class") == "selected":
+                    break
+                while True:
+                    if device.get_attribute("class") == "selected":
+                        break
+                    else:
+                        device.click()
+                    if time.time() > self.return_end_time():
+                        assert False, "@@@无法选中device sn, 请检查！！！"
+                    time.sleep(1)
+        self.click(self.loc_app_uninstall_confirm)
+        self.confirm_alert_not_existed(self.loc_app_uninstall_confirm)
 
     def click_delete_btn(self):
         self.click(self.loc_release_delete_btn)
@@ -116,7 +175,7 @@ class APPSPage(TelpoMDMPage):
         self.select_by_text(self.loc_silent_install, info["silent"].upper())
         devices = release_box.find_element(*self.loc_device_list).find_elements(*self.loc_single_device)
         for device in devices:
-            if info["sn"] in device.text:
+            if info["sn"] in device.get_attribute("data"):
                 if device.get_attribute("class") == "selected":
                     break
                 while True:

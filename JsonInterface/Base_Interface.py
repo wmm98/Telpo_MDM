@@ -15,6 +15,7 @@ class RequestMethodCarryFormData:
         # self.data = {}
         # self.files = {}
         self.header = {}
+        self.address = "http://test.telpopaas.com/"
 
     def get(self, url, data):
         """
@@ -23,7 +24,7 @@ class RequestMethodCarryFormData:
         """
         try:
             res = requests.get(url=url, params=data, headers=self.header, timeout=60)
-            return res.json()
+            return res
         except TimeoutError:
             return print('%s get request timeout!' % url)
 
@@ -33,11 +34,11 @@ class RequestMethodCarryFormData:
         :return:
         """
         try:
+            # print(self.header)
             res = requests.get(url=url, params=data, headers=self.header, timeout=60)
-            print(res.content)
             return res.json()
-        except TimeoutError:
-            return print('%s get request timeout!' % url)
+        except Exception:
+            return False
 
     def postCarryToken(self, url, data):
         """
@@ -47,19 +48,19 @@ class RequestMethodCarryFormData:
         """
         try:
             res = requests.post(url=url, data=data, headers=self.header, timeout=60)
-            print(res.content)
             return res.json()
-        except TimeoutError:
-            return print('%s post request timeout!' % url)
+        except Exception:
+            return False
 
+    # just for login
     def post(self, url, data):
         try:
-            res = requests.post(url=url, data=data, timeout=60)
-            self.token = res.json()["token"]
-            self.header["token"] = self.token
-            return res.json()
-        except TimeoutError:
-            return print('%s post request timeout!' % url)
+            response = requests.post(url=url, data=data, timeout=60)
+            self.header["token"] = response.json()["token"]
+            print(":,", self.header)
+            return response.json()
+        except Exception:
+            print("这里出错了")
 
 
 if __name__ == '__main__':
@@ -69,13 +70,10 @@ if __name__ == '__main__':
         "password": "123456",
         "platform": "mdm"
     }
-    # req = RequestMethodCarryFormData()
-    res = requests.post(url, data).json()
-    print(res)
-    # print(type(res))
+    req = RequestMethodCarryFormData()
+    req.post(url, data)
     # time.sleep(5)
     log_url = "http://test.telpopaas.com/appLogs"
-    # log_url = "http://test.telpopaas.com/caculateAppLogs"
     data1 = {"page": 1, "offset": 30}
     # data1 = {"page": 1,
     #          "offset": 5,
@@ -83,14 +81,13 @@ if __name__ == '__main__':
     #          "verifyed": 0,
     #          "groupcode": 1
     #          }
-    header = {
-        "token": res["token"]
-    }
+    # header = {
+    #     "token": res["token"]
+    # }
 
-    # header = {: }
-    # log_res = req.getCarryToken(log_url, data1)
-    log_res = requests.get(url=log_url, params=data1, headers=header)
-    print(log_res.content)
+    time.sleep(2)
+    log_res = req.getCarryToken(log_url, data1)
+    print(log_res)
 
 
 

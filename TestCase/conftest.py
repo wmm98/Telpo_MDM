@@ -48,3 +48,16 @@ def del_all_app_release_log():
     app_page.go_to_new_address("apps/releases")
     app_page.delete_all_app_release_log()
     yield
+
+
+@pytest.fixture()
+def del_all_app_uninstall_release_log():
+    app_page.go_to_new_address("apps/appUninstall")
+    app_page.delete_all_app_release_log()
+    yield
+
+
+@pytest.fixture()
+def go_to_app_release_log():
+    app_page.go_to_new_address("apps/releases")
+    yield

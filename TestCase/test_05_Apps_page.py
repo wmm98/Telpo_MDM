@@ -86,7 +86,7 @@ class TestAppPage:
                 else:
                     assert False, "@@@添加apk失败， 请检查"
 
-    @allure.feature('MDM_test02')
+    @allure.feature('MDM_test01')
     @allure.title("Apps-release app")
     def test_release_app(self, del_all_app_release_log, go_to_app_page):
         app_release_address = "http://test.telpoai.com/apps/releases"
@@ -94,7 +94,6 @@ class TestAppPage:
         release_info = {"package_name": "APKEditor_1_7_2.apk", "sn": "A250900P03100019",
                         "silent": "Yes", "version": "1.7.2", "package": "com.gmail.heagoo.apkeditor.pro"}
         self.page.search_app_by_name(release_info["package_name"])
-
         app_list = self.page.get_apps_text_list()
         if len(app_list) == 0:
             assert False, "@@@@没有 %s, 请检查！！！" % release_info["package_name"]
@@ -103,6 +102,38 @@ class TestAppPage:
         # go to app release log
         self.page.go_to_new_address("apps/releases")
         self.page.check_release_log_info(release_info)
+
+    @allure.feature('MDM_test01')
+    @allure.title("Apps- uninstall app")
+    def test_uninstall_app(self, del_all_app_uninstall_release_log, go_to_app_page):
+        app_release_address = "http://test.telpoai.com/apps/releases"
+        app_upgrade_address = "http://test.telpoai.com/apps/logs"
+        release_info = {"package_name": "APKEditor_1_9_10.apk", "sn": "A250900P03100019",
+                        "silent": "Yes", "version": "1.9.10", "package": "com.gmail.heagoo.apkeditor.pro"}
+        self.page.search_app_by_name(release_info["package_name"])
+
+        app_list = self.page.get_apps_text_list()
+        if len(app_list) == 0:
+            assert False, "@@@@没有 %s, 请检查！！！" % release_info["package_name"]
+        self.page.click_uninstall_app_btn()
+        self.page.input_uninstall_app_info(release_info)
+
+        # go to app uninstall log
+        # self.page.go_to_new_address("apps/releases")
+        # self.page.check_release_log_info(release_info)
+
+    @allure.feature('MDM_test01')
+    @allure.title("Apps- release app again")
+    def test_send_release_app_again(self, go_to_app_release_log):
+        exp_release_success_text = "Sync App Release Success"
+        release_info = {"package_name": "APKEditor_1_9_10.apk", "sn": "A250900P03100019",
+                        "silent": "Yes", "version": "1.9.10", "package": "com.gmail.heagoo.apkeditor.pro"}
+        self.page.search_app_release_log(release_info)
+        if self.page.get_current_app_release_log_total() == 0:
+            assert False, "@@@@没有相应的release app log, 请检查！！！"
+        self.page.select_single_app_release_log()
+        text = self.page.click_send_release_again()
+        print(text)
 
 
 
