@@ -24,17 +24,14 @@ class TelpoMDMPage(BasePage):
     loc_system_btn = (By.LINK_TEXT, "System")
 
     def get_loc_main_title(self):
-        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_main_title))
         main_title = self.get_element(self.loc_main_title)
         act_main_title = main_title.text
         return act_main_title
 
     def click_devices_btn(self):
-        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_devices_page_btn))
         self.click(self.loc_devices_page_btn)
 
     def click_message_btn(self):
-        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_message_page_btn))
         self.click(self.loc_message_page_btn)
 
     def click_OTA_btn(self):

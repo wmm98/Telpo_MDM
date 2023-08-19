@@ -1,3 +1,4 @@
+from selenium.common import TimeoutException
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.select import Select
@@ -14,25 +15,52 @@ class BasePage:
     def quit_browser(self):
         self.driver.quit()
 
+    def comm_alert_fade(self, loc):
+        try:
+            self.web_driver_wait_until_not(EC.presence_of_element_located(loc), 10)
+            return True
+        except TimeoutException:
+            return False
+
+    def comm_alert_show(self, loc):
+        try:
+            self.web_driver_wait_until(EC.presence_of_element_located(loc), 10)
+            return True
+        except TimeoutException:
+            return False
+
+    def comm_confirm_alert_not_existed(self, alert_loc, ele_loc, ex_js=0):
+        now_time = time.time()
+        while True:
+            if self.comm_alert_fade(alert_loc):
+                break
+            else:
+                if ex_js == 1:
+                    self.exc_js_click_loc(ele_loc)
+                else:
+                    self.click(ele_loc)
+            if time.time() > self.return_end_time(now_time):
+                assert False, "@@@@弹窗无法关闭 出错， 请检查！！！"
+            time.sleep(1)
+
     def confirm_alert_not_existed(self, loc, ex_js=0):
-        print("====到这里来了")
+        now_time = time.time()
         while True:
             if self.alert_is_not_existed():
                 break
             else:
-                print("====else 里面")
-                # self.click(release_btn)
-            if ex_js == 1:
-                if self.alert_is_not_existed():
-                    break
-                self.exc_js_click_loc(loc)
-            else:
-                self.click(loc)
-                print("已经点击了")
-            if time.time() > self.return_end_time():
-                assert False, "@@@@弹窗无法关闭 出错， 请检查！！！"
+                if ex_js == 1:
+                    if self.alert_is_not_existed():
+                        break
+                    self.exc_js_click_loc(loc)
+                else:
+                    self.click(loc)
+                    print("已经点击了")
+                if time.time() > self.return_end_time(now_time):
+                    assert False, "@@@@弹窗无法关闭 出错， 请检查！！！"
 
     def confirm_alert_existed(self, loc, ex_js=0):
+        now_time = time.time()
         while True:
             if self.alert_is_existed():
                 break
@@ -42,7 +70,7 @@ class BasePage:
                 else:
                     self.click(loc)
             time.sleep(1)
-            if time.time() > self.return_end_time():
+            if time.time() > self.return_end_time(now_time):
                 assert False, "@@@@弹窗无法打开 出错， 请检查！！！"
 
     def alert_is_existed(self):
@@ -59,7 +87,7 @@ class BasePage:
 
     def ele_is_existed(self, loc):
         try:
-            self.driver.find_element(*loc)
+            self.get_element(loc)
             return True
         except Exception:
             return False
@@ -71,10 +99,9 @@ class BasePage:
         except Exception:
             return False
 
-    def return_end_time(self):
-        timeout = 180
+    def return_end_time(self, now_time, timeout=180):
         timedelta = 1
-        end_time = time.time() + timeout
+        end_time = now_time + timeout
         return end_time
 
     def move_and_click(self, ele):
@@ -98,13 +125,14 @@ class BasePage:
         self.driver.execute_script("arguments[0].click();", ele)
 
     def deal_ele_selected(self, ele):
+        now_time = time.time()
         while True:
             if self.ele_is_selected(ele):
                 break
             else:
                 self.exc_js_click(ele)
             time.sleep(1)
-            if time.time() > self.return_end_time():
+            if time.time() > self.return_end_time(now_time):
                 assert False, "@@@无法选中check box, 请检查！！！"
 
     def ele_is_selected(self, ele):

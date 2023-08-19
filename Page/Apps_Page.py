@@ -268,3 +268,5 @@ class APPSPage(TelpoMDMPage):
                     self.exc_js_click_loc(loc)
                 else:
                     self.click(loc)
+            if time.time() > self.return_end_time():
+                assert False, "@@@@弹窗无法关闭 出错， 请检查！！！"

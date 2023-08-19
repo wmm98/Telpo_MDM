@@ -47,6 +47,7 @@ class DevicesPage(TelpoMDMPage):
     loc_select_dev_mode = (By.ID, "Model")
     loc_save_dev_btn = (By.CSS_SELECTOR, "[class = 'btn btn-primary comfirm_create_device_button']")
     loc_close_dev_btn = (By.XPATH, "//*[@id=\"modal-add-device\"]/div/div/div[3]/button[1]")
+    loc_add_device_success_warning = (By.ID, "modal-warning-device-model")
     # 设备列表
     loc_devices_list = (By.ID, "device_list")
     loc_label = (By.TAG_NAME, "label")
@@ -111,6 +112,9 @@ class DevicesPage(TelpoMDMPage):
     loc_api_box = (By.ID, "new_api")
     loc_api_send_btn = (By.CSS_SELECTOR, "[class = 'btn btn-primary sure_update_server_api']")
 
+    # left bar
+    loc_left_bar = (By.CLASS_NAME, "col-md-3")
+
     def click_server_btn(self):
         self.web_driver_wait_until(EC.presence_of_element_located(self.lco_server_btn))
         self.click(self.lco_server_btn)
@@ -157,7 +161,7 @@ class DevicesPage(TelpoMDMPage):
         self.click(self.loc_sure_btn)
         self.alert_fade()
 
-    def get_warning_alert_text(self, text):
+    def get_reboot_warning_alert_text(self, text):
         if text in self.get_element(self.loc_warning).text:
             # print(self.get_element(self.loc_warning).text)
             self.refresh_page()
@@ -179,9 +183,8 @@ class DevicesPage(TelpoMDMPage):
         self.click(self.loc_unlock_btn)
 
     def search_device_by_sn(self, sn):
-        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_search_btn))
         self.click(self.loc_search_btn)
-        self.alert_show()
+        self.confirm_alert_existed(self.loc_search_btn)
         self.web_driver_wait_until(EC.presence_of_element_located(self.loc_search_input_box))
         self.web_driver_wait_until(EC.presence_of_element_located(self.loc_search_search_btn))
         self.input_text(self.loc_search_input_box, sn)
@@ -190,31 +193,29 @@ class DevicesPage(TelpoMDMPage):
         time.sleep(1)
         # ele_search = self.get_element(self.loc_search_search_btn)
         # self.exc_js_click(ele_search)
-        try:
-            self.alert_fade()
-        except Exception:
-            self.click(self.loc_search_search_btn)
-            self.alert_fade()
+        self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_search_search_btn)
+        # try:
+        #     self.alert_fade()
+        # except Exception:
+        #     self.click(self.loc_search_search_btn)
+        #     self.alert_fade()
 
     def click_send_btn(self):
-        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_msg_btn))
         self.click(self.loc_msg_btn)
+        self.confirm_alert_existed(self.loc_msg_btn)
 
     def msg_input_and_send(self, msg):
-        self.alert_show()
         self.input_text(self.loc_msg_input_box, msg)
         self.click(self.loc_msg_input_send_btn)
 
     def click_devices_list_btn(self):
-        self.web_driver_wait_until(EC.presence_of_element_located((self.loc_devices_list_btn)))
         self.click(self.loc_devices_list_btn)
 
     def click_import_btn(self):
-        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_import_btn))
         self.click(self.loc_import_btn)
+        self.confirm_alert_existed(self.loc_import_btn)
 
     def click_download_template_btn(self):
-        self.alert_show()
         # download,
         self.click(self.loc_download_template_btn)
         # need add step check if success to download
@@ -228,15 +229,14 @@ class DevicesPage(TelpoMDMPage):
         self.select_by_text(self.loc_import_model_btn, info['model'])
         time.sleep(3)
         self.click(self.loc_import_save_btn)
+        self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_import_save_btn)
 
     def click_new_btn(self):
-        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_new_btn))
         self.click(self.loc_new_btn)
-        self.alert_show()
+        self.confirm_alert_existed(self.loc_new_btn)
 
     def add_devices_info(self, dev_info):
         # name
-        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_input_dev_name))
         self.input_text(self.loc_input_dev_name, dev_info['name'])
         # SN
         self.input_text(self.loc_input_dev_SN, dev_info['SN'])
@@ -247,6 +247,35 @@ class DevicesPage(TelpoMDMPage):
         # 保存
         self.click(self.loc_save_dev_btn)
 
+    def get_add_dev_warning_alert(self):
+        flag = 0
+        now_time = time.time()
+        while True:
+            ele = self.get_element(self.loc_add_device_success_warning)
+            print(ele.get_attribute("style"))
+            if "block" in ele.get_attribute("style"):
+                flag += 1
+                break
+            if time.time() > now_time + 5:
+                break
+            time.sleep(1)
+
+        now_time = time.time()
+        if flag == 0:
+            print("运行到这里")
+            while True:
+                if not ("block" in self.get_element(self.loc_add_device_success_warning).get_attribute("style")):
+                    self.click(self.loc_save_dev_btn)
+                else:
+                    break
+                if time.time() > now_time + 5:
+                    assert False, "无法添加device, 请检查！！！"
+                time.sleep(1)
+
+    # another alert would appear when add device successfully, would conflict
+    def confirm_add_device_alert_fade_discard(self):
+        self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_save_dev_btn)
+
     def close_btn_add_dev_info(self):
         self.click(self.loc_close_dev_btn)
         self.alert_fade()
@@ -255,7 +284,6 @@ class DevicesPage(TelpoMDMPage):
     def get_dev_info_list(self):
         try:
             devices_list = []
-            self.web_driver_wait_until(EC.presence_of_element_located(self.loc_devices_list))
             eles = self.get_element(self.loc_devices_list)
             tr_eles = eles.find_elements(*self.loc_tr)
             for tr_ele in tr_eles:
@@ -270,7 +298,6 @@ class DevicesPage(TelpoMDMPage):
     # return length of devices_list
     def get_dev_info_length(self):
         try:
-            self.web_driver_wait_until(EC.presence_of_element_located(self.loc_devices_list))
             eles = self.get_element(self.loc_devices_list)
             tr_eles = eles.find_elements(*self.loc_tr)
             return len(tr_eles)
@@ -280,12 +307,14 @@ class DevicesPage(TelpoMDMPage):
     def select_all_devices(self):
         ele = self.web_driver_wait_until(EC.presence_of_element_located(self.loc_check_all))
         self.exc_js_click(ele)
+        self.deal_ele_selected(ele)
         return ele
 
     def select_device(self, device_sn):
         loc = (By.ID, device_sn)
         ele = self.web_driver_wait_until(EC.presence_of_element_located(loc))
         self.exc_js_click(ele)
+        self.deal_ele_selected(ele)
         return ele
 
     def check_ele_is_selected(self, ele):
@@ -297,7 +326,6 @@ class DevicesPage(TelpoMDMPage):
             self.web_driver_wait_until_not(EC.element_to_be_selected(ele))
 
     def get_devices_list_label_text_discard(self):
-        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_devices_list))
         devices = self.get_element(self.loc_devices_list)
         label_eles = devices.find_elements(*self.loc_label)
         text = [label_ele.text for label_ele in label_eles]
@@ -305,33 +333,37 @@ class DevicesPage(TelpoMDMPage):
 
     # check if alert would disappear
     def alert_fade(self):
-        self.web_driver_wait_until_not(EC.presence_of_element_located(self.loc_alert_show), 6)
+        self.web_driver_wait_until_not(EC.presence_of_element_located(self.loc_alert_show), 10)
 
     # check if alert would appear
     def alert_show(self):
-        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_alert_show), 6)
+        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_alert_show), 10)
 
     # add single device
     def get_models_list(self):
-        try:
-            self.web_driver_wait_until(EC.presence_of_all_elements_located(self.loc_models_box))
+        if self.ele_is_existed(self.loc_models_box):
             eles = self.get_elements(self.loc_models_box)
             models_list = [ele.text for ele in eles]
-            print(models_list)
+            # print(models_list)
             return models_list
-        except TimeoutException:
+        else:
             return []
 
     # get all categories
     def get_categories_list(self):
-        try:
-            self.web_driver_wait_until(EC.presence_of_all_elements_located(self.loc_cate_box))
+        if self.ele_is_existed(self.loc_cate_box):
             eles = self.get_elements(self.loc_cate_box)
             cates_list = [ele.text for ele in eles]
             print(cates_list)
             return cates_list
-        except TimeoutException:
+        else:
             return []
+
+    def category_is_existed(self, cate):
+        if cate in self.get_categories_list():
+            return True
+        else:
+            return False
 
     # find cate element
     def find_category(self):
@@ -343,34 +375,43 @@ class DevicesPage(TelpoMDMPage):
 
     # click [Create New Category] btn
     def click_category(self):
-        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_category_btn))
         self.click(self.loc_category_btn)
+        self.confirm_alert_existed(self.loc_save_btn_cate)
 
     # add category
     def add_category(self, cate_name):
-        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_input_cate_box))
         self.input_text(self.loc_input_cate_box, cate_name)
         self.click(self.loc_save_btn_cate)
 
+    def confirm_add_category_box_fade(self):
+        self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_save_btn_cate)
+
     # click [Create New Model] btn
     def click_model(self):
-        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_mode_btn))
         self.click(self.loc_mode_btn)
+        self.confirm_alert_existed(self.loc_mode_btn)
 
     # add model
     def add_model(self, model_name):
-        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_input_mode_box))
         self.input_text(self.loc_input_mode_box, model_name)
         self.click(self.loc_save_btn_mode)
 
+    def confirm_add_model_box_fade(self):
+        self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_save_btn_cate)
+
     def close_btn_mode(self):
-        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_close_btn_mode))
         self.click(self.loc_close_btn_mode)
 
     def close_btn_cate(self):
-        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_close_btn_cate))
         self.click(self.loc_close_btn_cate)
 
     # get devices page alert text
     def get_alert_text(self):
+        # 1: tip_box is existed, 2:tip_box
+        # try:
+        #     tips_box = self.web_driver_wait_until(EC.presence_of_element_located(self.loc_cate_name_existed), 5)
+        #     text = tips_box.text
+        #     return text
+        # except TimeoutException:
+        #     return False
         return self.web_driver_wait_until(EC.presence_of_element_located(self.loc_cate_name_existed)).text

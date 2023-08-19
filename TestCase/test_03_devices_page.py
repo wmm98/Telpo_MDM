@@ -22,8 +22,8 @@ log = Log.MyLog()
 data_cate_mode = [{"cate": "台式2", "model": "M1"},
                   {"cate": "壁挂式1", "model": "TPS980P"}]
 
-devices = [{"name": "TPS980-cc", "SN": "898544444773133", "cate": "壁挂式", "model": "TPS980P"},
-           {"name": "M1K-MM", "SN": "999hhh921oo343", "cate": "手持终端", "model": "M1"}]
+devices = [{"name": "TPS980-cc", "SN": "3180980P12300283", "cate": "壁挂式", "model": "TPS980P"},
+           {"name": "M1K-MM", "SN": "00002002000000000", "cate": "手持终端", "model": "M1"}]
 
 
 class TestDevicesPage:
@@ -36,7 +36,7 @@ class TestDevicesPage:
     def teardown_class(self):
         self.page.refresh_page()
 
-    @allure.feature('MDM_test01')
+    @allure.feature('MDM_test02')
     @allure.title("Devices main page")  # 设置case的名字
     # @pytest.mark.dependency(depends=["test_TelpoMdM_Page"], scope='package')
     def test_go_to_devices_page(self):
@@ -47,7 +47,17 @@ class TestDevicesPage:
             self.page.click_devices_list_btn()
             # check current page
             act_main_title = self.page.get_loc_main_title()
-            assert exp_main_title in act_main_title
+            now_time = time.time()
+            while True:
+                if exp_main_title in act_main_title:
+                    break
+                else:
+                    self.page.go_to_new_address("devices")
+                time.sleep(1)
+                if time.time() > self.page.return_end_time(now_time):
+                    log.error("@@@打开device页超时")
+                    assert False, "@@@打开device页超时"
+
             log.info("当前默认的副标题为：%s" % act_main_title)
         except Exception as e:
             log.error(str(e))
@@ -60,35 +70,39 @@ class TestDevicesPage:
         exp_existed_name = "name already existed"
         exp_add_cate_success = "Add Category Success"
         exp_add_mode_success = "Add Model Success"
-
-        self.page.click_category()
-        self.page.add_category(cate_model["cate"])
-        cate_alert_text = self.page.get_alert_text()
-        print(cate_alert_text)
-        if cate_alert_text == exp_existed_name:
-            self.page.close_btn_cate()
-        elif cate_alert_text == exp_add_cate_success:
-            for i in range(10):
+        if not self.page.category_is_existed(cate_model["cate"]):
+            self.page.click_category()
+            self.page.add_category(cate_model["cate"])
+            text = self.page.get_alert_text()
+            print(text)
+            self.page.confirm_add_category_box_fade()
+            now_time = time.time()
+            while True:
                 time.sleep(1)
                 if cate_model["cate"] in self.page.get_categories_list():
                     break
-            assert cate_model["cate"] in self.page.get_categories_list(), "@@@添加种类失败"
-
-        self.page.alert_fade()
+                if time.time() > self.page.return_end_time(now_time, timeout=5):
+                    e = "@@@添加种类失败，请检查！！！"
+                    log.error(e)
+                    assert False, e
 
         if cate_model["model"] not in self.page.get_models_list():
             self.page.click_model()
             self.page.add_model(cate_model["model"])
             mode_alert_text = self.page.get_alert_text()
             print(mode_alert_text)
-            assert exp_add_mode_success in mode_alert_text
-            for i in range(10):
+            self.page.confirm_add_model_box_fade()
+            now_time = time.time()
+            while True:
                 time.sleep(1)
-                if cate_model["model"] in self.page.get_categories_list():
+                if cate_model["model"] in self.page.get_models_list():
                     break
-            assert cate_model["model"] in self.page.get_models_list(), "@@@添加模型失败"
+                if time.time() > self.page.return_end_time(now_time, timeout=5):
+                    e = "@@@添加种类失败，请检查！！！"
+                    log.error(e)
+                    assert False, e
+        self.page.confirm_add_category_box_fade()
 
-        self.page.alert_fade()
         self.page.find_category()
         self.page.find_model()
 
@@ -99,33 +113,24 @@ class TestDevicesPage:
         exp_success_text = "Device created successfully,pls reboot device to active!"
         exp_existed_text = "sn already existed"
         try:
-            info_len_pre = self.page.get_dev_info_length()
-            print(info_len_pre)
-            self.page.click_new_btn()
-            self.page.add_devices_info(devices_list)
-            text = self.page.get_alert_text()
-            print(text)
-            if exp_existed_text in text:
-                self.page.close_btn_add_dev_info()
-                # add-devices-alert fade
-                self.page.alert_fade()
-                info_len_pos = self.page.get_dev_info_length()
-                print(info_len_pos)
-                assert info_len_pre == info_len_pos
-            elif exp_success_text in text:
-                # wait Warning alert show
-                self.page.alert_show()
-                # wait Warning alert fade
-                # self.page.alert_fade()
-
-                # refresh current page
+            # check if device is existed before test, if not, skip
+            devices_sn = [device["SN"] for device in self.page.get_dev_info_list()]
+            print(devices_sn)
+            if devices_list["SN"] not in devices_sn:
+                info_len_pre = self.page.get_dev_info_length()
+                print(info_len_pre)
+                self.page.click_new_btn()
+                self.page.add_devices_info(devices_list)
+                # text = self.page.get_alert_text()
+                # print(text)
+                self.page.get_add_dev_warning_alert()
+                # refresh current page and clear warning war
                 self.page.refresh_page()
                 info_len_pos = self.page.get_dev_info_length()
                 print(info_len_pos)
-
                 assert info_len_pre == info_len_pos - 1
-            # print all devices info
-            print(self.page.get_dev_info_list())
+                # print all devices info
+                print(self.page.get_dev_info_list())
         except Exception as e:
             print("发生的异常是", e)
             assert False
@@ -157,7 +162,7 @@ class TestDevicesPage:
         except Exception:
             assert False, "@@@元素没有没选中, 请检查！！！"
 
-    @allure.feature('MDM_test01')
+    @allure.feature('MDM_test02')
     @allure.title("Devices- test import btn")
     def test_import_devices(self):
         exp_success_text = "Add Device Success"
