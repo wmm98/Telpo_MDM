@@ -1,5 +1,6 @@
 from selenium.common import TimeoutException
 from Conf.Config import Config
+from Common import Log
 from Page.Telpo_MDM_Page import TelpoMDMPage
 from selenium.webdriver import Keys
 from selenium.webdriver.common.by import By
@@ -7,6 +8,7 @@ from selenium.webdriver.support import expected_conditions as EC
 import os
 import time
 
+log = Log.MyLog()
 
 class MessagePage(TelpoMDMPage):
     def __init__(self, driver, times):
@@ -25,8 +27,10 @@ class MessagePage(TelpoMDMPage):
     loc_li_sn = (By.TAG_NAME, "li")
 
     # messages list relate
+    loc_message_item = (By.CLASS_NAME, "time-message")
     loc_message_box = (By.CLASS_NAME, "message")
     loc_msg_info = (By.TAG_NAME, "div")
+    loc_msg_time = (By.TAG_NAME, "span")
     # loc_message_text = (By.CLASS_NAME, "text")
     # loc_message_status = (By.CSS_SELECTOR, "[class = 'status text-danger']")
 
@@ -74,15 +78,29 @@ class MessagePage(TelpoMDMPage):
             assert False, "@@@@展开menu失败！！！， 请检查！！！"
 
     def get_device_message_list(self, length):
-        self.web_driver_wait_until(EC.presence_of_all_elements_located(self.loc_message_box))
-        message_boxes = self.get_elements(self.loc_message_box)[:length]
-        print(message_boxes)
-        print(len(message_boxes))
+        print("0000000000000000000000000000000")
+        messages = self.get_elements(self.loc_message_item)[:length]
+        print(messages)
         message_list = []
-        for box in message_boxes:
-            msg_total = box.find_elements(*self.loc_msg_info)
-            msg_text = msg_total[0].text
-            msg_status = msg_total[1].text
-            message = {"message": msg_text, "status": msg_status}
-            message_list.append(message)
+        for message in messages:
+            msg = message.find_element(self.loc_message_box).find_elements(*self.loc_msg_info)
+            # log.info(msg.text)
+            print("111111", msg.text)
+
+            text = msg[0].text
+            status = msg[1].text
+            send_time = message.find_element(*self.loc_msg_time)
+            time_line = send_time.text
+            msg_list = {"message": text, "status": status, "time": time_line}
+            message_list.append(msg_list)
+        # message_boxes = self.get_elements(self.loc_message_box)[:length]
+        # print(message_boxes)
+        # print(len(message_boxes))
+        # message_list = []
+        # for box in message_boxes:
+        #     msg_total = box.find_elements(*self.loc_msg_info)
+        #     msg_text = msg_total[0].text
+        #     msg_status = msg_total[1].text
+        #     message = {"message": msg_text, "status": msg_status}
+        #     message_list.append(message)
         return message_list

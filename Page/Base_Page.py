@@ -197,14 +197,3 @@ class BasePage:
         al = self.driver.switch_to.alert
         return al
 
-    def alert_input_text(self, al, text):
-        al.send_keys(text)
-
-    def accept_alert(self, al):
-        al.accept()
-
-    def dismiss_alert(self, al):
-        al.dismiss()
-
-        # d = webdriver.Chrome()
-        # al = d.switch_to.alert

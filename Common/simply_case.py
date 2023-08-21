@@ -1,11 +1,7 @@
 from utils.base_web_driver import BaseWebDriver
-import pytest
 from Common import Log
 from Page.Devices_Page import DevicesPage
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.wait import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium import webdriver
+
 
 log = Log.MyLog()
 

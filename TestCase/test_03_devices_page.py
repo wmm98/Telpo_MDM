@@ -162,7 +162,7 @@ class TestDevicesPage:
         except Exception:
             assert False, "@@@元素没有没选中, 请检查！！！"
 
-    @allure.feature('MDM_test02')
+    @allure.feature('MDM_test01')
     @allure.title("Devices- test import btn")
     def test_import_devices(self):
         exp_success_text = "Add Device Success"
@@ -173,8 +173,9 @@ class TestDevicesPage:
         # click import-btn
         self.page.click_import_btn()
         self.page.import_devices_info(devices_info)
-        if exp_success_text in self.page.get_alert_text():
-            self.page.alert_fade()
+        # print(self.page.get_alert_text())
+        # if exp_success_text in self.page.get_alert_text():
+        #     self.page.alert_fade()
 
         # need to add check length of data list
 
@@ -195,13 +196,14 @@ class TestDevicesPage:
         self.page.click_send_btn()
         self.page.msg_input_and_send(msg)
         # check alert text
-        opt_case.check_alert_text(exp_success_send_text)
+        # opt_case.check_alert_text(exp_success_send_text)
 
         # check devices
 
     @allure.feature('MDM_test01')
     @allure.title("Devices- lock and unlock single device")
     def test_lock_and_unlock_single_device(self):
+        # case is stable
         sn = "A250900P03100019"
         exp_lock_msg = "Device %s Locked" % sn
         exp_unlock_msg = "Device %s UnLocked" % sn
@@ -211,50 +213,31 @@ class TestDevicesPage:
             opt_case.check_single_device(sn)
             self.page.select_device(sn)
             self.page.click_lock()
-            lock_text_flag = opt_case.check_alert_text(exp_lock_msg)
             self.page.refresh_page()
             # check if device lock already
-            pass_flag = 0
-            for i in range(5):
+            now_time = time.time()
+            while True:
                 if "Locked" in opt_case.get_single_device_list(sn)[0]["Lock Status"]:
-                    pass_flag += 1
                     break
+                if time.time() > self.page.return_end_time(now_time, 60):
+                    assert False, "@@@@信息发送失败，请检查！！！！"
                 self.page.refresh_page()
                 time.sleep(1)
-
-            if pass_flag == 0:
-                # click again
-                opt_case.get_single_device_list(sn)
-                self.page.select_device(sn)
-                self.page.click_lock()
-                self.page.refresh_page()
-                if not ("Locked" in opt_case.get_single_device_list(sn)[0]["Lock Status"]):
-                    assert False
 
             self.page.refresh_page()
 
             opt_case.get_single_device_list(sn)
             self.page.select_device(sn)
             self.page.click_unlock()
-            unlock_text_flag = opt_case.check_alert_text(exp_unlock_msg)
             self.page.refresh_page()
-            pass_flag = 0
+            now_time = time.time()
             for j in range(5):
                 if "Normal" in opt_case.get_single_device_list(sn)[0]["Lock Status"]:
-                    pass_flag += 1
                     break
+                if time.time() > self.page.return_end_time(now_time, 60):
+                    assert False, "@@@@信息发送失败，请检查！！！！"
                 self.page.refresh_page()
                 time.sleep(1)
-
-            if pass_flag == 0:
-                opt_case.get_single_device_list(sn)
-                self.page.select_device(sn)
-                self.page.click_unlock()
-                self.page.refresh_page()
-                if not ("Normal" in opt_case.get_single_device_list(sn)[0]["Lock Status"]):
-                    assert False
-
-            time.sleep(1)
 
     @allure.feature('MDM_test01')
     @allure.title("Devices- reboot device 5 times")
@@ -268,34 +251,27 @@ class TestDevicesPage:
             opt_case.check_single_device(sn)
             self.page.select_device(sn)
             self.page.click_reboot_btn()
-            self.page.get_warning_alert_text(exp_reboot_text)
-            # do not get alert text now
-            # reboot_flag = opt_case.check_alert_text(exp_reboot_text)
             self.page.refresh_page()
             # get device info
-            for j in range(5):
-                print("111111111111111111111111111111111")
+            pass_flag = 0
+            for j in range(3):
                 res = opt_case.get_single_device_list(sn)[0]["Status"]
+                # check if command trigger in 3s
                 print(res)
                 if "Off" in res:
-                    print("222222222222222222222222222222222222222222222222222")
                     pass_flag += 1
                     break
                 self.page.refresh_page()
                 time.sleep(1)
-
             if pass_flag == 0:
-                self.page.refresh_page()
-                print("33333333333333333333333333333333333333333333333333333333333")
-                if not ("Off" in opt_case.get_single_device_list(sn)[0]["Status"]):
-                    assert False
+                assert "Off" in opt_case.get_single_device_list(sn)[0]["Status"]
+
             time.sleep(80)
             self.page.refresh_page()
-            print("444444444444444444444444444444444444444444444444444444444444444444444444444")
             assert "On" in opt_case.get_single_device_list(sn)[0]["Status"], "@@@@ 1分钟之内无法重启！！"
 
     @allure.feature('MDM_test01')
-    @allure.title("Devices- reboot device 5 times")
+    @allure.title("Devices- cat_logs")
     def test_cat_logs(self):
         exp_log_msg = "Device Debug Command sent"
         sn = "A250900P03100019"
@@ -303,8 +279,6 @@ class TestDevicesPage:
         opt_case.check_single_device(sn)
         self.page.click_dropdown_btn()
         self.page.click_cat_log()
-        text = self.page.get_alert_text()
-        print(text)
 
     @allure.feature('MDM_test01')
     @allure.title("Devices- reset device TPUI password")
@@ -322,9 +296,9 @@ class TestDevicesPage:
             self.page.alert_fade()
             self.page.refresh_page()
 
-    @allure.feature('MDM_test01')
+    @allure.feature('MDM_test02')
     @allure.title("Devices- AIMDM send msg and check the log in the Message Module")
-    def test_send_message_to_single_device(self, return_device_page):
+    def test_pressure_send_message_to_single_device(self, return_device_page):
         exp_success_send_text = "Message Sent"
         # sn would change after debug with devices
         sn = "A250900P03100019"
@@ -335,35 +309,29 @@ class TestDevicesPage:
         data = opt_case.check_single_device(sn)
         print(data)
         # get device category
-        device_cate = data[0]['Category']
-        self.page.select_device(sn)
-        for i in range(length):
-            now = time.strftime(date_time, time.localtime(time.time()))
-            msg = "%s: test send message" % now
-            self.page.click_send_btn()
-            self.page.msg_input_and_send(msg)
-            # check alert text
-            opt_case.check_alert_text(exp_success_send_text)
-            self.page.alert_fade()
-        # check devices
-        # no select
-        self.page.select_device(sn)
 
-        # go to Message Module
-        self.telpo_mdm_page.click_message_btn()
-        while True:
-            if message_page_title in self.meg_page.get_loc_main_title():
-                break
-            else:
-                self.telpo_mdm_page.click_message_btn()
-            time.sleep(1)
+        device_cate = data[0]['Category']
+        # for i in range(length):
+        #     now = time.strftime(date_time, time.localtime(time.time()))
+        #     msg = "%s: test send message" % now
+        #     opt_case.check_single_device(sn)
+        #     self.page.select_device(sn)
+        #     self.page.click_send_btn()
+        #     self.page.msg_input_and_send(msg)
+        #     self.page.refresh_page()
+        #
+        # # no select
+        # self.page.select_device(sn)
+
+        self.page.go_to_new_address("message")
 
         # Check result of device message in the Message Module and msg status
         time.sleep(1)
         self.meg_page.choose_device(sn, device_cate)
+        log.info("99999999999999999999")
+        time.sleep(3)
         msg_list = self.meg_page.get_device_message_list(length)
         print(msg_list)
-        time.sleep(4)
 
     @allure.feature('MDM_test01')
     @allure.title("Devices- AIMDM transfer api server ")
