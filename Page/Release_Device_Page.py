@@ -48,12 +48,13 @@ class ReleaseDevicePage(DevicesPage, MDMPage):
 
     def go_to_device_page(self, top_title):
         self.click_devices_btn()
+        now_time = time.time()
         while True:
             if top_title in self.get_loc_main_title():
                 break
             else:
                 self.click_devices_btn()
-            if time.time() > self.return_end_time():
+            if time.time() > self.return_end_time(now_time):
                 e = "@@@@ 3分钟内多次加载页面， 加载失败， 请检查！！！"
                 log.error(e)
                 assert False, e

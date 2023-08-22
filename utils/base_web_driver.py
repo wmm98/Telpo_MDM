@@ -1,4 +1,5 @@
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 
 
 class BaseWebDriver:
@@ -7,7 +8,13 @@ class BaseWebDriver:
 
     def open_web_site(self, url):
         global driver
-        driver = webdriver.Chrome()
+
+        chrome_options = Options()
+        chrome_options.add_argument("--allow-insecure-localhost")  # 允许访问不安全的本地主机（可选）
+        chrome_options.add_argument("--ignore-certificate-errors")  # 忽略证书错误
+        driver = webdriver.Chrome(chrome_options=chrome_options)
+
+        # driver = webdriver.Chrome()
         driver.implicitly_wait(5)
         driver.maximize_window()
         # url = 'http://test.telpoai.com/login'

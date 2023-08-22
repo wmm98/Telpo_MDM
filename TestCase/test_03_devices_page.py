@@ -331,7 +331,7 @@ class TestDevicesPage:
                 assert False, "@@@终端收到信息后, 平台180s内无法收到相应的信息"
         print(msg_list)
 
-    @allure.feature('MDM_test01')
+    @allure.feature('MDM_test02')
     @allure.title("Devices- AIMDM transfer api server ")
     def test_transfer_api_server(self):
         exp_success_msg = "Updated Device Setting"
@@ -387,7 +387,7 @@ class TestDevicesPage:
         # if release_data_list[0]["Status"] == "Off":
         #     assert False
 
-    @allure.feature('MDM_test02')
+    @allure.feature('MDM_test01')
     @allure.title("Devices- device shutdown -- test in the last")
     def test_device_shutdown(self):
         sn = "A250900P03100019"
