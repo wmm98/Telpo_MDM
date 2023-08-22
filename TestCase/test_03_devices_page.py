@@ -302,7 +302,7 @@ class TestDevicesPage:
         exp_success_send_text = "Message Sent"
         # sn would change after debug with devices
         sn = "A250900P03100019"
-        length = 1
+        length = 10
         # confirm if device is online and execute next step, if not, end the case execution
         data = opt_case.check_single_device(sn)
         print(data)
@@ -320,20 +320,19 @@ class TestDevicesPage:
             message_list.append(msg)
 
         self.page.go_to_new_address("message")
-        time.sleep(2)
         # Check result of device message in the Message Module and msg status
         self.meg_page.choose_device(sn, device_cate)
         now_time = time.time()
-        try:
-            while True:
-                msg_list = self.meg_page.get_device_message_list(now)
-                if len(msg_list) == length:
-                    break
-                if time.time() > self.page.return_end_time(now_time, 180):
-                    assert False, "@@@终端收到信息后, 平台180s内无法收到相应的信息"
-            print(msg_list)
-        except Exception as e:
-            print("e", e)
+        # res = self.meg_page.get_device_message_list(now)
+        # print(res)
+        # try:
+        while True:
+            msg_list = self.meg_page.get_device_message_list(now)
+            if len(msg_list) == length:
+                break
+            if time.time() > self.page.return_end_time(now_time):
+                assert False, "@@@终端收到信息后, 平台180s内无法收到相应的信息"
+        print(msg_list)
 
     @allure.feature('MDM_test01')
     @allure.title("Devices- AIMDM transfer api server ")

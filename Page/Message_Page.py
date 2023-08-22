@@ -1,4 +1,4 @@
-from selenium.common import TimeoutException
+from selenium.common import TimeoutException, StaleElementReferenceException
 from Conf.Config import Config
 from Common import Log
 from Page.Telpo_MDM_Page import TelpoMDMPage
@@ -82,24 +82,42 @@ class MessagePage(TelpoMDMPage):
             assert False, "@@@@展开menu失败！！！， 请检查！！！"
 
     def get_device_message_list(self, send, length=0):
-        # try:
-        if self.ele_is_existed(self.loc_message_item):
-            messages = self.get_elements(self.loc_message_item)[:10]
-            message_list = []
-            for message in messages:
-                msg = message.find_element(*self.loc_message_box).find_elements(*self.loc_msg_info)
-                text = msg[0].text
-                status = msg[1].text
-                send_time = message.find_element(*self.loc_msg_time)
-                time_line = send_time.text
-                f_time = self.format_string_time(self.extract_integers(time_line))
-                print(f_time)
-                if self.compare_time(send, f_time):
-                    msg_list = {"message": text, "status": status, "time": f_time}
-                    print(msg_list)
-                    message_list.append(msg_list)
-            return message_list
-        else:
-            return []
+        try:
+            if self.ele_is_existed(self.loc_message_item):
+                self.web_driver_wait_until(EC.presence_of_all_elements_located(self.loc_message_box))
+                messages = self.get_elements(self.loc_message_item)
+                # print(messages)
+                message_list = []
+                for message in messages:
+                    msg = message.find_element(*self.loc_message_box).find_elements(*self.loc_msg_info)
+                    text = msg[0].text
+                    status = msg[1].text
+                    send_time = message.find_element(*self.loc_msg_time)
+                    time_line = send_time.text
+                    f_time = self.format_string_time(self.extract_integers(time_line))
+                    if self.compare_time(send, f_time):
+                        msg_list = {"message": text, "status": status, "time": f_time}
+                        message_list.append(msg_list)
+                return message_list
+        except StaleElementReferenceException:
+            print("******************再次定位获取刷新的元素**********************************")
+            if self.ele_is_existed(self.loc_message_item):
+                self.web_driver_wait_until(EC.presence_of_all_elements_located(self.loc_message_box))
+                messages = self.get_elements(self.loc_message_item)
+                # print(messages)
+                message_list = []
+                for message in messages:
+                    msg = message.find_element(*self.loc_message_box).find_elements(*self.loc_msg_info)
+                    text = msg[0].text
+                    status = msg[1].text
+                    send_time = message.find_element(*self.loc_msg_time)
+                    time_line = send_time.text
+                    f_time = self.format_string_time(self.extract_integers(time_line))
+                    if self.compare_time(send, f_time):
+                        msg_list = {"message": text, "status": status, "time": f_time}
+                        message_list.append(msg_list)
+                return message_list
+        # else:
+        #     return []
         # except Exception:
         #     return []
