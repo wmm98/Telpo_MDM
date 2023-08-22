@@ -35,6 +35,10 @@ class MessagePage(TelpoMDMPage):
     # loc_message_status = (By.CSS_SELECTOR, "[class = 'status text-danger']")
 
     def choose_device(self, sn, cate):
+        # wait drop down open, for stability
+        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_drop_down_menu_open))
+        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_drop_down_menu_open))
+
         device_list = self.web_driver_wait_until(EC.presence_of_element_located(self.loc_device_list))
         self.web_driver_wait_until(EC.presence_of_element_located(self.loc_li_sn))
         # devices_sn = device_list.find_elements(*self.loc_li_sn)
@@ -77,30 +81,25 @@ class MessagePage(TelpoMDMPage):
         if flag == 0:
             assert False, "@@@@展开menu失败！！！， 请检查！！！"
 
-    def get_device_message_list(self, length):
-        print("0000000000000000000000000000000")
-        messages = self.get_elements(self.loc_message_item)[:length]
-        print(messages)
-        message_list = []
-        for message in messages:
-            msg = message.find_element(self.loc_message_box).find_elements(*self.loc_msg_info)
-            # log.info(msg.text)
-            print("111111", msg.text)
-
-            text = msg[0].text
-            status = msg[1].text
-            send_time = message.find_element(*self.loc_msg_time)
-            time_line = send_time.text
-            msg_list = {"message": text, "status": status, "time": time_line}
-            message_list.append(msg_list)
-        # message_boxes = self.get_elements(self.loc_message_box)[:length]
-        # print(message_boxes)
-        # print(len(message_boxes))
-        # message_list = []
-        # for box in message_boxes:
-        #     msg_total = box.find_elements(*self.loc_msg_info)
-        #     msg_text = msg_total[0].text
-        #     msg_status = msg_total[1].text
-        #     message = {"message": msg_text, "status": msg_status}
-        #     message_list.append(message)
-        return message_list
+    def get_device_message_list(self, send, length=0):
+        # try:
+        if self.ele_is_existed(self.loc_message_item):
+            messages = self.get_elements(self.loc_message_item)[:10]
+            message_list = []
+            for message in messages:
+                msg = message.find_element(*self.loc_message_box).find_elements(*self.loc_msg_info)
+                text = msg[0].text
+                status = msg[1].text
+                send_time = message.find_element(*self.loc_msg_time)
+                time_line = send_time.text
+                f_time = self.format_string_time(self.extract_integers(time_line))
+                print(f_time)
+                if self.compare_time(send, f_time):
+                    msg_list = {"message": text, "status": status, "time": f_time}
+                    print(msg_list)
+                    message_list.append(msg_list)
+            return message_list
+        else:
+            return []
+        # except Exception:
+        #     return []

@@ -304,7 +304,6 @@ class DevicesPage(TelpoMDMPage):
             devices_list = []
             eles = self.get_element(self.loc_devices_list)
             tr_eles = eles.find_elements(*self.loc_tr)
-            print("运行到这里")
             for tr_ele in tr_eles:
                 td_eles = tr_ele.find_elements(*self.loc_td)[1:8]
                 devices_list.append({"Name": td_eles[0].text, "Category": td_eles[2].text, "Model": td_eles[3].text,

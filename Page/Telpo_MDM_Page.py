@@ -90,13 +90,14 @@ class TelpoMDMPage(BasePage):
     def go_to_new_address(self, url):
         address = "http://test.telpoai.com/%s" % url
         self.driver.get(address)
+        now_time = time.time()
         if self.driver.current_url != address:
             while True:
                 if self.driver.current_url == address:
                     break
                 else:
                     self.driver.get(address)
-                if time.time() > self.return_end_time():
+                if time.time() > self.return_end_time(now_time):
                     assert False, "@@@打开 %s 失败， 请检查！！！" % address
                 time.sleep(1)
 

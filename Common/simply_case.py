@@ -19,7 +19,7 @@ class Optimize_Case:
             e = "@@@@还没有添加该设备 %s， 请检查！！！" % sn
             log.error(e)
             assert False, e
-        if devices_list[0]["Status"] == "Off":
+        if devices_list[0]["Status"].strip() == "Off":
             err = "@@@@%s: 设备不在线， 请检查！！！" % sn
             log.error(err)
             assert False, err

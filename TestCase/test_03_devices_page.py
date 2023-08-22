@@ -302,36 +302,38 @@ class TestDevicesPage:
         exp_success_send_text = "Message Sent"
         # sn would change after debug with devices
         sn = "A250900P03100019"
-        length = 3
-        date_time = '%Y-%m-%d %H:%M:%S'
-        message_page_title = "Device Message"
+        length = 1
         # confirm if device is online and execute next step, if not, end the case execution
         data = opt_case.check_single_device(sn)
         print(data)
         # get device category
-
         device_cate = data[0]['Category']
-        # for i in range(length):
-        #     now = time.strftime(date_time, time.localtime(time.time()))
-        #     msg = "%s: test send message" % now
-        #     opt_case.check_single_device(sn)
-        #     self.page.select_device(sn)
-        #     self.page.click_send_btn()
-        #     self.page.msg_input_and_send(msg)
-        #     self.page.refresh_page()
-        #
-        # # no select
-        # self.page.select_device(sn)
+        now = time.strftime('%Y-%m-%d %H:%M', time.localtime(time.time()))
+        message_list = []
+        for i in range(length):
+            self.page.refresh_page()
+            msg = "%s: test send message %d" % (now, i)
+            opt_case.check_single_device(sn)
+            self.page.select_device(sn)
+            self.page.click_send_btn()
+            self.page.msg_input_and_send(msg)
+            message_list.append(msg)
 
         self.page.go_to_new_address("message")
-
+        time.sleep(2)
         # Check result of device message in the Message Module and msg status
-        time.sleep(1)
         self.meg_page.choose_device(sn, device_cate)
-        log.info("99999999999999999999")
-        time.sleep(3)
-        msg_list = self.meg_page.get_device_message_list(length)
-        print(msg_list)
+        now_time = time.time()
+        try:
+            while True:
+                msg_list = self.meg_page.get_device_message_list(now)
+                if len(msg_list) == length:
+                    break
+                if time.time() > self.page.return_end_time(now_time, 180):
+                    assert False, "@@@终端收到信息后, 平台180s内无法收到相应的信息"
+            print(msg_list)
+        except Exception as e:
+            print("e", e)
 
     @allure.feature('MDM_test01')
     @allure.title("Devices- AIMDM transfer api server ")

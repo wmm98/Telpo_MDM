@@ -1,3 +1,5 @@
+from datetime import datetime
+import re
 from selenium.common import TimeoutException
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.common.action_chains import ActionChains
@@ -196,4 +198,31 @@ class BasePage:
     def switch_to_alert(self):
         al = self.driver.switch_to.alert
         return al
+
+    def extract_integers(self, text):
+        pattern = r"\d+"
+        integers = re.findall(pattern, text)
+        if len(integers) != 0:
+            return [int(inter) for inter in integers]
+        else:
+            return integers
+
+    def format_string_time(self, time_list):
+        format_time = "%d-%d-%d %d:%d" % (time_list[2], time_list[0], time_list[1], time_list[3], time_list[4])
+        return format_time
+
+    def compare_time(self, time1, time2):
+        dt1 = datetime.strptime(time1, "%Y-%m-%d %H:%M")
+        dt2 = datetime.strptime(time2, "%Y-%m-%d %H:%M")
+        if dt1 <= dt2:
+            return True
+        else:
+            return False
+
+
+
+
+
+
+
 
