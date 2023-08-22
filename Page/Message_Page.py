@@ -117,7 +117,5 @@ class MessagePage(TelpoMDMPage):
                         msg_list = {"message": text, "status": status, "time": f_time}
                         message_list.append(msg_list)
                 return message_list
-        # else:
-        #     return []
-        # except Exception:
-        #     return []
+            else:
+                return []

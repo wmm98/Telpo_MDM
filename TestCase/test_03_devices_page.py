@@ -291,12 +291,9 @@ class TestDevicesPage:
             self.page.select_device(sn)
             self.page.click_psw_btn()
             self.page.change_TPUI_password(psw)
-            text = self.page.get_alert_text()
-            print(text)
-            self.page.alert_fade()
             self.page.refresh_page()
 
-    @allure.feature('MDM_test02')
+    @allure.feature('MDM_test01')
     @allure.title("Devices- AIMDM send msg and check the log in the Message Module")
     def test_pressure_send_message_to_single_device(self, return_device_page):
         exp_success_send_text = "Message Sent"
@@ -340,7 +337,7 @@ class TestDevicesPage:
         exp_success_msg = "Updated Device Setting"
         test_version_api = "http://test.telpopaas.com"
         release_version_api = "http://api.telpotms.com"
-        release_version_url = "https://mdm.telpoai.com/"
+        release_version_url = "https://mdm.telpoai.com/login"
         release_user_info = {"username": "ceshibu03", "password": "123456"}
         sn = "A250900P03100019"
         release_main_title = "Total Devices"
@@ -354,16 +351,14 @@ class TestDevicesPage:
         self.page.select_device(sn)
         self.page.click_server_btn()
         self.page.api_transfer(release_version_api)
-        test_text = self.page.get_alert_text()
-        print(test_text)
-        self.page.alert_fade()
-        time.sleep(120)
+        time.sleep(150)
         # check if device is offline in test version
         self.page.refresh_page()
         test_device_info = opt_case.get_single_device_list(sn)
         print(test_device_info)
 
         # go to release version and check if device is online
+        release_page.refresh_page()
         release_page.login_release_version(release_user_info, release_login_ok_title)
         release_page.go_to_device_page(release_main_title)
         release_data_list = release_page.get_single_device_list_release(sn)
@@ -375,10 +370,8 @@ class TestDevicesPage:
         release_page.select_device(sn)
         release_page.click_server_btn()
         release_page.api_transfer(test_version_api)
-        release_text = release_page.get_alert_text()
-        print(release_text)
-        release_page.alert_fade()
-        # time.sleep(180)
+
+        time.sleep(150)
         # check if device is offline in release version
         release_page.refresh_page()
         release_data_info_again = release_page.get_single_device_list_release(sn)
@@ -394,7 +387,7 @@ class TestDevicesPage:
         # if release_data_list[0]["Status"] == "Off":
         #     assert False
 
-    @allure.feature('MDM_test01')
+    @allure.feature('MDM_test02')
     @allure.title("Devices- device shutdown -- test in the last")
     def test_device_shutdown(self):
         sn = "A250900P03100019"
@@ -402,22 +395,22 @@ class TestDevicesPage:
         opt_case.check_single_device(sn)
         self.page.click_dropdown_btn()
         self.page.click_shutdown_btn()
-        text = self.page.get_alert_text()
-        print(text)
-
-        pass_flag = 0
-        for i in range(5):
-            self.page.refresh_page()
-            if "Off" in opt_case.get_single_device_list(sn)[0]["Status"]:
-                pass_flag += 1
-                break
-            time.sleep(1)
-
-        if pass_flag == 0:
-            if not ("Off" in opt_case.get_single_device_list(sn)[0]["Status"]):
-                e = "@@@@ 关机失败， 请检查！！！"
-                log.error(e)
-                assert False, e
+        time.sleep(3)
+        self.page.refresh_page()
+        assert "Off" in opt_case.get_single_device_list(sn)[0]["Status"]
+        # pass_flag = 0
+        # for i in range(5):
+        #     self.page.refresh_page()
+        #     if "Off" in opt_case.get_single_device_list(sn)[0]["Status"]:
+        #         pass_flag += 1
+        #         break
+        #     time.sleep(1)
+        #
+        # if pass_flag == 0:
+        #     if not ("Off" in opt_case.get_single_device_list(sn)[0]["Status"]):
+        #         e = "@@@@ 关机失败， 请检查！！！"
+        #         log.error(e)
+        #         assert False, e
 
     @allure.feature('MDM_test01')
     @allure.title("Devices-debug")

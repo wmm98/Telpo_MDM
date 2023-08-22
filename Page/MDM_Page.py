@@ -16,19 +16,15 @@ class MDMPage(BasePage):
     loc_login_btn = (By.XPATH, "//*[@id=\"loginform\"]/div[3]/a")
 
     def input_user_name(self, username):
-        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_user_btn))
         self.input_text(self.loc_user_btn, username)
 
     def input_pwd_value(self, password):
-        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_pwd_btn))
         self.input_text(self.loc_pwd_btn, password)
 
     def choose_agree_btn(self):
-        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_agree_btn))
         self.input_keyboard(self.loc_agree_btn, self.agree_key)
 
     def click_login_btn(self):
-        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_login_btn))
         self.click(self.loc_login_btn)
 
 

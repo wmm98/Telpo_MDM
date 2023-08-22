@@ -19,7 +19,7 @@ class ReleaseDevicePage(DevicesPage, MDMPage):
 
         # login_ok_title = "Telpo MDM"
         # login_ok_url = "http://test.telpoai.com/device/map"
-
+        now_time = time.time()
         while True:
             self.input_user_name(user_info["username"])
             self.input_pwd_value(user_info["password"])
@@ -30,7 +30,7 @@ class ReleaseDevicePage(DevicesPage, MDMPage):
                 break
             else:
                 self.refresh_page()
-            if time.time() > self.return_end_time():
+            if time.time() > self.return_end_time(now_time):
                 e = "@@@@ 3分钟内多次登录， 登录失败， 请检查！！！"
                 log.error(e)
                 assert False, e

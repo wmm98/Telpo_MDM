@@ -126,20 +126,31 @@ class DevicesPage(TelpoMDMPage):
 
     def click_psw_btn(self):
         self.click(self.loc_psw_btn)
+        self.confirm_alert_existed(self.loc_psw_btn)
 
     def change_TPUI_password(self, psw):
         self.alert_show()
         self.input_text(self.loc_TPUI_password, psw)
         self.click(self.loc_save_psw_btn)
+        self.confirm_tips_alert_show(self.loc_save_psw_btn)
         # self.alert_fade()
 
     def click_dropdown_btn(self):
         self.click(self.loc_dropdown_btn)
-        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_menu_show), 10)
+        now_time = time.time()
+        while True:
+            if self.ele_is_existed(self.loc_menu_show):
+                break
+            else:
+                self.click(self.loc_dropdown_btn)
+            time.sleep(1)
+            if time.time() > self.return_end_time(now_time):
+                assert False, "@@@@dropdown 按钮无法打开！！！"
+        # self.web_driver_wait_until(EC.presence_of_element_located(self.loc_menu_show), 10)
 
     def click_shutdown_btn(self):
         self.click(self.loc_shutdown_btn)
-        self.alert_show()
+        self.confirm_alert_existed(self.loc_shutdown_btn)
         self.click(self.loc_shutdown_sure_btn)
         self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_shutdown_sure_btn)
 
