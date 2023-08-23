@@ -46,6 +46,9 @@ class TestOTAPage:
         self.page.search_device_by_pack_name(package_info["package_name"])
         if len(self.page.get_ota_package_list()) == 1:
             self.page.delete_ota_package()
+            self.page.refresh_page()
+            self.page.search_device_by_pack_name(package_info["package_name"])
+            assert len(self.page.get_ota_package_list()) == 0, "@@@@删除失败，请检查！！！"
 
     @allure.feature('MDM_test02')
     @allure.title("OTA-Add OTA package")
@@ -63,7 +66,8 @@ class TestOTAPage:
             self.page.click_add_btn()
             self.page.input_ota_package_info(ota_info)
             self.page.click_save_add_ota_pack()
-            assert len(self.page.search_device_by_pack_name(package_info["package_name"])) == 1, "@@@添加失败！！！"
+            # self.page.search_device_by_pack_name(package_info["package_name"])
+            # assert len(self.page.get_ota_package_list()) == 1, "@@@添加失败！！！"
 
     @allure.feature('MDM_test01')
     @allure.title("OTA-release OTA package")

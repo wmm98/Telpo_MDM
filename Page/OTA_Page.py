@@ -35,6 +35,7 @@ class OTAPage(TelpoMDMPage):
     loc_android_checkbox = (By.ID, "customRadio1")
     loc_linux_checkbox = (By.ID, "customRadio2")
     loc_save_package_info_btn = (By.CSS_SELECTOR, "[class = 'btn btn-primary btn-submit']")
+    loc_uploading_show = (By.CSS_SELECTOR, "[class = 'modal-backdrop fade show']")
 
     # search alert
     loc_alert_show = (By.CSS_SELECTOR, "[class = 'modal fade modal_dark show']")
@@ -261,10 +262,10 @@ class OTAPage(TelpoMDMPage):
             self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_search_search_btn)
 
     def get_ota_package_list(self):
-        boxes = self.get_elements(self.loc_packages_box)
         if "NO Data" in self.get_element(self.loc_ota_list).text:
             return []
         else:
+            boxes = self.get_elements(self.loc_packages_box)
             return boxes
 
     def click_add_btn(self):
@@ -285,8 +286,37 @@ class OTAPage(TelpoMDMPage):
 
     def click_save_add_ota_pack(self):
         self.click(self.loc_save_package_info_btn)
-        self.confirm_tips_alert_show(self.loc_save_package_info_btn)
-        self.confirm_alert_not_existed(self.loc_save_package_info_btn)
+        now_time = time.time()
+        while True:
+            if self.uploading_box_show():
+                break
+            else:
+                self.click(self.loc_save_package_info_btn)
+            if time.time() > self.return_end_time(now_time):
+                assert False, "@@@@无法上传OTA， 请检查！！！"
+            time.sleep(1)
+        # if not self.uploading_box_fade():
+        #     print("333333333333333333333333333333333333")
+        #     assert False, "@@@@上传OTA文件超过3分钟， 请检查！！！！"
+        if not self.get_tips_alert(180):
+            assert False, "@@@@上传OTA文件超过3分钟， 请检查！！！！"
+        self.refresh_page()
+
+    def uploading_box_show(self):
+        try:
+            self.web_driver_wait_until(EC.visibility_of_element_located(self.loc_uploading_show))
+            return True
+        except TimeoutException:
+            return False
+
+    def uploading_box_fade(self):
+        try:
+            self.web_driver_wait_until_not(EC.visibility_of_element_located(self.loc_uploading_show), 180)
+            print("这是yes")
+            return True
+        except TimeoutException:
+            print("这是not")
+            return False
 
     # check if alert would disappear
     def alert_fade(self):
@@ -304,20 +334,27 @@ class OTAPage(TelpoMDMPage):
         except TimeoutException:
             return False
 
-    def confirm_tips_alert_show(self, loc):
+    def confirm_tips_alert_show(self, loc, ex_js=0, times=0):
         now_time = time.time()
         while True:
-            if self.get_tips_alert():
+            if self.get_tips_alert(times):
                 break
             else:
-                self.click(loc)
+                if ex_js == 1:
+                    self.exc_js_click_loc(loc)
+                else:
+                    self.click(loc)
             if time.time() > self.return_end_time(now_time):
                 assert False, "@@@@弹窗无法关闭，请检查！！！"
 
-    def get_tips_alert(self):
+    def get_tips_alert(self, timeout=0):
         try:
-            ele = self.web_driver_wait_until(EC.presence_of_element_located(self.loc_cate_name_existed), 5)
-            print(ele.text)
+            if timeout != 0:
+                ele = self.web_driver_wait_until(EC.presence_of_element_located(self.loc_cate_name_existed), timeout)
+                print(ele.text)
+            else:
+                ele = self.web_driver_wait_until(EC.presence_of_element_located(self.loc_cate_name_existed), 5)
+                print(ele.text)
             return True
         except TimeoutException:
             return False
