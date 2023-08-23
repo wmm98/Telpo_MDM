@@ -32,33 +32,38 @@ class TestOTAPage:
     def teardown_class(self):
         self.page.refresh_page()
 
-    @allure.feature('MDM_test01')
+    @allure.feature('MDM_test02')
     @allure.title("OTA-Upgrade Packages Page")
     def test_upgrade_package_page(self):
         self.page.click_OTA_btn()
         self.page.click_upgrade_packages()
 
-    @allure.feature('MDM_test01')
+    @allure.feature('MDM_test02')
+    @allure.title("OTA-Delete OTA package")
+    def test_delete_OTA_package(self):
+        package_info = {"package_name": "TPS900_msm8937_sv10_fv1.1.16_pv1.1.16-1.1.18.zip", "file_category": "test",
+                        "plat_form": "Android"}
+        self.page.search_device_by_pack_name(package_info["package_name"])
+        if len(self.page.get_ota_package_list()) == 1:
+            self.page.delete_ota_package()
+
+    @allure.feature('MDM_test02')
     @allure.title("OTA-Add OTA package")
     def test_add_OTA_package(self):
         exp_existed_text = "ota already existed"
         exp_success_text = "success"
-        package_info = {"package_name": "TPS900_msm8937_sv10_fv1.1.16_pv1.1.16-1.1.18.zip", "file_category": "test", "plat_form": "Android"}
+        package_info = {"package_name": "TPS900_msm8937_sv10_fv1.1.16_pv1.1.16-1.1.18.zip", "file_category": "test",
+                        "plat_form": "Android"}
         file_path = conf.project_path + "\\Param\\Package\\%s" % package_info["package_name"]
-        ota_info = {"file_name": file_path,  "file_category": package_info["file_category"], "plat_form": package_info["plat_form"]}
-        self.page.click_add_btn()
-        self.page.input_ota_package_info(ota_info)
-        self.page.click_save_add_ota_pack()
-        text = self.page.get_alert_text()
-        print(text)
-        if exp_existed_text in text:
-            self.page.refresh_page()
-        elif exp_success_text in text:
-            # search package
-            self.page.search_device_by_pack_name(package_info["package_name"])
-        time.sleep(3)
-
-        # "loading-title txt-textOneRow"
+        ota_info = {"file_name": file_path, "file_category": package_info["file_category"],
+                    "plat_form": package_info["plat_form"]}
+        # check if ota package is existed, if not, add package, else skip
+        self.page.search_device_by_pack_name(package_info["package_name"])
+        if len(self.page.get_ota_package_list()) == 0:
+            self.page.click_add_btn()
+            self.page.input_ota_package_info(ota_info)
+            self.page.click_save_add_ota_pack()
+            assert len(self.page.search_device_by_pack_name(package_info["package_name"])) == 1, "@@@添加失败！！！"
 
     @allure.feature('MDM_test01')
     @allure.title("OTA-release OTA package")
@@ -128,21 +133,3 @@ class TestOTAPage:
             print(org_log_length)
             self.page.search_single_release_log(release_info)
             self.page.delete_all_release_log(org_len=org_log_length, del_all=False)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

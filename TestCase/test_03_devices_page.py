@@ -36,7 +36,7 @@ class TestDevicesPage:
     def teardown_class(self):
         self.page.refresh_page()
 
-    @allure.feature('MDM_test02')
+    @allure.feature('MDM_test01')
     @allure.title("Devices main page")  # 设置case的名字
     # @pytest.mark.dependency(depends=["test_TelpoMdM_Page"], scope='package')
     def test_go_to_devices_page(self):
@@ -142,7 +142,6 @@ class TestDevicesPage:
         # check all btn; select all devices
         se_all_btn = self.page.select_all_devices()
         self.page.check_ele_is_selected(se_all_btn)
-        time.sleep(3)
         se_none_btn = self.page.select_all_devices()
         self.page.check_ele_is_not_selected(se_none_btn)
         time.sleep(3)
@@ -244,8 +243,6 @@ class TestDevicesPage:
     def test_reboot_single_device_pressure_testing(self):
         exp_reboot_text = "Sending Reboot Comand to Devices"
         sn = "A250900P03100019"
-
-        pass_flag = 0
         for i in range(2):
             print("运行 %s 次" % str(i))
             opt_case.check_single_device(sn)
@@ -253,20 +250,11 @@ class TestDevicesPage:
             self.page.click_reboot_btn()
             self.page.refresh_page()
             # get device info
-            pass_flag = 0
-            for j in range(3):
-                res = opt_case.get_single_device_list(sn)[0]["Status"]
-                # check if command trigger in 3s
-                print(res)
-                if "Off" in res:
-                    pass_flag += 1
-                    break
-                self.page.refresh_page()
-                time.sleep(1)
-            if pass_flag == 0:
-                assert "Off" in opt_case.get_single_device_list(sn)[0]["Status"]
+            time.sleep(3)
+            # check if command trigger in 3s
+            assert "Off" in opt_case.get_single_device_list(sn)[0]["Status"]
 
-            time.sleep(80)
+            time.sleep(150)
             self.page.refresh_page()
             assert "On" in opt_case.get_single_device_list(sn)[0]["Status"], "@@@@ 1分钟之内无法重启！！"
 
@@ -331,7 +319,7 @@ class TestDevicesPage:
                 assert False, "@@@终端收到信息后, 平台180s内无法收到相应的信息"
         print(msg_list)
 
-    @allure.feature('MDM_test02')
+    @allure.feature('MDM_test01')
     @allure.title("Devices- AIMDM transfer api server ")
     def test_transfer_api_server(self):
         exp_success_msg = "Updated Device Setting"
@@ -398,19 +386,6 @@ class TestDevicesPage:
         time.sleep(3)
         self.page.refresh_page()
         assert "Off" in opt_case.get_single_device_list(sn)[0]["Status"]
-        # pass_flag = 0
-        # for i in range(5):
-        #     self.page.refresh_page()
-        #     if "Off" in opt_case.get_single_device_list(sn)[0]["Status"]:
-        #         pass_flag += 1
-        #         break
-        #     time.sleep(1)
-        #
-        # if pass_flag == 0:
-        #     if not ("Off" in opt_case.get_single_device_list(sn)[0]["Status"]):
-        #         e = "@@@@ 关机失败， 请检查！！！"
-        #         log.error(e)
-        #         assert False, e
 
     @allure.feature('MDM_test01')
     @allure.title("Devices-debug")

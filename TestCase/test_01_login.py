@@ -19,7 +19,7 @@ class TestLogin:
     def teardown_class(self):
         pass
 
-    @allure.feature('MDM_test02')
+    @allure.feature('MDM_test02_login')
     @allure.title("login is ok")  # 设置case的名字
     @pytest.mark.dependency(name="test_login_ok", scope='package')
     def test_login_ok(self):

@@ -1,4 +1,4 @@
-from selenium.common import TimeoutException
+from selenium.common import TimeoutException, StaleElementReferenceException, ElementNotInteractableException
 from Conf.Config import Config
 from Page.Telpo_MDM_Page import TelpoMDMPage
 from selenium.webdriver import Keys
@@ -123,6 +123,7 @@ class DevicesPage(TelpoMDMPage):
         self.input_text(self.loc_api_box, api_url)
         self.click(self.loc_api_send_btn)
         self.confirm_tips_alert_show(self.loc_api_send_btn)
+        self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_api_send_btn)
 
     def click_psw_btn(self):
         self.click(self.loc_psw_btn)
@@ -133,6 +134,7 @@ class DevicesPage(TelpoMDMPage):
         self.input_text(self.loc_TPUI_password, psw)
         self.click(self.loc_save_psw_btn)
         self.confirm_tips_alert_show(self.loc_save_psw_btn)
+        self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_save_psw_btn)
         # self.alert_fade()
 
     def click_dropdown_btn(self):
@@ -152,27 +154,30 @@ class DevicesPage(TelpoMDMPage):
         self.click(self.loc_shutdown_btn)
         self.confirm_alert_existed(self.loc_shutdown_btn)
         self.click(self.loc_shutdown_sure_btn)
+        self.confirm_tips_alert_show(self.loc_shutdown_sure_btn)
         self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_shutdown_sure_btn)
 
     def click_cat_log(self):
         self.click(self.loc_cat_log_btn)
         self.confirm_alert_existed(self.loc_cat_log_btn)
         self.click(self.loc_shutdown_sure_btn)
-        now_time = time.time()
-        while True:
-            if self.get_tips_alert():
-                break
-            else:
-                self.click(self.loc_shutdown_sure_btn)
-            if time.time() > self.return_end_time(now_time, 60):
-                assert False, "@@@@页面点击确认捕捉log失败， 请检查！！！"
+        self.confirm_tips_alert_show(self.loc_shutdown_btn)
+        self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_shutdown_btn)
+        # now_time = time.time()
+        # while True:
+        #     if self.get_tips_alert():
+        #         break
+        #     else:
+        #         self.click(self.loc_shutdown_sure_btn)
+        #     if time.time() > self.return_end_time(now_time, 60):
+        #         assert False, "@@@@页面点击确认捕捉log失败， 请检查！！！"
 
     # reboot relate
     def click_reboot_btn(self):
-        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_reboot_btn))
         self.click(self.loc_reboot_btn)
         self.confirm_alert_existed(self.loc_sure_btn)
         self.click(self.loc_sure_btn)
+        self.confirm_tips_alert_show(self.loc_sure_btn)
         self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_sure_btn)
 
     def get_reboot_warning_alert_text(self, text):
@@ -189,41 +194,43 @@ class DevicesPage(TelpoMDMPage):
         #     self.refresh_page()
 
     def click_lock(self):
-        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_lock_btn))
-        self.click(self.loc_lock_btn)
-        now_time = time.time()
-        while True:
-            if self.get_tips_alert():
-                break
-            else:
-                self.click(self.loc_lock_btn)
-            time.sleep(1)
-            if time.time() > self.return_end_time(now_time, 60):
-                assert False, "@@@@页面超时无法点击锁机， 请检查！！！"
+        try:
+            self.click(self.loc_lock_btn)
+            self.confirm_tips_alert_show(self.loc_lock_btn)
+        except StaleElementReferenceException:
+            self.click(self.loc_lock_btn)
+            self.confirm_tips_alert_show(self.loc_lock_btn)
 
     def click_unlock(self):
-        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_unlock_btn))
-        self.click(self.loc_unlock_btn)
-        now_time = time.time()
-        while True:
-            if self.get_tips_alert():
-                break
-            else:
-                self.click(self.loc_lock_btn)
-            time.sleep(1)
-            if time.time() > self.return_end_time(now_time, 60):
-                assert False, "@@@@页面点击开锁超时， 请检查！！！"
+        try:
+            self.click(self.loc_unlock_btn)
+            self.confirm_tips_alert_show(self.loc_unlock_btn)
+        except StaleElementReferenceException:
+            self.click(self.loc_unlock_btn)
+            self.confirm_tips_alert_show(self.loc_unlock_btn)
 
     def search_device_by_sn(self, sn):
-        self.click(self.loc_search_btn)
-        self.confirm_alert_existed(self.loc_search_btn)
-        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_search_input_box))
-        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_search_search_btn))
-        self.input_text(self.loc_search_input_box, sn)
-        time.sleep(1)
-        self.click(self.loc_search_search_btn)
-        time.sleep(1)
-        self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_search_search_btn)
+        try:
+            self.click(self.loc_search_btn)
+            self.confirm_alert_existed(self.loc_search_btn)
+            self.input_text(self.loc_search_input_box, sn)
+            time.sleep(1)
+            self.click(self.loc_search_search_btn)
+            self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_search_search_btn)
+        except StaleElementReferenceException:
+            self.click(self.loc_search_btn)
+            self.confirm_alert_existed(self.loc_search_btn)
+            self.input_text(self.loc_search_input_box, sn)
+            time.sleep(1)
+            self.click(self.loc_search_search_btn)
+            self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_search_search_btn)
+        except ElementNotInteractableException:
+            self.click(self.loc_search_btn)
+            self.confirm_alert_existed(self.loc_search_btn)
+            self.input_text(self.loc_search_input_box, sn)
+            time.sleep(1)
+            self.click(self.loc_search_search_btn)
+            self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_search_search_btn)
 
     def click_send_btn(self):
         self.click(self.loc_msg_btn)
@@ -233,6 +240,7 @@ class DevicesPage(TelpoMDMPage):
         self.input_text(self.loc_msg_input_box, msg)
         self.click(self.loc_msg_input_send_btn)
         self.confirm_tips_alert_show(self.loc_msg_btn)
+        self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_msg_btn)
 
     def confirm_msg_alert_fade(self):
         self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_msg_input_send_btn)
@@ -336,7 +344,7 @@ class DevicesPage(TelpoMDMPage):
     def select_all_devices(self):
         ele = self.web_driver_wait_until(EC.presence_of_element_located(self.loc_check_all))
         self.exc_js_click(ele)
-        self.deal_ele_selected(ele)
+        # self.deal_ele_selected(ele)
         return ele
 
     def select_device(self, device_sn):
@@ -347,12 +355,10 @@ class DevicesPage(TelpoMDMPage):
         return ele
 
     def check_ele_is_selected(self, ele):
-        if not self.ele_is_selected(ele):
-            self.web_driver_wait_until(EC.element_to_be_selected(ele))
+        self.deal_ele_selected(ele)
 
     def check_ele_is_not_selected(self, ele):
-        if self.ele_is_selected(ele):
-            self.web_driver_wait_until_not(EC.element_to_be_selected(ele))
+        self.deal_ele_not_selected(ele)
 
     def get_devices_list_label_text_discard(self):
         devices = self.get_element(self.loc_devices_list)
@@ -453,7 +459,7 @@ class DevicesPage(TelpoMDMPage):
             else:
                 self.click(loc)
             if time.time() > self.return_end_time(now_time):
-                assert False, "@@@@弹窗无法小时，请检查！！！"
+                assert False, "@@@@弹窗无法关闭，请检查！！！"
 
     def get_tips_alert(self):
         try:

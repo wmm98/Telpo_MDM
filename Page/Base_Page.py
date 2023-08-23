@@ -57,7 +57,6 @@ class BasePage:
                     self.exc_js_click_loc(loc)
                 else:
                     self.click(loc)
-                    print("已经点击了")
                 if time.time() > self.return_end_time(now_time):
                     assert False, "@@@@弹窗无法关闭 出错， 请检查！！！"
 
@@ -130,6 +129,17 @@ class BasePage:
         now_time = time.time()
         while True:
             if self.ele_is_selected(ele):
+                break
+            else:
+                self.exc_js_click(ele)
+            time.sleep(1)
+            if time.time() > self.return_end_time(now_time):
+                assert False, "@@@无法选中check box, 请检查！！！"
+
+    def deal_ele_not_selected(self, ele):
+        now_time = time.time()
+        while True:
+            if not self.ele_is_selected(ele):
                 break
             else:
                 self.exc_js_click(ele)

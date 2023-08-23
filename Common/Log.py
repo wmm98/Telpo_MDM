@@ -36,7 +36,8 @@ LEVELS = {
 }
 
 logger = logging.getLogger()
-level = 'default'
+# level = 'default'
+level = 'info'
 
 
 # r ：只读

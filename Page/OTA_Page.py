@@ -1,4 +1,4 @@
-from selenium.common import TimeoutException
+from selenium.common import TimeoutException, ElementNotInteractableException
 from Conf.Config import Config
 from Page.Telpo_MDM_Page import TelpoMDMPage
 # from Page.System_Page import SystemPage
@@ -23,6 +23,10 @@ class OTAPage(TelpoMDMPage):
     loc_input_search_package = (By.ID, "searchname")
     loc_search_category = (By.ID, "searchcate")
     loc_search_search_btn = (By.CSS_SELECTOR, "[class = 'btn btn-primary btn-search']")
+
+    # delete ota package btn relate
+    loc_delete_ota_package_btn = (By.CSS_SELECTOR, "[class = 'fas fa-trash-alt']")
+    loc_delete_ota_package_confirm = (By.CSS_SELECTOR, "[class = 'btn btn-danger btn-del']")
 
     # add OTA package btn relate
     loc_add_package_btn = (By.CSS_SELECTOR, "[class = 'fas fa-plus-square']")
@@ -72,15 +76,22 @@ class OTAPage(TelpoMDMPage):
     # select_all
     loc_release_check_all = (By.ID, "checkall")
 
+    def delete_ota_package(self):
+        self.click(self.loc_delete_ota_package_btn)
+        self.confirm_alert_existed(self.loc_delete_ota_package_btn)
+        self.click(self.loc_delete_ota_package_confirm)
+        self.confirm_tips_alert_show(self.loc_delete_ota_package_confirm)
+        self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_delete_ota_package_confirm)
+
     def click_package_release_page(self):
-        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_package_releases_btn))
         self.click(self.loc_package_releases_btn)
+        now_time = time.time()
         while True:
             if self.ota_release_package_title in self.get_loc_main_title():
                 break
             else:
                 self.click(self.loc_package_releases_btn)
-            if time.time() > self.return_end_time():
+            if time.time() > self.return_end_time(now_time):
                 assert False, "@@@@ 打开package release 出错！！！"
 
     def get_release_log_length(self):
@@ -116,7 +127,7 @@ class OTAPage(TelpoMDMPage):
         self.input_text(self.loc_search_release_sn, info["sn"])
         time.sleep(1)
         self.click(self.loc_search_release_search)
-        self.confirm_alert_not_existed(self.loc_search_release_search)
+        self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_search_release_search)
 
         if count:
             if "NO Data" in self.get_element(self.loc_data_body).text:
@@ -234,35 +245,33 @@ class OTAPage(TelpoMDMPage):
             self.confirm_alert_not_existed(self.loc_release_package_btn, ex_js=1)
 
     def search_device_by_pack_name(self, pack_name):
-        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_search_btn))
-        self.click(self.loc_search_btn)
-        self.alert_show()
-        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_input_search_package))
-        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_search_category))
-        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_search_search_btn))
-        self.input_text(self.loc_input_search_package, pack_name)
-        time.sleep(1)
-        self.click(self.loc_search_search_btn)
-        self.confirm_alert_not_existed(self.loc_search_search_btn)
-        if "NO Data" in self.get_element(self.loc_ota_list).text:
-            assert False, "@@@@找不到此包 %s, 请检查！！！" % pack_name
+        try:
+            self.click(self.loc_search_btn)
+            self.confirm_alert_existed(self.loc_search_btn)
+            self.input_text(self.loc_input_search_package, pack_name)
+            time.sleep(1)
+            self.click(self.loc_search_search_btn)
+            self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_search_search_btn)
+        except ElementNotInteractableException:
+            self.click(self.loc_search_btn)
+            self.confirm_alert_existed(self.loc_search_btn)
+            self.input_text(self.loc_input_search_package, pack_name)
+            time.sleep(1)
+            self.click(self.loc_search_search_btn)
+            self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_search_search_btn)
 
+    def get_ota_package_list(self):
         boxes = self.get_elements(self.loc_packages_box)
-        if len(boxes) != 1:
-            assert False, "@@@@有多个相同的包 %s, 请检查！！！" % pack_name
-        # try:
-        #     self.alert_fade()
-        # except Exception:
-        #     self.click(self.loc_search_search_btn)
-        #     self.alert_fade()
+        if "NO Data" in self.get_element(self.loc_ota_list).text:
+            return []
+        else:
+            return boxes
 
     def click_add_btn(self):
-        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_add_package_btn))
         self.click(self.loc_add_package_btn)
         self.confirm_alert_existed(self.loc_add_package_btn)
 
     def input_ota_package_info(self, info):
-        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_choose_package_btn))
         self.input_text(self.loc_choose_package_btn, info["file_name"])
         self.select_by_text(self.loc_file_category, info["file_category"])
         android_check_box = self.get_element(self.loc_android_checkbox)
@@ -273,11 +282,10 @@ class OTAPage(TelpoMDMPage):
         elif info["plat_form"] == "Linux":
             if not linux_check_box.is_selected():
                 linux_check_box.click()
-        time.sleep(5)
 
     def click_save_add_ota_pack(self):
-        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_save_package_info_btn))
         self.click(self.loc_save_package_info_btn)
+        self.confirm_tips_alert_show(self.loc_save_package_info_btn)
         self.confirm_alert_not_existed(self.loc_save_package_info_btn)
 
     # check if alert would disappear
@@ -296,15 +304,20 @@ class OTAPage(TelpoMDMPage):
         except TimeoutException:
             return False
 
-    def get_alert_text(self):
-        return self.web_driver_wait_until(EC.presence_of_element_located(self.loc_cate_name_existed)).text
-
-    def confirm_alert_not_existed(self, loc, ex_js=0):
+    def confirm_tips_alert_show(self, loc):
+        now_time = time.time()
         while True:
-            if self.alert_fade():
+            if self.get_tips_alert():
                 break
             else:
-                if ex_js == 1:
-                    self.exc_js_click_loc(loc)
-                else:
-                    self.click(loc)
+                self.click(loc)
+            if time.time() > self.return_end_time(now_time):
+                assert False, "@@@@弹窗无法关闭，请检查！！！"
+
+    def get_tips_alert(self):
+        try:
+            ele = self.web_driver_wait_until(EC.presence_of_element_located(self.loc_cate_name_existed), 5)
+            print(ele.text)
+            return True
+        except TimeoutException:
+            return False
