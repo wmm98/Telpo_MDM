@@ -19,14 +19,14 @@ class BasePage:
 
     def comm_alert_fade(self, loc):
         try:
-            self.web_driver_wait_until_not(EC.presence_of_element_located(loc), 10)
+            self.web_driver_wait_until_not(EC.presence_of_element_located(loc), 5)
             return True
         except TimeoutException:
             return False
 
     def comm_alert_show(self, loc):
         try:
-            self.web_driver_wait_until(EC.presence_of_element_located(loc), 10)
+            self.web_driver_wait_until(EC.presence_of_element_located(loc), 5)
             return True
         except TimeoutException:
             return False
@@ -99,6 +99,24 @@ class BasePage:
             return True
         except Exception:
             return False
+
+    def page_is_loaded(self):
+        if self.driver.execute_script('return document.readyState;') == 'complete':
+            return True
+        else:
+            return False
+
+    def page_load_complete(self):
+        now_time = time.time()
+        while True:
+            if self.page_is_loaded():
+                print("网页完全加载完成")
+                break
+            print("网页还没有加载完成")
+            time.sleep(1)
+            if now_time > self.return_end_time(now_time, 60):
+                self.refresh_page()
+                break
 
     def return_end_time(self, now_time, timeout=180):
         timedelta = 1
@@ -228,6 +246,17 @@ class BasePage:
             return True
         else:
             return False
+
+    def confirm_sn_is_selected(self, ele_sn):
+        now_time = time.time()
+        while True:
+            if ele_sn.get_attribute("class") == "selected":
+                break
+            else:
+                ele_sn.click()
+            if time.time() > self.return_end_time(now_time):
+                assert False, "@@@无法选中device sn, 请检查！！！"
+            time.sleep(1)
 
 
 

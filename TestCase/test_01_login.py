@@ -23,7 +23,7 @@ class TestLogin:
     @allure.title("login is ok")  # 设置case的名字
     @pytest.mark.dependency(name="test_login_ok", scope='package')
     def test_login_ok(self):
-        username = "ceshibu"
+        username = "mdm_automation"
         password = "123456"
 
         login_ok_title = "Telpo MDM"

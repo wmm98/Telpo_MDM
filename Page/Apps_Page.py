@@ -178,14 +178,7 @@ class APPSPage(TelpoMDMPage):
             if info["sn"] in device.get_attribute("data"):
                 if device.get_attribute("class") == "selected":
                     break
-                while True:
-                    if device.get_attribute("class") == "selected":
-                        break
-                    else:
-                        device.click()
-                    if time.time() > self.return_end_time():
-                        assert False, "@@@无法选中device sn, 请检查！！！"
-                    time.sleep(1)
+                self.confirm_sn_is_selected(device)
         self.click(self.loc_app_release_confirm)
         self.confirm_alert_not_existed(self.loc_app_release_confirm)
 

@@ -32,11 +32,13 @@ class TestDevicesPage:
         self.page = DevicesPage(self.driver, 40)
         self.meg_page = MessagePage(self.driver, 40)
         self.telpo_mdm_page = TelpoMDMPage(self.driver, 40)
+        self.rerun = 5
+        self.delay = 3
 
     def teardown_class(self):
         self.page.refresh_page()
 
-    @allure.feature('MDM_test01')
+    @allure.feature('MDM_test02')
     @allure.title("Devices main page")  # 设置case的名字
     # @pytest.mark.dependency(depends=["test_TelpoMdM_Page"], scope='package')
     def test_go_to_devices_page(self):
@@ -45,6 +47,8 @@ class TestDevicesPage:
             self.page.click_devices_btn()
             # click devices list btn  -- just for test version
             self.page.click_devices_list_btn()
+            # wait page load complete
+            self.page.page_load_complete()
             # check current page
             act_main_title = self.page.get_loc_main_title()
             now_time = time.time()
@@ -53,17 +57,16 @@ class TestDevicesPage:
                     break
                 else:
                     self.page.go_to_new_address("devices")
-                time.sleep(1)
                 if time.time() > self.page.return_end_time(now_time):
                     log.error("@@@打开device页超时")
                     assert False, "@@@打开device页超时"
-
+                time.sleep(1)
             log.info("当前默认的副标题为：%s" % act_main_title)
         except Exception as e:
             log.error(str(e))
             assert False
 
-    @allure.feature('MDM_test01')
+    @allure.feature('MDM_test02')
     @allure.title("Devices-add category and  model")  # 设置case的名字
     @pytest.mark.parametrize('cate_model', data_cate_mode)
     def test_add_category_model(self, cate_model):
@@ -106,7 +109,7 @@ class TestDevicesPage:
         self.page.find_category()
         self.page.find_model()
 
-    @allure.feature('MDM_test01')
+    @allure.feature('MDM_test02')
     @allure.title("Devices-new devices")  # 设置case的名字
     @pytest.mark.parametrize('devices_list', devices)
     def test_new_devices(self, devices_list):
@@ -135,11 +138,13 @@ class TestDevicesPage:
             print("发生的异常是", e)
             assert False
 
-    @allure.feature('MDM_test01')
+    @allure.feature('MDM_test02')
     @allure.title("Devices- test check box")  # 设置case的名字
     @pytest.mark.parametrize('devices_list', devices)
+    @pytest.mark.flaky(reruns=5, reruns_delay=3)
     def test_check_boxes(self, devices_list):
         # check all btn; select all devices
+        self.page.refresh_page()
         se_all_btn = self.page.select_all_devices()
         self.page.check_ele_is_selected(se_all_btn)
         se_none_btn = self.page.select_all_devices()
@@ -161,7 +166,7 @@ class TestDevicesPage:
         except Exception:
             assert False, "@@@元素没有没选中, 请检查！！！"
 
-    @allure.feature('MDM_test01')
+    @allure.feature('MDM_test02')
     @allure.title("Devices- test import btn")
     def test_import_devices(self):
         exp_success_text = "Add Device Success"
@@ -178,14 +183,15 @@ class TestDevicesPage:
 
         # need to add check length of data list
 
-    @allure.feature('MDM_test01')
+    @allure.feature('MDM_test02')
     @allure.title("Devices- AIMDM send message")
+    @pytest.mark.flaky(reruns=5, reruns_delay=3)
     def test_send_message_to_single_device(self):
         exp_success_send_text = "Message Sent"
         # sn would change after debug with devices
         sn = "A250900P03100019"
         date_time = '%Y-%m-%d %H:%M:%S'
-
+        self.page.refresh_page()
         now = time.strftime(date_time, time.localtime(time.time()))
         msg = "%s: 12345#$**&&&&" % now
         # confirm if device is online and execute next step, if not, end the case execution
@@ -199,7 +205,7 @@ class TestDevicesPage:
 
         # check devices
 
-    @allure.feature('MDM_test01')
+    @allure.feature('MDM_test02')
     @allure.title("Devices- lock and unlock single device")
     def test_lock_and_unlock_single_device(self):
         # case is stable
@@ -238,42 +244,48 @@ class TestDevicesPage:
                 self.page.refresh_page()
                 time.sleep(1)
 
-    @allure.feature('MDM_test01')
+    @allure.feature('MDM_test02')
     @allure.title("Devices- reboot device 5 times")
+    @pytest.mark.flaky(reruns=5, reruns_delay=3)
     def test_reboot_single_device_pressure_testing(self):
         exp_reboot_text = "Sending Reboot Comand to Devices"
         sn = "A250900P03100019"
+        self.page.refresh_page()
         for i in range(2):
-            print("运行 %s 次" % str(i))
             opt_case.check_single_device(sn)
             self.page.select_device(sn)
             self.page.click_reboot_btn()
+            time.sleep(3)
             self.page.refresh_page()
             # get device info
-            time.sleep(3)
             # check if command trigger in 3s
             assert "Off" in opt_case.get_single_device_list(sn)[0]["Status"]
 
             time.sleep(150)
             self.page.refresh_page()
             assert "On" in opt_case.get_single_device_list(sn)[0]["Status"], "@@@@ 1分钟之内无法重启！！"
+            print("成功运行 %s 次" % str(i))
 
-    @allure.feature('MDM_test01')
+    @allure.feature('MDM_test02')
     @allure.title("Devices- cat_logs")
+    @pytest.mark.flaky(reruns=5, reruns_delay=3)
     def test_cat_logs(self):
         exp_log_msg = "Device Debug Command sent"
         sn = "A250900P03100019"
-
+        self.page.refresh_page()
         opt_case.check_single_device(sn)
         self.page.click_dropdown_btn()
         self.page.click_cat_log()
 
-    @allure.feature('MDM_test01')
+    @allure.feature('MDM_test02')
     @allure.title("Devices- reset device TPUI password")
+    @pytest.mark.flaky(reruns=5, reruns_delay=3)
     def test_reset_TPUI_password(self):
         exp_psw_text = "Password changed"
         sn = "A250900P03100019"
         password = ["123456", "000000", "999999"]
+        self.page.refresh_page()
+        self.page.refresh_page()
         for psw in password:
             opt_case.check_single_device(sn)
             self.page.select_device(sn)
@@ -281,13 +293,15 @@ class TestDevicesPage:
             self.page.change_TPUI_password(psw)
             self.page.refresh_page()
 
-    @allure.feature('MDM_test01')
+    @allure.feature('MDM_test02')
     @allure.title("Devices- AIMDM send msg and check the log in the Message Module")
+    @pytest.mark.flaky(reruns=5, reruns_delay=1)
     def test_pressure_send_message_to_single_device(self, return_device_page):
         exp_success_send_text = "Message Sent"
         # sn would change after debug with devices
         sn = "A250900P03100019"
         length = 10
+        self.page.refresh_page()
         # confirm if device is online and execute next step, if not, end the case execution
         data = opt_case.check_single_device(sn)
         print(data)
@@ -305,6 +319,8 @@ class TestDevicesPage:
             message_list.append(msg)
 
         self.page.go_to_new_address("message")
+        # check if page loaded completely
+        self.meg_page.page_load_complete()
         # Check result of device message in the Message Module and msg status
         self.meg_page.choose_device(sn, device_cate)
         now_time = time.time()
@@ -319,8 +335,9 @@ class TestDevicesPage:
                 assert False, "@@@终端收到信息后, 平台180s内无法收到相应的信息"
         print(msg_list)
 
-    @allure.feature('MDM_test01')
+    @allure.feature('MDM_test02')
     @allure.title("Devices- AIMDM transfer api server ")
+    @pytest.mark.flaky(reruns=5, reruns_delay=3)
     def test_transfer_api_server(self):
         exp_success_msg = "Updated Device Setting"
         test_version_api = "http://test.telpopaas.com"
@@ -330,7 +347,8 @@ class TestDevicesPage:
         sn = "A250900P03100019"
         release_main_title = "Total Devices"
         release_login_ok_title = "Telpo MDM"
-
+        self.page.refresh_page()
+        self.page.page_load_complete()
         BaseWebDriver().open_web_site(release_version_url)
         release_driver = BaseWebDriver().get_web_driver()
         release_page = ReleaseDevicePage(release_driver, 40)
@@ -339,7 +357,7 @@ class TestDevicesPage:
         self.page.select_device(sn)
         self.page.click_server_btn()
         self.page.api_transfer(release_version_api)
-        time.sleep(150)
+        # time.sleep(150)
         # check if device is offline in test version
         self.page.refresh_page()
         test_device_info = opt_case.get_single_device_list(sn)
@@ -359,7 +377,7 @@ class TestDevicesPage:
         release_page.click_server_btn()
         release_page.api_transfer(test_version_api)
 
-        time.sleep(150)
+        # time.sleep(150)
         # check if device is offline in release version
         release_page.refresh_page()
         release_data_info_again = release_page.get_single_device_list_release(sn)

@@ -63,8 +63,7 @@ if __name__ == '__main__':
     # # 定义测试集
     allure_list = '--allure-features=MDM_test02_login,MDM_test02'
     # allure_story = '--allure-stories=pytest_debug_story'
-    # pyte
-    # st -s --allure-features pytest_debug
+    # pytest -s --allure-features pytest_debug
     # pytest -s --allure-features pytest_debug --allure-stories pytest_debug_story
 
     # 运行选中的case

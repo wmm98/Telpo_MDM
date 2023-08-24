@@ -38,6 +38,12 @@ def go_to_ota_upgrade_logs_page():
 
 
 @pytest.fixture()
+def go_to_ota_upgrade_package_page():
+    ota_page.go_to_new_address("ota")
+    yield
+
+
+@pytest.fixture()
 def go_to_ota_package_releases():
     app_page.go_to_new_address("ota/release")
     yield

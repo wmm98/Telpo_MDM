@@ -36,8 +36,8 @@ class MessagePage(TelpoMDMPage):
 
     def choose_device(self, sn, cate):
         # wait drop down open, for stability
-        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_drop_down_menu_open))
-        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_drop_down_menu_open))
+        # self.web_driver_wait_until(EC.presence_of_element_located(self.loc_drop_down_menu_open))
+        # self.web_driver_wait_until(EC.presence_of_element_located(self.loc_drop_down_menu_open))
 
         device_list = self.web_driver_wait_until(EC.presence_of_element_located(self.loc_device_list))
         self.web_driver_wait_until(EC.presence_of_element_located(self.loc_li_sn))

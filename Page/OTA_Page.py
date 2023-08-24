@@ -205,16 +205,11 @@ class OTAPage(TelpoMDMPage):
                 return ele
 
     def click_release_btn(self):
-        self.web_driver_wait_until(EC.presence_of_all_elements_located(self.loc_release_btn))
         self.click(self.loc_release_btn)
-        try:
-            self.alert_show()
-        except TimeoutException:
-            self.confirm_alert_existed(self.loc_release_btn)
+        self.confirm_alert_existed(self.loc_release_btn)
 
     def input_release_OTA_package(self, release_info):
         # {"network": "NO Limit", "silent": 0, "category": "No Limit"}
-        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_download_network))
         self.select_by_text(self.loc_download_network, release_info['network'])
         silent_update = self.get_element(self.loc_silent_update)
         if release_info["silent"] == 1:
@@ -229,11 +224,9 @@ class OTAPage(TelpoMDMPage):
         eles_sn = sn_list.find_elements(*self.loc_sn_text)
         for ele_sn in eles_sn:
             if release_info["sn"] in ele_sn.text:
-                # self.click(ele_sn)
-                ele_sn.click()
-                print("选中的text: ", self.get_element(self.loc_label_selected).text)
-                break
-        time.sleep(3)
+                if ele_sn.get_attribute("class") == "selected":
+                    break
+                self.confirm_sn_is_selected(ele_sn)
 
     def click_alert_release_btn(self):
         # self.click(self.loc_release_package_btn)
@@ -300,7 +293,6 @@ class OTAPage(TelpoMDMPage):
         #     assert False, "@@@@上传OTA文件超过3分钟， 请检查！！！！"
         if not self.get_tips_alert(180):
             assert False, "@@@@上传OTA文件超过3分钟， 请检查！！！！"
-        self.refresh_page()
 
     def uploading_box_show(self):
         try:
@@ -312,10 +304,8 @@ class OTAPage(TelpoMDMPage):
     def uploading_box_fade(self):
         try:
             self.web_driver_wait_until_not(EC.visibility_of_element_located(self.loc_uploading_show), 180)
-            print("这是yes")
             return True
         except TimeoutException:
-            print("这是not")
             return False
 
     # check if alert would disappear

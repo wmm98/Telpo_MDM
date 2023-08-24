@@ -177,7 +177,7 @@ class DevicesPage(TelpoMDMPage):
         self.click(self.loc_reboot_btn)
         self.confirm_alert_existed(self.loc_sure_btn)
         self.click(self.loc_sure_btn)
-        self.confirm_tips_alert_show(self.loc_sure_btn)
+        self.click(self.loc_sure_btn)
         self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_sure_btn)
 
     def get_reboot_warning_alert_text(self, text):

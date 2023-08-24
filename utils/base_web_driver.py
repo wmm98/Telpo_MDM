@@ -1,5 +1,6 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+import time
 
 
 class BaseWebDriver:
@@ -21,6 +22,14 @@ class BaseWebDriver:
         url = url
         # 窗口最大化
         driver.get(url)
+        now_time = time.time()
+        while True:
+            if driver.execute_script('return document.readyState;') == 'complete':
+                break
+            if time.time() > now_time + 60:
+                driver.refresh()
+                break
+            time.sleep(1)
 
     def get_web_driver(self):
         return driver

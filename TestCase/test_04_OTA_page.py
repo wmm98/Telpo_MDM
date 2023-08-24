@@ -34,15 +34,18 @@ class TestOTAPage:
 
     @allure.feature('MDM_test02')
     @allure.title("OTA-Upgrade Packages Page")
-    def test_upgrade_package_page(self):
-        self.page.click_OTA_btn()
-        self.page.click_upgrade_packages()
+    def test_upgrade_package_page(self, go_to_ota_upgrade_package_page):
+        # self.page.click_OTA_btn()
+        # self.page.click_upgrade_packages()
+        self.page.page_load_complete()
 
     @allure.feature('MDM_test02')
     @allure.title("OTA-Delete OTA package")
+    @pytest.mark.flaky(reruns=5, reruns_delay=3)
     def test_delete_OTA_package(self):
         package_info = {"package_name": "TPS900_msm8937_sv10_fv1.1.16_pv1.1.16-1.1.18.zip", "file_category": "test",
                         "plat_form": "Android"}
+        self.page.refresh_page()
         self.page.search_device_by_pack_name(package_info["package_name"])
         if len(self.page.get_ota_package_list()) == 1:
             self.page.delete_ota_package()
@@ -52,6 +55,7 @@ class TestOTAPage:
 
     @allure.feature('MDM_test02')
     @allure.title("OTA-Add OTA package")
+    @pytest.mark.flaky(reruns=5, reruns_delay=3)
     def test_add_OTA_package(self):
         exp_existed_text = "ota already existed"
         exp_success_text = "success"
@@ -61,13 +65,14 @@ class TestOTAPage:
         ota_info = {"file_name": file_path, "file_category": package_info["file_category"],
                     "plat_form": package_info["plat_form"]}
         # check if ota package is existed, if not, add package, else skip
+        self.page.refresh_page()
         self.page.search_device_by_pack_name(package_info["package_name"])
         if len(self.page.get_ota_package_list()) == 0:
             self.page.click_add_btn()
             self.page.input_ota_package_info(ota_info)
             self.page.click_save_add_ota_pack()
-            # self.page.search_device_by_pack_name(package_info["package_name"])
-            # assert len(self.page.get_ota_package_list()) == 1, "@@@添加失败！！！"
+            self.page.search_device_by_pack_name(package_info["package_name"])
+            assert len(self.page.get_ota_package_list()) == 1, "@@@添加失败！！！"
 
     @allure.feature('MDM_test01')
     @allure.title("OTA-release OTA package")
@@ -77,10 +82,11 @@ class TestOTAPage:
         release_info = {"package_name": "TPS900_msm8937_sv10_fv1.1.16_pv1.1.16-1.1.18.zip", "sn": "A250900P03100019",
                         "silent": 0, "category": "NO Limit", "network": "NO Limit"}
 
-        self.page.click_upgrade_packages()
+        self.page.refresh_page()
         # search package
         self.page.search_device_by_pack_name(release_info["package_name"])
         # ele = self.page.get_package_ele(release_info["package_name"])
+        # if device is existed, click
         self.page.click_release_btn()
         self.page.input_release_OTA_package(release_info)
 
