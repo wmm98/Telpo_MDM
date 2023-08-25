@@ -1,12 +1,13 @@
-import time
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
-from Page.Base_Page import BasePage
+import Page
+
+By = Page.By
+EC = Page.EC
+t_time = Page.time
 
 
-class TelpoMDMPage(BasePage):
+class TelpoMDMPage(Page.BasePage):
     def __init__(self, driver, times):
-        BasePage.__init__(self, driver, times)
+        Page.BasePage.__init__(self, driver, times)
 
     # loc_devics_map_btn =
     # loc_apps_btn =
@@ -81,40 +82,22 @@ class TelpoMDMPage(BasePage):
             self.web_driver_wait_until(EC.presence_of_element_located(self.loc_main_title))
             if not (title in self.get_loc_main_title()):
                 self.click(loc)
-                time.sleep(1)
+                t_time.sleep(1)
             else:
                 break
-            if time.time() > self.return_end_time():
+            if t_time.time() > self.return_end_time():
                 assert False, "@@@@加载页面失败！！！"
 
     def go_to_new_address(self, url):
         address = "http://test.telpoai.com/%s" % url
         self.driver.get(address)
-        now_time = time.time()
+        now_time = t_time.time()
         if self.driver.current_url != address:
             while True:
                 if self.driver.current_url == address:
                     break
                 else:
                     self.driver.get(address)
-                if time.time() > self.return_end_time(now_time):
+                if t_time.time() > self.return_end_time(now_time):
                     assert False, "@@@打开 %s 失败， 请检查！！！" % address
-                time.sleep(1)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+                t_time.sleep(1)

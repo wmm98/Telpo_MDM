@@ -1,18 +1,14 @@
-from selenium.common import TimeoutException, StaleElementReferenceException, ElementNotInteractableException
-from Conf.Config import Config
-from Page.Telpo_MDM_Page import TelpoMDMPage
-from selenium.webdriver import Keys
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
-import os
-import time
+import Page
 
-conf = Config()
+conf = Page.Config()
+By = Page.By
+t_time = Page.time
+EC = Page.EC
 
 
-class DevicesPage(TelpoMDMPage):
+class DevicesPage(Page.TelpoMDMPage):
     def __init__(self, driver, times):
-        TelpoMDMPage.__init__(self, driver, times)
+        Page.TelpoMDMPage.__init__(self, driver, times)
         self.driver = driver
 
     # Devices_list btn  --new add for test version
@@ -139,14 +135,14 @@ class DevicesPage(TelpoMDMPage):
 
     def click_dropdown_btn(self):
         self.click(self.loc_dropdown_btn)
-        now_time = time.time()
+        now_time = t_time.time()
         while True:
             if self.ele_is_existed(self.loc_menu_show):
                 break
             else:
                 self.click(self.loc_dropdown_btn)
-            time.sleep(1)
-            if time.time() > self.return_end_time(now_time):
+            t_time.sleep(1)
+            if t_time.time() > self.return_end_time(now_time):
                 assert False, "@@@@dropdown 按钮无法打开！！！"
         # self.web_driver_wait_until(EC.presence_of_element_located(self.loc_menu_show), 10)
 
@@ -197,7 +193,7 @@ class DevicesPage(TelpoMDMPage):
         try:
             self.click(self.loc_lock_btn)
             self.confirm_tips_alert_show(self.loc_lock_btn)
-        except StaleElementReferenceException:
+        except Page.StaleElementReferenceException:
             self.click(self.loc_lock_btn)
             self.confirm_tips_alert_show(self.loc_lock_btn)
 
@@ -205,7 +201,7 @@ class DevicesPage(TelpoMDMPage):
         try:
             self.click(self.loc_unlock_btn)
             self.confirm_tips_alert_show(self.loc_unlock_btn)
-        except StaleElementReferenceException:
+        except Page.StaleElementReferenceException:
             self.click(self.loc_unlock_btn)
             self.confirm_tips_alert_show(self.loc_unlock_btn)
 
@@ -214,21 +210,21 @@ class DevicesPage(TelpoMDMPage):
             self.click(self.loc_search_btn)
             self.confirm_alert_existed(self.loc_search_btn)
             self.input_text(self.loc_search_input_box, sn)
-            time.sleep(1)
+            t_time.sleep(1)
             self.click(self.loc_search_search_btn)
             self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_search_search_btn)
-        except StaleElementReferenceException:
+        except Page.StaleElementReferenceException:
             self.click(self.loc_search_btn)
             self.confirm_alert_existed(self.loc_search_btn)
             self.input_text(self.loc_search_input_box, sn)
-            time.sleep(1)
+            t_time.sleep(1)
             self.click(self.loc_search_search_btn)
             self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_search_search_btn)
-        except ElementNotInteractableException:
+        except Page.ElementNotInteractableException:
             self.click(self.loc_search_btn)
             self.confirm_alert_existed(self.loc_search_btn)
             self.input_text(self.loc_search_input_box, sn)
-            time.sleep(1)
+            t_time.sleep(1)
             self.click(self.loc_search_search_btn)
             self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_search_search_btn)
 
@@ -239,8 +235,8 @@ class DevicesPage(TelpoMDMPage):
     def msg_input_and_send(self, msg):
         self.input_text(self.loc_msg_input_box, msg)
         self.click(self.loc_msg_input_send_btn)
-        self.confirm_tips_alert_show(self.loc_msg_btn)
-        self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_msg_btn)
+        self.confirm_tips_alert_show(self.loc_msg_input_send_btn)
+        self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_msg_input_send_btn)
 
     def confirm_msg_alert_fade(self):
         self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_msg_input_send_btn)
@@ -259,12 +255,12 @@ class DevicesPage(TelpoMDMPage):
 
     def import_devices_info(self, info):
         self.alert_show()
-        if not os.path.exists(self.file_path):
+        if not Page.os.path.exists(self.file_path):
             raise FileNotFoundError
         self.input_text(self.loc_choose_file_btn, self.file_path)
         self.select_by_text(self.loc_import_cate_btn, info['cate'])
         self.select_by_text(self.loc_import_model_btn, info['model'])
-        time.sleep(3)
+        t_time.sleep(3)
         self.click(self.loc_import_save_btn)
         self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_import_save_btn)
 
@@ -286,18 +282,18 @@ class DevicesPage(TelpoMDMPage):
 
     def get_add_dev_warning_alert(self):
         flag = 0
-        now_time = time.time()
+        now_time = t_time.time()
         while True:
             ele = self.get_element(self.loc_add_device_success_warning)
             print(ele.get_attribute("style"))
             if "block" in ele.get_attribute("style"):
                 flag += 1
                 break
-            if time.time() > now_time + 5:
+            if t_time.time() > now_time + 5:
                 break
-            time.sleep(1)
+            t_time.sleep(1)
 
-        now_time = time.time()
+        now_time = t_time.time()
         if flag == 0:
             print("运行到这里")
             while True:
@@ -305,9 +301,9 @@ class DevicesPage(TelpoMDMPage):
                     self.click(self.loc_save_dev_btn)
                 else:
                     break
-                if time.time() > now_time + 5:
+                if t_time.time() > now_time + 5:
                     assert False, "无法添加device, 请检查！！！"
-                time.sleep(1)
+                t_time.sleep(1)
 
     # another alert would appear when add device successfully, would conflict
     def confirm_add_device_alert_fade_discard(self):
@@ -329,7 +325,7 @@ class DevicesPage(TelpoMDMPage):
                                      "SN": td_eles[4].text, "Status": td_eles[5].text,
                                      "Lock Status": td_eles[6].text})
             return devices_list
-        except TimeoutException:
+        except Page.TimeoutException:
             return []
 
     # return length of devices_list
@@ -338,7 +334,7 @@ class DevicesPage(TelpoMDMPage):
             eles = self.get_element(self.loc_devices_list)
             tr_eles = eles.find_elements(*self.loc_tr)
             return len(tr_eles)
-        except TimeoutException:
+        except Page.TimeoutException:
             return 0
 
     def select_all_devices(self):
@@ -452,13 +448,13 @@ class DevicesPage(TelpoMDMPage):
         return self.web_driver_wait_until(EC.presence_of_element_located(self.loc_cate_name_existed)).text
 
     def confirm_tips_alert_show(self, loc):
-        now_time = time.time()
+        now_time = t_time.time()
         while True:
             if self.get_tips_alert():
                 break
             else:
                 self.click(loc)
-            if time.time() > self.return_end_time(now_time):
+            if t_time.time() > self.return_end_time(now_time):
                 assert False, "@@@@弹窗无法关闭，请检查！！！"
 
     def get_tips_alert(self):
@@ -466,5 +462,5 @@ class DevicesPage(TelpoMDMPage):
             ele = self.web_driver_wait_until(EC.presence_of_element_located(self.loc_cate_name_existed), 5)
             print(ele.text)
             return True
-        except TimeoutException:
+        except Page.TimeoutException:
             return False

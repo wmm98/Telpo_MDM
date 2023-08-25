@@ -1,18 +1,14 @@
-from selenium.common import TimeoutException
-from Conf.Config import Config
-from Page.Telpo_MDM_Page import TelpoMDMPage
-from selenium.webdriver import Keys
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
-import os
-import time
+import Page
 
-conf = Config()
+conf = Page.Config()
+By = Page.By
+EC = Page.EC
+t_time = Page.time
 
 
-class SystemPage(TelpoMDMPage):
+class SystemPage(Page.TelpoMDMPage):
     def __init__(self, driver, times):
-        TelpoMDMPage.__init__(self, driver, times)
+        Page.TelpoMDMPage.__init__(self, driver, times)
         self.driver = driver
 
     # private app related

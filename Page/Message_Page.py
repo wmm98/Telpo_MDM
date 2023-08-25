@@ -1,18 +1,15 @@
-from selenium.common import TimeoutException, StaleElementReferenceException
-from Conf.Config import Config
-from Common import Log
-from Page.Telpo_MDM_Page import TelpoMDMPage
-from selenium.webdriver import Keys
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
-import os
-import time
+import Page
 
-log = Log.MyLog()
+conf = Page.Config()
+By = Page.By
+EC = Page.EC
+t_time = Page.time
+log = Page.MyLog()
 
-class MessagePage(TelpoMDMPage):
+
+class MessagePage(Page.TelpoMDMPage):
     def __init__(self, driver, times):
-        TelpoMDMPage.__init__(self, driver, times)
+        Page.TelpoMDMPage.__init__(self, driver, times)
         self.driver = driver
 
     loc_device_list = (By.CLASS_NAME, "devicelist")
@@ -31,6 +28,7 @@ class MessagePage(TelpoMDMPage):
     loc_message_box = (By.CLASS_NAME, "message")
     loc_msg_info = (By.TAG_NAME, "div")
     loc_msg_time = (By.TAG_NAME, "span")
+
     # loc_message_text = (By.CLASS_NAME, "text")
     # loc_message_status = (By.CSS_SELECTOR, "[class = 'status text-danger']")
 
@@ -48,7 +46,7 @@ class MessagePage(TelpoMDMPage):
             res = [dev.get_attribute("data-sn") for dev in device_list.find_elements(*self.loc_li_sn)]
             if sn not in res:
                 self.drop_down_categories(cate)
-                time.sleep(1)
+                t_time.sleep(1)
             else:
                 break
         # device is displayed, click related device
@@ -77,7 +75,7 @@ class MessagePage(TelpoMDMPage):
             if self.get_element(self.loc_drop_down_menu_open).find_element(*self.loc_device_active):
                 flag += 1
                 break
-            time.sleep(1)
+            t_time.sleep(1)
         if flag == 0:
             assert False, "@@@@展开menu失败！！！， 请检查！！！"
 
@@ -99,7 +97,7 @@ class MessagePage(TelpoMDMPage):
                         msg_list = {"message": text, "status": status, "time": f_time}
                         message_list.append(msg_list)
                 return message_list
-        except StaleElementReferenceException:
+        except Page.StaleElementReferenceException:
             print("******************再次定位获取刷新的元素**********************************")
             if self.ele_is_existed(self.loc_message_item):
                 self.web_driver_wait_until(EC.presence_of_all_elements_located(self.loc_message_box))

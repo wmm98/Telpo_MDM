@@ -25,9 +25,10 @@ app_page = Apps_Page.APPSPage(driver, 40)
 @pytest.fixture()
 def return_device_page():
     yield
-    device_page.click_devices_btn()
-    # click devices list btn  -- just for test version
-    device_page.click_devices_list_btn()
+    device_page.go_to_new_address("devices")
+    # device_page.click_devices_btn()
+    # # click devices list btn  -- just for test version
+    # device_page.click_devices_list_btn()
 
 
 @pytest.fixture()

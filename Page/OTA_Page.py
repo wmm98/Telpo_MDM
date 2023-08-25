@@ -1,19 +1,14 @@
-from selenium.common import TimeoutException, ElementNotInteractableException
-from Conf.Config import Config
-from Page.Telpo_MDM_Page import TelpoMDMPage
-# from Page.System_Page import SystemPage
-from selenium.webdriver import Keys
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
-import os
-import time
+import Page
 
-conf = Config()
+conf = Page.Config()
+By = Page.By
+EC = Page.EC
+t_time = Page.time
 
 
-class OTAPage(TelpoMDMPage):
+class OTAPage(Page.TelpoMDMPage):
     def __init__(self, driver, times):
-        TelpoMDMPage.__init__(self, driver, times)
+        Page.TelpoMDMPage.__init__(self, driver, times)
         self.driver = driver
 
     loc_upgrade_packages_btn = (By.LINK_TEXT, "Upgrade Packages")
@@ -86,13 +81,13 @@ class OTAPage(TelpoMDMPage):
 
     def click_package_release_page(self):
         self.click(self.loc_package_releases_btn)
-        now_time = time.time()
+        now_time = t_time.time()
         while True:
             if self.ota_release_package_title in self.get_loc_main_title():
                 break
             else:
                 self.click(self.loc_package_releases_btn)
-            if time.time() > self.return_end_time(now_time):
+            if t_time.time() > self.return_end_time(now_time):
                 assert False, "@@@@ 打开package release 出错！！！"
 
     def get_release_log_length(self):
@@ -126,7 +121,7 @@ class OTAPage(TelpoMDMPage):
         self.web_driver_wait_until(EC.presence_of_element_located(self.loc_search_release_search))
         self.input_text(self.loc_search_release_package_name, info["package_name"])
         self.input_text(self.loc_search_release_sn, info["sn"])
-        time.sleep(1)
+        t_time.sleep(1)
         self.click(self.loc_search_release_search)
         self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_search_release_search)
 
@@ -167,8 +162,8 @@ class OTAPage(TelpoMDMPage):
                     self.deal_ele_selected(ele)
                     self.click(self.loc_release_delete_btn)
                     self.confirm_alert_existed(self.loc_release_delete_btn)
-                time.sleep(1)
-                if time.time() > self.return_end_time():
+                t_time.sleep(1)
+                if t_time.time() > self.return_end_time():
                     assert False, "@@@@删除全部release ota logs 出错, 请检查！！！"
         else:
             while True:
@@ -179,7 +174,7 @@ class OTAPage(TelpoMDMPage):
                     self.deal_ele_selected(ele)
                     self.click(self.loc_release_delete_btn)
                     self.confirm_alert_existed(self.loc_release_delete_btn)
-                time.sleep(1)
+                t_time.sleep(1)
 
     def select_release_log(self):
         ele = self.web_driver_wait_until(EC.presence_of_element_located(self.loc_log_check_box))
@@ -194,7 +189,7 @@ class OTAPage(TelpoMDMPage):
                 break
             else:
                 self.click(self.loc_upgrade_packages_btn)
-            if time.time() > self.return_end_time():
+            if t_time.time() > self.return_end_time():
                 assert False, "@@@@ 打开upgrade packages 出错！！！"
 
     def get_package_ele_discard(self, pack_name):
@@ -243,14 +238,14 @@ class OTAPage(TelpoMDMPage):
             self.click(self.loc_search_btn)
             self.confirm_alert_existed(self.loc_search_btn)
             self.input_text(self.loc_input_search_package, pack_name)
-            time.sleep(1)
+            t_time.sleep(1)
             self.click(self.loc_search_search_btn)
             self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_search_search_btn)
-        except ElementNotInteractableException:
+        except Page.ElementNotInteractableException:
             self.click(self.loc_search_btn)
             self.confirm_alert_existed(self.loc_search_btn)
             self.input_text(self.loc_input_search_package, pack_name)
-            time.sleep(1)
+            t_time.sleep(1)
             self.click(self.loc_search_search_btn)
             self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_search_search_btn)
 
@@ -279,15 +274,15 @@ class OTAPage(TelpoMDMPage):
 
     def click_save_add_ota_pack(self):
         self.click(self.loc_save_package_info_btn)
-        now_time = time.time()
+        now_time = t_time.time()
         while True:
             if self.uploading_box_show():
                 break
             else:
                 self.click(self.loc_save_package_info_btn)
-            if time.time() > self.return_end_time(now_time):
+            if t_time.time() > self.return_end_time(now_time):
                 assert False, "@@@@无法上传OTA， 请检查！！！"
-            time.sleep(1)
+            t_time.sleep(1)
         # if not self.uploading_box_fade():
         #     print("333333333333333333333333333333333333")
         #     assert False, "@@@@上传OTA文件超过3分钟， 请检查！！！！"
@@ -298,14 +293,14 @@ class OTAPage(TelpoMDMPage):
         try:
             self.web_driver_wait_until(EC.visibility_of_element_located(self.loc_uploading_show))
             return True
-        except TimeoutException:
+        except Page.TimeoutException:
             return False
 
     def uploading_box_fade(self):
         try:
             self.web_driver_wait_until_not(EC.visibility_of_element_located(self.loc_uploading_show), 180)
             return True
-        except TimeoutException:
+        except Page.TimeoutException:
             return False
 
     # check if alert would disappear
@@ -313,7 +308,7 @@ class OTAPage(TelpoMDMPage):
         try:
             self.web_driver_wait_until_not(EC.presence_of_element_located(self.loc_alert_show), 6)
             return True
-        except TimeoutException:
+        except Page.TimeoutException:
             return False
 
     # check if alert would appear
@@ -321,11 +316,11 @@ class OTAPage(TelpoMDMPage):
         try:
             self.web_driver_wait_until(EC.presence_of_element_located(self.loc_alert_show), 6)
             return True
-        except TimeoutException:
+        except Page.TimeoutException:
             return False
 
     def confirm_tips_alert_show(self, loc, ex_js=0, times=0):
-        now_time = time.time()
+        now_time = t_time.time()
         while True:
             if self.get_tips_alert(times):
                 break
@@ -334,7 +329,7 @@ class OTAPage(TelpoMDMPage):
                     self.exc_js_click_loc(loc)
                 else:
                     self.click(loc)
-            if time.time() > self.return_end_time(now_time):
+            if t_time.time() > self.return_end_time(now_time):
                 assert False, "@@@@弹窗无法关闭，请检查！！！"
 
     def get_tips_alert(self, timeout=0):
@@ -346,5 +341,5 @@ class OTAPage(TelpoMDMPage):
                 ele = self.web_driver_wait_until(EC.presence_of_element_located(self.loc_cate_name_existed), 5)
                 print(ele.text)
             return True
-        except TimeoutException:
+        except Page.TimeoutException:
             return False

@@ -1,18 +1,15 @@
-from selenium.common import TimeoutException
-from Conf.Config import Config
-from Page.Telpo_MDM_Page import TelpoMDMPage
-from selenium.webdriver import Keys
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
-import os
-import time
+import Page
 
-conf = Config()
+By = Page.By
+EC = Page.EC
+t_time = Page.time
+log = Page.MyLog()
+conf = Page.Config()
 
 
-class APPSPage(TelpoMDMPage):
+class APPSPage(Page.TelpoMDMPage):
     def __init__(self, driver, times):
-        TelpoMDMPage.__init__(self, driver, times)
+        Page.TelpoMDMPage.__init__(self, driver, times)
         self.driver = driver
 
     # private app related
@@ -117,9 +114,9 @@ class APPSPage(TelpoMDMPage):
                         break
                     else:
                         device.click()
-                    if time.time() > self.return_end_time():
+                    if t_time.time() > self.return_end_time():
                         assert False, "@@@无法选中device sn, 请检查！！！"
-                    time.sleep(1)
+                    t_time.sleep(1)
         self.click(self.loc_app_uninstall_confirm)
         self.confirm_alert_not_existed(self.loc_app_uninstall_confirm)
 
@@ -148,8 +145,8 @@ class APPSPage(TelpoMDMPage):
                 break
             else:
                 self.refresh_page()
-            time.sleep(1)
-            if time.time() > self.return_end_time():
+            t_time.sleep(1)
+            if t_time.time() > self.return_end_time():
                 assert False, "@@@@ release app 失败, 没有相应得log， 请检查！！！"
 
         text = self.get_element(self.loc_release_list).find_element(*self.loc_single_release).text
@@ -161,7 +158,7 @@ class APPSPage(TelpoMDMPage):
             self.click_select_all_box()
             self.click_delete_btn()
             self.refresh_page()
-            time.sleep(1)
+            t_time.sleep(1)
             if self.get_current_app_release_log_total() != 0:
                 self.click_select_all_box()
                 self.click_delete_btn()
@@ -199,7 +196,7 @@ class APPSPage(TelpoMDMPage):
         self.click(self.loc_search_btn)
         self.confirm_alert_existed(self.loc_search_btn)
         self.input_text(self.loc_search_app_name, app_name)
-        time.sleep(1)
+        t_time.sleep(1)
         self.click(self.loc_search_search)
         self.confirm_alert_not_existed(self.loc_search_search)
 
@@ -210,7 +207,7 @@ class APPSPage(TelpoMDMPage):
                 break
             else:
                 self.click(self.loc_private_app_btn)
-            if time.time() > self.return_end_time():
+            if t_time.time() > self.return_end_time():
                 assert False, "@@@@打开private app page 出错！！！"
 
     def click_add_btn(self):
@@ -222,7 +219,7 @@ class APPSPage(TelpoMDMPage):
         self.select_by_text(self.loc_choose_category, info["file_category"])
         self.input_text(self.loc_developer_box, info["developer"])
         self.input_text(self.loc_des_box, info["description"])
-        time.sleep(1)
+        t_time.sleep(1)
         self.click(self.loc_apk_save_btn)
         # self.confirm_alert_not_existed(self.loc_apk_save_btn)
 
@@ -237,7 +234,7 @@ class APPSPage(TelpoMDMPage):
         try:
             self.web_driver_wait_until_not(EC.presence_of_element_located(self.loc_alert_show), 10)
             return True
-        except TimeoutException:
+        except Page.TimeoutException:
             return False
 
         # check if alert would appear
@@ -246,7 +243,7 @@ class APPSPage(TelpoMDMPage):
         try:
             self.web_driver_wait_until(EC.presence_of_element_located(self.loc_alert_show), 10)
             return True
-        except TimeoutException:
+        except Page.TimeoutException:
             return False
 
     def get_alert_text(self):
@@ -261,5 +258,5 @@ class APPSPage(TelpoMDMPage):
                     self.exc_js_click_loc(loc)
                 else:
                     self.click(loc)
-            if time.time() > self.return_end_time():
+            if t_time.time() > self.return_end_time():
                 assert False, "@@@@弹窗无法关闭 出错， 请检查！！！"

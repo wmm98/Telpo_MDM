@@ -1,32 +1,21 @@
 import allure
-from utils.base_web_driver import BaseWebDriver
 import pytest
-from Common import Log
-from Page.Devices_Page import DevicesPage
-from Page.Apps_Page import APPSPage
-from Page.System_Page import SystemPage
-from Page.OTA_Page import OTAPage
-import time
-from Common.excel_data import ExcelData
-from Conf.Config import Config
-from Common.simply_case import Optimize_Case
-from Common.DealAlert import AlertData
-from Page.Release_Device_Page import ReleaseDevicePage
+import TestCase
 
-conf = Config()
-excel = ExcelData()
-opt_case = Optimize_Case()
-alert = AlertData()
+conf = TestCase.Config()
+excel = TestCase.ExcelData()
+opt_case = TestCase.Optimize_Case()
+alert = TestCase.AlertData()
 
-log = Log.MyLog()
+log = TestCase.MyLog()
 
 
 class TestAppPage:
 
     def setup_class(self):
-        self.driver = BaseWebDriver().get_web_driver()
-        self.page = APPSPage(self.driver, 40)
-        self.system_page = SystemPage(self.driver, 40)
+        self.driver = TestCase.BaseWebDriver().get_web_driver()
+        self.page = TestCase.APPSPage(self.driver, 40)
+        self.system_page = TestCase.SystemPage(self.driver, 40)
 
     def teardown_class(self):
         self.page.refresh_page()

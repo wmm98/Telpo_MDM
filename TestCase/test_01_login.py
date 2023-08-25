@@ -1,19 +1,15 @@
-from selenium.webdriver.support import expected_conditions as EC
-from utils.base_web_driver import BaseWebDriver
-from Page.MDM_Page import MDMPage
-from Common.Log import MyLog
-import time
+import TestCase
 import allure
 import pytest
 
-log = MyLog()
+log = TestCase.MyLog()
 
 
 class TestLogin:
 
     def setup_class(self):
-        self.driver = BaseWebDriver().get_web_driver()
-        self.mdm_page = MDMPage(self.driver, 40)
+        self.driver = TestCase.test_driver
+        self.mdm_page = TestCase.MDMPage(self.driver, 40)
         self.wait_times = 10
 
     def teardown_class(self):
@@ -33,8 +29,8 @@ class TestLogin:
             self.mdm_page.input_pwd_value(password)
             self.mdm_page.choose_agree_btn()
             self.mdm_page.click_login_btn()
-            assert self.mdm_page.web_driver_wait_until(EC.url_to_be(login_ok_url))
-            assert self.mdm_page.web_driver_wait_until(EC.title_is(login_ok_title))
+            assert self.mdm_page.web_driver_wait_until(TestCase.EC.url_to_be(login_ok_url))
+            assert self.mdm_page.web_driver_wait_until(TestCase.EC.title_is(login_ok_title))
         except AssertionError:
             e = "@@@登录失败， 请检查！！！"
             log.error(e)

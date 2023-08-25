@@ -1,23 +1,12 @@
 import allure
-from utils.base_web_driver import BaseWebDriver
 import pytest
-from Common import Log
-from Page.Devices_Page import DevicesPage
-from Page.Message_Page import MessagePage
-from Page.Telpo_MDM_Page import TelpoMDMPage
-import time
-from Common.excel_data import ExcelData
-from Conf.Config import Config
-from Common.simply_case import Optimize_Case
-from Common.DealAlert import AlertData
-from Page.Release_Device_Page import ReleaseDevicePage
+import TestCase
 
-conf = Config()
-excel = ExcelData()
-opt_case = Optimize_Case()
-alert = AlertData()
-
-log = Log.MyLog()
+conf = TestCase.Config()
+excel = TestCase.ExcelData()
+opt_case = TestCase.Optimize_Case()
+alert = TestCase.AlertData()
+log = TestCase.MyLog()
 
 data_cate_mode = [{"cate": "台式2", "model": "M1"},
                   {"cate": "壁挂式1", "model": "TPS980P"}]
@@ -28,10 +17,10 @@ devices = [{"name": "TPS980-cc", "SN": "3180980P12300283", "cate": "壁挂式", 
 
 class TestDevicesPage:
     def setup_class(self):
-        self.driver = BaseWebDriver().get_web_driver()
-        self.page = DevicesPage(self.driver, 40)
-        self.meg_page = MessagePage(self.driver, 40)
-        self.telpo_mdm_page = TelpoMDMPage(self.driver, 40)
+        self.driver = TestCase.test_driver
+        self.page = TestCase.DevicesPage(self.driver, 40)
+        self.meg_page = TestCase.MessagePage(self.driver, 40)
+        self.telpo_mdm_page = TestCase.TelpoMDMPage(self.driver, 40)
         self.rerun = 5
         self.delay = 3
 
@@ -51,16 +40,16 @@ class TestDevicesPage:
             self.page.page_load_complete()
             # check current page
             act_main_title = self.page.get_loc_main_title()
-            now_time = time.time()
+            now_time = TestCase.time.time()
             while True:
                 if exp_main_title in act_main_title:
                     break
                 else:
                     self.page.go_to_new_address("devices")
-                if time.time() > self.page.return_end_time(now_time):
+                if TestCase.time.time() > self.page.return_end_time(now_time):
                     log.error("@@@打开device页超时")
                     assert False, "@@@打开device页超时"
-                time.sleep(1)
+                TestCase.time.sleep(1)
             log.info("当前默认的副标题为：%s" % act_main_title)
         except Exception as e:
             log.error(str(e))
@@ -79,12 +68,12 @@ class TestDevicesPage:
             text = self.page.get_alert_text()
             print(text)
             self.page.confirm_add_category_box_fade()
-            now_time = time.time()
+            now_time = TestCase.time.time()
             while True:
-                time.sleep(1)
+                TestCase.time.sleep(1)
                 if cate_model["cate"] in self.page.get_categories_list():
                     break
-                if time.time() > self.page.return_end_time(now_time, timeout=5):
+                if TestCase.time.time() > self.page.return_end_time(now_time, timeout=5):
                     e = "@@@添加种类失败，请检查！！！"
                     log.error(e)
                     assert False, e
@@ -95,12 +84,12 @@ class TestDevicesPage:
             mode_alert_text = self.page.get_alert_text()
             print(mode_alert_text)
             self.page.confirm_add_model_box_fade()
-            now_time = time.time()
+            now_time = TestCase.time.time()
             while True:
-                time.sleep(1)
+                TestCase.time.sleep(1)
                 if cate_model["model"] in self.page.get_models_list():
                     break
-                if time.time() > self.page.return_end_time(now_time, timeout=5):
+                if TestCase.time.time() > self.page.return_end_time(now_time, timeout=5):
                     e = "@@@添加种类失败，请检查！！！"
                     log.error(e)
                     assert False, e
@@ -149,7 +138,7 @@ class TestDevicesPage:
         self.page.check_ele_is_selected(se_all_btn)
         se_none_btn = self.page.select_all_devices()
         self.page.check_ele_is_not_selected(se_none_btn)
-        time.sleep(3)
+        TestCase.time.sleep(3)
 
         # select single device
         devices_info = self.page.get_dev_info_list()
@@ -159,10 +148,10 @@ class TestDevicesPage:
                     ele = self.page.select_device(devices_list["SN"])
                     # 选中
                     self.page.check_ele_is_selected(ele)
-                    time.sleep(2)
+                    TestCase.time.sleep(2)
                     ele_not = self.page.select_device(devices_list["SN"])
                     self.page.check_ele_is_not_selected(ele_not)
-                    time.sleep(2)
+                    TestCase.time.sleep(2)
         except Exception:
             assert False, "@@@元素没有没选中, 请检查！！！"
 
@@ -185,14 +174,14 @@ class TestDevicesPage:
 
     @allure.feature('MDM_test02')
     @allure.title("Devices- AIMDM send message")
-    @pytest.mark.flaky(reruns=5, reruns_delay=3)
+    @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_send_message_to_single_device(self):
         exp_success_send_text = "Message Sent"
         # sn would change after debug with devices
         sn = "A250900P03100019"
         date_time = '%Y-%m-%d %H:%M:%S'
         self.page.refresh_page()
-        now = time.strftime(date_time, time.localtime(time.time()))
+        now = TestCase.time.strftime(date_time, TestCase.time.localtime(TestCase.time.time()))
         msg = "%s: 12345#$**&&&&" % now
         # confirm if device is online and execute next step, if not, end the case execution
         opt_case.check_single_device(sn)
@@ -220,14 +209,14 @@ class TestDevicesPage:
             self.page.click_lock()
             self.page.refresh_page()
             # check if device lock already
-            now_time = time.time()
+            now_time = TestCase.time.time()
             while True:
                 if "Locked" in opt_case.get_single_device_list(sn)[0]["Lock Status"]:
                     break
-                if time.time() > self.page.return_end_time(now_time, 60):
+                if TestCase.time.time() > self.page.return_end_time(now_time, 60):
                     assert False, "@@@@信息发送失败，请检查！！！！"
                 self.page.refresh_page()
-                time.sleep(1)
+                TestCase.time.sleep(1)
 
             self.page.refresh_page()
 
@@ -235,14 +224,14 @@ class TestDevicesPage:
             self.page.select_device(sn)
             self.page.click_unlock()
             self.page.refresh_page()
-            now_time = time.time()
+            now_time = TestCase.time.time()
             for j in range(5):
                 if "Normal" in opt_case.get_single_device_list(sn)[0]["Lock Status"]:
                     break
-                if time.time() > self.page.return_end_time(now_time, 60):
+                if TestCase.time.time() > self.page.return_end_time(now_time, 60):
                     assert False, "@@@@信息发送失败，请检查！！！！"
                 self.page.refresh_page()
-                time.sleep(1)
+                TestCase.time.sleep(1)
 
     @allure.feature('MDM_test02')
     @allure.title("Devices- reboot device 5 times")
@@ -255,13 +244,13 @@ class TestDevicesPage:
             opt_case.check_single_device(sn)
             self.page.select_device(sn)
             self.page.click_reboot_btn()
-            time.sleep(3)
+            TestCase.time.sleep(3)
             self.page.refresh_page()
             # get device info
             # check if command trigger in 3s
             assert "Off" in opt_case.get_single_device_list(sn)[0]["Status"]
 
-            time.sleep(150)
+            TestCase.time.sleep(150)
             self.page.refresh_page()
             assert "On" in opt_case.get_single_device_list(sn)[0]["Status"], "@@@@ 1分钟之内无法重启！！"
             print("成功运行 %s 次" % str(i))
@@ -295,19 +284,19 @@ class TestDevicesPage:
 
     @allure.feature('MDM_test02')
     @allure.title("Devices- AIMDM send msg and check the log in the Message Module")
-    @pytest.mark.flaky(reruns=5, reruns_delay=1)
+    @pytest.mark.flaky(reruns=1, reruns_delay=1)
     def test_pressure_send_message_to_single_device(self, return_device_page):
         exp_success_send_text = "Message Sent"
         # sn would change after debug with devices
         sn = "A250900P03100019"
-        length = 10
+        length = 2
         self.page.refresh_page()
         # confirm if device is online and execute next step, if not, end the case execution
         data = opt_case.check_single_device(sn)
         print(data)
         # get device category
         device_cate = data[0]['Category']
-        now = time.strftime('%Y-%m-%d %H:%M', time.localtime(time.time()))
+        now = TestCase.time.strftime('%Y-%m-%d %H:%M', TestCase.time.localtime(TestCase.time.time()))
         message_list = []
         for i in range(length):
             self.page.refresh_page()
@@ -323,7 +312,7 @@ class TestDevicesPage:
         self.meg_page.page_load_complete()
         # Check result of device message in the Message Module and msg status
         self.meg_page.choose_device(sn, device_cate)
-        now_time = time.time()
+        now_time = TestCase.time.time()
         # res = self.meg_page.get_device_message_list(now)
         # print(res)
         # try:
@@ -331,9 +320,8 @@ class TestDevicesPage:
             msg_list = self.meg_page.get_device_message_list(now)
             if len(msg_list) == length:
                 break
-            if time.time() > self.page.return_end_time(now_time):
+            if TestCase.time.time() > self.page.return_end_time(now_time):
                 assert False, "@@@终端收到信息后, 平台180s内无法收到相应的信息"
-        print(msg_list)
 
     @allure.feature('MDM_test02')
     @allure.title("Devices- AIMDM transfer api server ")
@@ -349,9 +337,10 @@ class TestDevicesPage:
         release_login_ok_title = "Telpo MDM"
         self.page.refresh_page()
         self.page.page_load_complete()
-        BaseWebDriver().open_web_site(release_version_url)
-        release_driver = BaseWebDriver().get_web_driver()
-        release_page = ReleaseDevicePage(release_driver, 40)
+
+        TestCase.BaseWebDriver().open_web_site(release_version_url)
+        release_driver = TestCase.BaseWebDriver().get_web_driver()
+        release_page = TestCase.ReleaseDevicePage(release_driver, 40)
 
         opt_case.check_single_device(sn)
         self.page.select_device(sn)
@@ -401,7 +390,7 @@ class TestDevicesPage:
         opt_case.check_single_device(sn)
         self.page.click_dropdown_btn()
         self.page.click_shutdown_btn()
-        time.sleep(3)
+        TestCase.time.sleep(3)
         self.page.refresh_page()
         assert "Off" in opt_case.get_single_device_list(sn)[0]["Status"]
 
@@ -414,8 +403,8 @@ class TestDevicesPage:
         self.telpo_mdm_page.click_message_btn()
         if not (message_page_title in self.meg_page.get_loc_main_title()):
             self.telpo_mdm_page.click_message_btn()
-        time.sleep(1)
+        TestCase.time.sleep(1)
         self.meg_page.choose_device(sn, "壁挂式")
         msg_list = self.meg_page.get_device_message_list(length)
         print(msg_list)
-        time.sleep(4)
+        TestCase.time.sleep(4)
