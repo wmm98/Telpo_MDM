@@ -18,7 +18,7 @@ class TestTelpoMDM:
         pass
 
     @allure.feature('MDM_test01 -- not run right now')
-    @allure.title("Telpo_MDM main page")  # 设置case的名字
+    @allure.title("Telpo_MDM main Page")  # 设置case的名字
     @pytest.mark.dependency(depends=["test_login_ok"], scope='package')
     @pytest.mark.dependency(name="test_TelpoMdM_Page", scope='package')
     def test_Telpo_page(self):

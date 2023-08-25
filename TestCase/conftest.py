@@ -12,14 +12,14 @@
 
 """
 import pytest
-from utils.base_web_driver import BaseWebDriver
-from Page import Telpo_MDM_Page, Devices_Page, OTA_Page, Apps_Page
+# from utils.base_web_driver import BaseWebDriver
+# from Page import Telpo_MDM_Page, Devices_Page, OTA_Page, Apps_Page
+import TestCase
 
-base_driver = BaseWebDriver()
-driver = base_driver.get_web_driver()
-device_page = Devices_Page.DevicesPage(driver, 40)
-ota_page = OTA_Page.OTAPage(driver, 40)
-app_page = Apps_Page.APPSPage(driver, 40)
+driver = TestCase.test_driver
+device_page = TestCase.DevicesPage(driver, 40)
+ota_page = TestCase.OTAPage(driver, 40)
+app_page = TestCase.APPSPage(driver, 40)
 
 
 @pytest.fixture()

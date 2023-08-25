@@ -49,7 +49,7 @@ class TestAppPage:
         if len(search_list) == 0:
             self.page.click_add_btn()
             self.page.input_app_info(info)
-            # self.page.click_save_add_app()
+            # self.Page.click_save_add_app()
             text = self.page.get_alert_text()
             print(text)
             self.page.check_add_app_save_btn()
@@ -108,8 +108,8 @@ class TestAppPage:
         self.page.input_uninstall_app_info(release_info)
 
         # go to app uninstall log
-        # self.page.go_to_new_address("apps/releases")
-        # self.page.check_release_log_info(release_info)
+        # self.Page.go_to_new_address("apps/releases")
+        # self.Page.check_release_log_info(release_info)
 
     @allure.feature('MDM_test01')
     @allure.title("Apps- release app again")

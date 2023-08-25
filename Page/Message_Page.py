@@ -1,15 +1,16 @@
-import Page
+import Page as public_pack
+from Page.Telpo_MDM_Page import TelpoMDMPage
 
-conf = Page.Config()
-By = Page.By
-EC = Page.EC
-t_time = Page.time
-log = Page.MyLog()
+conf = public_pack.Config()
+By = public_pack.By
+EC = public_pack.EC
+t_time = public_pack.t_time
+log = public_pack.MyLog()
 
 
-class MessagePage(Page.TelpoMDMPage):
+class MessagePage(TelpoMDMPage):
     def __init__(self, driver, times):
-        Page.TelpoMDMPage.__init__(self, driver, times)
+        TelpoMDMPage.__init__(self, driver, times)
         self.driver = driver
 
     loc_device_list = (By.CLASS_NAME, "devicelist")
@@ -46,7 +47,7 @@ class MessagePage(Page.TelpoMDMPage):
             res = [dev.get_attribute("data-sn") for dev in device_list.find_elements(*self.loc_li_sn)]
             if sn not in res:
                 self.drop_down_categories(cate)
-                t_time.sleep(1)
+                self.time_sleep(1)
             else:
                 break
         # device is displayed, click related device
@@ -97,7 +98,7 @@ class MessagePage(Page.TelpoMDMPage):
                         msg_list = {"message": text, "status": status, "time": f_time}
                         message_list.append(msg_list)
                 return message_list
-        except Page.StaleElementReferenceException:
+        except public_pack.StaleElementReferenceException:
             print("******************再次定位获取刷新的元素**********************************")
             if self.ele_is_existed(self.loc_message_item):
                 self.web_driver_wait_until(EC.presence_of_all_elements_located(self.loc_message_box))

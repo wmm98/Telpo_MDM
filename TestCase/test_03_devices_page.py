@@ -28,7 +28,7 @@ class TestDevicesPage:
         self.page.refresh_page()
 
     @allure.feature('MDM_test02')
-    @allure.title("Devices main page")  # 设置case的名字
+    @allure.title("Devices main Page")  # 设置case的名字
     # @pytest.mark.dependency(depends=["test_TelpoMdM_Page"], scope='package')
     def test_go_to_devices_page(self):
         exp_main_title = "Total Devices"
@@ -36,9 +36,9 @@ class TestDevicesPage:
             self.page.click_devices_btn()
             # click devices list btn  -- just for test version
             self.page.click_devices_list_btn()
-            # wait page load complete
+            # wait Page load complete
             self.page.page_load_complete()
-            # check current page
+            # check current Page
             act_main_title = self.page.get_loc_main_title()
             now_time = TestCase.time.time()
             while True:
@@ -113,10 +113,10 @@ class TestDevicesPage:
                 print(info_len_pre)
                 self.page.click_new_btn()
                 self.page.add_devices_info(devices_list)
-                # text = self.page.get_alert_text()
+                # text = self.Page.get_alert_text()
                 # print(text)
                 self.page.get_add_dev_warning_alert()
-                # refresh current page and clear warning war
+                # refresh current Page and clear warning war
                 self.page.refresh_page()
                 info_len_pos = self.page.get_dev_info_length()
                 print(info_len_pos)
@@ -166,9 +166,9 @@ class TestDevicesPage:
         # click import-btn
         self.page.click_import_btn()
         self.page.import_devices_info(devices_info)
-        # print(self.page.get_alert_text())
-        # if exp_success_text in self.page.get_alert_text():
-        #     self.page.alert_fade()
+        # print(self.Page.get_alert_text())
+        # if exp_success_text in self.Page.get_alert_text():
+        #     self.Page.alert_fade()
 
         # need to add check length of data list
 
@@ -308,7 +308,7 @@ class TestDevicesPage:
             message_list.append(msg)
 
         self.page.go_to_new_address("message")
-        # check if page loaded completely
+        # check if Page loaded completely
         self.meg_page.page_load_complete()
         # Check result of device message in the Message Module and msg status
         self.meg_page.choose_device(sn, device_cate)

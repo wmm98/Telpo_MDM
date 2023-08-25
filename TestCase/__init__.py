@@ -16,5 +16,22 @@ from Page.System_Page import SystemPage
 from Page.Apps_Page import APPSPage
 import time
 
+#
 chrome_driver = BaseWebDriver()
 test_driver = chrome_driver.get_web_driver()
+# EC = EC
+# MDMPage = MDMPage
+# MyLog = MyLog
+# Log = Log
+# OTAPage = OTAPage
+# DevicesPage = DevicesPage
+# MessagePage = MessagePage
+# TelpoMDMPage = TelpoMDMPage
+# ExcelData = ExcelData
+# Config = Config
+# Optimize_Case = Optimize_Case
+# AlertData = AlertData
+# ReleaseDevicePage = ReleaseDevicePage
+# SystemPage = SystemPage
+# APPSPage = APPSPage
+# time = time

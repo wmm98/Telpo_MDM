@@ -74,8 +74,8 @@ if __name__ == '__main__':
     req.post(url, data)
     # time.sleep(5)
     log_url = "http://test.telpopaas.com/appLogs"
-    data1 = {"page": 1, "offset": 30}
-    # data1 = {"page": 1,
+    data1 = {"Page": 1, "offset": 30}
+    # data1 = {"Page": 1,
     #          "offset": 5,
     #          "share": 0,
     #          "verifyed": 0,

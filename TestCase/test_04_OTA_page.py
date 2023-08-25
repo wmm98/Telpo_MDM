@@ -23,8 +23,8 @@ class TestOTAPage:
     @allure.feature('MDM_test02')
     @allure.title("OTA-Upgrade Packages Page")
     def test_upgrade_package_page(self, go_to_ota_upgrade_package_page):
-        # self.page.click_OTA_btn()
-        # self.page.click_upgrade_packages()
+        # self.Page.click_OTA_btn()
+        # self.Page.click_upgrade_packages()
         self.page.page_load_complete()
 
     @allure.feature('MDM_test02')
@@ -73,13 +73,13 @@ class TestOTAPage:
         self.page.refresh_page()
         # search package
         self.page.search_device_by_pack_name(release_info["package_name"])
-        # ele = self.page.get_package_ele(release_info["package_name"])
+        # ele = self.Page.get_package_ele(release_info["package_name"])
         # if device is existed, click
         self.page.click_release_btn()
         self.page.input_release_OTA_package(release_info)
 
         text = self.page.click_alert_release_btn()
-        # text = self.page.get_alert_text()
+        # text = self.Page.get_alert_text()
         if exp_success_text in text:
             self.page.click_package_release_page()
             # check release log
@@ -90,13 +90,13 @@ class TestOTAPage:
     @allure.feature('MDM_test01')
     @allure.title("OTA- release again")
     def test_release_ota_again(self, go_to_ota_upgrade_logs_page):
-        # self.page.refresh_page()
+        # self.Page.refresh_page()
         TestCase.time.sleep(1)
         exp_success_text = "Sync Ota Release Success"
         # exp_existed_text = "ota release already existed"
         release_info = {"package_name": "TPS900_msm8937_sv10_fv1.1.16_pv1.1.16-1.1.18.zip", "sn": "A250900P03100019",
                         "silent": 0, "category": "NO Limit", "network": "NO Limit"}
-        # self.page.click_package_release_page()
+        # self.Page.click_package_release_page()
         self.page.check_single_release_info(release_info)
         self.page.search_single_release_log(release_info, count=True)
         self.page.select_release_log()

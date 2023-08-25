@@ -1,14 +1,15 @@
-import Page
+import Page as public_pack
+from Page.Telpo_MDM_Page import TelpoMDMPage
 
-conf = Page.Config()
-By = Page.By
-EC = Page.EC
-t_time = Page.time
+conf = public_pack.Config()
+By = public_pack.By
+EC = public_pack.EC
+t_time = public_pack.t_time
 
 
-class SystemPage(Page.TelpoMDMPage):
+class SystemPage(TelpoMDMPage):
     def __init__(self, driver, times):
-        Page.TelpoMDMPage.__init__(self, driver, times)
+        TelpoMDMPage.__init__(self, driver, times)
         self.driver = driver
 
     # private app related

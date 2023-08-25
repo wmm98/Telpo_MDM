@@ -1,15 +1,16 @@
-import Page
+import Page as public_pack
+from Page.Telpo_MDM_Page import TelpoMDMPage
 
-By = Page.By
-EC = Page.EC
-t_time = Page.time
-log = Page.MyLog()
-conf = Page.Config()
+By = public_pack.By
+EC = public_pack.EC
+t_time = public_pack.t_time
+log = public_pack.MyLog()
+conf = public_pack.Config()
 
 
-class APPSPage(Page.TelpoMDMPage):
+class APPSPage(TelpoMDMPage):
     def __init__(self, driver, times):
-        Page.TelpoMDMPage.__init__(self, driver, times)
+        TelpoMDMPage.__init__(self, driver, times)
         self.driver = driver
 
     # private app related
@@ -54,7 +55,7 @@ class APPSPage(Page.TelpoMDMPage):
     loc_app_package_name = (By.ID, "release_apk_package")
     loc_app_release_confirm = (By.CSS_SELECTOR, "[class = 'btn btn-primary confirm_release']")
 
-    # app release page
+    # app release Page
     loc_release_check_all = (By.ID, "checkall")
     loc_release_delete_btn = (By.CSS_SELECTOR, "[class = 'fas fa-trash-alt ']")
     loc_release_confirm_del_btn = (By.CSS_SELECTOR, "[class = 'btn btn-outline-dark sure_delete_release']")
@@ -109,14 +110,15 @@ class APPSPage(Page.TelpoMDMPage):
             if info["sn"] in device.get_attribute("data"):
                 if device.get_attribute("class") == "selected":
                     break
+                now_time = self.get_current_time()
                 while True:
                     if device.get_attribute("class") == "selected":
                         break
                     else:
                         device.click()
-                    if t_time.time() > self.return_end_time():
+                    if self.get_current_time() > self.return_end_time(now_time):
                         assert False, "@@@无法选中device sn, 请检查！！！"
-                    t_time.sleep(1)
+                    self.time_sleep(1)
         self.click(self.loc_app_uninstall_confirm)
         self.confirm_alert_not_existed(self.loc_app_uninstall_confirm)
 
@@ -140,14 +142,15 @@ class APPSPage(Page.TelpoMDMPage):
         self.deal_ele_selected(ele)
 
     def check_release_log_info(self, info):
+        now_time = self.get_current_time()
         while True:
             if self.get_current_app_release_log_total() != 0:
                 break
             else:
                 self.refresh_page()
-            t_time.sleep(1)
-            if t_time.time() > self.return_end_time():
+            if self.get_current_time() > self.return_end_time(now_time):
                 assert False, "@@@@ release app 失败, 没有相应得log， 请检查！！！"
+            self.time_sleep(1)
 
         text = self.get_element(self.loc_release_list).find_element(*self.loc_single_release).text
         if not info["package"] in text and (info["silent"] in text) and (info["version"] in text):
@@ -158,7 +161,7 @@ class APPSPage(Page.TelpoMDMPage):
             self.click_select_all_box()
             self.click_delete_btn()
             self.refresh_page()
-            t_time.sleep(1)
+            self.time_sleep(1)
             if self.get_current_app_release_log_total() != 0:
                 self.click_select_all_box()
                 self.click_delete_btn()
@@ -196,19 +199,21 @@ class APPSPage(Page.TelpoMDMPage):
         self.click(self.loc_search_btn)
         self.confirm_alert_existed(self.loc_search_btn)
         self.input_text(self.loc_search_app_name, app_name)
-        t_time.sleep(1)
+        self.time_sleep(1)
         self.click(self.loc_search_search)
         self.confirm_alert_not_existed(self.loc_search_search)
 
     def click_private_app_btn(self):
         self.click(self.loc_private_app_btn)
+        now_time = self.get_current_time()
         while True:
             if self.private_app_main_title in self.get_loc_main_title():
                 break
             else:
                 self.click(self.loc_private_app_btn)
-            if t_time.time() > self.return_end_time():
-                assert False, "@@@@打开private app page 出错！！！"
+            if self.get_current_time() > self.return_end_time(now_time):
+                assert False, "@@@@打开private app Page 出错！！！"
+            self.time_sleep(1)
 
     def click_add_btn(self):
         self.click(self.loc_new_btn)
@@ -219,7 +224,7 @@ class APPSPage(Page.TelpoMDMPage):
         self.select_by_text(self.loc_choose_category, info["file_category"])
         self.input_text(self.loc_developer_box, info["developer"])
         self.input_text(self.loc_des_box, info["description"])
-        t_time.sleep(1)
+        self.time_sleep(1)
         self.click(self.loc_apk_save_btn)
         # self.confirm_alert_not_existed(self.loc_apk_save_btn)
 
@@ -234,7 +239,7 @@ class APPSPage(Page.TelpoMDMPage):
         try:
             self.web_driver_wait_until_not(EC.presence_of_element_located(self.loc_alert_show), 10)
             return True
-        except Page.TimeoutException:
+        except public_pack.TimeoutException:
             return False
 
         # check if alert would appear
@@ -243,13 +248,14 @@ class APPSPage(Page.TelpoMDMPage):
         try:
             self.web_driver_wait_until(EC.presence_of_element_located(self.loc_alert_show), 10)
             return True
-        except Page.TimeoutException:
+        except public_pack.TimeoutException:
             return False
 
     def get_alert_text(self):
         return self.web_driver_wait_until(EC.presence_of_element_located(self.loc_cate_name_existed)).text
 
     def confirm_alert_not_existed(self, loc, ex_js=0):
+        now_time = self.get_current_time()
         while True:
             if self.alert_fade():
                 break
@@ -258,5 +264,6 @@ class APPSPage(Page.TelpoMDMPage):
                     self.exc_js_click_loc(loc)
                 else:
                     self.click(loc)
-            if t_time.time() > self.return_end_time():
+            if self.get_current_time() > self.return_end_time(now_time):
                 assert False, "@@@@弹窗无法关闭 出错， 请检查！！！"
+            self.time_sleep(1)
