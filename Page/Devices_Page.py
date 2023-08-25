@@ -445,21 +445,3 @@ class DevicesPage(TelpoMDMPage):
         # except TimeoutException:
         #     return False
         return self.web_driver_wait_until(EC.presence_of_element_located(self.loc_cate_name_existed)).text
-
-    def confirm_tips_alert_show(self, loc):
-        now_time = t_time.time()
-        while True:
-            if self.get_tips_alert():
-                break
-            else:
-                self.click(loc)
-            if t_time.time() > self.return_end_time(now_time):
-                assert False, "@@@@弹窗无法关闭，请检查！！！"
-
-    def get_tips_alert(self):
-        try:
-            ele = self.web_driver_wait_until(EC.presence_of_element_located(self.loc_cate_name_existed), 5)
-            print(ele.text)
-            return True
-        except public_pack.TimeoutException:
-            return False

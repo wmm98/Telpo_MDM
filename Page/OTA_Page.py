@@ -324,7 +324,7 @@ class OTAPage(TelpoMDMPage):
             return False
 
     def confirm_tips_alert_show(self, loc, ex_js=0, times=0):
-        now_time = t_time.time()
+        now_time = self.get_current_time()
         while True:
             if self.get_tips_alert(times):
                 break
@@ -333,8 +333,9 @@ class OTAPage(TelpoMDMPage):
                     self.exc_js_click_loc(loc)
                 else:
                     self.click(loc)
-            if t_time.time() > self.return_end_time(now_time):
+            if self.get_current_time() > self.return_end_time(now_time):
                 assert False, "@@@@弹窗无法关闭，请检查！！！"
+            self.time_sleep(1)
 
     def get_tips_alert(self, timeout=0):
         try:

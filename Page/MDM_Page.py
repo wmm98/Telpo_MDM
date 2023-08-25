@@ -45,26 +45,6 @@ class MDMPage(BasePage):
         self.confirm_tips_alert_show(self.loc_login_btn)
         # self.
 
-    def confirm_tips_alert_show(self, loc):
-        now_time = self.get_current_time()
-        while True:
-            if self.get_tips_alert():
-                break
-            else:
-                self.click(loc)
-            if self.get_current_time() > self.return_end_time(now_time):
-                assert False, "@@@@弹窗无法关闭，请检查！！！"
-            self.time_sleep(1)
-
-    def get_tips_alert(self):
-        try:
-            ele = self.web_driver_wait_until(EC.presence_of_element_located(self.loc_success_tips), 5)
-            print(ele.text)
-            return True
-        except public_pack.TimeoutException:
-            return False
-
-
 # if __name__ == '__main__':
 #     from selenium import webdriver
 #     driver = webdriver.Chrome()

@@ -7,6 +7,8 @@ class BasePage:
         self.driver = driver
         self.times = times
 
+    loc_tips = (public_pack.By.ID, "swal2-title")
+
     def quit_browser(self):
         self.driver.quit()
 
@@ -251,17 +253,28 @@ class BasePage:
             if self.get_current_time() > self.return_end_time(now_time):
                 assert False, "@@@无法选中device sn, 请检查！！！"
             self.time_sleep(1)
-            
+
     def get_current_time(self):
         return public_pack.t_time.time()
 
     def time_sleep(self, sec):
         public_pack.t_time.sleep(sec)
 
+    def confirm_tips_alert_show(self, loc):
+        now_time = self.get_current_time()
+        while True:
+            if self.get_tips_alert():
+                break
+            else:
+                self.click(loc)
+            if self.get_current_time() > self.return_end_time(now_time):
+                assert False, "@@@@弹窗无法关闭，请检查！！！"
+            self.time_sleep(1)
 
-
-
-
-
-
-
+    def get_tips_alert(self):
+        try:
+            ele = self.web_driver_wait_until(public_pack.EC.presence_of_element_located(self.loc_tips), 5)
+            print(ele.text)
+            return True
+        except public_pack.TimeoutException:
+            return False

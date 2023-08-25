@@ -12,7 +12,6 @@ class TestTelpoMDM:
     def setup_class(self):
         self.driver = BaseWebDriver().get_web_driver()
         self.page = TelpoMDMPage(self.driver, 40)
-        self.wait_times = 10
 
     def teardown_class(self):
         pass
