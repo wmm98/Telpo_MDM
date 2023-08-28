@@ -228,6 +228,14 @@ class DevicesPage(TelpoMDMPage):
             self.time_sleep(1)
             self.click(self.loc_search_search_btn)
             self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_search_search_btn)
+        except public_pack.TimeoutException:
+            self.refresh_page()
+            self.click(self.loc_search_btn)
+            self.confirm_alert_existed(self.loc_search_btn)
+            self.input_text(self.loc_search_input_box, sn)
+            self.time_sleep(1)
+            self.click(self.loc_search_search_btn)
+            self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_search_search_btn)
 
     def click_send_btn(self):
         self.click(self.loc_msg_btn)
@@ -412,6 +420,7 @@ class DevicesPage(TelpoMDMPage):
     def add_category(self, cate_name):
         self.input_text(self.loc_input_cate_box, cate_name)
         self.click(self.loc_save_btn_cate)
+        self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_save_btn_cate)
 
     def confirm_add_category_box_fade(self):
         self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_save_btn_cate)
@@ -425,6 +434,7 @@ class DevicesPage(TelpoMDMPage):
     def add_model(self, model_name):
         self.input_text(self.loc_input_mode_box, model_name)
         self.click(self.loc_save_btn_mode)
+        self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_save_btn_cate)
 
     def confirm_add_model_box_fade(self):
         self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_save_btn_cate)

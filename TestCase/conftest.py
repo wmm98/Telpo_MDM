@@ -32,6 +32,13 @@ def return_device_page():
 
 
 @pytest.fixture()
+def go_to_and_return_device_page():
+    device_page.go_to_new_address("devices")
+    yield
+    device_page.go_to_new_address("devices")
+
+
+@pytest.fixture()
 def go_to_ota_upgrade_logs_page():
     ota_page.click_OTA_btn()
     ota_page.click_package_release_page()

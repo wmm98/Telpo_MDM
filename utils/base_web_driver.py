@@ -13,7 +13,7 @@ class BaseWebDriver:
         chrome_options = Options()
         chrome_options.add_argument("--allow-insecure-localhost")  # 允许访问不安全的本地主机（可选）
         chrome_options.add_argument("--ignore-certificate-errors")  # 忽略证书错误
-        driver = webdriver.Chrome(chrome_options=chrome_options)
+        driver = webdriver.Chrome(options=chrome_options)
 
         # driver = webdriver.Chrome()
         driver.implicitly_wait(5)

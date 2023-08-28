@@ -7,8 +7,6 @@
 import logging
 import os
 import time
-# from Conf import Config
-# conf = Config.Config()
 
 """
 2.8 组件之间的关系

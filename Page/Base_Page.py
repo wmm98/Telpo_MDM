@@ -179,6 +179,7 @@ class BasePage:
         return self.driver.find_elements(*loc)
 
     def get_elements_in_range(self, loc_pre, loc_pos):
+        self.web_driver_wait_until(public_pack.EC.presence_of_element_located(loc_pre))
         return self.driver.find_element(*loc_pre).find_elements(*loc_pos)
 
     def input_text(self, loc, text):

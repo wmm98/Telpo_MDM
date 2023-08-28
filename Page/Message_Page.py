@@ -34,26 +34,40 @@ class MessagePage(TelpoMDMPage):
     # loc_message_status = (By.CSS_SELECTOR, "[class = 'status text-danger']")
 
     def choose_device(self, sn, cate):
-        # wait drop down open, for stability
-        # self.web_driver_wait_until(EC.presence_of_element_located(self.loc_drop_down_menu_open))
-        # self.web_driver_wait_until(EC.presence_of_element_located(self.loc_drop_down_menu_open))
-
-        device_list = self.web_driver_wait_until(EC.presence_of_element_located(self.loc_device_list))
-        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_li_sn))
-        # devices_sn = device_list.find_elements(*self.loc_li_sn)
-        # check if device is displayed
-        while True:
-            # if sn in res, ele is displayed
-            res = [dev.get_attribute("data-sn") for dev in device_list.find_elements(*self.loc_li_sn)]
-            if sn not in res:
-                self.drop_down_categories(cate)
-                self.time_sleep(1)
-            else:
-                break
-        # device is displayed, click related device
-        for device in device_list.find_elements(*self.loc_li_sn):
-            if sn == device.get_attribute("data-sn"):
-                self.exc_js_click(device)
+        try:
+            device_list = self.web_driver_wait_until(EC.presence_of_element_located(self.loc_device_list))
+            self.web_driver_wait_until(EC.presence_of_element_located(self.loc_li_sn))
+            # devices_sn = device_list.find_elements(*self.loc_li_sn)
+            # check if device is displayed
+            while True:
+                # if sn in res, ele is displayed
+                res = [dev.get_attribute("data-sn") for dev in device_list.find_elements(*self.loc_li_sn)]
+                if sn not in res:
+                    self.drop_down_categories(cate)
+                    self.time_sleep(1)
+                else:
+                    break
+            # device is displayed, click related device
+            for device in device_list.find_elements(*self.loc_li_sn):
+                if sn == device.get_attribute("data-sn"):
+                    self.exc_js_click(device)
+        except public_pack.StaleElementReferenceException:
+            device_list = self.web_driver_wait_until(EC.presence_of_element_located(self.loc_device_list))
+            self.web_driver_wait_until(EC.presence_of_element_located(self.loc_li_sn))
+            # devices_sn = device_list.find_elements(*self.loc_li_sn)
+            # check if device is displayed
+            while True:
+                # if sn in res, ele is displayed
+                res = [dev.get_attribute("data-sn") for dev in device_list.find_elements(*self.loc_li_sn)]
+                if sn not in res:
+                    self.drop_down_categories(cate)
+                    self.time_sleep(1)
+                else:
+                    break
+            # device is displayed, click related device
+            for device in device_list.find_elements(*self.loc_li_sn):
+                if sn == device.get_attribute("data-sn"):
+                    self.exc_js_click(device)
 
     def drop_down_categories(self, cate):
         device_list = self.web_driver_wait_until(EC.presence_of_element_located(self.loc_device_list))
