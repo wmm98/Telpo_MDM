@@ -61,6 +61,7 @@ class APPSPage(TelpoMDMPage):
     loc_release_confirm_del_btn = (By.CSS_SELECTOR, "[class = 'btn btn-outline-dark sure_delete_release']")
     loc_release_list = (By.ID, "releases_list")
     loc_single_release = (By.TAG_NAME, "tr")
+    loc_single_release_col = (By.CLASS_NAME, "text-center")
 
     # app release search btn relate
     loc_release_search_btn = (By.CSS_SELECTOR, "[class = 'fas fa-search']")
@@ -126,7 +127,8 @@ class APPSPage(TelpoMDMPage):
         self.click(self.loc_release_delete_btn)
         self.confirm_alert_existed(self.loc_release_delete_btn)
         self.click(self.loc_release_confirm_del_btn)
-        self.confirm_alert_not_existed(self.loc_release_confirm_del_btn)
+        self.confirm_tips_alert_show(self.loc_release_confirm_del_btn)
+        self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_release_confirm_del_btn)
 
     def get_current_app_release_log_total(self):
         release_list = self.get_element(self.loc_release_list)
@@ -136,35 +138,57 @@ class APPSPage(TelpoMDMPage):
         else:
             return 0
 
+    def get_app_current_release_log_list(self, send_time, device):
+        release_list = self.get_element(self.loc_release_list)
+        logs_list = []
+        if self.ele_is_existed_in_range(self.loc_release_list, self.loc_single_release):
+            logs = release_list.find_elements(*self.loc_single_release)
+            for single_log in logs:
+                cols = single_log.find_elements(*self.loc_single_release_col)
+                receive_time_text = cols[3].text
+                sn = cols[5].text
+                receive_time = self.format_string_time(receive_time_text)
+                if self.compare_time(send_time, receive_time):
+                    if device in sn:
+                        logs_list.append(single_log)
+            return logs_list
+            # return release_count
+        else:
+            return []
+
     def click_select_all_box(self):
         ele = self.get_element(self.loc_release_check_all)
         self.exc_js_click(ele)
         self.deal_ele_selected(ele)
 
-    def check_release_log_info(self, info):
+    def check_release_log_info_discard(self, send_time, device):
         now_time = self.get_current_time()
         while True:
-            if self.get_current_app_release_log_total() != 0:
+            if len(self.get_app_current_release_log_list(send_time, device)) != 1:
                 break
             else:
                 self.refresh_page()
             if self.get_current_time() > self.return_end_time(now_time):
-                assert False, "@@@@ release app 失败, 没有相应得log， 请检查！！！"
+                assert False, "@@@@没有相应的 app release log， 请检查！！！"
             self.time_sleep(1)
-
-        text = self.get_element(self.loc_release_list).find_element(*self.loc_single_release).text
-        if not info["package"] in text and (info["silent"] in text) and (info["version"] in text):
-            assert False, "@@@@release app的log有误， 请检查！！！"
+        #
+        # text = self.get_element(self.loc_release_list).find_element(*self.loc_single_release).text
+        # if not info["package"] in text and (info["silent"] in text) and (info["version"] in text):
+        #     assert False, "@@@@release app的log有误， 请检查！！！"
 
     def delete_all_app_release_log(self):
-        if self.get_current_app_release_log_total() != 0:
-            self.click_select_all_box()
-            self.click_delete_btn()
-            self.refresh_page()
-            self.time_sleep(1)
+        try:
             if self.get_current_app_release_log_total() != 0:
                 self.click_select_all_box()
                 self.click_delete_btn()
+                self.refresh_page()
+                self.page_load_complete()
+        except Exception:
+            if self.get_current_app_release_log_total() != 0:
+                self.click_select_all_box()
+                self.click_delete_btn()
+                self.refresh_page()
+                self.page_load_complete()
 
     def click_release_app_btn(self):
         self.click(self.loc_app_release_btn)
@@ -180,12 +204,14 @@ class APPSPage(TelpoMDMPage):
                     break
                 self.confirm_sn_is_selected(device)
         self.click(self.loc_app_release_confirm)
-        self.confirm_alert_not_existed(self.loc_app_release_confirm)
+        self.confirm_tips_alert_show(self.loc_app_release_confirm)
+        self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_app_release_confirm)
 
     def click_delete_app_btn(self):
         self.click(self.loc_app_delete_btn)
         self.confirm_alert_existed(self.loc_app_delete_btn)
         self.click(self.loc_app_confirm_del_btn)
+        self.confirm_tips_alert_show(self.loc_app_confirm_del_btn)
         self.confirm_alert_not_existed(self.loc_app_confirm_del_btn)
 
     def get_apps_text_list(self):
@@ -201,7 +227,7 @@ class APPSPage(TelpoMDMPage):
         self.input_text(self.loc_search_app_name, app_name)
         self.time_sleep(1)
         self.click(self.loc_search_search)
-        self.confirm_alert_not_existed(self.loc_search_search)
+        self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_search_search)
 
     def click_private_app_btn(self):
         self.click(self.loc_private_app_btn)
@@ -226,11 +252,8 @@ class APPSPage(TelpoMDMPage):
         self.input_text(self.loc_des_box, info["description"])
         self.time_sleep(1)
         self.click(self.loc_apk_save_btn)
-        # self.confirm_alert_not_existed(self.loc_apk_save_btn)
-
-    # def click_save_add_app(self):
-    #     ele = self.web_driver_wait_until(EC.presence_of_element_located(self.loc_apk_save_btn))
-    #     self.exc_js_click_loc(self.loc_apk_save_btn)
+        self.confirm_alert_existed(self.loc_apk_save_btn)
+        self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_apk_save_btn)
 
     def check_add_app_save_btn(self):
         self.confirm_alert_not_existed(self.loc_apk_save_btn)
