@@ -147,12 +147,12 @@ class APPSPage(TelpoMDMPage):
                 cols = single_log.find_elements(*self.loc_single_release_col)
                 receive_time_text = cols[3].text
                 sn = cols[5].text
-                receive_time = self.format_string_time(receive_time_text)
+                time_line = self.extract_integers(receive_time_text)
+                receive_time = self.format_string_time(time_line)
                 if self.compare_time(send_time, receive_time):
                     if device in sn:
                         logs_list.append(single_log)
             return logs_list
-            # return release_count
         else:
             return []
 
@@ -182,13 +182,11 @@ class APPSPage(TelpoMDMPage):
                 self.click_select_all_box()
                 self.click_delete_btn()
                 self.refresh_page()
-                self.page_load_complete()
         except Exception:
             if self.get_current_app_release_log_total() != 0:
                 self.click_select_all_box()
                 self.click_delete_btn()
                 self.refresh_page()
-                self.page_load_complete()
 
     def click_release_app_btn(self):
         self.click(self.loc_app_release_btn)

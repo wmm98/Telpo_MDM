@@ -13,14 +13,14 @@ log = case_pack.MyLog()
 class TestAppPage:
 
     def setup_class(self):
-        self.driver = case_pack.BaseWebDriver().get_web_driver()
+        self.driver = case_pack.test_driver
         self.page = case_pack.APPSPage(self.driver, 40)
         self.system_page = case_pack.SystemPage(self.driver, 40)
 
     def teardown_class(self):
         self.page.refresh_page()
 
-    @allure.feature('MDM_test022')
+    @allure.feature('MDM_test02')
     @allure.title("Apps-add app apk package")
     def test_add_new_apps(self, go_to_app_page):
         exp_success_text = "Success"
@@ -48,7 +48,7 @@ class TestAppPage:
             else:
                 assert False, "@@@添加apk失败， 请检查"
 
-    @allure.feature('MDM_test022')
+    @allure.feature('MDM_test02')
     @allure.title("Apps-delete apk package")
     def test_delete_single_app(self, go_to_app_page):
         package_info = {"package_name": "ComAssistant.apk", "file_category": "test",
@@ -62,6 +62,14 @@ class TestAppPage:
             new_length = len(self.page.get_apps_text_list())
             if org_length != (new_length + 1):
                 assert False, "@@@@删除apk包失败请检查！！！"
+
+    @allure.feature('MDM_test022')
+    @allure.title("Apps-delete all app release log")
+    def test_delete_all_app_release_app(self, go_to_app_release_log):
+        self.page.page_load_complete()
+        self.page.delete_all_app_release_log()
+
+        assert self.page.get_current_app_release_log_total() == 0, "@@@@没有删除完了所有的app release log, 请检查!!!"
 
     @allure.feature('MDM_test022')
     @allure.title("Apps-release app")
@@ -82,9 +90,14 @@ class TestAppPage:
         # self.page.check_release_log_info(send_time, release_info["sn"])
 
         now_time = self.page.get_current_time()
+        # print(self.page.get_app_current_release_log_list(send_time, release_info["sn"]))
         while True:
-            if len(self.page.get_app_current_release_log_list(send_time, release_info["sn"])) != 1:
+            release_len = len(self.page.get_app_current_release_log_list(send_time, release_info["sn"]))
+            print("release_len", release_len)
+            if release_len == 1:
                 break
+            elif release_len > 1:
+                assert False, "@@@@释放一次app，有多条释放记录，请检查！！！"
             else:
                 self.page.refresh_page()
             if self.page.get_current_time() > self.page.return_end_time(now_time):
@@ -93,7 +106,7 @@ class TestAppPage:
 
     @allure.feature('MDM_test01')
     @allure.title("Apps- uninstall app")
-    def test_uninstall_app(self, del_all_app_uninstall_release_log, go_to_app_page):
+    def test_uninstall_app(self, del_all_app_release_log, del_all_app_uninstall_release_log, go_to_app_page):
         app_release_address = "http://test.telpoai.com/apps/releases"
         app_upgrade_address = "http://test.telpoai.com/apps/logs"
         release_info = {"package_name": "APKEditor_1_9_10.apk", "sn": "A250900P03100019",

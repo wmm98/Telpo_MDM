@@ -233,7 +233,7 @@ class BasePage:
             return integers
 
     def format_string_time(self, time_list):
-        format_time = "%d-%d-%d %d:%d" % (int(time_list[2]), int(time_list[0]), int(time_list[1]), int(time_list[3]), int(time_list[4]))
+        format_time = "%d-%d-%d %d:%d" % (time_list[2], time_list[0], time_list[1], time_list[3], time_list[4])
         return format_time
 
     def compare_time(self, time1, time2):
