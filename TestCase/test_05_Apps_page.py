@@ -63,7 +63,7 @@ class TestAppPage:
             if org_length != (new_length + 1):
                 assert False, "@@@@删除apk包失败请检查！！！"
 
-    @allure.feature('MDM_test022')
+    @allure.feature('MDM_test02')
     @allure.title("Apps-delete all app release log")
     def test_delete_all_app_release_app(self, go_to_app_release_log):
         self.page.page_load_complete()
@@ -71,7 +71,7 @@ class TestAppPage:
 
         assert self.page.get_current_app_release_log_total() == 0, "@@@@没有删除完了所有的app release log, 请检查!!!"
 
-    @allure.feature('MDM_test022')
+    @allure.feature('MDM_test02')
     @allure.title("Apps-release app")
     def test_release_app(self, go_to_app_page):
         release_info = {"package_name": "APKEditor_1_7_2.apk", "sn": "A250900P03100019",
@@ -92,7 +92,7 @@ class TestAppPage:
         now_time = self.page.get_current_time()
         # print(self.page.get_app_current_release_log_list(send_time, release_info["sn"]))
         while True:
-            release_len = len(self.page.get_app_current_release_log_list(send_time, release_info["sn"]))
+            release_len = len(self.page.get_app_latest_release_log_list(send_time, release_info["sn"]))
             print("release_len", release_len)
             if release_len == 1:
                 break
@@ -100,7 +100,7 @@ class TestAppPage:
                 assert False, "@@@@释放一次app，有多条释放记录，请检查！！！"
             else:
                 self.page.refresh_page()
-            if self.page.get_current_time() > self.page.return_end_time(now_time):
+            if self.page.get_current_time() > self.page.return_end_time(now_time, 60):
                 assert False, "@@@@没有相应的 app release log， 请检查！！！"
             self.page.time_sleep(1)
 
@@ -125,7 +125,7 @@ class TestAppPage:
 
     @allure.feature('MDM_test01')
     @allure.title("Apps- release app again")
-    def test_send_release_app_again(self, go_to_app_release_log):
+    def test_uninstall_page_send_release_app_again(self, go_to_app_release_log):
         exp_release_success_text = "Sync App Release Success"
         release_info = {"package_name": "APKEditor_1_9_10.apk", "sn": "A250900P03100019",
                         "silent": "Yes", "version": "1.9.10", "package": "com.gmail.heagoo.apkeditor.pro"}

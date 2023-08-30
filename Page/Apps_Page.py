@@ -77,10 +77,10 @@ class APPSPage(TelpoMDMPage):
     loc_uninstall_btn = (By.CSS_SELECTOR, "[class = 'fas fa-eraser']")
     loc_app_uninstall_alert = (By.ID, "modal-appuninstall")
 
+    # app upgrade logs relate
+
     loc_app_uninstall_confirm = (By.CSS_SELECTOR, "[class = 'btn btn-warning confirm_uninstall']")
     loc_uninstall_device_list = (By.ID, "labelItem1")
-
-    # upgrade logs relate
 
     def select_single_app_release_log(self):
         ele = self.get_element(self.loc_release_check_box)
@@ -138,7 +138,7 @@ class APPSPage(TelpoMDMPage):
         else:
             return 0
 
-    def get_app_current_release_log_list(self, send_time, device):
+    def get_app_latest_release_log_list(self, send_time, device):
         release_list = self.get_element(self.loc_release_list)
         logs_list = []
         if self.ele_is_existed_in_range(self.loc_release_list, self.loc_single_release):
@@ -164,7 +164,7 @@ class APPSPage(TelpoMDMPage):
     def check_release_log_info_discard(self, send_time, device):
         now_time = self.get_current_time()
         while True:
-            if len(self.get_app_current_release_log_list(send_time, device)) != 1:
+            if len(self.get_app_latest_release_log_list(send_time, device)) != 1:
                 break
             else:
                 self.refresh_page()
