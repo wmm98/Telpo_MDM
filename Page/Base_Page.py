@@ -279,3 +279,23 @@ class BasePage:
             return True
         except public_pack.TimeoutException:
             return False
+
+    def get_upgrade_action_status(self, action):
+        """
+                Upgrade action (1: downloading, 2: downloading complete, 3: upgrading,
+                 4: upgrading complete, 5: downloading failed, 6: upgrading failed)
+        """
+        if "Downloading" in action:
+            return 1
+        if "Download Completed" in action:
+            return 2
+        if "Upgrading" in action:
+            return 3
+        if "Upgrade completed" in action:
+            return 4
+        if "Download Fail" in action:
+            return 5
+        if "Upgrade Fail" in action:
+            return 6
+
+

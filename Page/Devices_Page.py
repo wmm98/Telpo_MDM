@@ -322,8 +322,8 @@ class DevicesPage(TelpoMDMPage):
 
     # return devices_list
     def get_dev_info_list(self):
-        try:
-            devices_list = []
+        devices_list = []
+        if self.ele_is_existed_in_range(self.loc_devices_list, self.loc_tr):
             eles = self.get_element(self.loc_devices_list)
             tr_eles = eles.find_elements(*self.loc_tr)
             for tr_ele in tr_eles:
@@ -332,7 +332,7 @@ class DevicesPage(TelpoMDMPage):
                                      "SN": td_eles[4].text, "Status": td_eles[5].text,
                                      "Lock Status": td_eles[6].text})
             return devices_list
-        except public_pack.TimeoutException:
+        else:
             return []
 
     # return length of devices_list

@@ -92,7 +92,7 @@ class TestAppPage:
         now_time = self.page.get_current_time()
         # print(self.page.get_app_current_release_log_list(send_time, release_info["sn"]))
         while True:
-            release_len = len(self.page.get_app_latest_release_log_list(send_time, release_info["sn"]))
+            release_len = len(self.page.get_app_latest_release_log_list(send_time, release_info))
             print("release_len", release_len)
             if release_len == 1:
                 break
@@ -100,9 +100,40 @@ class TestAppPage:
                 assert False, "@@@@释放一次app，有多条释放记录，请检查！！！"
             else:
                 self.page.refresh_page()
-            if self.page.get_current_time() > self.page.return_end_time(now_time, 60):
+            if self.page.get_current_time() > self.page.return_end_time(now_time):
                 assert False, "@@@@没有相应的 app release log， 请检查！！！"
             self.page.time_sleep(1)
+
+        # check if the upgrade log appeared, if appeared, break
+        self.page.go_to_new_address("apps/logs")
+        now_time = self.page.get_current_time()
+        while True:
+            release_len = len(self.page.get_app_latest_upgrade_log(send_time, release_info))
+            print("release_len", release_len)
+            if release_len == 1:
+                break
+            if self.page.get_current_time() > self.page.return_end_time(now_time):
+                assert False, "@@@@没有相应的 app upgrade log， 请检查！！！"
+            self.page.time_sleep(1)
+
+        """
+        Upgrade action (1: downloading, 2: downloading complete, 3: upgrading,
+         4: upgrading complete, 5: downloading failed, 6: upgrading failed)
+        """
+        # check the app action in app upgrade logs, if download complete or upgrade complete, break
+        now_time = self.page.get_current_time()
+        while True:
+            action = self.page.get_app_latest_upgrade_log(send_time, release_info)[0]["Action"]
+            if self.page.get_upgrade_action_status(action) == 2 or self.page.get_upgrade_action_status(action) == 3:
+                break
+            else:
+                self.page.refresh_page()
+            # wait 20 mins
+            if self.page.get_current_time() > self.page.return_end_time(now_time, 1200):
+                assert False, "@@@@20分钟还没有下载完相应的app， 请检查！！！"
+            self.page.time_sleep(2)
+
+        check upgrade
 
     @allure.feature('MDM_test01')
     @allure.title("Apps- uninstall app")
@@ -135,21 +166,3 @@ class TestAppPage:
         self.page.select_single_app_release_log()
         text = self.page.click_send_release_again()
         print(text)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

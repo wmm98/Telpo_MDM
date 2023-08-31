@@ -73,14 +73,38 @@ class APPSPage(TelpoMDMPage):
     # send release again
     loc_app_send_release_again = (By.CSS_SELECTOR, "[class = 'btn-witdh btn  btn-sm sync_release']")
 
+    # app upgrade logs relate
+    loc_app_upgrade_logs_body = (By.ID, "logs_list")
+    loc_app_upgrade_single_log = (By.TAG_NAME, "tr")
+    loc_app_upgrade_log_col = (By.CLASS_NAME, "text-center")
+
     # app uninstall relate
     loc_uninstall_btn = (By.CSS_SELECTOR, "[class = 'fas fa-eraser']")
     loc_app_uninstall_alert = (By.ID, "modal-appuninstall")
 
-    # app upgrade logs relate
-
     loc_app_uninstall_confirm = (By.CSS_SELECTOR, "[class = 'btn btn-warning confirm_uninstall']")
     loc_uninstall_device_list = (By.ID, "labelItem1")
+
+    def get_app_latest_upgrade_log(self, send_time, release_info):
+        upgrade_list = self.get_element(self.loc_app_upgrade_logs_body)
+        logs_list = []
+        if self.ele_is_existed_in_range(self.loc_app_upgrade_logs_body, self.loc_app_upgrade_single_log):
+            single_log = upgrade_list.find_elements(*self.loc_app_upgrade_single_log)[0]
+            cols = single_log.find_elements(*self.loc_app_upgrade_log_col)
+            receive_time_text = cols[4].text
+            sn = cols[0].text
+            action = cols[5].text
+            package = cols[2].text
+            version = cols[3].text
+            time_line = self.extract_integers(receive_time_text)
+            receive_time = self.format_string_time(time_line)
+            if self.compare_time(send_time, receive_time):
+                if (release_info["sn"] in sn) and (release_info["package"] in package):
+                    if release_info["version"] in version:
+                        logs_list.append({"SN": sn, "Update Time": receive_time, "Action": action, "Version": version})
+            return logs_list
+        else:
+            return []
 
     def select_single_app_release_log(self):
         ele = self.get_element(self.loc_release_check_box)
@@ -138,7 +162,7 @@ class APPSPage(TelpoMDMPage):
         else:
             return 0
 
-    def get_app_latest_release_log_list(self, send_time, device):
+    def get_app_latest_release_log_list(self, send_time, release_info):
         release_list = self.get_element(self.loc_release_list)
         logs_list = []
         if self.ele_is_existed_in_range(self.loc_release_list, self.loc_single_release):
@@ -147,11 +171,14 @@ class APPSPage(TelpoMDMPage):
                 cols = single_log.find_elements(*self.loc_single_release_col)
                 receive_time_text = cols[3].text
                 sn = cols[5].text
+                package = cols[1].text
+                version = cols[2].text
                 time_line = self.extract_integers(receive_time_text)
                 receive_time = self.format_string_time(time_line)
                 if self.compare_time(send_time, receive_time):
-                    if device in sn:
-                        logs_list.append(single_log)
+                    if (release_info["sn"] in sn) and (release_info["package"] in package):
+                        if release_info["version"] in version:
+                            logs_list.append(single_log)
             return logs_list
         else:
             return []
