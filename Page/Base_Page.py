@@ -225,16 +225,20 @@ class BasePage:
         return al
 
     def extract_integers(self, text):
-        pattern = r"\d+"
+        # pattern = r"\d+"
+        pattern = r'\d+\.\d+|\d+'
         integers = public_pack.re.findall(pattern, text)
         if len(integers) != 0:
-            return [int(inter) for inter in integers]
+            return [inter for inter in integers]
         else:
             return integers
 
     def format_string_time(self, time_list):
-        format_time = "%d-%d-%d %d:%d" % (time_list[2], time_list[0], time_list[1], time_list[3], time_list[4])
-        return format_time
+        if len(time_list) != 0:
+            format_time = "%s-%s-%s %s:%s" % (time_list[2], time_list[0], time_list[1], time_list[3], time_list[4])
+            return format_time
+        else:
+            assert False, "@@@@没有显示时间，请检查！！！"
 
     def compare_time(self, time1, time2):
         dt1 = public_pack.datetime.strptime(time1, "%Y-%m-%d %H:%M")

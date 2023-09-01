@@ -40,6 +40,7 @@ class APPSPage(TelpoMDMPage):
     loc_apps_list = (By.ID, "apps_list")
     loc_single_app_box = (
         By.CSS_SELECTOR, "[class = 'col-12 col-sm-6 col-md-4 d-flex align-items-stretch flex-column']")
+    loc_app_detail_info = (By.CSS_SELECTOR, "[class = 'small pt-1']")
     # app delete btn
     loc_app_delete_btn = (By.CSS_SELECTOR, "[class = 'btn btn-sm bg-danger']")
     loc_app_confirm_del_btn = (By.CSS_SELECTOR, "[class = 'btn btn-outline-light deleteapp_button']")
@@ -76,7 +77,7 @@ class APPSPage(TelpoMDMPage):
     # app upgrade logs relate
     loc_app_upgrade_logs_body = (By.ID, "logs_list")
     loc_app_upgrade_single_log = (By.TAG_NAME, "tr")
-    loc_app_upgrade_log_col = (By.CLASS_NAME, "text-center")
+    loc_app_upgrade_log_col = (By.TAG_NAME, "td")
 
     # app uninstall relate
     loc_uninstall_btn = (By.CSS_SELECTOR, "[class = 'fas fa-eraser']")
@@ -91,11 +92,11 @@ class APPSPage(TelpoMDMPage):
         if self.ele_is_existed_in_range(self.loc_app_upgrade_logs_body, self.loc_app_upgrade_single_log):
             single_log = upgrade_list.find_elements(*self.loc_app_upgrade_single_log)[0]
             cols = single_log.find_elements(*self.loc_app_upgrade_log_col)
-            receive_time_text = cols[4].text
+            receive_time_text = cols[3].text
             sn = cols[0].text
-            action = cols[5].text
-            package = cols[2].text
-            version = cols[3].text
+            action = cols[4].text
+            package = cols[1].text
+            version = cols[2].text
             time_line = self.extract_integers(receive_time_text)
             receive_time = self.format_string_time(time_line)
             if self.compare_time(send_time, receive_time):
@@ -210,6 +211,7 @@ class APPSPage(TelpoMDMPage):
                 self.click_delete_btn()
                 self.refresh_page()
         except Exception:
+            self.refresh_page()
             if self.get_current_app_release_log_total() != 0:
                 self.click_select_all_box()
                 self.click_delete_btn()
@@ -245,6 +247,11 @@ class APPSPage(TelpoMDMPage):
             return [box.text for box in boxes]
         else:
             return []
+
+    def get_app_size(self):
+        boxes = self.get_elements(self.loc_app_detail_info)
+        size = self.extract_integers(boxes[1].text)
+        return size
 
     def search_app_by_name(self, app_name):
         self.click(self.loc_search_btn)
