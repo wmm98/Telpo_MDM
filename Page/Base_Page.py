@@ -106,7 +106,6 @@ class BasePage:
         now_time = self.get_current_time()
         while True:
             if self.page_is_loaded():
-                print("网页完全加载完成")
                 break
             print("网页还没有加载完成")
             if self.get_current_time() > self.return_end_time(now_time, 60):
@@ -284,22 +283,32 @@ class BasePage:
         except public_pack.TimeoutException:
             return False
 
-    def get_upgrade_action_status(self, action):
+    def get_action_status(self, action):
         """
                 Upgrade action (1: downloading, 2: downloading complete, 3: upgrading,
                  4: upgrading complete, 5: downloading failed, 6: upgrading failed)
+                 0: Uninstall completed
         """
-        if "Downloading" in action:
+        action = self.upper_transfer(self.remove_space(action))
+        print("转换后的action", action)
+        if self.upper_transfer(self.remove_space("Uninstall completed")) in action:
+            return 0
+        if self.upper_transfer(self.remove_space("Downloading")) in action:
             return 1
-        if "Download Completed" in action:
+        if self.upper_transfer(self.remove_space("Download Completed")) in action:
             return 2
-        if "Upgrading" in action:
+        if self.upper_transfer(self.remove_space("Upgrading")) in action:
             return 3
-        if "Upgrade completed" in action:
+        if self.upper_transfer(self.remove_space("Upgrade completed")) in action:
             return 4
-        if "Download Fail" in action:
+        if self.upper_transfer(self.remove_space("Download Fail")) in action:
             return 5
-        if "Upgrade Fail" in action:
+        if self.upper_transfer(self.remove_space("Upgrade Fail")) in action:
             return 6
 
+    def remove_space(self, text):
+        return text.replace("\r", "").replace("\n", "").replace(" ", "")
+
+    def upper_transfer(self, text):
+        return text.upper()
 

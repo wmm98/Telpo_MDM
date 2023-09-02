@@ -103,3 +103,4 @@ class TelpoMDMPage(BasePage):
                 if self.get_current_time() > self.return_end_time(now_time):
                     assert False, "@@@打开 %s 失败， 请检查！！！" % address
                 self.time_sleep(1)
+        self.page_load_complete()

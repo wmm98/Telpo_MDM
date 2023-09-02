@@ -107,6 +107,25 @@ class APPSPage(TelpoMDMPage):
         else:
             return []
 
+    def get_app_latest_uninstall_log(self, send_time, release_info):
+        upgrade_list = self.get_element(self.loc_app_upgrade_logs_body)
+        logs_list = []
+        if self.ele_is_existed_in_range(self.loc_app_upgrade_logs_body, self.loc_app_upgrade_single_log):
+            single_log = upgrade_list.find_elements(*self.loc_app_upgrade_single_log)[0]
+            cols = single_log.find_elements(*self.loc_app_upgrade_log_col)
+            receive_time_text = cols[4].text
+            sn = cols[1].text
+            action = cols[3].text
+            package = cols[2].text
+            time_line = self.extract_integers(receive_time_text)
+            receive_time = self.format_string_time(time_line)
+            if self.compare_time(send_time, receive_time):
+                if (release_info["sn"] in sn) and (release_info["package"] in package):
+                    logs_list.append({"SN": sn, "Update Time": receive_time, "Action": action})
+            return logs_list
+        else:
+            return []
+
     def select_single_app_release_log(self):
         ele = self.get_element(self.loc_release_check_box)
         self.exc_js_click(ele)
@@ -122,8 +141,7 @@ class APPSPage(TelpoMDMPage):
 
     def click_send_release_again(self):
         self.click(self.loc_app_send_release_again)
-        text = self.get_alert_text()
-        return text
+        self.confirm_tips_alert_show(self.loc_app_send_release_again)
 
     def click_uninstall_app_btn(self):
         self.click(self.loc_uninstall_btn)
@@ -146,6 +164,7 @@ class APPSPage(TelpoMDMPage):
                         assert False, "@@@无法选中device sn, 请检查！！！"
                     self.time_sleep(1)
         self.click(self.loc_app_uninstall_confirm)
+        self.confirm_tips_alert_show(self.loc_app_uninstall_confirm)
         self.confirm_alert_not_existed(self.loc_app_uninstall_confirm)
 
     def click_delete_btn(self):
@@ -163,26 +182,45 @@ class APPSPage(TelpoMDMPage):
         else:
             return 0
 
-    def get_app_latest_release_log_list(self, send_time, release_info):
+    def get_app_latest_release_log_list(self, send_time, release_info, uninstall=False):
         release_list = self.get_element(self.loc_release_list)
+        self.time_sleep(2)
         logs_list = []
-        if self.ele_is_existed_in_range(self.loc_release_list, self.loc_single_release):
-            logs = release_list.find_elements(*self.loc_single_release)
-            for single_log in logs:
-                cols = single_log.find_elements(*self.loc_single_release_col)
-                receive_time_text = cols[3].text
-                sn = cols[5].text
-                package = cols[1].text
-                version = cols[2].text
-                time_line = self.extract_integers(receive_time_text)
-                receive_time = self.format_string_time(time_line)
-                if self.compare_time(send_time, receive_time):
-                    if (release_info["sn"] in sn) and (release_info["package"] in package):
-                        if release_info["version"] in version:
+        if not uninstall:
+            if self.ele_is_existed_in_range(self.loc_release_list, self.loc_single_release):
+                print("True")
+                logs = release_list.find_elements(*self.loc_single_release)
+                for single_log in logs:
+                    cols = single_log.find_elements(*self.loc_single_release_col)
+                    receive_time_text = cols[3].text
+                    sn = cols[5].text
+                    package = cols[1].text
+                    version = cols[2].text
+                    time_line = self.extract_integers(receive_time_text)
+                    receive_time = self.format_string_time(time_line)
+                    if self.compare_time(send_time, receive_time):
+                        if (release_info["sn"] in sn) and (release_info["package"] in package):
+                            if release_info["version"] in version:
+                                logs_list.append(single_log)
+                return logs_list
+            else:
+                return []
+        elif uninstall:
+            if self.ele_is_existed_in_range(self.loc_release_list, self.loc_single_release):
+                logs = release_list.find_elements(*self.loc_single_release)
+                for single_log in logs:
+                    cols = single_log.find_elements(*self.loc_single_release_col)
+                    receive_time_text = cols[3].text
+                    sn = cols[2].text
+                    package = cols[1].text
+                    time_line = self.extract_integers(receive_time_text)
+                    receive_time = self.format_string_time(time_line)
+                    if self.compare_time(send_time, receive_time):
+                        if (release_info["sn"] in sn) and (release_info["package"] in package):
                             logs_list.append(single_log)
-            return logs_list
-        else:
-            return []
+                return logs_list
+            else:
+                return []
 
     def click_select_all_box(self):
         ele = self.get_element(self.loc_release_check_all)

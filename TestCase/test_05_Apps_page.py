@@ -4,7 +4,7 @@ import TestCase as case_pack
 
 conf = case_pack.Config()
 excel = case_pack.ExcelData()
-opt_case_pack_pack_pack = case_pack.Optimize_Case()
+opt_case = case_pack.Optimize_Case()
 alert = case_pack.AlertData()
 
 log = case_pack.MyLog()
@@ -63,7 +63,7 @@ class TestAppPage:
             if org_length != (new_length + 1):
                 assert False, "@@@@删除apk包失败请检查！！！"
 
-    @allure.feature('MDM_test022')
+    @allure.feature('MDM_test02')
     @allure.title("Apps-delete all app release log")
     def test_delete_all_app_release_app(self, go_to_app_release_log):
         self.page.page_load_complete()
@@ -74,12 +74,16 @@ class TestAppPage:
     @allure.feature('MDM_test022')
     @allure.title("Apps-release low version app")
     @pytest.mark.dependency(name="test_release_app_ok", scope='package')
-    def test_release_low_version_app(self, go_to_app_page):
-        release_info = {"package_name": "APKEditor_1_7_2.apk", "sn": "A250900P03100019",
-                        "silent": "Yes", "version": "1.7.2", "package": "com.gmail.heagoo.apkeditor.pro"}
-        # release_info = {"package_name": "ComAssistant.apk", "sn": "A250900P03100019",
-        #                 "silent": "Yes", "version": "1.1", "package": "com.bjw.ComAssistant"}
-        self.page.page_load_complete()
+    def test_release_low_version_app(self, del_all_app_release_log, del_all_app_uninstall_release_log):
+        # release_info = {"package_name": "APKEditor_1_7_2.apk", "sn": "A250900P03100019",
+        #                 "silent": "Yes", "version": "1.7.2", "package": "com.gmail.heagoo.apkeditor.pro"}
+        release_info = {"package_name": "ComAssistant.apk", "sn": "A250900P03100019",
+                        "silent": "Yes", "version": "1.1", "package": "com.bjw.ComAssistant"}
+        # check if device is online
+        self.page.go_to_new_address("devices")
+        opt_case.check_single_device(release_info["sn"])
+        # go to app page
+        self.page.go_to_new_address("apps")
         self.page.search_app_by_name(release_info["package_name"])
         app_size_mdm = self.page.get_app_size()
         print("app 的size: ", app_size_mdm)
@@ -89,9 +93,9 @@ class TestAppPage:
         self.page.click_release_app_btn()
         self.page.input_release_app_info(release_info)
         send_time = case_pack.time.strftime('%Y-%m-%d %H:%M', case_pack.time.localtime(self.page.get_current_time()))
+        self.page.time_sleep(1)
         # go to app release log
         self.page.go_to_new_address("apps/releases")
-        self.page.page_load_complete()
         # self.page.check_release_log_info(send_time, release_info["sn"])
 
         now_time = self.page.get_current_time()
@@ -114,7 +118,6 @@ class TestAppPage:
         now_time = self.page.get_current_time()
         while True:
             release_len = len(self.page.get_app_latest_upgrade_log(send_time, release_info))
-            print("release_len", release_len)
             if release_len == 1:
                 break
             else:
@@ -126,14 +129,14 @@ class TestAppPage:
         """
         Upgrade action (1: downloading, 2: downloading complete, 3: upgrading,
          4: upgrading complete, 5: downloading failed, 6: upgrading failed)
+         0: Uninstall completed
         """
         # check the app action in app upgrade logs, if download complete or upgrade complete, break
         now_time = self.page.get_current_time()
         while True:
             action = self.page.get_app_latest_upgrade_log(send_time, release_info)[0]["Action"]
-            print(action)
-            if self.page.get_upgrade_action_status(action) == 2 or self.page.get_upgrade_action_status(action) == 4 \
-                    or self.page.get_upgrade_action_status(action) == 3:
+            if self.page.get_action_status(action) == 2 or self.page.get_action_status(action) == 4 \
+                    or self.page.get_action_status(action) == 3:
                 break
             else:
                 self.page.refresh_page()
@@ -146,105 +149,137 @@ class TestAppPage:
         now_time = self.page.get_current_time()
         while True:
             action = self.page.get_app_latest_upgrade_log(send_time, release_info)[0]["Action"]
-            if action == 4:
+            print("action", action)
+            if self.page.get_action_status(action) == 4:
                 break
             else:
                 self.page.refresh_page()
             # wait upgrade 3 mins at most
             if self.page.get_current_time() > self.page.return_end_time(now_time, 180):
-                assert False, "@@@@5分钟还没有安装完相应的app， 请检查！！！"
-            self.page.time_sleep(2)
-
-    @allure.feature('MDM_test02')
-    @allure.title("Apps-release high version app")
-    @pytest.mark.dependency(depends=["test_release_app_ok"], scope='package')
-    def test_high_version_app_cover_low_version_app(self, go_to_app_page):
-        release_info = {"package_name": "APKEditor_1_9_10.apk", "sn": "A250900P03100019",
-                        "silent": "Yes", "version": "1.9.10", "package": "com.gmail.heagoo.apkeditor.pro"}
-        self.page.page_load_complete()
-        self.page.search_app_by_name(release_info["package_name"])
-        app_size_mdm = self.page.get_app_size()
-        print("app 的size: ", app_size_mdm)
-        app_list = self.page.get_apps_text_list()
-        if len(app_list) == 0:
-            assert False, "@@@@没有 %s, 请检查！！！" % release_info["package_name"]
-        self.page.click_release_app_btn()
-        self.page.input_release_app_info(release_info)
-        send_time = case_pack.time.strftime('%Y-%m-%d %H:%M', case_pack.time.localtime(self.page.get_current_time()))
-        # go to app release log
-        self.page.go_to_new_address("apps/releases")
-        self.page.page_load_complete()
-        # self.page.check_release_log_info(send_time, release_info["sn"])
-
-        now_time = self.page.get_current_time()
-        # print(self.page.get_app_current_release_log_list(send_time, release_info["sn"]))
-        while True:
-            release_len = len(self.page.get_app_latest_release_log_list(send_time, release_info))
-            print("release_len", release_len)
-            if release_len == 1:
-                break
-            elif release_len > 1:
-                assert False, "@@@@释放一次app，有多条释放记录，请检查！！！"
-            else:
-                self.page.refresh_page()
-            if self.page.get_current_time() > self.page.return_end_time(now_time):
-                assert False, "@@@@没有相应的 app release log， 请检查！！！"
-            self.page.time_sleep(1)
-
-        # check if the upgrade log appeared, if appeared, break
-        self.page.go_to_new_address("apps/logs")
-        now_time = self.page.get_current_time()
-        while True:
-            release_len = len(self.page.get_app_latest_upgrade_log(send_time, release_info))
-            print("release_len", release_len)
-            if release_len == 1:
-                break
-            else:
-                self.page.refresh_page()
-            if self.page.get_current_time() > self.page.return_end_time(now_time):
-                assert False, "@@@@没有相应的 app upgrade log， 请检查！！！"
-            self.page.time_sleep(1)
-
-        """
-        Upgrade action (1: downloading, 2: downloading complete, 3: upgrading,
-         4: upgrading complete, 5: downloading failed, 6: upgrading failed)
-        """
-        # check the app action in app upgrade logs, if download complete or upgrade complete, break
-        now_time = self.page.get_current_time()
-        while True:
-            action = self.page.get_app_latest_upgrade_log(send_time, release_info)[0]["Action"]
-            print(action)
-            if self.page.get_upgrade_action_status(action) == 2 or self.page.get_upgrade_action_status(action) == 4 \
-                    or self.page.get_upgrade_action_status(action) == 3:
-                break
-            else:
-                self.page.refresh_page()
-            # wait 20 mins
-            if self.page.get_current_time() > self.page.return_end_time(now_time, 1200):
-                assert False, "@@@@20分钟还没有下载完相应的app， 请检查！！！"
-            self.page.time_sleep(2)
-
-        # check upgrade
-        now_time = self.page.get_current_time()
-        while True:
-            action = self.page.get_app_latest_upgrade_log(send_time, release_info)[0]["Action"]
-            if action == 4:
-                break
-            else:
-                self.page.refresh_page()
-            # wait upgrade 3 mins at most
-            if self.page.get_current_time() > self.page.return_end_time(now_time, 180):
-                assert False, "@@@@5分钟还没有安装完相应的app， 请检查！！！"
+                assert False, "@@@@3分钟还没有安装完相应的app， 请检查！！！"
             self.page.time_sleep(2)
 
     @allure.feature('MDM_test01')
-    @allure.title("Apps- uninstall app")
-    def test_uninstall_app(self, del_all_app_release_log, del_all_app_uninstall_release_log, go_to_app_page):
-        app_release_address = "http://test.telpoai.com/apps/releases"
-        app_upgrade_address = "http://test.telpoai.com/apps/logs"
+    @allure.title("Apps-release high version app, no test now")
+    @pytest.mark.dependency(depends=["test_release_app_ok"], scope='package')
+    def test_high_version_app_cover_low_version_app(self, del_all_app_release_log, del_all_app_uninstall_release_log):
         release_info = {"package_name": "APKEditor_1_9_10.apk", "sn": "A250900P03100019",
                         "silent": "Yes", "version": "1.9.10", "package": "com.gmail.heagoo.apkeditor.pro"}
 
+        # check if device is online
+        self.page.go_to_new_address("devices")
+        opt_case.check_single_device(release_info["sn"])
+        # go to app page
+        self.page.go_to_new_address("apps")
+        self.page.search_app_by_name(release_info["package_name"])
+        app_size_mdm = self.page.get_app_size()
+        print("app 的size: ", app_size_mdm)
+        app_list = self.page.get_apps_text_list()
+        if len(app_list) == 0:
+            assert False, "@@@@没有 %s, 请检查！！！" % release_info["package_name"]
+        self.page.click_release_app_btn()
+        self.page.input_release_app_info(release_info)
+        send_time = case_pack.time.strftime('%Y-%m-%d %H:%M', case_pack.time.localtime(self.page.get_current_time()))
+        # go to app release log
+        self.page.go_to_new_address("apps/releases")
+        # self.page.check_release_log_info(send_time, release_info["sn"])
+
+        now_time = self.page.get_current_time()
+        self.page.time_sleep(1)
+        # print(self.page.get_app_current_release_log_list(send_time, release_info["sn"]))
+        while True:
+            release_len = len(self.page.get_app_latest_release_log_list(send_time, release_info))
+            if release_len == 1:
+                break
+            elif release_len > 1:
+                assert False, "@@@@释放一次app，有多条释放记录，请检查！！！"
+            else:
+                self.page.refresh_page()
+            if self.page.get_current_time() > self.page.return_end_time(now_time):
+                assert False, "@@@@没有相应的 app release log， 请检查！！！"
+            self.page.time_sleep(1)
+
+        # check if the upgrade log appeared, if appeared, break
+        self.page.go_to_new_address("apps/logs")
+        now_time = self.page.get_current_time()
+        self.page.time_sleep(1)
+        while True:
+            release_len = len(self.page.get_app_latest_upgrade_log(send_time, release_info))
+            if release_len == 1:
+                break
+            else:
+                self.page.refresh_page()
+            if self.page.get_current_time() > self.page.return_end_time(now_time):
+                assert False, "@@@@没有相应的 app upgrade log， 请检查！！！"
+            self.page.time_sleep(1)
+
+        """
+        Upgrade action (1: downloading, 2: downloading complete, 3: upgrading,
+         4: upgrading complete, 5: downloading failed, 6: upgrading failed)
+        """
+        # check the app action in app upgrade logs, if download complete or upgrade complete, break
+        now_time = self.page.get_current_time()
+        self.page.time_sleep(1)
+        while True:
+            action = self.page.get_app_latest_upgrade_log(send_time, release_info)[0]["Action"]
+            if self.page.get_action_status(action) == 2 or self.page.get_action_status(action) == 4 \
+                    or self.page.get_action_status(action) == 3:
+                break
+            else:
+                self.page.refresh_page()
+            # wait 20 mins
+            if self.page.get_current_time() > self.page.return_end_time(now_time, 1200):
+                assert False, "@@@@20分钟还没有下载完相应的app， 请检查！！！"
+            self.page.time_sleep(2)
+
+        # check upgrade
+        now_time = self.page.get_current_time()
+        self.page.time_sleep(1)
+        while True:
+            action = self.page.get_app_latest_upgrade_log(send_time, release_info)[0]["Action"]
+            print("action", action)
+            if self.page.get_action_status(action) == 4:
+                break
+            else:
+                self.page.refresh_page()
+            # wait upgrade 3 mins at most
+            if self.page.get_current_time() > self.page.return_end_time(now_time, 300):
+                assert False, "@@@@3分钟还没有安装完相应的app， 请检查！！！"
+            self.page.time_sleep(2)
+
+    @allure.feature('MDM_test022')
+    @allure.title("Apps- release app again")
+    def test_send_release_install_app_again(self, go_to_app_release_log):
+        exp_release_success_text = "Sync App Release Success"
+        # release_info = {"package_name": "APKEditor_1_9_10.apk", "sn": "A250900P03100019",
+        #                 "silent": "Yes", "version": "1.9.10", "package": "com.gmail.heagoo.apkeditor.pro"}
+        release_info = {"package_name": "ComAssistant.apk", "sn": "A250900P03100019",
+                        "silent": "Yes", "version": "1.1", "package": "com.bjw.ComAssistant"}
+        # self.page.search_app_release_log(release_info)
+        # check if device is online
+        self.page.go_to_new_address("devices")
+        opt_case.check_single_device(release_info["sn"])
+        # go to app release page
+        self.page.go_to_new_address("apps/releases")
+        if self.page.get_current_app_release_log_total() == 0:
+            assert False, "@@@@没有相应的release app log, 请检查！！！"
+        self.page.select_single_app_release_log()
+        self.page.click_send_release_again()
+
+    @allure.feature('MDM_test022')
+    @allure.title("Apps- uninstall app")
+    @pytest.mark.dependency(depends=["test_release_app_ok"], scope='package')
+    def test_uninstall_app(self, del_all_app_release_log, del_all_app_uninstall_release_log):
+        # release_info = {"package_name": "APKEditor_1_9_10.apk", "sn": "A250900P03100019",
+        #                 "silent": "Yes", "version": "1.9.10", "package": "com.gmail.heagoo.apkeditor.pro"}
+        release_info = {"package_name": "ComAssistant.apk", "sn": "A250900P03100019",
+                        "silent": "Yes", "version": "1.1", "package": "com.bjw.ComAssistant"}
+
+        # check if device is online
+        self.page.go_to_new_address("devices")
+        opt_case.check_single_device(release_info["sn"])
+        # go to app release page
+        self.page.go_to_new_address("apps")
         self.page.search_app_by_name(release_info["package_name"])
 
         app_list = self.page.get_apps_text_list()
@@ -252,20 +287,50 @@ class TestAppPage:
             assert False, "@@@@没有 %s, 请检查！！！" % release_info["package_name"]
         self.page.click_uninstall_app_btn()
         self.page.input_uninstall_app_info(release_info)
-
+        send_time = case_pack.time.strftime('%Y-%m-%d %H:%M', case_pack.time.localtime(self.page.get_current_time()))
         # go to app uninstall log
-        # self.Page.go_to_new_address("apps/releases")
-        # self.Page.check_release_log_info(release_info)
+        self.page.go_to_new_address("apps/appUninstall")
+        now_time = self.page.get_current_time()
+        while True:
+            release_len = len(self.page.get_app_latest_release_log_list(send_time, release_info, uninstall=True))
+            if release_len == 1:
+                break
+            elif release_len > 1:
+                assert False, "@@@@释放一次uninstall app，有多条释放记录，请检查！！！"
+            else:
+                self.page.refresh_page()
+            if self.page.get_current_time() > self.page.return_end_time(now_time):
+                assert False, "@@@@没有相应的 app uninstall release log， 请检查！！！"
+            self.page.time_sleep(1)
 
-    @allure.feature('MDM_test01')
+        self.page.go_to_new_address("apps/uninstalllogs")
+        now_time = self.page.get_current_time()
+        while True:
+            action = self.page.get_app_latest_uninstall_log(send_time, release_info)[0]["Action"]
+            print("action", action)
+            if self.page.get_action_status(action) == 0:
+                break
+            else:
+                self.page.refresh_page()
+            # wait upgrade 3 mins at most
+            if self.page.get_current_time() > self.page.return_end_time(now_time, 180):
+                assert False, "@@@@3分钟还没有卸载完相应的app， 请检查！！！"
+            self.page.time_sleep(2)
+
+    @allure.feature('MDM_test022')
     @allure.title("Apps- release app again")
-    def test_uninstall_page_send_release_app_again(self, go_to_app_release_log):
+    def test_send_release_uninstall_app_again(self, go_to_app_uninstall_release_log):
         exp_release_success_text = "Sync App Release Success"
-        release_info = {"package_name": "APKEditor_1_9_10.apk", "sn": "A250900P03100019",
-                        "silent": "Yes", "version": "1.9.10", "package": "com.gmail.heagoo.apkeditor.pro"}
-        self.page.search_app_release_log(release_info)
+        # release_info = {"package_name": "APKEditor_1_9_10.apk", "sn": "A250900P03100019",
+        #                 "silent": "Yes", "version": "1.9.10", "package": "com.gmail.heagoo.apkeditor.pro"}
+        release_info = {"package_name": "ComAssistant.apk", "sn": "A250900P03100019",
+                        "silent": "Yes", "version": "1.1", "package": "com.bjw.ComAssistant"}
+        # check if device is online
+        self.page.go_to_new_address("devices")
+        opt_case.check_single_device(release_info["sn"])
+        # go to app release page
+        self.page.go_to_new_address("apps/appUninstall")
         if self.page.get_current_app_release_log_total() == 0:
             assert False, "@@@@没有相应的release app log, 请检查！！！"
         self.page.select_single_app_release_log()
-        text = self.page.click_send_release_again()
-        print(text)
+        self.page.click_send_release_again()
