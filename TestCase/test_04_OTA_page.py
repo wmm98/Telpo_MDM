@@ -98,8 +98,41 @@ class TestOTAPage:
             if self.page.get_current_time() > self.page.return_end_time(now_time):
                 assert False, "@@@@没有相应的 ota package release log， 请检查！！！"
             self.page.time_sleep(1)
+        """
+                Upgrade action (1: downloading, 2: downloading complete, 3: upgrading,
+                 4: upgrading complete, 5: downloading failed, 6: upgrading failed)
+                """
+        # check the app action in ota upgrade logs, if download complete or upgrade complete, break
+        self.page.go_to_new_address("ota/log")
+        now_time = self.page.get_current_time()
+        self.page.time_sleep(1)
+        while True:
+            action = self.page.get_ota_latest_upgrade_log(send_time, release_info)[0]["Action"]
+            if self.page.get_action_status(action) == 2 or self.page.get_action_status(action) == 4 \
+                    or self.page.get_action_status(action) == 3:
+                break
+            else:
+                self.page.refresh_page()
+            # wait 20 mins
+            if self.page.get_current_time() > self.page.return_end_time(now_time, 1200):
+                assert False, "@@@@20分钟还没有下载完相应的app， 请检查！！！"
+            self.page.time_sleep(2)
 
-        alert.getAlert("请确人升级完")
+        alert.getAlert("请确认升级")
+        # check upgrade
+        now_time = self.page.get_current_time()
+        self.page.time_sleep(1)
+        while True:
+            action = self.page.get_ota_latest_upgrade_log(send_time, release_info)[0]["Action"]
+            print("action", action)
+            if self.page.get_action_status(action) == 4:
+                break
+            else:
+                self.page.refresh_page()
+            # wait upgrade 3 mins at most
+            if self.page.get_current_time() > self.page.return_end_time(now_time, 300):
+                assert False, "@@@@3分钟还没有安装完相应的app， 请检查！！！"
+            self.page.time_sleep(2)
 
     @allure.feature('MDM_test022')
     @allure.title("OTA- release again")
