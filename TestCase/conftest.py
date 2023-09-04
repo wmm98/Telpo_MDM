@@ -40,8 +40,7 @@ def go_to_and_return_device_page():
 
 @pytest.fixture()
 def go_to_ota_upgrade_logs_page():
-    ota_page.click_OTA_btn()
-    ota_page.click_package_release_page()
+    ota_page.go_to_new_address("ota/log")
     yield
 
 
@@ -52,7 +51,7 @@ def go_to_ota_upgrade_package_page():
 
 
 @pytest.fixture()
-def go_to_ota_package_releases():
+def go_to_ota_package_release():
     app_page.go_to_new_address("ota/release")
     yield
 
@@ -71,10 +70,44 @@ def del_all_app_release_log():
 
 
 @pytest.fixture()
+def del_all_ota_release_log():
+    ota_page.go_to_new_address("ota/release")
+    ota_page.delete_all_ota_release_log()
+    yield
+
+
+@pytest.fixture()
+def del_all_ota_release_log_after():
+    yield
+    ota_page.go_to_new_address("ota/release")
+    ota_page.delete_all_ota_release_log()
+
+
+@pytest.fixture()
+def go_to_ota_page():
+    ota_page.go_to_new_address("ota")
+    yield
+
+
+@pytest.fixture()
+def del_all_app_release_log_after():
+    yield
+    app_page.go_to_new_address("apps/releases")
+    app_page.delete_all_app_release_log()
+
+
+@pytest.fixture()
 def del_all_app_uninstall_release_log():
     app_page.go_to_new_address("apps/appUninstall")
     app_page.delete_all_app_release_log()
     yield
+
+
+@pytest.fixture()
+def del_all_app_uninstall_release_log_after():
+    yield
+    app_page.go_to_new_address("apps/appUninstall")
+    app_page.delete_all_app_release_log()
 
 
 @pytest.fixture()

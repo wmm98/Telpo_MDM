@@ -323,7 +323,10 @@ class DevicesPage(TelpoMDMPage):
     # return devices_list
     def get_dev_info_list(self):
         devices_list = []
-        if self.ele_is_existed_in_range(self.loc_devices_list, self.loc_tr):
+        is_existed = self.ele_is_existed_in_range(self.loc_devices_list, self.loc_tr)
+        if not is_existed:
+            is_existed = self.ele_is_existed_in_range(self.loc_devices_list, self.loc_tr)
+        if is_existed:
             eles = self.get_element(self.loc_devices_list)
             tr_eles = eles.find_elements(*self.loc_tr)
             for tr_ele in tr_eles:

@@ -176,7 +176,11 @@ class APPSPage(TelpoMDMPage):
 
     def get_current_app_release_log_total(self):
         release_list = self.get_element(self.loc_release_list)
-        if self.ele_is_existed_in_range(self.loc_release_list, self.loc_single_release):
+        is_exited = self.ele_is_existed_in_range(self.loc_release_list, self.loc_single_release)
+        if is_exited:
+            self.time_sleep(2)
+            is_exited = self.ele_is_existed_in_range(self.loc_release_list, self.loc_single_release)
+        if is_exited:
             release_count = len(release_list.find_elements(*self.loc_single_release))
             return release_count
         else:
@@ -184,11 +188,13 @@ class APPSPage(TelpoMDMPage):
 
     def get_app_latest_release_log_list(self, send_time, release_info, uninstall=False):
         release_list = self.get_element(self.loc_release_list)
-        self.time_sleep(2)
         logs_list = []
+        existed = self.ele_is_existed_in_range(self.loc_release_list, self.loc_single_release)
+        if not existed:
+            self.time_sleep(2)
+            existed = self.ele_is_existed_in_range(self.loc_release_list, self.loc_single_release)
         if not uninstall:
-            if self.ele_is_existed_in_range(self.loc_release_list, self.loc_single_release):
-                print("True")
+            if existed:
                 logs = release_list.find_elements(*self.loc_single_release)
                 for single_log in logs:
                     cols = single_log.find_elements(*self.loc_single_release_col)
@@ -206,7 +212,7 @@ class APPSPage(TelpoMDMPage):
             else:
                 return []
         elif uninstall:
-            if self.ele_is_existed_in_range(self.loc_release_list, self.loc_single_release):
+            if existed:
                 logs = release_list.find_elements(*self.loc_single_release)
                 for single_log in logs:
                     cols = single_log.find_elements(*self.loc_single_release_col)

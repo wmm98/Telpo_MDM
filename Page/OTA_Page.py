@@ -46,7 +46,7 @@ class OTAPage(TelpoMDMPage):
     loc_hide_device_btn = (By.CSS_SELECTOR, "[class = 'btn btn-sm bg-teal hide-labelitem']")
     loc_release_package_btn = (By.CSS_SELECTOR, "[class = 'btn btn-danger btn-release']")
     loc_sn_list = (By.ID, "snlist")
-    loc_sn_text = (By.TAG_NAME, "span")
+    loc_sn_text = (By.TAG_NAME, "li")
     loc_label_selected = (By.CLASS_NAME, "label-selected")
 
     loc_ota_list = (By.ID, "otalist")
@@ -59,6 +59,7 @@ class OTAPage(TelpoMDMPage):
     ota_release_package_title = "OTA Package Releases"
     loc_data_body = (By.ID, "databody")
     loc_single_log = (By.TAG_NAME, "tr")
+    loc_single_release_col = (By.TAG_NAME, "td")
     # delete btn relate
     loc_release_delete_btn = (By.CSS_SELECTOR, "[class = 'fas fa-trash-alt']")
     loc_release_confirm_del = (By.CSS_SELECTOR, "[class = 'btn btn-danger btn-dels']")
@@ -72,6 +73,73 @@ class OTAPage(TelpoMDMPage):
 
     # select_all
     loc_release_check_all = (By.ID, "checkall")
+
+
+    def click_select_all_box(self):
+        ele = self.get_element(self.loc_release_check_all)
+        self.exc_js_click(ele)
+        self.deal_ele_selected(ele)
+
+    def click_delete_release_btn(self):
+        self.click(self.loc_release_delete_btn)
+        self.confirm_alert_existed(self.loc_release_delete_btn)
+        self.click(self.loc_release_confirm_del)
+        self.confirm_tips_alert_show(self.loc_release_confirm_del)
+        self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_release_confirm_del)
+
+    def delete_all_ota_release_log(self):
+        try:
+            if self.get_current_ota_release_log_total() != 0:
+                self.click_select_all_box()
+                self.click_delete_release_btn()
+                self.refresh_page()
+        except Exception:
+            self.refresh_page()
+            if self.get_current_ota_release_log_total() != 0:
+                self.click_select_all_box()
+                self.click_delete_release_btn()
+                self.refresh_page()
+
+    def get_current_ota_release_log_total(self):
+        release_list = self.get_element(self.loc_data_body)
+        if "No Data" in release_list.text:
+            return 0
+        is_exited = self.ele_is_existed_in_range(self.loc_data_body, self.loc_single_log)
+        if is_exited:
+            self.time_sleep(2)
+            is_exited = self.ele_is_existed_in_range(self.loc_data_body, self.loc_single_log)
+        if is_exited:
+            release_count = len(release_list.find_elements(*self.loc_single_log))
+            return release_count
+        else:
+            return 0
+
+    def get_ota_latest_release_log_list(self, send_time, release_info):
+        release_list = self.get_element(self.loc_data_body)
+        logs_list = []
+        existed = self.ele_is_existed_in_range(self.loc_data_body, self.loc_single_log)
+        if not existed:
+            self.time_sleep(2)
+            existed = self.ele_is_existed_in_range(self.loc_data_body, self.loc_single_log)
+        if "No Data" in release_list.text:
+            return []
+        if existed:
+            logs = release_list.find_elements(*self.loc_single_log)
+            for single_log in logs:
+                cols = single_log.find_elements(*self.loc_single_release_col)
+                receive_time_text = cols[4].text
+                sn = cols[6].text
+                package = cols[1].text
+                version = cols[3].text
+                time_line = self.extract_integers(receive_time_text)
+                receive_time = self.format_string_time(time_line)
+                if self.compare_time(send_time, receive_time):
+                    if (release_info["sn"] in sn) and (release_info["package_name"] in package):
+                        if release_info["version"] in version:
+                            logs_list.append(single_log)
+            return logs_list
+        else:
+            return []
 
     def delete_ota_package(self):
         self.click(self.loc_delete_ota_package_btn)
@@ -118,9 +186,6 @@ class OTAPage(TelpoMDMPage):
         ele = self.web_driver_wait_until(EC.presence_of_element_located(self.loc_release_search_btn))
         self.click(self.loc_release_search_btn)
         self.confirm_alert_existed(self.loc_release_search_btn)
-        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_search_release_package_name))
-        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_search_release_sn))
-        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_search_release_search))
         self.input_text(self.loc_search_release_package_name, info["package_name"])
         self.input_text(self.loc_search_release_sn, info["sn"])
         self.time_sleep(1)
@@ -136,18 +201,11 @@ class OTAPage(TelpoMDMPage):
             #     assert False, "@@@@有多个相同的  %s %s 释放记录, 请检查！！！" % (info["package_name"], info["sn"])
 
     def release_again(self):
-        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_send_release_again_btn))
         self.click(self.loc_send_release_again_btn)
-
-    # def
-    #     text = self.get_alert_text()
-    #     if not (exp_text in text):
-    #         self.click(self.loc_send_release_again_btn)
+        self.confirm_tips_alert_show(self.loc_send_release_again_btn)
 
     def delete_all_release_log(self, org_len=0, del_all=True):
         ele = self.web_driver_wait_until(EC.presence_of_element_located(self.loc_release_check_all))
-        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_release_delete_btn))
-        # print(ele)
         self.exc_js_click_loc(self.loc_release_check_all)
         self.deal_ele_selected(ele)
         self.click(self.loc_release_delete_btn)
@@ -218,7 +276,6 @@ class OTAPage(TelpoMDMPage):
         btn = self.get_element(self.loc_show_device_btn)
         if "block" in btn.get_attribute("style"):
             btn.click()
-
         sn_list = self.get_element(self.loc_sn_list)
         eles_sn = sn_list.find_elements(*self.loc_sn_text)
         for ele_sn in eles_sn:
@@ -226,14 +283,17 @@ class OTAPage(TelpoMDMPage):
                 if ele_sn.get_attribute("class") == "selected":
                     break
                 self.confirm_sn_is_selected(ele_sn)
+        self.exc_js_click(self.get_element(self.loc_release_package_btn))
+        self.confirm_tips_alert_show(self.loc_release_package_btn, ex_js=1)
+        self.refresh_page()
+        # self.confirm_alert_not_existed(self.loc_release_package_btn, ex_js=1)
 
     def click_alert_release_btn(self):
         # self.click(self.loc_release_package_btn)
         # print("弹窗是否存在：", self.alert_is_existed())
         try:
             self.exc_js_click(self.get_element(self.loc_release_package_btn))
-            text = self.get_alert_text()
-            return text
+            self.confirm_tips_alert_show(self.loc_release_package_btn, ex_js=1)
         except Exception:
             self.confirm_alert_not_existed(self.loc_release_package_btn, ex_js=1)
 

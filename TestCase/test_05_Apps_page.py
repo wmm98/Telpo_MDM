@@ -68,10 +68,9 @@ class TestAppPage:
     def test_delete_all_app_release_app(self, go_to_app_release_log):
         self.page.page_load_complete()
         self.page.delete_all_app_release_log()
-
         assert self.page.get_current_app_release_log_total() == 0, "@@@@没有删除完了所有的app release log, 请检查!!!"
 
-    @allure.feature('MDM_test022')
+    @allure.feature('MDM_test02')
     @allure.title("Apps-release low version app")
     @pytest.mark.dependency(name="test_release_app_ok", scope='package')
     def test_release_low_version_app(self, del_all_app_release_log, del_all_app_uninstall_release_log):
@@ -247,9 +246,9 @@ class TestAppPage:
                 assert False, "@@@@3分钟还没有安装完相应的app， 请检查！！！"
             self.page.time_sleep(2)
 
-    @allure.feature('MDM_test022')
+    @allure.feature('MDM_test02')
     @allure.title("Apps- release app again")
-    def test_send_release_install_app_again(self, go_to_app_release_log):
+    def test_send_release_install_app_again(self, go_to_app_release_log, del_all_app_release_log_after):
         exp_release_success_text = "Sync App Release Success"
         # release_info = {"package_name": "APKEditor_1_9_10.apk", "sn": "A250900P03100019",
         #                 "silent": "Yes", "version": "1.9.10", "package": "com.gmail.heagoo.apkeditor.pro"}
@@ -266,7 +265,7 @@ class TestAppPage:
         self.page.select_single_app_release_log()
         self.page.click_send_release_again()
 
-    @allure.feature('MDM_test022')
+    @allure.feature('MDM_test02')
     @allure.title("Apps- uninstall app")
     @pytest.mark.dependency(depends=["test_release_app_ok"], scope='package')
     def test_uninstall_app(self, del_all_app_release_log, del_all_app_uninstall_release_log):
@@ -317,9 +316,9 @@ class TestAppPage:
                 assert False, "@@@@3分钟还没有卸载完相应的app， 请检查！！！"
             self.page.time_sleep(2)
 
-    @allure.feature('MDM_test022')
+    @allure.feature('MDM_test02')
     @allure.title("Apps- release app again")
-    def test_send_release_uninstall_app_again(self, go_to_app_uninstall_release_log):
+    def test_send_release_uninstall_app_again(self, del_all_app_release_log, del_all_app_uninstall_release_log_after):
         exp_release_success_text = "Sync App Release Success"
         # release_info = {"package_name": "APKEditor_1_9_10.apk", "sn": "A250900P03100019",
         #                 "silent": "Yes", "version": "1.9.10", "package": "com.gmail.heagoo.apkeditor.pro"}
@@ -334,3 +333,4 @@ class TestAppPage:
             assert False, "@@@@没有相应的release app log, 请检查！！！"
         self.page.select_single_app_release_log()
         self.page.click_send_release_again()
+
