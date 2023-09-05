@@ -87,6 +87,7 @@ class APPSPage(TelpoMDMPage):
     loc_uninstall_device_list = (By.ID, "labelItem1")
 
     def get_app_latest_upgrade_log(self, send_time, release_info):
+        self.page_load_complete()
         upgrade_list = self.get_element(self.loc_app_upgrade_logs_body)
         logs_list = []
         if self.ele_is_existed_in_range(self.loc_app_upgrade_logs_body, self.loc_app_upgrade_single_log):
@@ -108,6 +109,7 @@ class APPSPage(TelpoMDMPage):
             return []
 
     def get_app_latest_uninstall_log(self, send_time, release_info):
+        self.page_load_complete()
         upgrade_list = self.get_element(self.loc_app_upgrade_logs_body)
         logs_list = []
         if self.ele_is_existed_in_range(self.loc_app_upgrade_logs_body, self.loc_app_upgrade_single_log):
@@ -175,6 +177,7 @@ class APPSPage(TelpoMDMPage):
         self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_release_confirm_del_btn)
 
     def get_current_app_release_log_total(self):
+        self.page_load_complete()
         release_list = self.get_element(self.loc_release_list)
         is_exited = self.ele_is_existed_in_range(self.loc_release_list, self.loc_single_release)
         if is_exited:
@@ -187,6 +190,7 @@ class APPSPage(TelpoMDMPage):
             return 0
 
     def get_app_latest_release_log_list(self, send_time, release_info, uninstall=False):
+        self.web_driver_wait_until(EC.text_to_be_present_in_element(self.loc_release_list, release_info["package"]))
         release_list = self.get_element(self.loc_release_list)
         logs_list = []
         existed = self.ele_is_existed_in_range(self.loc_release_list, self.loc_single_release)

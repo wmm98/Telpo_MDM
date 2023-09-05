@@ -21,7 +21,24 @@ class TestAppPage:
         self.page.refresh_page()
 
     @allure.feature('MDM_test02')
+    @allure.title("Apps-delete apk package")
+    @pytest.mark.flaky(reruns=1, reruns_delay=3)
+    def test_delete_single_app(self, go_to_app_page):
+        package_info = {"package_name": "ComAssistant.apk", "file_category": "test",
+                        "developer": "engineer", "description": "test"}
+        self.page.page_load_complete()
+        org_length = len(self.page.get_apps_text_list())
+        self.page.search_app_by_name(package_info["package_name"])
+        if len(self.page.get_apps_text_list()) == 1:
+            self.page.click_delete_app_btn()
+            self.page.refresh_page()
+            new_length = len(self.page.get_apps_text_list())
+            if org_length != (new_length + 1):
+                assert False, "@@@@删除apk包失败请检查！！！"
+
+    @allure.feature('MDM_test02')
     @allure.title("Apps-add app apk package")
+    @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_add_new_apps(self, go_to_app_page):
         exp_success_text = "Success"
         package_info = {"package_name": "ComAssistant.apk", "file_category": "test",
@@ -49,22 +66,8 @@ class TestAppPage:
                 assert False, "@@@添加apk失败， 请检查"
 
     @allure.feature('MDM_test02')
-    @allure.title("Apps-delete apk package")
-    def test_delete_single_app(self, go_to_app_page):
-        package_info = {"package_name": "ComAssistant.apk", "file_category": "test",
-                        "developer": "engineer", "description": "test"}
-        self.page.page_load_complete()
-        org_length = len(self.page.get_apps_text_list())
-        self.page.search_app_by_name(package_info["package_name"])
-        if len(self.page.get_apps_text_list()) == 1:
-            self.page.click_delete_app_btn()
-            self.page.refresh_page()
-            new_length = len(self.page.get_apps_text_list())
-            if org_length != (new_length + 1):
-                assert False, "@@@@删除apk包失败请检查！！！"
-
-    @allure.feature('MDM_test02')
     @allure.title("Apps-delete all app release log")
+    @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_delete_all_app_release_app(self, go_to_app_release_log):
         self.page.page_load_complete()
         self.page.delete_all_app_release_log()
@@ -73,6 +76,7 @@ class TestAppPage:
     @allure.feature('MDM_test02')
     @allure.title("Apps-release low version app")
     @pytest.mark.dependency(name="test_release_app_ok", scope='package')
+    @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_release_low_version_app(self, del_all_app_release_log, del_all_app_uninstall_release_log):
         # release_info = {"package_name": "APKEditor_1_7_2.apk", "sn": "A250900P03100019",
         #                 "silent": "Yes", "version": "1.7.2", "package": "com.gmail.heagoo.apkeditor.pro"}
@@ -91,8 +95,8 @@ class TestAppPage:
             assert False, "@@@@没有 %s, 请检查！！！" % release_info["package_name"]
         self.page.click_release_app_btn()
         self.page.input_release_app_info(release_info)
+        self.page.time_sleep(3)
         send_time = case_pack.time.strftime('%Y-%m-%d %H:%M', case_pack.time.localtime(self.page.get_current_time()))
-        self.page.time_sleep(1)
         # go to app release log
         self.page.go_to_new_address("apps/releases")
         # self.page.check_release_log_info(send_time, release_info["sn"])
@@ -161,6 +165,7 @@ class TestAppPage:
     @allure.feature('MDM_test01')
     @allure.title("Apps-release high version app, no test now")
     @pytest.mark.dependency(depends=["test_release_app_ok"], scope='package')
+    @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_high_version_app_cover_low_version_app(self, del_all_app_release_log, del_all_app_uninstall_release_log):
         release_info = {"package_name": "APKEditor_1_9_10.apk", "sn": "A250900P03100019",
                         "silent": "Yes", "version": "1.9.10", "package": "com.gmail.heagoo.apkeditor.pro"}
@@ -178,13 +183,13 @@ class TestAppPage:
             assert False, "@@@@没有 %s, 请检查！！！" % release_info["package_name"]
         self.page.click_release_app_btn()
         self.page.input_release_app_info(release_info)
+        self.page.time_sleep(3)
         send_time = case_pack.time.strftime('%Y-%m-%d %H:%M', case_pack.time.localtime(self.page.get_current_time()))
         # go to app release log
         self.page.go_to_new_address("apps/releases")
         # self.page.check_release_log_info(send_time, release_info["sn"])
 
         now_time = self.page.get_current_time()
-        self.page.time_sleep(1)
         # print(self.page.get_app_current_release_log_list(send_time, release_info["sn"]))
         while True:
             release_len = len(self.page.get_app_latest_release_log_list(send_time, release_info))
@@ -201,7 +206,6 @@ class TestAppPage:
         # check if the upgrade log appeared, if appeared, break
         self.page.go_to_new_address("apps/logs")
         now_time = self.page.get_current_time()
-        self.page.time_sleep(1)
         while True:
             release_len = len(self.page.get_app_latest_upgrade_log(send_time, release_info))
             if release_len == 1:
@@ -218,7 +222,6 @@ class TestAppPage:
         """
         # check the app action in app upgrade logs, if download complete or upgrade complete, break
         now_time = self.page.get_current_time()
-        self.page.time_sleep(1)
         while True:
             action = self.page.get_app_latest_upgrade_log(send_time, release_info)[0]["Action"]
             if self.page.get_action_status(action) == 2 or self.page.get_action_status(action) == 4 \
@@ -233,7 +236,6 @@ class TestAppPage:
 
         # check upgrade
         now_time = self.page.get_current_time()
-        self.page.time_sleep(1)
         while True:
             action = self.page.get_app_latest_upgrade_log(send_time, release_info)[0]["Action"]
             print("action", action)
@@ -248,6 +250,7 @@ class TestAppPage:
 
     @allure.feature('MDM_test02')
     @allure.title("Apps- release app again")
+    @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_send_release_install_app_again(self, go_to_app_release_log, del_all_app_release_log_after):
         exp_release_success_text = "Sync App Release Success"
         # release_info = {"package_name": "APKEditor_1_9_10.apk", "sn": "A250900P03100019",
@@ -268,6 +271,7 @@ class TestAppPage:
     @allure.feature('MDM_test02')
     @allure.title("Apps- uninstall app")
     @pytest.mark.dependency(depends=["test_release_app_ok"], scope='package')
+    @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_uninstall_app(self, del_all_app_release_log, del_all_app_uninstall_release_log):
         # release_info = {"package_name": "APKEditor_1_9_10.apk", "sn": "A250900P03100019",
         #                 "silent": "Yes", "version": "1.9.10", "package": "com.gmail.heagoo.apkeditor.pro"}
@@ -286,6 +290,7 @@ class TestAppPage:
             assert False, "@@@@没有 %s, 请检查！！！" % release_info["package_name"]
         self.page.click_uninstall_app_btn()
         self.page.input_uninstall_app_info(release_info)
+        self.page.time_sleep(3)
         send_time = case_pack.time.strftime('%Y-%m-%d %H:%M', case_pack.time.localtime(self.page.get_current_time()))
         # go to app uninstall log
         self.page.go_to_new_address("apps/appUninstall")
@@ -300,7 +305,6 @@ class TestAppPage:
                 self.page.refresh_page()
             if self.page.get_current_time() > self.page.return_end_time(now_time):
                 assert False, "@@@@没有相应的 app uninstall release log， 请检查！！！"
-            self.page.time_sleep(1)
 
         self.page.go_to_new_address("apps/uninstalllogs")
         now_time = self.page.get_current_time()

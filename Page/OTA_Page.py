@@ -80,6 +80,7 @@ class OTAPage(TelpoMDMPage):
     loc_app_upgrade_log_col = (By.TAG_NAME, "td")
 
     def get_ota_latest_upgrade_log(self, send_time, release_info):
+        self.page_load_complete()
         upgrade_list = self.get_element(self.loc_app_upgrade_logs_body)
         logs_list = []
         if "No Data" in upgrade_list.text:
@@ -95,7 +96,7 @@ class OTAPage(TelpoMDMPage):
             time_line = self.extract_integers(receive_time_text)
             receive_time = self.format_string_time(time_line)
             if self.compare_time(send_time, receive_time):
-                if (release_info["sn"] in sn) and (release_info["package_nam"] in package):
+                if (release_info["sn"] in sn) and (release_info["package_name"] in package):
                     if release_info["version"] in version:
                         logs_list.append({"SN": sn, "Update Time": receive_time, "Action": action, "Version": version})
             return logs_list
@@ -128,6 +129,7 @@ class OTAPage(TelpoMDMPage):
                 self.refresh_page()
 
     def get_current_ota_release_log_total(self):
+        self.page_load_complete()
         release_list = self.get_element(self.loc_data_body)
         if "No Data" in release_list.text:
             return 0
@@ -142,6 +144,7 @@ class OTAPage(TelpoMDMPage):
             return 0
 
     def get_ota_latest_release_log_list(self, send_time, release_info):
+        self.page_load_complete()
         release_list = self.get_element(self.loc_data_body)
         logs_list = []
         existed = self.ele_is_existed_in_range(self.loc_data_body, self.loc_single_log)
