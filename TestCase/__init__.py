@@ -15,6 +15,10 @@ from Page.Release_Device_Page import ReleaseDevicePage
 from Page.System_Page import SystemPage
 from Page.Apps_Page import APPSPage
 import time
+from Page.Android_Aimdm_Page import Android_Aimdm_Page
+from utils.client_connect import ClientConnect
+
+client = ClientConnect().get_device()
 
 #
 chrome_driver = BaseWebDriver()

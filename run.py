@@ -8,7 +8,6 @@
 
 """
 import sys
-
 import pytest
 from Common import Log
 from Common import Shell
@@ -20,14 +19,15 @@ import time
 import shutil
 import datetime
 from utils.base_web_driver import BaseWebDriver
+from utils.client_connect import ClientConnect
 
 
 if __name__ == '__main__':
 
-    # 加载弹窗, 获取设备名称
-    # alert.alertChip()
-
-    # 连接上adb server
+    # 先连接adb
+    device = ClientConnect()
+    device.connect_device("d")
+    # init config file
     conf = Config.Config()
     log = Log.MyLog()
     shell = Shell.Shell()
@@ -42,26 +42,13 @@ if __name__ == '__main__':
     xml_report_path = conf.xml_report_path
     html_report_path = conf.html_report_path
 
-    # 清空XML文件夹然后重创文件夹
-    # if os.path.exists(xml_report_path):
-    #     shutil.rmtree(xml_report_path)
-    #
-    # os.mkdir(xml_report_path)
-    #
-    # cmd = 'allure generate %s -o %s --clean' % (xml_report_path, html_report_path)
-    # try:
-    #     shell.invoke(cmd)
-    # except Exception:
-    #     log.error('Failed to execute case, check environment configuration!!')
-    #     raise
     pro_path = conf.project_path + "\\Report\\environment.properties"
-    # print(pro_path)
 
     env_path = pro_path
     shutil.copy(env_path, xml_report_path)
 
     # # 定义测试集
-    allure_list = '--allure-features=MDM_test02_login,MDM_test02'
+    allure_list = '--allure-features=MDM_test02_login,MDM_test022'
     # allure_story = '--allure-stories=pytest_debug_story'
     # pytest -s --allure-features pytest_debug
     # pytest -s --allure-features pytest_debug --allure-stories pytest_debug_story
@@ -70,11 +57,10 @@ if __name__ == '__main__':
     args = ['-s', '-q', '--alluredir', xml_report_path, allure_list]
     # args = ['-s', '-q', '--alluredir', xml_report_path, allure_list, allure_story]
 
-    # 如下参数不添加allure_list，会自动运行项目里面带有feature侦听器的的所有case
+    # 如下参数不添加allure_list，会自动运行项目里面带有feature监听器器的的所有case
     # args = ['-s', '-q', '--alluredir', xml_report_path]
     log.info('Execution Testcases List：%s' % allure_list)
     curr_time = datetime.datetime.now()
-    # print(curr_time)
     log.info('Execution Testcases start time: %s' % curr_time)
     pytest.main(args)
     cmd = 'allure generate %s -o %s --clean' % (xml_report_path, html_report_path)
@@ -83,7 +69,6 @@ if __name__ == '__main__':
 
     try:
         shell.invoke(cmd)
-        # print(cmd)
     except Exception:
         log.error('@@@执行失败， 请检查环境配置！！！')
         raise

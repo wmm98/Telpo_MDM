@@ -2,7 +2,6 @@ import allure
 import TestCase as case_pack
 import pytest
 
-
 conf = case_pack.Config()
 excel = case_pack.ExcelData()
 opt_case = case_pack.Optimize_Case()

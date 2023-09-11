@@ -1,6 +1,4 @@
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-import time
+import utils as pack
 
 
 class BaseWebDriver:
@@ -10,10 +8,10 @@ class BaseWebDriver:
     def open_web_site(self, url):
         global driver
 
-        chrome_options = Options()
+        chrome_options = pack.Options()
         chrome_options.add_argument("--allow-insecure-localhost")  # 允许访问不安全的本地主机（可选）
         chrome_options.add_argument("--ignore-certificate-errors")  # 忽略证书错误
-        driver = webdriver.Chrome(options=chrome_options)
+        driver = pack.webdriver.Chrome(options=chrome_options)
 
         # driver = webdriver.Chrome()
         driver.implicitly_wait(5)
@@ -22,14 +20,14 @@ class BaseWebDriver:
         url = url
         # 窗口最大化
         driver.get(url)
-        now_time = time.time()
+        now_time = pack.time.time()
         while True:
             if driver.execute_script('return document.readyState;') == 'complete':
                 break
-            if time.time() > now_time + 60:
+            if pack.time.time() > now_time + 60:
                 driver.refresh()
                 break
-            time.sleep(1)
+            pack.time.sleep(1)
 
     def get_web_driver(self):
         return driver

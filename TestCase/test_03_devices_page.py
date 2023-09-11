@@ -21,11 +21,12 @@ class TestDevicesPage:
         self.page = case_pack.DevicesPage(self.driver, 40)
         self.meg_page = case_pack.MessagePage(self.driver, 40)
         self.telpo_mdm_page = case_pack.TelpoMDMPage(self.driver, 40)
+        self.android_mdm_page = case_pack.Android_Aimdm_Page(case_pack.client, 5, case_pack.client.serial)
 
     def teardown_class(self):
         self.page.refresh_page()
 
-    @allure.feature('MDM_test02')
+    @allure.feature('MDM_test022')
     @allure.title("Devices main Page")  # 设置case的名字
     # @pytest.mark.dependency(depends=["test_TelpoMdM_Page"], scope='package')
     def test_go_to_devices_page(self):
@@ -187,7 +188,7 @@ class TestDevicesPage:
 
         # need to add check length of data list
 
-    @allure.feature('MDM_test02')
+    @allure.feature('MDM_test022')
     @allure.title("Devices- AIMDM send message")
     @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_send_message_to_single_device(self):
@@ -197,17 +198,26 @@ class TestDevicesPage:
         date_time = '%Y-%m-%d %H:%M:%S'
         self.page.refresh_page()
         now = case_pack.time.strftime(date_time, case_pack.time.localtime(case_pack.time.time()))
-        msg = "%s: 12345#$**&&&&" % now
+        msg = "%s: 1#$*&" % now
+        msg_box_header = "Notification"
         # confirm if device is online and execute next step, if not, end the case execution
         opt_case.check_single_device(sn)
 
         self.page.select_device(sn)
         self.page.click_send_btn()
         self.page.msg_input_and_send(msg)
-        # check alert text
-        # opt_case.check_alert_text(exp_success_send_text)
 
-        # check devices
+        # check message in device
+        wait_time = 60
+        if not self.android_mdm_page.mdm_msg_alert_show(wait_time):
+            assert False, "@@@@%ss内无法接收到信息， 请检查设备是否在线！！！！" % wait_time
+
+        exp_text = self.android_mdm_page.remove_space(msg)
+        act_text = self.android_mdm_page.remove_space(self.android_mdm_page.get_msg_tips_text())
+        assert exp_text == act_text, "@@@发送的信息和接收到的不一样， 请检查！！！！"
+
+        self.android_mdm_page.click_msg_confirm_btn()
+        self.android_mdm_page.confirm_msg_alert_fade(msg)
 
     @allure.feature('MDM_test02')
     @allure.title("Devices- lock and unlock single device")
