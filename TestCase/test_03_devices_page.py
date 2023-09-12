@@ -389,12 +389,12 @@ class TestDevicesPage:
         while True:
             receive_list = self.meg_page.get_device_message_list(now)
             if len(receive_list) >= length:
-                msg_list = [self.page.remove_space(m['message']) for m in self.meg_page.get_device_message_list(now)[:length]]
+                msg_list = [self.page.remove_space(m['message']) for m in receive_list[:length]]
                 for meg in message_list:
                     if self.page.remove_space(meg) not in msg_list:
                         assert False, "@@@@平台反馈终端接收的信息有误， 请检查！！！！"
                 print("msg_list", msg_list)
-                status_list = [i['status'].upper() for i in msg_list[:length]]
+                status_list = [i['status'].upper() for i in receive_list[:length]]
                 print(status_list)
                 if len(msg_list) == length and status_list.count("Successed".upper()) == length:
                     break
