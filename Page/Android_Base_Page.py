@@ -79,16 +79,24 @@ class AndroidBasePage:
         return text.replace("\r", "").replace("\n", "").replace(" ", "")
 
     def return_end_time(self, now_time, timeout=100):
+        if timeout == 0:
+            wait = 100
+        else:
+            wait = timeout
         timedelta = 1
-        end_time = now_time + timeout
+        end_time = now_time + wait
         return end_time
 
     def click_element(self, ele):
-        ele.click(timeout=self.times)
+        ele.click()
 
     def get_element_text(self, ele):
         text = ele.get_text()
         return text
+
+    def input_element_text(self, ele, text):
+        ele.clear_text()
+        ele.send_keys(text)
 
     def get_element_by_id(self, id_no, timeout=0):
         if timeout == 0:
@@ -97,6 +105,9 @@ class AndroidBasePage:
             time_to_wait = timeout
         if self.wait_ele_presence_by_id(id_no, time_to_wait):
             return self.client(resourceId=id_no)
+
+    def get_element_by_id_no_wait(self, id_no):
+        return self.client(resourceId=id_no)
 
     def get_element_by_class_name(self, class_name, timeout=0):
         if timeout == 0:
@@ -120,7 +131,11 @@ class AndroidBasePage:
         else:
             assert False, "@@@@查找元素超时！！！"
 
-    def wait_ele_gone_by_id(self, id_no, time_to_wait):
+    def wait_ele_gone_by_id(self, id_no, wait):
+        if wait == 0:
+            time_to_wait = 5
+        else:
+            time_to_wait = wait
         return self.client(resourceId=id_no).wait_gone(timeout=time_to_wait)
 
     def wait_ele_gone_by_class_name(self, class_name, time_to_wait):

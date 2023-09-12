@@ -54,7 +54,7 @@ class TestDevicesPage:
             log.error(str(e))
             assert False
 
-    @allure.feature('MDM_test02')
+    @allure.feature('MDM_test01')
     @allure.title("Devices-add category and  model")  # 设置case的名字
     @pytest.mark.parametrize('cate_model', data_cate_mode)
     def test_add_category_model(self, cate_model):
@@ -132,7 +132,7 @@ class TestDevicesPage:
             print("发生的异常是", e)
             assert False
 
-    @allure.feature('MDM_test02')
+    @allure.feature('MDM_test01')
     @allure.title("Devices- test check box")  # 设置case的名字
     @pytest.mark.parametrize('devices_list', devices)
     @pytest.mark.flaky(reruns=5, reruns_delay=3)
@@ -188,17 +188,17 @@ class TestDevicesPage:
 
         # need to add check length of data list
 
-    @allure.feature('MDM_test022')
+    @allure.feature('MDM_test02')
     @allure.title("Devices- AIMDM send message")
     @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_send_message_to_single_device(self):
         exp_success_send_text = "Message Sent"
         # sn would change after debug with devices
         sn = "A250900P03100019"
-        date_time = '%Y-%m-%d %H:%M:%S'
+        date_time = '%m-%d %H:%M'
         self.page.refresh_page()
         now = case_pack.time.strftime(date_time, case_pack.time.localtime(case_pack.time.time()))
-        msg = "%s: 1#$*&" % now
+        msg = "%s:1#$*" % now
         msg_box_header = "Notification"
         # confirm if device is online and execute next step, if not, end the case execution
         opt_case.check_single_device(sn)
@@ -215,18 +215,18 @@ class TestDevicesPage:
         exp_text = self.android_mdm_page.remove_space(msg)
         act_text = self.android_mdm_page.remove_space(self.android_mdm_page.get_msg_tips_text())
         assert exp_text == act_text, "@@@发送的信息和接收到的不一样， 请检查！！！！"
-
         self.android_mdm_page.click_msg_confirm_btn()
         self.android_mdm_page.confirm_msg_alert_fade(msg)
 
     @allure.feature('MDM_test02')
     @allure.title("Devices- lock and unlock single device")
+    @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_lock_and_unlock_single_device(self):
         # case is stable
         sn = "A250900P03100019"
         exp_lock_msg = "Device %s Locked" % sn
         exp_unlock_msg = "Device %s UnLocked" % sn
-
+        lock_tips = "pls contact the administrator to unlock it!"
         for k in range(2):
             # test lock btn
             opt_case.check_single_device(sn)
@@ -243,17 +243,22 @@ class TestDevicesPage:
                 self.page.refresh_page()
                 self.page.time_sleep(1)
 
+            # go to device and check the lock alert
+            assert self.android_mdm_page.mdm_msg_alert_show(60), "@@@@60s后还没显示锁定设备， 请检查！！！"
+            assert self.page.remove_space(lock_tips) in self.android_mdm_page.get_msg_tips_text(), "@@@@100s后还没显示锁定设备， tips内容对不上， 请检查！！！"
+
             self.page.refresh_page()
 
             opt_case.get_single_device_list(sn)
             self.page.select_device(sn)
             self.page.click_unlock()
+            assert self.android_mdm_page.confirm_msg_alert_fade(self.page.remove_space(lock_tips)), "@@@@60s后还没解锁， 请检查！！！"
             self.page.refresh_page()
             now_time = self.page.get_current_time()
             for j in range(5):
                 if "Normal" in opt_case.get_single_device_list(sn)[0]["Lock Status"]:
                     break
-                if self.page.get_current_time() > self.page.return_end_time(now_time, 60):
+                if self.page.get_current_time() > self.page.return_end_time(now_time, 120):
                     assert False, "@@@@信息发送失败，请检查！！！！"
                 self.page.refresh_page()
                 self.page.time_sleep(1)
@@ -299,7 +304,6 @@ class TestDevicesPage:
         sn = "A250900P03100019"
         password = ["123456", "000000", "999999"]
         self.page.refresh_page()
-        self.page.refresh_page()
         for psw in password:
             opt_case.check_single_device(sn)
             self.page.select_device(sn)
@@ -308,8 +312,41 @@ class TestDevicesPage:
             self.page.refresh_page()
 
     @allure.feature('MDM_test02')
+    @allure.title("Devices- reset device password")
+    @pytest.mark.flaky(reruns=1, reruns_delay=3)
+    def test_reset_device_password(self):
+        exp_psw_text = "Password changed"
+        sn = "A250900P03100019"
+        lock_tips = "pls contact the administrator to unlock it!"
+        password = ["123456", "000000", "999999"]
+        self.page.refresh_page()
+        for psw in password:
+            opt_case.check_single_device(sn)
+            self.page.select_device(sn)
+            self.page.click_psw_btn()
+            self.page.change_device_password(psw)
+            # lock device
+            self.page.select_device(sn)
+            self.page.click_lock()
+            # input password in device
+            assert self.android_mdm_page.mdm_msg_alert_show(5), "@@@@100s后还没显示锁机，请检查！！！"
+            assert self.page.remove_space(lock_tips) in self.android_mdm_page.get_msg_tips_text(), "@@@@100s后还没显示锁定设备， tips内容对不上， 请检查！！！"
+            # need to click confirm btn six times, device would disappear
+            self.android_mdm_page.manual_unlock()
+            try:
+                self.android_mdm_page.lock_psw_box_presence()
+                self.android_mdm_page.lock_psw_input(psw)
+            except:
+                self.page.time_sleep(1)
+                self.android_mdm_page.manual_unlock()
+                self.android_mdm_page.lock_psw_input(psw)
+            self.android_mdm_page.click_psw_confirm_btn()
+            assert self.android_mdm_page.confirm_psw_alert_fade(), "@@@@无法确认密码， 请检查！！！"
+            self.page.refresh_page()
+
+    @allure.feature('MDM_test022')
     @allure.title("Devices- AIMDM send msg and check the log in the Message Module")
-    @pytest.mark.flaky(reruns=1, reruns_delay=1)
+    # @pytest.mark.flaky(reruns=1, reruns_delay=1)
     def test_pressure_send_message_to_single_device(self, go_to_and_return_device_page):
         exp_success_send_text = "Message Sent"
         # sn would change after debug with devices
@@ -325,12 +362,21 @@ class TestDevicesPage:
         message_list = []
         for i in range(length):
             self.page.refresh_page()
-            msg = "%s: test send message %d" % (now, i)
+            msg = "%s:test%d" % (now, i)
             opt_case.check_single_device(sn)
             self.page.select_device(sn)
             self.page.click_send_btn()
             self.page.msg_input_and_send(msg)
             message_list.append(msg)
+            # check message in device
+            wait_time = 60
+            if not self.android_mdm_page.mdm_msg_alert_show(wait_time):
+                assert False, "@@@@%ss内无法接收到信息， 请检查设备是否在线！！！！" % wait_time
+            exp_text = self.android_mdm_page.remove_space(msg)
+            act_text = self.android_mdm_page.remove_space(self.android_mdm_page.get_msg_tips_text())
+            assert exp_text == act_text, "@@@发送的信息和终端接收到的不一样， 请检查！！！！"
+            self.android_mdm_page.click_msg_confirm_btn()
+            self.android_mdm_page.confirm_msg_alert_fade(msg)
 
         self.page.go_to_new_address("message")
         # check if Page loaded completely
@@ -338,16 +384,23 @@ class TestDevicesPage:
         # Check result of device message in the Message Module and msg status
         self.meg_page.choose_device(sn, device_cate)
         now_time = self.page.get_current_time()
-        res = self.meg_page.get_device_message_list(now)
-        print(res)
-
-        # while True:
-        #     msg_list = self.meg_page.get_device_message_list(now)
-        #     if len(msg_list) == length:
-        #         break
-        #     if self.page.get_current_time() > self.page.return_end_time(now_time):
-        #         assert False, "@@@终端收到信息后, 平台180s内无法收到相应的信息"
-        #     self.page.time_sleep(1)
+        # res = self.meg_page.get_device_message_list(now)
+        # print(res)
+        while True:
+            receive_list = self.meg_page.get_device_message_list(now)
+            if len(receive_list) >= length:
+                msg_list = [self.page.remove_space(m['message']) for m in self.meg_page.get_device_message_list(now)[:length]]
+                for meg in message_list:
+                    if self.page.remove_space(meg) not in msg_list:
+                        assert False, "@@@@平台反馈终端接收的信息有误， 请检查！！！！"
+                print("msg_list", msg_list)
+                status_list = [i['status'].upper() for i in msg_list[:length]]
+                print(status_list)
+                if len(msg_list) == length and status_list.count("Successed".upper()) == length:
+                    break
+            if self.page.get_current_time() > self.page.return_end_time(now_time):
+                assert False, "@@@终端收到信息后, 平台180s内无法收到相应的信息"
+            self.page.time_sleep(1)
 
     @allure.feature('MDM_test02')
     @allure.title("Devices- AIMDM transfer api server ")

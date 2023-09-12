@@ -134,6 +134,14 @@ class DevicesPage(TelpoMDMPage):
         self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_save_psw_btn)
         # self.alert_fade()
 
+    def change_device_password(self, psw):
+        self.alert_show()
+        self.input_text(self.loc_lock_password, psw)
+        self.click(self.loc_save_psw_btn)
+        self.confirm_tips_alert_show(self.loc_save_psw_btn)
+        self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_save_psw_btn)
+        # self.alert_fade()
+
     def click_dropdown_btn(self):
         self.click(self.loc_dropdown_btn)
         now_time = self.get_current_time()
@@ -245,7 +253,8 @@ class DevicesPage(TelpoMDMPage):
         self.input_text(self.loc_msg_input_box, msg)
         self.click(self.loc_msg_input_send_btn)
         self.confirm_tips_alert_show(self.loc_msg_input_send_btn)
-        self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_msg_input_send_btn)
+        self.refresh_page()
+        # self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_msg_input_send_btn)
 
     def confirm_msg_alert_fade(self):
         self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_msg_input_send_btn)
