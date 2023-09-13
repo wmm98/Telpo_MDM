@@ -26,7 +26,7 @@ class TestDevicesPage:
     def teardown_class(self):
         self.page.refresh_page()
 
-    @allure.feature('MDM_test022')
+    @allure.feature('MDM_test02')
     @allure.title("Devices main Page")  # 设置case的名字
     # @pytest.mark.dependency(depends=["test_TelpoMdM_Page"], scope='package')
     def test_go_to_devices_page(self):

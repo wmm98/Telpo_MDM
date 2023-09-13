@@ -5,6 +5,26 @@ class interface:
     def __init__(self):
         pass
 
+    def get_apk_package_name(self, apk_file_path):
+        try:
+            # 加载 APK 文件
+            apk = public_pack.APK(apk_file_path)
+            # 获取包名
+            package_name = apk.get_package()
+            print("APK 文件的包名为:", package_name)
+        except Exception as e:
+            print("获取包名时出现错误:", e)
+
+    def get_file_size_in_windows(self, file_path):
+        if public_pack.os.path.exists:
+            try:
+                size = public_pack.os.path.getsize(file_path)
+                return size
+            except Exception:
+                return -1
+        else:
+            assert False, "@@@@不存在%s, 请检查！！！" % file_path
+
     def remove_space(self, text):
         return text.replace("\r", "").replace("\n", "").replace(" ", "")
 

@@ -16,6 +16,7 @@ class TestAppPage:
         self.driver = case_pack.test_driver
         self.page = case_pack.APPSPage(self.driver, 40)
         self.system_page = case_pack.SystemPage(self.driver, 40)
+        self.android_mdm_page = case_pack.Android_Aimdm_Page(case_pack.client, 5, case_pack.client.serial)
 
     def teardown_class(self):
         self.page.refresh_page()
@@ -82,14 +83,17 @@ class TestAppPage:
         #                 "silent": "Yes", "version": "1.7.2", "package": "com.gmail.heagoo.apkeditor.pro"}
         release_info = {"package_name": "ComAssistant.apk", "sn": "A250900P03100019",
                         "silent": "Yes", "version": "1.1", "package": "com.bjw.ComAssistant"}
+        file_path = conf.project_path + "\\Param\\Package\\%s" % release_info["package_name"]
         # check if device is online
         self.page.go_to_new_address("devices")
         opt_case.check_single_device(release_info["sn"])
         # go to app page
         self.page.go_to_new_address("apps")
         self.page.search_app_by_name(release_info["package_name"])
-        app_size_mdm = self.page.get_app_size()
-        print("app 的size: ", app_size_mdm)
+        # app_size_mdm = self.page.get_app_size()  for web
+        # check app size(bytes) in windows
+        app_size = self.page.get_file_size_in_windows(file_path)
+        print("app 的size(bytes): ", app_size)
         app_list = self.page.get_apps_text_list()
         if len(app_list) == 0:
             assert False, "@@@@没有 %s, 请检查！！！" % release_info["package_name"]
@@ -140,6 +144,8 @@ class TestAppPage:
             action = self.page.get_app_latest_upgrade_log(send_time, release_info)[0]["Action"]
             if self.page.get_action_status(action) == 2 or self.page.get_action_status(action) == 4 \
                     or self.page.get_action_status(action) == 3:
+                # check the app size in device, check if app download fully
+                self.android_mdm_page.download_file_is_existed(release_info["package_name"])
                 break
             else:
                 self.page.refresh_page()

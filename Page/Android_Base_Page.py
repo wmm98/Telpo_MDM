@@ -13,11 +13,28 @@ class AndroidBasePage(interface):
     def get_device_name(self):
         return self.device_name
 
+    def download_file_is_existed(self, file_name):
+        res = self.u2_send_command("ls /%s/aimdm/download/ |grep %s" % (self.get_internal_storage_directory(), file_name))
+        if file_name in res:
+            return True
+        else:
+            return False
+
+    def get_file_size_in_device(self, file_name):
+        "-rw-rw---- 1 root sdcard_rw   73015 2023-09-05 16:51 com.bjw.ComAssistant_1.1.apk"
+        res = self.u2_send_command("ls -l /%s/aimdm/download/ |grep %s" % (self.get_internal_storage_directory(), file_name))
+        # get integer list in res
+        integer_list = self.extract_integers(res)
+        size = integer_list[1]
+        return size
+
     def get_internal_storage_directory(self):
         if "aimdm" in self.u2_send_command("ls sdcard/"):
             return "sdcard"
         elif "aimdm" in self.u2_send_command("ls data/"):
             return "data"
+        else:
+            assert False, "@@@@ 内部sdcard和data下均不存在aimdm文件夹， 请检查设备内核版本！！！！"
 
     def ping_network(self, times):
         # 每隔0.6秒ping一次，一共ping5次
