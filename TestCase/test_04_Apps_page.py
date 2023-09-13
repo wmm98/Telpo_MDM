@@ -81,9 +81,14 @@ class TestAppPage:
     def test_release_low_version_app(self, del_all_app_release_log, del_all_app_uninstall_release_log):
         # release_info = {"package_name": "APKEditor_1_7_2.apk", "sn": "A250900P03100019",
         #                 "silent": "Yes", "version": "1.7.2", "package": "com.gmail.heagoo.apkeditor.pro"}
+        apk_info = {"package_name": "ComAssistant.apk", "sn": "A250900P03100019",
+                        "silent": "Yes", "version": "1.1"}
+
         release_info = {"package_name": "ComAssistant.apk", "sn": "A250900P03100019",
-                        "silent": "Yes", "version": "1.1", "package": "com.bjw.ComAssistant"}
-        file_path = conf.project_path + "\\Param\\Package\\%s" % release_info["package_name"]
+                        "silent": "Yes"}
+        file_path = conf.project_path + "\\Param\\Package\\%s" % apk_info["package_name"]
+        package = self.page.get_apk_package_name(file_path)
+        release_info["package_name"] = package
         # check if device is online
         self.page.go_to_new_address("devices")
         opt_case.check_single_device(release_info["sn"])
@@ -146,6 +151,10 @@ class TestAppPage:
                     or self.page.get_action_status(action) == 3:
                 # check the app size in device, check if app download fully
                 self.android_mdm_page.download_file_is_existed(release_info["package_name"])
+                size = self.android_mdm_page.get_file_size_in_device(release_info["package_name"])
+                print("终端下载后的的size大小：", size)
+                if app_size != size:
+                    assert False, "@@@@平台显示下载完成， 终端的包下载不完整，请检查！！！"
                 break
             else:
                 self.page.refresh_page()

@@ -7,13 +7,13 @@ class interface:
 
     def get_apk_package_name(self, apk_file_path):
         try:
-            # 加载 APK 文件
+            # get apk file
             apk = public_pack.APK(apk_file_path)
-            # 获取包名
+            # get apk package file name
             package_name = apk.get_package()
-            print("APK 文件的包名为:", package_name)
+            return package_name
         except Exception as e:
-            print("获取包名时出现错误:", e)
+            assert False, "@@@@获取包名时出现错误"
 
     def get_file_size_in_windows(self, file_path):
         if public_pack.os.path.exists:
