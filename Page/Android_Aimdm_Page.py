@@ -18,6 +18,12 @@ class Android_Aimdm_Page(AndroidBasePage):
     lock_psw_id = "%s:id/et_pwd" % aimdm_package
     psw_confirm_id = "%s:id/confirm_pwd" % aimdm_package
 
+    def get_aimdm_logs_list(self):
+        cmd = "ls /%s/aimdm/log" % self.get_internal_storage_directory()
+        files = self.u2_send_command(cmd)
+        files_list = files.split("\n")
+        return files_list
+
     def manual_unlock(self):
         # ele = self.get_element_by_id(self.msg_confirm_id)
         # ele = self.client(resourceId=self.msg_confirm_id)

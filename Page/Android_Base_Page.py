@@ -1,13 +1,39 @@
 import Page as public_pack
+from Page.Interface_Page import interface
 
 sub_shell = public_pack.Shell.Shell()
 
 
-class AndroidBasePage:
+class AndroidBasePage(interface):
     def __init__(self, client, times, name):
         self.client = client
         self.times = times
         self.device_name = name
+
+    def get_device_name(self):
+        return self.device_name
+
+    def get_internal_storage_directory(self):
+        if "aimdm" in self.u2_send_command("ls sdcard/"):
+            return "sdcard"
+        elif "aimdm" in self.u2_send_command("ls data/"):
+            return "data"
+
+    def ping_network(self, times):
+        # 每隔0.6秒ping一次，一共ping5次
+        # ping - c 5 - i 0.6 qq.com
+        cmd = " ping -c %s %s" % (times, "www.baidu.com")
+        exp = self.remove_space("ping: unknown host %s" % "www.baidu.com")
+        now_time = self.get_current_time()
+        while True:
+            res = self.remove_space(self.send_shell_command(cmd))
+            print(res)
+            if exp not in res:
+                break
+            public_pack.t_time.sleep(1)
+            if self.get_current_time() > self.return_end_time(now_time, 120):
+                if exp in self.remove_space(self.send_shell_command(cmd)):
+                    assert False, "超过2分钟无法上网,请检查网络"
 
     def device_unlock(self):
         self.client.screen_off()
@@ -15,7 +41,7 @@ class AndroidBasePage:
 
     def u2_send_command(self, cmd):
         try:
-            return self.client.shell(cmd).output
+            return self.client.shell(cmd, timeout=120).output
         except TypeError:
             raise Exception("@@@@传入的指令无效！！！")
         except RuntimeError:
@@ -61,6 +87,9 @@ class AndroidBasePage:
         except Exception as e:
             assert False, "@@@@启动出问题，请检查设备启动情况！！！"
 
+    def devices_list(self):
+        return sub_shell.invoke("adb devices")
+
     def device_exist(self):
         while True:
             res = sub_shell.invoke("adb devices")
@@ -68,24 +97,6 @@ class AndroidBasePage:
             if self.device_name in res.replace('\r', '').replace('\t', '').replace(' ', ''):
                 break
             self.time_sleep(2)
-
-    def get_current_time(self):
-        return public_pack.t_time.time()
-
-    def time_sleep(self, sec):
-        public_pack.t_time.sleep(sec)
-
-    def remove_space(self, text):
-        return text.replace("\r", "").replace("\n", "").replace(" ", "")
-
-    def return_end_time(self, now_time, timeout=100):
-        if timeout == 0:
-            wait = 100
-        else:
-            wait = timeout
-        timedelta = 1
-        end_time = now_time + wait
-        return end_time
 
     def click_element(self, ele):
         ele.click()

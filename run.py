@@ -35,6 +35,7 @@ if __name__ == '__main__':
     log.info('initialize Config, path=' + conf.conf_path)
     # 先进行登录
     web = BaseWebDriver()
+    # web.test_network_connection()
     url = 'http://test.telpoai.com/login'
     web.open_web_site(url)
 
