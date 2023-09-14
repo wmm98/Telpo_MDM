@@ -10,12 +10,43 @@ class AndroidBasePage(interface):
         self.times = times
         self.device_name = name
 
+    def get_app_info(self, package):
+        """
+        Return example:
+            {
+                "mainActivity": "com.github.uiautomator.MainActivity",
+                "label": "ATX",
+                "versionName": "1.1.7",
+                "versionCode": 1001007,
+                "size":1760809
+            }
+            """
+        try:
+            app_information = self.client.app_info(package)
+            return app_information
+        except public_pack.UiaError as e:
+            print("获取app信息发生异常：", e)
+            assert False, e
+
+    def get_app_installed_list(self):
+        return self.client.app_list()
+
+    def app_is_installed(self, package):
+        if package in self.get_app_installed_list():
+            return True
+        else:
+            return False
+
+    def uninstall_app(self, package):
+        status = self.client.app_uninstall(package)
+        return status
+
     def get_device_name(self):
         return self.device_name
 
     def download_file_is_existed(self, file_name):
         res = self.u2_send_command("ls /%s/aimdm/download/ |grep %s" % (self.get_internal_storage_directory(), file_name))
-        if file_name in res:
+        if self.remove_space(file_name) in self.remove_space(res):
             return True
         else:
             return False
@@ -25,7 +56,7 @@ class AndroidBasePage(interface):
         res = self.u2_send_command("ls -l /%s/aimdm/download/ |grep %s" % (self.get_internal_storage_directory(), file_name))
         # get integer list in res
         integer_list = self.extract_integers(res)
-        size = integer_list[1]
+        size = int(integer_list[1])
         return size
 
     def get_internal_storage_directory(self):

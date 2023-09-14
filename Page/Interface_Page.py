@@ -5,15 +5,24 @@ class interface:
     def __init__(self):
         pass
 
+    def load_apk_package(self, path):
+        # get apk file
+        apk = public_pack.APK(path)
+        return apk
+
     def get_apk_package_name(self, apk_file_path):
         try:
-            # get apk file
-            apk = public_pack.APK(apk_file_path)
             # get apk package file name
-            package_name = apk.get_package()
-            return package_name
+            return self.load_apk_package(apk_file_path).get_package()
         except Exception as e:
             assert False, "@@@@获取包名时出现错误"
+
+    def get_apk_package_version(self, apk_file_path):
+        # get package version
+        try:
+            return self.load_apk_package(apk_file_path).get_androidversion_name()
+        except Exception:
+            assert False, "@@@@获取包版本时出现错误"
 
     def get_file_size_in_windows(self, file_path):
         if public_pack.os.path.exists:
@@ -72,3 +81,13 @@ class interface:
         timedelta = 1
         end_time = now_time + timeout
         return end_time
+
+
+if __name__ == '__main__':
+    path = "E:\Mingming\Telpo_Automation\Telpo_MDM\Param\Package\ComAssistant.apk"
+    case = interface()
+    name = case.get_apk_package_name(path)
+    print(name)
+    version = case.get_apk_package_version(path)
+    print(version)
+    print(len(version))

@@ -20,7 +20,7 @@ class TestLogin:
     @pytest.mark.dependency(name="test_login_ok", scope='package')
     def test_login_ok(self):
         username = "mdm_automation"
-        password = "123456"
+        password = "mm17765602533"
 
         login_ok_title = "Telpo MDM"
         login_ok_url = "http://test.telpoai.com/device/map"
