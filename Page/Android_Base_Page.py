@@ -67,7 +67,36 @@ class AndroidBasePage(interface):
         else:
             assert False, "@@@@ 内部sdcard和data下均不存在aimdm文件夹， 请检查设备内核版本！！！！"
 
-    def ping_network(self, times):
+    def get_cur_wifi_status(self):
+        return self.u2_send_command("settings get global wifi_on")
+
+    def wifi_open_status(self):
+        return self.text_is_existed("1", self.get_cur_wifi_status())
+
+    def wifi_close_status(self):
+        return self.text_is_existed("0", self.get_cur_wifi_status())
+
+    def open_wifi_btn(self):
+        if "0" in self.get_cur_wifi_status():
+            self.u2_send_command("svc wifi enable")
+            return self.wifi_open_status()
+        return True
+
+    def close_wifi_btn(self):
+        if "1" in self.get_cur_wifi_status():
+            self.u2_send_command("svc wifi disable")
+            return self.wifi_close_status()
+        return True
+
+    def text_is_existed(self, text1, text2):
+        sub = self.remove_space(text1)
+        string = self.remove_space(text2)
+        if sub in string:
+            return True
+        else:
+            return True
+
+    def ping_network(self, times, timeout=120):
         # 每隔0.6秒ping一次，一共ping5次
         # ping - c 5 - i 0.6 qq.com
         cmd = " ping -c %s %s" % (times, "www.baidu.com")
@@ -77,11 +106,11 @@ class AndroidBasePage(interface):
             res = self.remove_space(self.send_shell_command(cmd))
             print(res)
             if exp not in res:
-                break
-            public_pack.t_time.sleep(1)
-            if self.get_current_time() > self.return_end_time(now_time, 120):
+                return True
+            if self.get_current_time() > self.return_end_time(now_time, timeout):
                 if exp in self.remove_space(self.send_shell_command(cmd)):
-                    assert False, "超过2分钟无法上网,请检查网络"
+                    assert False, "@@@@超过2分钟无法上网,请检查网络"
+            public_pack.t_time.sleep(2)
 
     def device_unlock(self):
         self.client.screen_off()

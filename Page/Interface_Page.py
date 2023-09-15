@@ -5,6 +5,11 @@ class interface:
     def __init__(self):
         pass
 
+    def transfer_version_into_int(self, ver):
+        integer_list = ver.split(".")
+        integer_version = "".join(integer_list)
+        return int(integer_version)
+
     def load_apk_package(self, path):
         # get apk file
         apk = public_pack.APK(path)
@@ -86,8 +91,8 @@ class interface:
 if __name__ == '__main__':
     path = "E:\Mingming\Telpo_Automation\Telpo_MDM\Param\Package\ComAssistant.apk"
     case = interface()
-    name = case.get_apk_package_name(path)
-    print(name)
-    version = case.get_apk_package_version(path)
-    print(version)
-    print(len(version))
+    # name = case.get_apk_package_name(path)
+    # print(name)
+    # version = case.get_apk_package_version(path)
+    # print(version)
+    #

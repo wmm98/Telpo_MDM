@@ -18,6 +18,24 @@ class Android_Aimdm_Page(AndroidBasePage):
     lock_psw_id = "%s:id/et_pwd" % aimdm_package
     psw_confirm_id = "%s:id/confirm_pwd" % aimdm_package
 
+    def confirm_wifi_btn_open(self, timeout=60):
+        now = self.get_current_time()
+        while True:
+            if self.open_wifi_btn():
+                break
+            if self.get_current_time() > self.return_end_time(now, timeout):
+                assert False, "@@@@1分钟内无法打开wifi开关， 请检查!!!!"
+            self.time_sleep(1)
+
+    def confirm_wifi_btn_close(self, timeout=60):
+        now = self.get_current_time()
+        while True:
+            if self.close_wifi_btn():
+                break
+            if self.get_current_time() > self.return_end_time(now, timeout):
+                assert False, "@@@@1分钟内无法关闭wifi开关， 请检查!!!!"
+            self.time_sleep(1)
+
     def get_aimdm_logs_list(self):
         cmd = "ls /%s/aimdm/log" % self.get_internal_storage_directory()
         files = self.u2_send_command(cmd)

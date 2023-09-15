@@ -42,7 +42,7 @@ class TestAppPage:
     @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_add_new_apps(self, go_to_app_page):
         exp_success_text = "Success"
-        package_info = {"package_name": "ComAssistant.apk", "file_category": "test",
+        package_info = {"package_name": "Bus Recharge System_1.0.0_20220421.apk", "file_category": "test",
                         "developer": "engineer", "description": "test"}
 
         file_path = conf.project_path + "\\Param\\Package\\%s" % package_info["package_name"]
@@ -77,9 +77,9 @@ class TestAppPage:
     @allure.feature('MDM_test0222')
     @allure.title("Apps-release low version app")
     @pytest.mark.dependency(name="test_release_app_ok", scope='package')
-    @pytest.mark.flaky(reruns=1, reruns_delay=3)
+    # @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_release_low_version_app(self, del_all_app_release_log, del_all_app_uninstall_release_log):
-        release_info = {"package_name": "APKEditor_1_7_2.apk", "sn": "A250900P03100019",
+        release_info = {"package_name": "Bus_Recharge_System_1.0.0_20220421.apk", "sn": "A250900P03100019",
                         "silent": "Yes"}
         # apk_info = {"package_name": "ComAssistant.apk", "sn": "A250900P03100019",
         #                 "silent": "Yes", "version": "1.1"}
@@ -193,9 +193,9 @@ class TestAppPage:
     @allure.feature('MDM_test0222')
     @allure.title("Apps-release high version app")
     @pytest.mark.dependency(depends=["test_release_app_ok"], scope='package')
-    @pytest.mark.flaky(reruns=1, reruns_delay=3)
+    # @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_high_version_app_cover_low_version_app(self, del_all_app_release_log, del_all_app_uninstall_release_log):
-        release_info = {"package_name": "APKEditor_1_9_10.apk", "sn": "A250900P03100019",
+        release_info = {"package_name": "Bus_Recharge_System_1.0.1_20220615.apk", "sn": "A250900P03100019",
                         "silent": "Yes"}
 
         file_path = conf.project_path + "\\Param\\Package\\%s" % release_info["package_name"]
@@ -288,7 +288,8 @@ class TestAppPage:
             print("action", action)
             if self.page.get_action_status(action) == 4:
                 if self.android_mdm_page.app_is_installed(release_info["package"]):
-                    if float(self.android_mdm_page.get_app_info(["versionName"])) == float(release_info["version"]):
+                    version_installed = self.page.transfer_version_into_int(self.android_mdm_page.get_app_info(release_info["package"])['versionName'])
+                    if version_installed == self.page.transfer_version_into_int(release_info["version"]):
                         break
                 else:
                     assert False, "@@@@平台显示已经完成覆盖安装了app, 终端发现没有安装高版本的app，还是原来的版本， 请检查！！！！"

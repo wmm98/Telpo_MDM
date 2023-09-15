@@ -88,9 +88,23 @@ class APPSPage(TelpoMDMPage):
 
     def get_app_latest_upgrade_log(self, send_time, release_info):
         self.page_load_complete()
-        upgrade_list = self.get_element(self.loc_app_upgrade_logs_body)
         logs_list = []
         if self.ele_is_existed_in_range(self.loc_app_upgrade_logs_body, self.loc_app_upgrade_single_log):
+            upgrade_list = self.get_element(self.loc_app_upgrade_logs_body)
+            try:
+                now = self.get_current_time()
+                while True:
+                    single_log = upgrade_list.find_elements(*self.loc_app_upgrade_single_log)
+                    if len(single_log) > 0:
+                        break
+                    else:
+                        self.refresh_page()
+                    if self.get_current_time() > self.return_end_time(now, 15):
+                        assert False
+                    self.time_sleep(2)
+            except Exception:
+                self.refresh_page()
+
             single_log = upgrade_list.find_elements(*self.loc_app_upgrade_single_log)[0]
             cols = single_log.find_elements(*self.loc_app_upgrade_log_col)
             receive_time_text = cols[3].text
@@ -110,9 +124,9 @@ class APPSPage(TelpoMDMPage):
 
     def get_app_latest_uninstall_log(self, send_time, release_info):
         self.page_load_complete()
-        upgrade_list = self.get_element(self.loc_app_upgrade_logs_body)
         logs_list = []
         if self.ele_is_existed_in_range(self.loc_app_upgrade_logs_body, self.loc_app_upgrade_single_log):
+            upgrade_list = self.get_element(self.loc_app_upgrade_logs_body)
             single_log = upgrade_list.find_elements(*self.loc_app_upgrade_single_log)[0]
             cols = single_log.find_elements(*self.loc_app_upgrade_log_col)
             receive_time_text = cols[4].text
