@@ -1,11 +1,16 @@
 import Page as public_pack
-from Page.Android_Base_Page import AndroidBasePage
+from Page.Android_Base_Page_USB import AndroidBasePageUSB
+from Page.Android_Base_Page_WiFi import AndroidBasePageWiFi
 
 
-class Android_Aimdm_Page(AndroidBasePage):
-    def __init__(self, client, times, name):
-        AndroidBasePage.__init__(self, client, times, name)
-        self.client = client
+class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
+    def __init__(self, devices_data, times):
+        self.client = devices_data["usb_device_info"]["device"]
+        self.serial = devices_data["usb_device_info"]["serial"]
+        self.wifi_client = devices_data["wifi_device_info"]["device"]
+        self.device_ip = devices_data["wifi_device_info"]["ip"]
+        AndroidBasePageUSB.__init__(self, self.client, times, self.serial)
+        AndroidBasePageWiFi.__init__(self, self.wifi_client, times, self.device_ip)
 
     aimdm_package = "com.tpos.aimdm"
     # msg_box related

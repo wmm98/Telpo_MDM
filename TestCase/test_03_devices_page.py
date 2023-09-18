@@ -21,12 +21,13 @@ class TestDevicesPage:
         self.page = case_pack.DevicesPage(self.driver, 40)
         self.meg_page = case_pack.MessagePage(self.driver, 40)
         self.telpo_mdm_page = case_pack.TelpoMDMPage(self.driver, 40)
-        self.android_mdm_page = case_pack.Android_Aimdm_Page(case_pack.client, 5, case_pack.client.serial)
+        self.android_mdm_page = case_pack.AndroidAimdmPage(case_pack.device_data, 5)
+        self.wifi_ip = case_pack.device_data["wifi_device_info"]["device"]
 
     def teardown_class(self):
         self.page.refresh_page()
 
-    @allure.feature('MDM_test02')
+    @allure.feature('MDM_test0222')
     @allure.title("Devices main Page")  # 设置case的名字
     # @pytest.mark.dependency(depends=["test_TelpoMdM_Page"], scope='package')
     def test_go_to_devices_page(self):

@@ -1,9 +1,61 @@
 import Page as public_pack
 
+sub_shell = public_pack.Shell.Shell()
+
 
 class interface:
     def __init__(self):
         pass
+
+    def text_is_existed(self, text1, text2):
+        sub = self.remove_space(text1)
+        string = self.remove_space(text2)
+        if sub in string:
+            return True
+        else:
+            return True
+
+    def devices_list(self):
+        return sub_shell.invoke("adb devices")
+
+    def connect_ip(self, ip):
+        ip_info1 = "connected to %s" % ip
+        ip_info2 = "already connected to %s" % ip
+        res = sub_shell.invoke("adb connect %s" % ip)
+        print(res)
+        res = self.remove_space(res)
+        if self.remove_space(ip_info1) in res or self.remove_space(ip_info2) in res:
+            return True
+        else:
+            return False
+
+    def disconnect_ip(self, ip):
+        res = sub_shell.invoke("adb disconnect %s" % ip)
+        print(res)
+
+    def confirm_wifi_adb_connected(self, ip, timeout=90):
+        now_time = self.get_current_time()
+        while True:
+            res = self.connect_ip(ip)
+            if res:
+                break
+            self.time_sleep(2)
+            if self.get_current_time() > self.return_end_time(now_time, timeout):
+                raise Exception("无法连接上WIFI adb")
+        self.device_exist(ip)
+
+    def device_exist(self, address):
+        now_time = self.get_current_time()
+        while True:
+            device_online = address + "device"
+            res = self.devices_list()
+            print(res)
+            if device_online in res.replace('\r', '').replace('\t', '').replace(' ', ''):
+                break
+            if self.get_current_time() > self.return_end_time(now_time, 60):
+                self.connect_ip(address)
+                assert False, "@@@@无法连接上wifi adb， 请检查！！！！"
+            self.time_sleep(1)
 
     def transfer_version_into_int(self, ver):
         integer_list = ver.split(".")

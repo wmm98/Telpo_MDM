@@ -16,7 +16,7 @@ class TestAppPage:
         self.driver = case_pack.test_driver
         self.page = case_pack.APPSPage(self.driver, 40)
         self.system_page = case_pack.SystemPage(self.driver, 40)
-        self.android_mdm_page = case_pack.Android_Aimdm_Page(case_pack.client, 5, case_pack.client.serial)
+        self.android_mdm_page = case_pack.AndroidAimdmPage(case_pack.client, 5, case_pack.client.serial)
 
     def teardown_class(self):
         self.page.refresh_page()
@@ -74,7 +74,7 @@ class TestAppPage:
         self.page.delete_all_app_release_log()
         assert self.page.get_current_app_release_log_total() == 0, "@@@@没有删除完了所有的app release log, 请检查!!!"
 
-    @allure.feature('MDM_test0222')
+    @allure.feature('MDM_test02')
     @allure.title("Apps-release low version app")
     @pytest.mark.dependency(name="test_release_app_ok", scope='package')
     # @pytest.mark.flaky(reruns=1, reruns_delay=3)
@@ -190,7 +190,7 @@ class TestAppPage:
                 assert False, "@@@@3分钟还没有安装完相应的app， 请检查！！！"
             self.page.time_sleep(2)
 
-    @allure.feature('MDM_test0222')
+    @allure.feature('MDM_test02')
     @allure.title("Apps-release high version app")
     @pytest.mark.dependency(depends=["test_release_app_ok"], scope='package')
     # @pytest.mark.flaky(reruns=1, reruns_delay=3)
