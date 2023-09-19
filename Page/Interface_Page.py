@@ -21,7 +21,9 @@ class interface:
     def connect_ip(self, ip):
         ip_info1 = "connected to %s" % ip
         ip_info2 = "already connected to %s" % ip
-        res = sub_shell.invoke("adb connect %s" % ip)
+        cmd = "adb connect %s" % ip
+        print(cmd)
+        res = sub_shell.invoke(cmd)
         print(res)
         res = self.remove_space(res)
         if self.remove_space(ip_info1) in res or self.remove_space(ip_info2) in res:
@@ -42,9 +44,9 @@ class interface:
             self.time_sleep(2)
             if self.get_current_time() > self.return_end_time(now_time, timeout):
                 raise Exception("无法连接上WIFI adb")
-        self.device_exist(ip)
+        self.device_existed(ip)
 
-    def device_exist(self, address):
+    def device_existed(self, address):
         now_time = self.get_current_time()
         while True:
             device_online = address + "device"

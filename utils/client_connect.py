@@ -36,6 +36,9 @@ class ClientConnect:
     def get_wifi_ip(self):
         return address
 
+    def reconnect(self, link):
+        u2.connect_adb_wifi(link)
+
 
 if __name__ == '__main__':
     d = ClientConnect()

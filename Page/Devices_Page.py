@@ -95,9 +95,6 @@ class DevicesPage(TelpoMDMPage):
     loc_shutdown_btn = (By.CSS_SELECTOR, "[class = 'fas fa-power-off']")
     loc_shutdown_sure_btn = (By.CSS_SELECTOR, "[class = 'btn btn-outline-dark sure_command_button']")
 
-    # cat log btn
-    loc_cat_log_btn = (By.CSS_SELECTOR, "[class = 'far fa-file-code']")
-
     # psw btn relate
     loc_psw_btn = (By.CSS_SELECTOR, "[class = 'fas fa-key batch_password']")
     loc_TPUI_password = (By.ID, "device_tpui_password")
@@ -111,6 +108,55 @@ class DevicesPage(TelpoMDMPage):
 
     # left bar
     loc_left_bar = (By.CLASS_NAME, "col-md-3")
+
+    # cat log btn
+    loc_cat_log_btn = (By.CSS_SELECTOR, "[class = 'far fa-file-code']")
+    loc_type_box = (By.CLASS_NAME, "select2-search__field")
+    loc_log_type_options_box = (By.ID, "select2-0zye-results")
+    loc_app_log = (By.ID, "select2-0zye-result-nfho-1")
+    loc_system_log = (By.ID, "select2-0zye-result-e7db-3")
+    loc_save_catch_btn = (By.CSS_SELECTOR, "[class = 'btn btn-primary btn-submit-catch']")
+    # log type is selected, title = system log
+    loc_type_selected = (By.CLASS_NAME, "select2-selection__choice")
+    # Duration
+    loc_duration_selector = (By.CSS_SELECTOR, "[class = 'form-control catch_duration']")
+    loc_duration_option = (By.TAG_NAME, "option")
+
+    def show_log_type(self):
+        now_time = self.get_current_time()
+        self.click(self.loc_type_box)
+        while True:
+            if self.ele_is_existed(self.loc_log_type_options_box):
+                break
+            else:
+                self.click(self.loc_type_box)
+            if self.get_current_time() > self.return_end_time(now_time):
+                assert False, "@@@@@无法选择log类型， 请检查！！！"
+            self.time_sleep(1)
+
+    # def select_app_log(self, minutes):
+    #     self.click(self.loc_app_log)
+    #     while True:
+    #         if self.ele_is_existed(self.loc_type_selected):
+    #
+    #     if self.get_element(self.loc_type_selected).get_attribute("title") == ""
+    #     self.click(self.loc_app_log)
+
+    def click_cat_log(self):
+        self.click(self.loc_cat_log_btn)
+        self.confirm_alert_existed(self.loc_cat_log_btn)
+        self.click(self.loc_shutdown_sure_btn)
+        # select log type
+
+        self.confirm_tips_alert_show(self.loc_shutdown_btn)
+        self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_shutdown_btn)
+
+    def click_shutdown_btn(self):
+        self.click(self.loc_shutdown_btn)
+        self.confirm_alert_existed(self.loc_shutdown_btn)
+        self.click(self.loc_shutdown_sure_btn)
+        self.confirm_tips_alert_show(self.loc_shutdown_sure_btn)
+        self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_shutdown_sure_btn)
 
     def click_server_btn(self):
         self.click(self.lco_server_btn)
@@ -155,28 +201,6 @@ class DevicesPage(TelpoMDMPage):
                 assert False, "@@@@dropdown 按钮无法打开！！！"
         self.time_sleep(1)
         # self.web_driver_wait_until(EC.presence_of_element_located(self.loc_menu_show), 10)
-
-    def click_shutdown_btn(self):
-        self.click(self.loc_shutdown_btn)
-        self.confirm_alert_existed(self.loc_shutdown_btn)
-        self.click(self.loc_shutdown_sure_btn)
-        self.confirm_tips_alert_show(self.loc_shutdown_sure_btn)
-        self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_shutdown_sure_btn)
-
-    def click_cat_log(self):
-        self.click(self.loc_cat_log_btn)
-        self.confirm_alert_existed(self.loc_cat_log_btn)
-        self.click(self.loc_shutdown_sure_btn)
-        self.confirm_tips_alert_show(self.loc_shutdown_btn)
-        self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_shutdown_btn)
-        # now_time = time.time()
-        # while True:
-        #     if self.get_tips_alert():
-        #         break
-        #     else:
-        #         self.click(self.loc_shutdown_sure_btn)
-        #     if time.time() > self.return_end_time(now_time, 60):
-        #         assert False, "@@@@页面点击确认捕捉log失败， 请检查！！！"
 
     # reboot relate
     def click_reboot_btn(self):

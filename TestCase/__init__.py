@@ -21,29 +21,15 @@ from utils.client_connect import ClientConnect
 client = ClientConnect().get_device()
 usb_device_info = {"device": client, "serial": client.serial}
 # connect wifi adb
-ClientConnect().wifi_connect_device()
-wifi_client = ClientConnect().get_wifi_device()
-wifi_ip = ClientConnect().get_wifi_ip()
+connect = ClientConnect()
+connect.wifi_connect_device()
+wifi_client = connect.get_wifi_device()
+wifi_ip = connect.get_wifi_ip()
 wifi_device_info = {"device": wifi_client, "ip": wifi_ip}
 device_data = {"usb_device_info": usb_device_info, "wifi_device_info": wifi_device_info}
+
 
 
 #
 chrome_driver = BaseWebDriver()
 test_driver = chrome_driver.get_web_driver()
-# EC = EC
-# MDMPage = MDMPage
-# MyLog = MyLog
-# Log = Log
-# OTAPage = OTAPage
-# DevicesPage = DevicesPage
-# MessagePage = MessagePage
-# TelpoMDMPage = TelpoMDMPage
-# ExcelData = ExcelData
-# Config = Config
-# Optimize_Case = Optimize_Case
-# AlertData = AlertData
-# ReleaseDevicePage = ReleaseDevicePage
-# SystemPage = SystemPage
-# APPSPage = APPSPage
-# time = time

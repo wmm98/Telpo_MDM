@@ -165,6 +165,10 @@ class BasePage(interface):
         # select.select_by_value(value)
         select.select_by_visible_text(value)
 
+    def select_by_value(self, loc, value):
+        select = self.get_selector(loc)
+        select.select_by_value(value)
+
     def get_element(self, loc):
         self.web_driver_wait_until(public_pack.EC.presence_of_element_located(loc))
         return self.driver.find_element(*loc)

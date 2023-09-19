@@ -52,8 +52,11 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
         # ele = self.client(resourceId=self.msg_confirm_id)
         ele = self.get_element_by_id_no_wait(self.msg_confirm_id)
         print(ele.get_text())
-        for i in range(6):
-            ele.click()
+        try:
+            for i in range(100):
+                ele.click()
+        except Exception as e:
+            print(e)
 
     def lock_psw_box_presence(self, time_to_wait=3):
         self.wait_ele_presence_by_id(self.lock_psw_id, time_to_wait)
@@ -78,25 +81,33 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
                 return False
             self.time_sleep(1)
 
-    def mdm_msg_alert_show(self, time_out=0):
-        return self.wait_alert_appear(self.msg_alert_id, time_out)
-
     def get_msg_tips_text(self):
         ele = self.get_element_by_id(self.msg_tips_id)
         return self.remove_space(self.get_element_text(ele))
 
     def get_msg_header_text(self):
-        ele = self.get_element_by_id(self.msg_tips_id).child(className=self.msg_header_id)
+        ele = self.get_element_by_id(self.msg_alert_id).child(className=self.msg_header_id)
         return self.remove_space(self.get_element_text(ele))
 
     def click_msg_confirm_btn(self):
         ele = self.get_element_by_id(self.msg_confirm_id)
         self.click_element(ele)
 
+    def mdm_msg_alert_show(self, time_out=5):
+        now_time = self.get_current_time()
+        while True:
+            ele = self.wait_ele_presence_by_id(self.msg_alert_id, time_out)
+            if ele:
+                return True
+            if self.get_current_time() > self.return_end_time(now_time):
+                return False
+            self.time_sleep(1)
+
     def confirm_msg_alert_fade(self, text, timeout=0):
         now_time = self.get_current_time()
         while True:
-            if self.wait_alert_fade(self.msg_alert_id, 5):
+            ele = self.wait_ele_gone_by_id(self.msg_alert_id, timeout)
+            if ele:
                 return True
             else:
                 # deal with different alert

@@ -20,6 +20,13 @@ driver = TestCase.test_driver
 device_page = TestCase.DevicesPage(driver, 40)
 ota_page = TestCase.OTAPage(driver, 40)
 app_page = TestCase.APPSPage(driver, 40)
+android_page = TestCase.AndroidAimdmPage(TestCase.device_data, 30)
+
+
+@pytest.fixture()
+def unlock_screen():
+    android_page.device_unlock()
+    yield
 
 
 @pytest.fixture()

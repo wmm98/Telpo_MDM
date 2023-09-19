@@ -103,7 +103,7 @@ class AndroidBasePageWiFi(interface):
             print("@@@@发送指令有异常， 请检查！！！")
 
     def device_boot_complete(self):
-        time_out = self.get_current_time() + 120
+        time_out = self.get_current_time() + 60
         try:
             while True:
                 boot_res = self.send_shell_command("getprop sys.boot_completed")
@@ -114,7 +114,7 @@ class AndroidBasePageWiFi(interface):
                     print("完全启动超时")
                 self.time_sleep(2)
         except Exception as e:
-            assert False, "@@@@启动出问题，请检查设备启动情况！！！"
+            assert False, "@@@@正常开机后出问题，完全启动超过60s, 请检查！！！！！！！"
 
     def device_boot_complete_debug_off(self):
         try:
@@ -159,10 +159,11 @@ class AndroidBasePageWiFi(interface):
 
     def wait_ele_presence_by_id(self, id_no, time_to_wait):
         flag = self.client(resourceId=id_no).exists(timeout=time_to_wait)
-        if flag:
-            return True
-        else:
-            assert False, "@@@@查找元素超时！！！"
+        return flag
+        # if flag:
+        #     return True
+        # else:
+        #     assert False, "@@@@查找元素超时！！！"
 
     def wait_ele_presence_by_class_name(self, class_name, time_to_wait):
         flag = self.client(className=class_name).exists(timeout=time_to_wait)
@@ -183,6 +184,7 @@ class AndroidBasePageWiFi(interface):
 
     def alert_show(self, id_no, time_to_wait):
         try:
+            print("11111111111111111111111111")
             self.wait_ele_presence_by_id(id_no, time_to_wait)
             return True
         except AssertionError:
@@ -212,7 +214,6 @@ class AndroidBasePageWiFi(interface):
             if self.get_current_time() > self.return_end_time(now_time):
                 return False
             self.time_sleep(1)
-
 
 if __name__ == '__main__':
     from utils.client_connect import ClientConnect

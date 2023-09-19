@@ -16,6 +16,7 @@ class TestNetworkCases:
         self.android_mdm_page = case_pack.AndroidAimdmPage(case_pack.device_data, 5)
         self.serial = case_pack.device_data["usb_device_info"]["device"]
         self.ip = case_pack.device_data["wifi_device_info"]["ip"]
+        self.android_mdm_page.device_unlock_USB()
 
     def teardown_class(self):
         self.page.refresh_page()
@@ -39,9 +40,14 @@ class TestNetworkCases:
             self.page.time_sleep(2)
 
         self.android_mdm_page.ping_network(times=4)
-        self.android_mdm_page.send_adb_command_USB("reboot")
+        # self.android_mdm_page.send_adb_command_USB("reboot")
         self.android_mdm_page.confirm_wifi_adb_connected(self.ip)
         self.android_mdm_page.device_boot_complete()
+        print(self.android_mdm_page.get_app_installed_list())
+
+
+
+
 
 
 

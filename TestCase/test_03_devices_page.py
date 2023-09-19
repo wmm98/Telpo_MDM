@@ -22,12 +22,13 @@ class TestDevicesPage:
         self.meg_page = case_pack.MessagePage(self.driver, 40)
         self.telpo_mdm_page = case_pack.TelpoMDMPage(self.driver, 40)
         self.android_mdm_page = case_pack.AndroidAimdmPage(case_pack.device_data, 5)
-        self.wifi_ip = case_pack.device_data["wifi_device_info"]["device"]
+        self.wifi_ip = case_pack.device_data["wifi_device_info"]["ip"]
+        # self.android_mdm_page.device_unlock()
 
     def teardown_class(self):
         self.page.refresh_page()
 
-    @allure.feature('MDM_test0222')
+    @allure.feature('MDM_test022')
     @allure.title("Devices main Page")  # 设置case的名字
     # @pytest.mark.dependency(depends=["test_TelpoMdM_Page"], scope='package')
     def test_go_to_devices_page(self):
@@ -189,10 +190,176 @@ class TestDevicesPage:
 
         # need to add check length of data list
 
-    @allure.feature('MDM_test02')
-    @allure.title("Devices- AIMDM send message")
+    @allure.feature('MDM_test022')
+    @allure.title("Devices- lock and unlock single device")
     @pytest.mark.flaky(reruns=1, reruns_delay=3)
-    def test_send_message_to_single_device(self):
+    def test_lock_and_unlock_single_device(self, unlock_screen):
+        # case is stable
+        sn = "A250900P03100019"
+        exp_lock_msg = "Device %s Locked" % sn
+        exp_unlock_msg = "Device %s UnLocked" % sn
+        lock_tips = "pls contact the administrator to unlock it!"
+        for k in range(2):
+            # test lock btn
+            opt_case.check_single_device(sn)
+            self.page.select_device(sn)
+            self.page.click_lock()
+            # assert 1 == 0
+            self.page.refresh_page()
+            # check if device lock already
+            now_time = self.page.get_current_time()
+            while True:
+                if "Locked" in opt_case.get_single_device_list(sn)[0]["Lock Status"]:
+                    break
+                if self.page.get_current_time() > self.page.return_end_time(now_time, 60):
+                    assert False, "@@@@信息发送失败，请检查！！！！"
+                self.page.refresh_page()
+                self.page.time_sleep(1)
+
+            # go to device and check the lock alert
+            assert self.android_mdm_page.mdm_msg_alert_show(60), "@@@@60s后还没显示锁定设备， 请检查！！！"
+            assert self.page.remove_space(
+                lock_tips) in self.android_mdm_page.get_msg_tips_text(), "@@@@100s后还没显示锁定设备， tips内容对不上， 请检查！！！"
+
+            self.page.refresh_page()
+
+            opt_case.get_single_device_list(sn)
+            self.page.select_device(sn)
+            self.page.click_unlock()
+            assert self.android_mdm_page.confirm_msg_alert_fade(
+                self.page.remove_space(lock_tips)), "@@@@60s后还没解锁， 请检查！！！"
+            self.page.refresh_page()
+            now_time = self.page.get_current_time()
+            for j in range(5):
+                if "Normal" in opt_case.get_single_device_list(sn)[0]["Lock Status"]:
+                    break
+                if self.page.get_current_time() > self.page.return_end_time(now_time, 120):
+                    assert False, "@@@@信息发送失败，请检查！！！！"
+                self.page.refresh_page()
+                self.page.time_sleep(1)
+
+    @allure.feature('MDM_test022')
+    @allure.title("Devices- reboot device 5 times")
+    @pytest.mark.flaky(reruns=1, reruns_delay=3)
+    def test_reboot_single_device_pressure_testing(self, unlock_screen):
+        exp_reboot_text = "Sending Reboot Comand to Devices"
+        sn = "A250900P03100019"
+        self.page.refresh_page()
+        for i in range(1):
+            opt_case.check_single_device(sn)
+            self.page.select_device(sn)
+            self.android_mdm_page.disconnect_ip(self.wifi_ip)
+            self.page.click_reboot_btn()
+            for j in range(10):
+                case_pack.time.sleep(3)
+                self.page.refresh_page()
+                # get device info
+                # check if command trigger in 3s
+                if "Off" in opt_case.get_single_device_list(sn)[0]["Status"]:
+                    break
+            assert "Off" in opt_case.get_single_device_list(sn)[0]["Status"]
+            self.page.time_sleep(4)
+            self.android_mdm_page.confirm_wifi_adb_connected(self.wifi_ip)
+            self.android_mdm_page.device_existed(self.wifi_ip)
+            self.android_mdm_page.device_boot_complete()
+            # wait device network normal
+            self.android_mdm_page.ping_network(5)
+            now_time = self.page.get_current_time()
+            while True:
+                self.page.refresh_page()
+                if "On" in opt_case.get_single_device_list(sn)[0]["Status"]:
+                    break
+                if self.page.get_current_time() > self.page.return_end_time(now_time, 100):
+                    assert False, "@@@@恢复网络后1分钟内没与平台通讯！！"
+                self.page.time_sleep(1)
+            print("成功运行 %s 次" % str(i))
+            # case_pack.connect.reconnect(self.wifi_ip)
+
+    @allure.feature('MDM_test02255')
+    @allure.title("Devices- cat_logs")
+    # @pytest.mark.flaky(reruns=1, reruns_delay=3)
+    def test_cat_logs(self):
+        exp_log_msg = "Device Debug Command sent"
+        sn = "A250900P03100019"
+        self.page.refresh_page()
+        opt_case.check_single_device(sn)
+        self.page.click_dropdown_btn()
+        send_time = case_pack.time.strftime('%Y-%m-%d %H:%M', case_pack.time.localtime(case_pack.time.time()))
+        self.page.time_sleep(2)
+        # check the logs list before catch log
+        orig_logs = self.android_mdm_page.get_aimdm_logs_list()
+        self.page.click_cat_log()
+        # select log_type
+
+        # check if device log generates in 3 mins
+        now_time = self.page.get_current_time()
+        while True:
+            new_logs = self.android_mdm_page.get_aimdm_logs_list()
+            if len(new_logs) > len(orig_logs):
+                rec_time = self.page.format_time(self.page.extract_integers(new_logs[-2]))
+                if self.page.compare_time(send_time, rec_time):
+                    break
+                else:
+                    assert False, "@@@@生成的文件有误， 请检查！！！"
+            if self.page.get_current_time() > self.page.return_end_time(now_time, 100):
+                assert False, "@@@@100s内无法生成在aimdm/log下检测到相应的log, 请检查！！！ "
+            self.page.time_sleep(1)
+
+    @allure.feature('MDM_test022')
+    @allure.title("Devices- reset device TPUI password")
+    @pytest.mark.flaky(reruns=1, reruns_delay=3)
+    def test_reset_TPUI_password(self, unlock_screen):
+        exp_psw_text = "Password changed"
+        sn = "A250900P03100019"
+        password = ["123456", "000000", "999999"]
+        self.page.refresh_page()
+        for psw in password:
+            opt_case.check_single_device(sn)
+            self.page.select_device(sn)
+            self.page.click_psw_btn()
+            self.page.change_TPUI_password(psw)
+            self.page.refresh_page()
+
+    @allure.feature('MDM_test022')
+    @allure.title("Devices- reset device password")
+    @pytest.mark.flaky(reruns=1, reruns_delay=3)
+    def test_reset_device_password(self, unlock_screen):
+        exp_psw_text = "Password changed"
+        sn = "A250900P03100019"
+        lock_tips = "pls contact the administrator to unlock it!"
+        password = ["123456", "000000", "999999"]
+        self.page.refresh_page()
+        for psw in password:
+            opt_case.check_single_device(sn)
+            self.page.select_device(sn)
+            self.page.click_psw_btn()
+            self.page.change_device_password(psw)
+            # lock device
+            self.page.select_device(sn)
+            self.page.click_lock()
+            # input password in device
+
+            print(self.android_mdm_page.get_app_installed_list())
+            assert self.android_mdm_page.mdm_msg_alert_show(time_out=5), "@@@@100s后还没显示锁机，请检查！！！"
+            assert self.page.remove_space(
+                lock_tips) in self.android_mdm_page.get_msg_tips_text(), "@@@@3分钟后还没显示锁定设备， tips内容对不上， 请检查！！！"
+            # need to click confirm btn six times, device would disappear
+            self.android_mdm_page.manual_unlock()
+            try:
+                self.android_mdm_page.lock_psw_box_presence()
+                self.android_mdm_page.lock_psw_input(psw)
+            except:
+                self.page.time_sleep(1)
+                self.android_mdm_page.manual_unlock()
+                self.android_mdm_page.lock_psw_input(psw)
+            self.android_mdm_page.click_psw_confirm_btn()
+            assert self.android_mdm_page.confirm_psw_alert_fade(), "@@@@无法确认密码， 请检查！！！"
+            self.page.refresh_page()
+
+    @allure.feature('MDM_test022')
+    @allure.title("Devices- AIMDM send message")
+    # @pytest.mark.flaky(reruns=1, reruns_delay=3)
+    def test_send_message_to_single_device(self, unlock_screen):
         exp_success_send_text = "Message Sent"
         # sn would change after debug with devices
         sn = "A250900P03100019"
@@ -210,172 +377,21 @@ class TestDevicesPage:
 
         # check message in device
         wait_time = 60
+        # self.page.time_sleep(10)
         if not self.android_mdm_page.mdm_msg_alert_show(wait_time):
             assert False, "@@@@%ss内无法接收到信息， 请检查设备是否在线！！！！" % wait_time
-
+        # print(self.android_mdm_page.get_msg_tips_text())
+        # print(self.android_mdm_page.get_msg_header_text())
         exp_text = self.android_mdm_page.remove_space(msg)
         act_text = self.android_mdm_page.remove_space(self.android_mdm_page.get_msg_tips_text())
         assert exp_text == act_text, "@@@发送的信息和接收到的不一样， 请检查！！！！"
         self.android_mdm_page.click_msg_confirm_btn()
         self.android_mdm_page.confirm_msg_alert_fade(msg)
 
-    @allure.feature('MDM_test02')
-    @allure.title("Devices- lock and unlock single device")
-    @pytest.mark.flaky(reruns=3, reruns_delay=3)
-    def test_lock_and_unlock_single_device(self):
-        # case is stable
-        sn = "A250900P03100019"
-        exp_lock_msg = "Device %s Locked" % sn
-        exp_unlock_msg = "Device %s UnLocked" % sn
-        lock_tips = "pls contact the administrator to unlock it!"
-        for k in range(2):
-            # test lock btn
-            opt_case.check_single_device(sn)
-            self.page.select_device(sn)
-            self.page.click_lock()
-            self.page.refresh_page()
-            # check if device lock already
-            now_time = self.page.get_current_time()
-            while True:
-                if "Locked" in opt_case.get_single_device_list(sn)[0]["Lock Status"]:
-                    break
-                if self.page.get_current_time() > self.page.return_end_time(now_time, 60):
-                    assert False, "@@@@信息发送失败，请检查！！！！"
-                self.page.refresh_page()
-                self.page.time_sleep(1)
-
-            # go to device and check the lock alert
-            assert self.android_mdm_page.mdm_msg_alert_show(60), "@@@@60s后还没显示锁定设备， 请检查！！！"
-            assert self.page.remove_space(lock_tips) in self.android_mdm_page.get_msg_tips_text(), "@@@@100s后还没显示锁定设备， tips内容对不上， 请检查！！！"
-
-            self.page.refresh_page()
-
-            opt_case.get_single_device_list(sn)
-            self.page.select_device(sn)
-            self.page.click_unlock()
-            assert self.android_mdm_page.confirm_msg_alert_fade(self.page.remove_space(lock_tips)), "@@@@60s后还没解锁， 请检查！！！"
-            self.page.refresh_page()
-            now_time = self.page.get_current_time()
-            for j in range(5):
-                if "Normal" in opt_case.get_single_device_list(sn)[0]["Lock Status"]:
-                    break
-                if self.page.get_current_time() > self.page.return_end_time(now_time, 120):
-                    assert False, "@@@@信息发送失败，请检查！！！！"
-                self.page.refresh_page()
-                self.page.time_sleep(1)
-
-    @allure.feature('MDM_test02')
-    @allure.title("Devices- reboot device 5 times")
-    @pytest.mark.flaky(reruns=2, reruns_delay=3)
-    def test_reboot_single_device_pressure_testing(self):
-        exp_reboot_text = "Sending Reboot Comand to Devices"
-        sn = "A250900P03100019"
-        self.page.refresh_page()
-        for i in range(1):
-            opt_case.check_single_device(sn)
-            self.page.select_device(sn)
-            self.page.click_reboot_btn()
-            case_pack.time.sleep(3)
-            self.page.refresh_page()
-            # get device info
-            # check if command trigger in 3s
-            assert "Off" in opt_case.get_single_device_list(sn)[0]["Status"]
-            self.page.time_sleep(30)
-            alert.getAlert("********请打设备的调试模式再关闭窗口*********")
-            self.android_mdm_page.device_exist()
-            self.android_mdm_page.device_boot_complete_debug_off()
-            # wait device network normal
-            self.android_mdm_page.ping_network(5)
-            now_time = self.page.get_current_time()
-            while True:
-                self.page.refresh_page()
-                if "On" in opt_case.get_single_device_list(sn)[0]["Status"]:
-                    break
-                if self.page.get_current_time() > self.page.return_end_time(now_time, 100):
-                    assert False, "@@@@恢复网络后1分钟内没与平台通讯！！"
-                self.page.time_sleep(1)
-            print("成功运行 %s 次" % str(i))
-
-    @allure.feature('MDM_test02')
-    @allure.title("Devices- cat_logs")
-    # @pytest.mark.flaky(reruns=1, reruns_delay=3)
-    def test_cat_logs(self):
-        exp_log_msg = "Device Debug Command sent"
-        sn = "A250900P03100019"
-        self.page.refresh_page()
-        opt_case.check_single_device(sn)
-        self.page.click_dropdown_btn()
-        send_time = case_pack.time.strftime('%Y-%m-%d %H:%M', case_pack.time.localtime(case_pack.time.time()))
-        self.page.time_sleep(2)
-        # check the logs list before catch log
-        orig_logs = self.android_mdm_page.get_aimdm_logs_list()
-        self.page.click_cat_log()
-        # check if device log generates in 3 mins
-        now_time = self.page.get_current_time()
-        while True:
-            new_logs = self.android_mdm_page.get_aimdm_logs_list()
-            if len(new_logs) > len(orig_logs):
-                rec_time = self.page.format_time(self.page.extract_integers(new_logs[-2]))
-                if self.page.compare_time(send_time, rec_time):
-                    break
-                else:
-                    assert False, "@@@@生成的文件有误， 请检查！！！"
-            if self.page.get_current_time() > self.page.return_end_time(now_time, 100):
-                assert False, "@@@@100s内无法生成在aimdm/log下检测到相应的log, 请检查！！！ "
-            self.page.time_sleep(1)
-
-    @allure.feature('MDM_test02')
-    @allure.title("Devices- reset device TPUI password")
-    @pytest.mark.flaky(reruns=5, reruns_delay=3)
-    def test_reset_TPUI_password(self):
-        exp_psw_text = "Password changed"
-        sn = "A250900P03100019"
-        password = ["123456", "000000", "999999"]
-        self.page.refresh_page()
-        for psw in password:
-            opt_case.check_single_device(sn)
-            self.page.select_device(sn)
-            self.page.click_psw_btn()
-            self.page.change_TPUI_password(psw)
-            self.page.refresh_page()
-
-    @allure.feature('MDM_test02')
-    @allure.title("Devices- reset device password")
-    @pytest.mark.flaky(reruns=1, reruns_delay=3)
-    def test_reset_device_password(self):
-        exp_psw_text = "Password changed"
-        sn = "A250900P03100019"
-        lock_tips = "pls contact the administrator to unlock it!"
-        password = ["123456", "000000", "999999"]
-        self.page.refresh_page()
-        for psw in password:
-            opt_case.check_single_device(sn)
-            self.page.select_device(sn)
-            self.page.click_psw_btn()
-            self.page.change_device_password(psw)
-            # lock device
-            self.page.select_device(sn)
-            self.page.click_lock()
-            # input password in device
-            assert self.android_mdm_page.mdm_msg_alert_show(5), "@@@@100s后还没显示锁机，请检查！！！"
-            assert self.page.remove_space(lock_tips) in self.android_mdm_page.get_msg_tips_text(), "@@@@100s后还没显示锁定设备， tips内容对不上， 请检查！！！"
-            # need to click confirm btn six times, device would disappear
-            self.android_mdm_page.manual_unlock()
-            try:
-                self.android_mdm_page.lock_psw_box_presence()
-                self.android_mdm_page.lock_psw_input(psw)
-            except:
-                self.page.time_sleep(1)
-                self.android_mdm_page.manual_unlock()
-                self.android_mdm_page.lock_psw_input(psw)
-            self.android_mdm_page.click_psw_confirm_btn()
-            assert self.android_mdm_page.confirm_psw_alert_fade(), "@@@@无法确认密码， 请检查！！！"
-            self.page.refresh_page()
-
-    @allure.feature('MDM_test02')
+    @allure.feature('MDM_test022')
     @allure.title("Devices- AIMDM send msg and check the log in the Message Module")
     @pytest.mark.flaky(reruns=1, reruns_delay=1)
-    def test_pressure_send_message_to_single_device(self, go_to_and_return_device_page):
+    def test_pressure_send_message_to_single_device(self, unlock_screen, go_to_and_return_device_page):
         exp_success_send_text = "Message Sent"
         # sn would change after debug with devices
         sn = "A250900P03100019"
@@ -499,7 +515,8 @@ class TestDevicesPage:
         self.page.click_shutdown_btn()
         # check if shutdown command works in 3 sec
         self.page.time_sleep(3)
-        assert "%sdevice" % self.android_mdm_page.get_device_name() not in self.page.remove_space(self.android_mdm_page.devices_list()), "@@@@3s内还没触发关机， 请检查！！！"
+        assert "%sdevice" % self.android_mdm_page.get_device_name() not in self.page.remove_space(
+            self.android_mdm_page.devices_list()), "@@@@3s内还没触发关机， 请检查！！！"
         self.page.refresh_page()
         assert "Off" in opt_case.get_single_device_list(sn)[0]["Status"], "@@@@已发送关机命令， 设备还显示在线状态"
         # check device
