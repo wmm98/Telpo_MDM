@@ -113,12 +113,12 @@ class DevicesPage(TelpoMDMPage):
     loc_cat_log_btn = (By.CSS_SELECTOR, "[class = 'far fa-file-code']")
     loc_type_box = (By.CLASS_NAME, "select2-search__field")
     loc_log_type_options_box = (By.CSS_SELECTOR, "[class = 'select2-dropdown select2-dropdown--below']")
-    loc_app_log = (By.ID, "select2-ekc1-result-wvs3-1")
-    loc_system_log = (By.ID, "sselect2-ekc1-result-lmim-3")
+    loc_log_types = (By.TAG_NAME, "li")
+
     loc_save_catch_btn = (By.CSS_SELECTOR, "[class = 'btn btn-primary btn-submit-catch']")
     # log type is selected, title = system log
     loc_type_selected = (By.CLASS_NAME, "select2-selection__choice")
-    loc_type_selected_box = (By.CLASS_NAME, "select2 select2-container select2-container--default select2-container--below select2-container--focus")
+    loc_type_selected_box = (By.CSS_SELECTOR, "[class = 'select2-selection select2-selection--multiple]")
 
     # Duration
     loc_duration_selector = (By.CSS_SELECTOR, "[class = 'form-control catch_duration']")
@@ -137,19 +137,41 @@ class DevicesPage(TelpoMDMPage):
                 assert False, "@@@@@无法选择log类型， 请检查！！！"
             self.time_sleep(1)
 
+    def show_log_type_again(self):
+        ele = self.get_element(self.loc_type_box)
+        ele.click()
+        now_time = self.get_current_time()
+        while True:
+            if self.ele_is_existed(self.loc_log_type_options_box):
+                break
+            else:
+                ele.click()
+            if self.get_current_time() > self.return_end_time(now_time):
+                assert False, "@@@@@无法选择log类型， 请检查！！！"
+            self.time_sleep(1)
+
     def select_app_log(self):
-        app_log = self.get_element(self.loc_app_log)
+        app_log = self.get_element(self.loc_log_type_options_box).find_elements(*self.loc_log_types)[0]
         app_text = app_log.text
         print(app_text)
         app_log.click()
+        all_text = ''
         while True:
+            flag = 0
             if self.ele_is_existed(self.loc_type_selected):
-                all_text = self.remove_space(self.upper_transfer(self.get_element(self.loc_type_selected_box).text))
-                selected_text = self.remove_space(self.upper_transfer(app_text))
-                if selected_text in all_text:
+                eles = self.get_elements(self.loc_type_selected)
+                for e in eles:
+                    all_text += self.remove_space(self.upper_transfer(e.text))
+                    print(all_text)
+                    selected_text = self.remove_space(self.upper_transfer(app_text))
+                    if selected_text in all_text:
+                        flag += 1
+                        break
+                if flag == 1:
                     break
             else:
-                self.click(self.loc_app_log)
+                app_log.click()
+            self.time_sleep(1)
 
     def get_catch_log_duration_list(self):
         select_box = self.get_element(self.loc_duration_selector)
@@ -158,17 +180,28 @@ class DevicesPage(TelpoMDMPage):
         return values
 
     def select_system_log(self):
-        system_log = self.get_element(self.loc_system_log)
-        system_text = system_log.text
-        system_log.click()
+        app_log = self.get_element(self.loc_log_type_options_box).find_elements(*self.loc_log_types)[1]
+        app_text = app_log.text
+        print(app_text)
+        app_log.click()
+        all_text = ''
         while True:
+            flag = 0
             if self.ele_is_existed(self.loc_type_selected):
-                all_text = self.remove_space(self.upper_transfer(self.get_element(self.loc_type_selected_box).text))
-                selected_text = self.remove_space(self.upper_transfer(system_text))
-                if selected_text in all_text:
+                eles = self.get_elements(self.loc_type_selected)
+                for e in eles:
+                    all_text += self.remove_space(self.upper_transfer(e.text))
+                    print(all_text)
+                    selected_text = self.remove_space(self.upper_transfer(app_text))
+                    if selected_text in all_text:
+                        flag += 1
+                        print("已经选中了application log")
+                        break
+                if flag == 1:
                     break
             else:
-                self.click(self.loc_system_log)
+                app_log.click()
+            self.time_sleep(1)
 
     def select_log_duration(self, minutes):
         flag = 0
@@ -192,10 +225,10 @@ class DevicesPage(TelpoMDMPage):
         self.click_cat_log()
         self.show_log_type()
         self.select_app_log()
-        self.show_log_type()
+        self.show_log_type_again()
         self.select_system_log()
-        # self.select_log_duration(minutes)
-        # self.click_save_catch_log()
+        self.select_log_duration(minutes)
+        self.click_save_catch_log()
 
     def click_shutdown_btn(self):
         self.click(self.loc_shutdown_btn)
