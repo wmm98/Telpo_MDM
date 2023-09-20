@@ -53,8 +53,9 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
         ele = self.get_element_by_id_no_wait(self.msg_confirm_id)
         print(ele.get_text())
         try:
-            for i in range(100):
+            for i in range(10):
                 ele.click()
+                self.time_sleep(0.2)
         except Exception as e:
             print(e)
 
@@ -102,6 +103,11 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
             if self.get_current_time() > self.return_end_time(now_time):
                 return False
             self.time_sleep(1)
+
+    def mdm_msg_alert_show_discard(self, time_out=5):
+        now_time = self.get_current_time()
+        if not self.wait_alert_appear(self.msg_alert_id, time_out):
+            assert False
 
     def confirm_msg_alert_fade(self, text, timeout=0):
         now_time = self.get_current_time()

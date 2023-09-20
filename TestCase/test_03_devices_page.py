@@ -240,8 +240,8 @@ class TestDevicesPage:
 
     @allure.feature('MDM_test022')
     @allure.title("Devices- reboot device 5 times")
-    @pytest.mark.flaky(reruns=1, reruns_delay=3)
-    def test_reboot_single_device_pressure_testing(self, unlock_screen):
+    # @pytest.mark.flaky(reruns=1, reruns_delay=3)
+    def test_reboot_single_device_pressure_testing(self, unlock_screen, connected_wifi_adb):
         exp_reboot_text = "Sending Reboot Comand to Devices"
         sn = "A250900P03100019"
         self.page.refresh_page()
@@ -278,7 +278,7 @@ class TestDevicesPage:
     @allure.feature('MDM_test02255')
     @allure.title("Devices- cat_logs")
     # @pytest.mark.flaky(reruns=1, reruns_delay=3)
-    def test_cat_logs(self):
+    def test_cat_logs(self, go_to_and_return_device_page):
         exp_log_msg = "Device Debug Command sent"
         sn = "A250900P03100019"
         self.page.refresh_page()
@@ -288,7 +288,7 @@ class TestDevicesPage:
         self.page.time_sleep(2)
         # check the logs list before catch log
         orig_logs = self.android_mdm_page.get_aimdm_logs_list()
-        self.page.click_cat_log()
+        self.page.catch_all_log(5)
         # select log_type
 
         # check if device log generates in 3 mins

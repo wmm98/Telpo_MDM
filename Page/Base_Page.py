@@ -247,7 +247,7 @@ class BasePage(interface):
 
     def get_tips_alert(self):
         try:
-            ele = self.web_driver_wait_until(public_pack.EC.presence_of_element_located(self.loc_tips), 5)
+            ele = self.web_driver_wait_until(public_pack.EC.presence_of_element_located(self.loc_tips), 6)
             print(ele.text)
             return True
         except public_pack.TimeoutException:

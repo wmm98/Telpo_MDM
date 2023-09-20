@@ -135,10 +135,10 @@ class AndroidBasePageWiFi(interface):
         return text
 
     def input_element_text(self, ele, text):
-        ele.clear_text()
+        # ele.clear_text()
         ele.send_keys(text)
 
-    def get_element_by_id(self, id_no, timeout=0):
+    def get_element_by_id(self, id_no, timeout=5):
         if timeout == 0:
             time_to_wait = self.times
         else:
@@ -149,7 +149,7 @@ class AndroidBasePageWiFi(interface):
     def get_element_by_id_no_wait(self, id_no):
         return self.client(resourceId=id_no)
 
-    def get_element_by_class_name(self, class_name, timeout=0):
+    def get_element_by_class_name(self, class_name, timeout=5):
         if timeout == 0:
             time_to_wait = self.times
         else:
@@ -214,6 +214,7 @@ class AndroidBasePageWiFi(interface):
             if self.get_current_time() > self.return_end_time(now_time):
                 return False
             self.time_sleep(1)
+
 
 if __name__ == '__main__':
     from utils.client_connect import ClientConnect

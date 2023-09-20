@@ -112,44 +112,90 @@ class DevicesPage(TelpoMDMPage):
     # cat log btn
     loc_cat_log_btn = (By.CSS_SELECTOR, "[class = 'far fa-file-code']")
     loc_type_box = (By.CLASS_NAME, "select2-search__field")
-    loc_log_type_options_box = (By.ID, "select2-0zye-results")
-    loc_app_log = (By.ID, "select2-0zye-result-nfho-1")
-    loc_system_log = (By.ID, "select2-0zye-result-e7db-3")
+    loc_log_type_options_box = (By.CSS_SELECTOR, "[class = 'select2-dropdown select2-dropdown--below']")
+    loc_app_log = (By.ID, "select2-ekc1-result-wvs3-1")
+    loc_system_log = (By.ID, "sselect2-ekc1-result-lmim-3")
     loc_save_catch_btn = (By.CSS_SELECTOR, "[class = 'btn btn-primary btn-submit-catch']")
     # log type is selected, title = system log
     loc_type_selected = (By.CLASS_NAME, "select2-selection__choice")
+    loc_type_selected_box = (By.CLASS_NAME, "select2 select2-container select2-container--default select2-container--below select2-container--focus")
+
     # Duration
     loc_duration_selector = (By.CSS_SELECTOR, "[class = 'form-control catch_duration']")
     loc_duration_option = (By.TAG_NAME, "option")
 
     def show_log_type(self):
+        ele = self.get_element(self.loc_type_box)
+        ele.click()
         now_time = self.get_current_time()
-        self.click(self.loc_type_box)
         while True:
             if self.ele_is_existed(self.loc_log_type_options_box):
                 break
             else:
-                self.click(self.loc_type_box)
+                ele.click()
             if self.get_current_time() > self.return_end_time(now_time):
                 assert False, "@@@@@无法选择log类型， 请检查！！！"
             self.time_sleep(1)
 
-    # def select_app_log(self, minutes):
-    #     self.click(self.loc_app_log)
-    #     while True:
-    #         if self.ele_is_existed(self.loc_type_selected):
-    #
-    #     if self.get_element(self.loc_type_selected).get_attribute("title") == ""
-    #     self.click(self.loc_app_log)
+    def select_app_log(self):
+        app_log = self.get_element(self.loc_app_log)
+        app_text = app_log.text
+        print(app_text)
+        app_log.click()
+        while True:
+            if self.ele_is_existed(self.loc_type_selected):
+                all_text = self.remove_space(self.upper_transfer(self.get_element(self.loc_type_selected_box).text))
+                selected_text = self.remove_space(self.upper_transfer(app_text))
+                if selected_text in all_text:
+                    break
+            else:
+                self.click(self.loc_app_log)
+
+    def get_catch_log_duration_list(self):
+        select_box = self.get_element(self.loc_duration_selector)
+        select_options = select_box.find_elements(*self.loc_duration_option)
+        values = [option.get_attribute("value") for option in select_options]
+        return values
+
+    def select_system_log(self):
+        system_log = self.get_element(self.loc_system_log)
+        system_text = system_log.text
+        system_log.click()
+        while True:
+            if self.ele_is_existed(self.loc_type_selected):
+                all_text = self.remove_space(self.upper_transfer(self.get_element(self.loc_type_selected_box).text))
+                selected_text = self.remove_space(self.upper_transfer(system_text))
+                if selected_text in all_text:
+                    break
+            else:
+                self.click(self.loc_system_log)
+
+    def select_log_duration(self, minutes):
+        flag = 0
+        for m in self.get_catch_log_duration_list():
+            if m == str(minutes):
+                flag += 1
+                self.select_by_value(self.loc_duration_selector, m)
+                break
+        assert flag == 1, "@@@@传入的log 捕捉时长不对， 请检查！！！！！"
 
     def click_cat_log(self):
         self.click(self.loc_cat_log_btn)
         self.confirm_alert_existed(self.loc_cat_log_btn)
-        self.click(self.loc_shutdown_sure_btn)
-        # select log type
 
-        self.confirm_tips_alert_show(self.loc_shutdown_btn)
-        self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_shutdown_btn)
+    def click_save_catch_log(self):
+        self.click(self.loc_save_catch_btn)
+        self.confirm_tips_alert_show(self.loc_save_catch_btn)
+        self.refresh_page()
+
+    def catch_all_log(self, minutes):
+        self.click_cat_log()
+        self.show_log_type()
+        self.select_app_log()
+        self.show_log_type()
+        self.select_system_log()
+        # self.select_log_duration(minutes)
+        # self.click_save_catch_log()
 
     def click_shutdown_btn(self):
         self.click(self.loc_shutdown_btn)

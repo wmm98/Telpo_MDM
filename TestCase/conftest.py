@@ -30,6 +30,14 @@ def unlock_screen():
 
 
 @pytest.fixture()
+def connected_wifi_adb():
+    yield
+    android_page.confirm_wifi_adb_connected(TestCase.wifi_ip)
+    android_page.device_existed(TestCase.wifi_ip)
+    android_page.device_boot_complete()
+
+
+@pytest.fixture()
 def return_device_page():
     yield
     device_page.go_to_new_address("devices")
