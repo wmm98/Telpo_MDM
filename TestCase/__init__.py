@@ -16,6 +16,7 @@ from Page.System_Page import SystemPage
 from Page.Apps_Page import APPSPage
 import time
 from Page.Android_Aimdm_Page import AndroidAimdmPage
+from Page.Catch_Log_Page import CatchLogPage
 from utils.client_connect import ClientConnect
 
 client = ClientConnect().get_device()

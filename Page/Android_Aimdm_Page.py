@@ -41,11 +41,36 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
                 assert False, "@@@@1分钟内无法关闭wifi开关， 请检查!!!!"
             self.time_sleep(1)
 
-    def get_aimdm_logs_list(self):
+    def get_aimdm_logs_list_discard(self):
         cmd = "ls /%s/aimdm/log" % self.get_internal_storage_directory()
         files = self.u2_send_command(cmd)
         files_list = files.split("\n")
         return files_list
+
+    def get_aimdm_logs_list(self):
+        cmd = "ls /%s/aimdm/log" % self.get_internal_storage_directory()
+        files = self.u2_send_command(cmd)
+        files_list = files.split("\n")
+        if len(files_list) == 0:
+            return []
+        return files_list
+
+    def get_app_log_txt(self, send_time):
+        """
+        TPS900+unknown+V1.1.16+20230830.093927_2023_9_21_9_18_16+radio.txt
+        TPS900+unknown+V1.1.16+20230830.093927_2023_9_21_9_33_7+radio.txt
+        """
+        logs_list = self.get_aimdm_logs_list()
+        if len(logs_list) == 0:
+            return []
+        else:
+            logs = logs_list[:-1]
+            for log in logs:
+                log_info =
+
+
+
+
 
     def manual_unlock(self):
         # ele = self.get_element_by_id(self.msg_confirm_id)

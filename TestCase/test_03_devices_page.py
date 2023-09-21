@@ -20,6 +20,7 @@ class TestDevicesPage:
         self.driver = case_pack.test_driver
         self.page = case_pack.DevicesPage(self.driver, 40)
         self.meg_page = case_pack.MessagePage(self.driver, 40)
+        self.cat_log_page = case_pack.CatchLogPage(self.driver, 40)
         self.telpo_mdm_page = case_pack.TelpoMDMPage(self.driver, 40)
         self.android_mdm_page = case_pack.AndroidAimdmPage(case_pack.device_data, 5)
         self.wifi_ip = case_pack.device_data["wifi_device_info"]["ip"]
@@ -281,6 +282,7 @@ class TestDevicesPage:
     def test_cat_logs(self, go_to_and_return_device_page):
         exp_log_msg = "Device Debug Command sent"
         sn = "A250900P03100019"
+        duration = 5
         self.page.refresh_page()
         opt_case.check_single_device(sn)
         self.page.click_dropdown_btn()
@@ -288,21 +290,47 @@ class TestDevicesPage:
         self.page.time_sleep(2)
         # check the logs list before catch log
         orig_logs = self.android_mdm_page.get_aimdm_logs_list()
-        self.page.catch_all_log(5)
+        self.page.catch_all_log(duration)
         # select log_type
+        self.page.go_to_new_address("catchlog/task")
+        # check catch log info
+        now_time = self.page.get_current_time()
+        while True:
+            if len(self.cat_log_page.get_latest_catch_log_list(send_time, sn)) == 1:
+                break
+            else:
+                self.page.refresh_page()
+            # wait 20 min
+            if self.page.get_current_time() > self.page.return_end_time(now_time, 60):
+                assert False, "@@@@超过 60s 还没有相应的catch log！！！"
+            self.page.time_sleep(2)
 
-        # check if device log generates in 3 mins
+        success_flag = self.page.remove_space(self.page.upper_transfer("success"))
+        now_time = self.page.get_current_time()
+        while True:
+            action = self.cat_log_page.get_latest_catch_log_list(send_time, sn)[0]["Action"]
+            print(action)
+            if success_flag in action:
+                break
+            else:
+                self.page.refresh_page()
+            # wait 20 min
+            if self.page.get_current_time() > self.page.return_end_time(now_time, 1200):
+                assert False, "@@@@超过 %dmin 还没有采集完 %dminda的log！！！" % (1200, duration)
+            self.page.time_sleep(3)
+
+        # check if device log generates in 1 mins
         now_time = self.page.get_current_time()
         while True:
             new_logs = self.android_mdm_page.get_aimdm_logs_list()
-            if len(new_logs) > len(orig_logs):
+            if len(new_logs) == len(orig_logs) + 2:
                 rec_time = self.page.format_time(self.page.extract_integers(new_logs[-2]))
                 if self.page.compare_time(send_time, rec_time):
                     break
                 else:
                     assert False, "@@@@生成的文件有误， 请检查！！！"
-            if self.page.get_current_time() > self.page.return_end_time(now_time, 100):
-                assert False, "@@@@100s内无法生成在aimdm/log下检测到相应的log, 请检查！！！ "
+            if self.page.get_current_time() > self.page.return_end_time(now_time, 60):
+                assert False, "@@@@60s内无法检测在aimdm/log下检测到相应的log, 请检查！！！ "
             self.page.time_sleep(1)
 
     @allure.feature('MDM_test022')
