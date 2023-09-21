@@ -2,6 +2,7 @@ import Page as public_pack
 from Page.Android_Base_Page_USB import AndroidBasePageUSB
 from Page.Android_Base_Page_WiFi import AndroidBasePageWiFi
 
+config = public_pack.Config()
 
 class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
     def __init__(self, devices_data, times):
@@ -55,22 +56,34 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
             return []
         return files_list
 
-    def get_app_log_txt(self, send_time):
+    def get_logs_txt(self, send_time):
         """
         TPS900+unknown+V1.1.16+20230830.093927_2023_9_21_9_18_16+radio.txt
-        TPS900+unknown+V1.1.16+20230830.093927_2023_9_21_9_33_7+radio.txt
+        TPS900+unknown+V1.1.16+20230830.093927_2023_9_21_9_18_16+main.txt
         """
         logs_list = self.get_aimdm_logs_list()
+        generate_list = []
         if len(logs_list) == 0:
             return []
         else:
             logs = logs_list[:-1]
             for log in logs:
-                log_info =
+                # 20230830.093927_2023_9_21_9_33_7
+                log_time = log.split("+")[-2]
+                # ['20230830.093927', '2023', '9', '21', '9', '18', '16']
+                time_list = self.extract_integers(log_time)
+                generate_time = self.format_time(time_list[1:])
+                if self.compare_time(send_time, generate_time):
+                    generate_list.append(log)
+            return generate_list
 
-
-
-
+    def pull_logs_file(self, logs):
+        # conf.project_path + "\\Report\\environment.properties"
+        internal = self.get_internal_storage_directory()
+        des = config.project_path + "\\CatchLogs"
+        for txt in logs:
+            cmd = "/%s/aimdm/log/%s %s" % (internal, txt, des)
+            self.send_adb_command(cmd)
 
     def manual_unlock(self):
         # ele = self.get_element_by_id(self.msg_confirm_id)

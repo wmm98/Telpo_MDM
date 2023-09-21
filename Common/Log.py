@@ -150,34 +150,34 @@ class MyLog():
 #         # fd.close()
 
 
-class OutPutText():
-    # 返回上级目录
-    # path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    # log的目录，日志目录
-    filename = log_path + '/TextFile/output.txt'
-    # filename D:\GNP\GNP_StablilityTest/Log/log.log    D:\GNP\GNP_StablilityTest/Log/err.log
-    # path D:\GNP\GNP_StablilityTest/Log
-    path = filename[0:filename.rfind('/')]
-    # 判断是否为文件夹
-    if not os.path.isdir(path):
-        os.makedirs(path)
-    # 判读是否为文件
-    elif not os.path.isfile(filename):
-        fd = open(filename, mode='w', encoding='utf-8')
-        fd.close()
-    elif 'output.txt' in filename:
-        os.rename(filename, path + '/output' + time.strftime("%Y-%m-%d_%H_%M_%S") + '.txt')
-        fd = open(filename, mode='w', encoding='utf-8')
-        fd.close()
-
-    @staticmethod
-    def write_text(msg):
-        # ("[WARNING " + get_current_time() + "]" + log_meg)
-        date = '%Y-%m-%d %H:%M:%S'
-        filename = log_path + '/TextFile/output.txt'
-        f = open(filename, 'a+', encoding='utf-8')
-        f.write(msg + '\n')
-        f.close()
+# class OutPutText():
+#     # 返回上级目录
+#     # path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+#     # log的目录，日志目录
+#     filename = log_path + '/CatchLogs/output.txt'
+#     # filename D:\GNP\GNP_StablilityTest/Log/log.log    D:\GNP\GNP_StablilityTest/Log/err.log
+#     # path D:\GNP\GNP_StablilityTest/Log
+#     path = filename[0:filename.rfind('/')]
+#     # 判断是否为文件夹
+#     if not os.path.isdir(path):
+#         os.makedirs(path)
+#     # 判读是否为文件
+#     elif not os.path.isfile(filename):
+#         fd = open(filename, mode='w', encoding='utf-8')
+#         fd.close()
+#     elif 'output.txt' in filename:
+#         os.rename(filename, path + '/output' + time.strftime("%Y-%m-%d_%H_%M_%S") + '.txt')
+#         fd = open(filename, mode='w', encoding='utf-8')
+#         fd.close()
+#
+#     @staticmethod
+#     def write_text(msg):
+#         # ("[WARNING " + get_current_time() + "]" + log_meg)
+#         date = '%Y-%m-%d %H:%M:%S'
+#         filename = log_path + '/CatchLogs/output.txt'
+#         f = open(filename, 'a+', encoding='utf-8')
+#         f.write(msg + '\n')
+#         f.close()
 
 
 if __name__ == "__main__":

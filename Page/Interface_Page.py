@@ -129,6 +129,10 @@ class interface:
             assert False, "@@@@没有显示时间，请检查！！！"
 
     def compare_time(self, time1, time2):
+        """
+        time1: send time
+        time2: receive time
+        """
         dt1 = public_pack.datetime.strptime(time1, "%Y-%m-%d %H:%M")
         dt2 = public_pack.datetime.strptime(time2, "%Y-%m-%d %H:%M")
         if dt1 <= dt2:
