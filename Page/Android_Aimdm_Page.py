@@ -4,6 +4,7 @@ from Page.Android_Base_Page_WiFi import AndroidBasePageWiFi
 
 config = public_pack.Config()
 
+
 class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
     def __init__(self, devices_data, times):
         self.client = devices_data["usb_device_info"]["device"]
@@ -82,8 +83,25 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
         internal = self.get_internal_storage_directory()
         des = config.project_path + "\\CatchLogs"
         for txt in logs:
-            cmd = "/%s/aimdm/log/%s %s" % (internal, txt, des)
-            self.send_adb_command(cmd)
+            cmd = "pull /%s/aimdm/log/%s %s" % (internal, txt, des)
+            try:
+                res = self.send_adb_command(cmd)
+                print(res)
+            except Exception:
+                res = self.send_adb_command(cmd)
+                print(res)
+
+    def generate_and_upload_log(self, send_time, file_name):
+        logs = self.get_logs_txt(send_time)
+        self.pull_logs_file(logs)
+        for lo in logs:
+            file_path = config.project_path + "\\CatchLogs\\" + lo
+            if not self.path_is_existed(file_path):
+                assert False, "@@@@无%s文件， 请检查！！！" % lo
+            public_pack.allure.attach(file_path, name=file_name, attachment_type=public_pack.allure.attachment_type.TEXT)
+
+    def upload_log(self, file, name):
+        public_pack.allure.attach(file, name=name, attachment_type=public_pack.allure.attachment_type.TEXT)
 
     def manual_unlock(self):
         # ele = self.get_element_by_id(self.msg_confirm_id)

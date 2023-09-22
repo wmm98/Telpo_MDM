@@ -35,6 +35,12 @@ class interface:
         res = sub_shell.invoke("adb disconnect %s" % ip)
         print(res)
 
+    def path_is_existed(self, path):
+        if public_pack.os.path.exists(path):
+            return True
+        else:
+            return False
+
     def confirm_wifi_adb_connected(self, ip, timeout=90):
         now_time = self.get_current_time()
         while True:
@@ -98,6 +104,9 @@ class interface:
 
     def upper_transfer(self, text):
         return text.upper()
+
+    def remove_space_and_upper(self, text):
+        return self.upper_transfer(self.remove_space(text))
 
     def get_current_time(self):
         return public_pack.t_time.time()

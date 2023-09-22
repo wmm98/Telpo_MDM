@@ -16,4 +16,5 @@ import requests
 from androguard.core.bytecodes.apk import APK
 import uiautomator2 as u2
 from uiautomator2.exceptions import UiaError
+import allure
 

@@ -26,20 +26,17 @@ class CatchLogPage(TelpoMDMPage):
         get_type = self.get_log_type(log_type)
         release_list = self.get_element(self.loc_data_body)
         logs_list = []
-        existed = self.ele_is_existed_in_range(self.loc_data_body, self.loc_single_log)
-        if not existed:
-            self.time_sleep(2)
-            existed = self.ele_is_existed_in_range(self.loc_data_body, self.loc_single_log)
         if self.remove_space("No Dat") in self.remove_space(release_list.text):
             return []
-        if existed:
-            logs = release_list.find_elements(*self.loc_single_log)
+        logs = release_list.find_elements(*self.loc_single_log)
+        try:
             for single_log in logs:
                 cols = single_log.find_elements(*self.loc_single_release_col)
+                sn = cols[2].text
+                # print([i.text for i in cols[4].find_elements(*self.loc_small_col)])
                 receive_time_text = cols[4].find_elements(*self.loc_small_col)[1].text
                 # duration = cols[4].find_elements(*self.loc_small_col)[3].get_attribute("data-time")
-                sn = cols[2].text
-                log_type = self.remove_space(self.upper_transfer(cols[3].text))   # cols[3].text
+                log_type = self.remove_space(self.upper_transfer(cols[3].text))  # cols[3].text
                 time_line = self.extract_integers(receive_time_text)
                 receive_time = self.format_string_time(time_line)
                 action = self.remove_space(self.upper_transfer(cols[6].text))
@@ -53,7 +50,7 @@ class CatchLogPage(TelpoMDMPage):
                         # logs_list.append(single_log)
                         logs_list.append({"SN": sn, "Catch_Time": receive_time, "Action": action})
             return logs_list
-        else:
+        except Exception:
             return []
 
     def get_log_type(self, log_type):

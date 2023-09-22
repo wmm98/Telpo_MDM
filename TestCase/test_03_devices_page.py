@@ -276,62 +276,34 @@ class TestDevicesPage:
             print("成功运行 %s 次" % str(i))
             # case_pack.connect.reconnect(self.wifi_ip)
 
-    @allure.feature('MDM_test02255')
+    @allure.feature('MDM_test022')
     @allure.title("Devices- cat_logs")
     # @pytest.mark.flaky(reruns=1, reruns_delay=3)
-    def test_cat_logs(self, go_to_and_return_device_page):
+    def test_cat_logs(self):
         exp_log_msg = "Device Debug Command sent"
         sn = "A250900P03100019"
         duration = 5
         self.page.refresh_page()
-        opt_case.check_single_device(sn)
-        self.page.click_dropdown_btn()
         send_time = case_pack.time.strftime('%Y-%m-%d %H:%M', case_pack.time.localtime(case_pack.time.time()))
-        self.page.time_sleep(2)
-        # check the logs list before catch log
-        orig_logs = self.android_mdm_page.get_aimdm_logs_list()
-        self.page.catch_all_log(duration)
-        # select log_type
-        self.page.go_to_new_address("catchlog/task")
-        # check catch log info
-        now_time = self.page.get_current_time()
-        while True:
-            if len(self.cat_log_page.get_latest_catch_log_list(send_time, sn)) == 1:
-                break
-            else:
-                self.page.refresh_page()
-            # wait 20 min
-            if self.page.get_current_time() > self.page.return_end_time(now_time, 60):
-                assert False, "@@@@超过 60s 还没有相应的catch log！！！"
-            self.page.time_sleep(2)
+        opt_case.catch_logs(sn, duration)
+        # check if device log generates and upload to allure report
+        self.android_mdm_page.generate_and_upload_log(send_time, "捕捉的log")
 
-        success_flag = self.page.remove_space(self.page.upper_transfer("success"))
-        now_time = self.page.get_current_time()
-        while True:
-            action = self.cat_log_page.get_latest_catch_log_list(send_time, sn)[0]["Action"]
-            print(action)
-            if success_flag in action:
-                break
-            else:
-                self.page.refresh_page()
-            # wait 20 min
-            if self.page.get_current_time() > self.page.return_end_time(now_time, 1200):
-                assert False, "@@@@超过 %dmin 还没有采集完 %dminda的log！！！" % (1200, duration)
-            self.page.time_sleep(3)
+    @allure.feature('MDM_test022551')
+    @allure.title("Devices- cat_logs")
+    @allure.description
+    # @pytest.mark.flaky(reruns=1, reruns_delay=3)
+    def test_cat_logs_test_upload(self):
+        # file_path = conf.project_path + "\\TestCase\\err.txt"
+        file_path = "E:\Mingming\Telpo_Automation\Telpo_MDM\TestCase\err.txt"
+        print(file_path)
+        # with open(file_path, "rb") as file:
+        # allure.attach.file(file_path, name="测试附件下载连接", attachment_type=allure.attachment_type.TEXT)
+            # self.android_mdm_page.upload_log(file, "测试附件")
 
-        # check if device log generates in 1 mins
-        now_time = self.page.get_current_time()
-        while True:
-            new_logs = self.android_mdm_page.get_aimdm_logs_list()
-            if len(new_logs) == len(orig_logs) + 2:
-                rec_time = self.page.format_time(self.page.extract_integers(new_logs[-2]))
-                if self.page.compare_time(send_time, rec_time):
-                    break
-                else:
-                    assert False, "@@@@生成的文件有误， 请检查！！！"
-            if self.page.get_current_time() > self.page.return_end_time(now_time, 60):
-                assert False, "@@@@60s内无法检测在aimdm/log下检测到相应的log, 请检查！！！ "
-            self.page.time_sleep(1)
+        with open(file_path, 'rb') as attachment:
+            allure.attach(attachment.read(), name='附件', attachment_type=allure.attachment_type.TEXT)
+
 
     @allure.feature('MDM_test022')
     @allure.title("Devices- reset device TPUI password")
