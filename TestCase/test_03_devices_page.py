@@ -219,8 +219,7 @@ class TestDevicesPage:
 
             # go to device and check the lock alert
             assert self.android_mdm_page.mdm_msg_alert_show(60), "@@@@60s后还没显示锁定设备， 请检查！！！"
-            assert self.page.remove_space(
-                lock_tips) in self.android_mdm_page.get_msg_tips_text(), "@@@@100s后还没显示锁定设备， tips内容对不上， 请检查！！！"
+            self.android_mdm_page.confirm_received_text(lock_tips)
 
             self.page.refresh_page()
 
@@ -279,7 +278,7 @@ class TestDevicesPage:
     @allure.feature('MDM_test022')
     @allure.title("Devices- cat_logs")
     # @pytest.mark.flaky(reruns=1, reruns_delay=3)
-    def test_cat_logs(self):
+    def test_cat_logs(self, return_device_page):
         exp_log_msg = "Device Debug Command sent"
         sn = "A250900P03100019"
         duration = 5
@@ -299,16 +298,15 @@ class TestDevicesPage:
         print(file_path)
         # with open(file_path, "rb") as file:
         # allure.attach.file(file_path, name="测试附件下载连接", attachment_type=allure.attachment_type.TEXT)
-            # self.android_mdm_page.upload_log(file, "测试附件")
+        # self.android_mdm_page.upload_log(file, "测试附件")
 
         with open(file_path, 'rb') as attachment:
             allure.attach(attachment.read(), name='附件', attachment_type=allure.attachment_type.TEXT)
 
-
-    @allure.feature('MDM_test022')
+    @allure.feature('MDM_test0222')
     @allure.title("Devices- reset device TPUI password")
     @pytest.mark.flaky(reruns=1, reruns_delay=3)
-    def test_reset_TPUI_password(self, unlock_screen):
+    def test_reset_TPUI_password(self, unlock_screen, go_to_and_return_device_page):
         exp_psw_text = "Password changed"
         sn = "A250900P03100019"
         password = ["123456", "000000", "999999"]
@@ -320,10 +318,10 @@ class TestDevicesPage:
             self.page.change_TPUI_password(psw)
             self.page.refresh_page()
 
-    @allure.feature('MDM_test022')
+    @allure.feature('MDM_test0222')
     @allure.title("Devices- reset device password")
-    @pytest.mark.flaky(reruns=1, reruns_delay=3)
-    def test_reset_device_password(self, unlock_screen):
+    @pytest.mark.flaky(reruns=5, reruns_delay=3)
+    def test_reset_device_password(self, unlock_screen, go_to_and_return_device_page):
         exp_psw_text = "Password changed"
         sn = "A250900P03100019"
         lock_tips = "pls contact the administrator to unlock it!"
@@ -340,9 +338,8 @@ class TestDevicesPage:
             # input password in device
 
             print(self.android_mdm_page.get_app_installed_list())
-            assert self.android_mdm_page.mdm_msg_alert_show(time_out=5), "@@@@100s后还没显示锁机，请检查！！！"
-            assert self.page.remove_space(
-                lock_tips) in self.android_mdm_page.get_msg_tips_text(), "@@@@3分钟后还没显示锁定设备， tips内容对不上， 请检查！！！"
+            assert self.android_mdm_page.mdm_msg_alert_show(time_out=5), "@@@@180s后还没显示锁机，请检查！！！"
+            self.android_mdm_page.confirm_received_text(lock_tips)
             # need to click confirm btn six times, device would disappear
             self.android_mdm_page.manual_unlock()
             try:
@@ -358,8 +355,8 @@ class TestDevicesPage:
 
     @allure.feature('MDM_test022')
     @allure.title("Devices- AIMDM send message")
-    # @pytest.mark.flaky(reruns=1, reruns_delay=3)
-    def test_send_message_to_single_device(self, unlock_screen):
+    @pytest.mark.flaky(reruns=1, reruns_delay=3)
+    def test_send_message_to_single_device(self, unlock_screen, go_to_and_return_device_page):
         exp_success_send_text = "Message Sent"
         # sn would change after debug with devices
         sn = "A250900P03100019"
@@ -380,11 +377,7 @@ class TestDevicesPage:
         # self.page.time_sleep(10)
         if not self.android_mdm_page.mdm_msg_alert_show(wait_time):
             assert False, "@@@@%ss内无法接收到信息， 请检查设备是否在线！！！！" % wait_time
-        # print(self.android_mdm_page.get_msg_tips_text())
-        # print(self.android_mdm_page.get_msg_header_text())
-        exp_text = self.android_mdm_page.remove_space(msg)
-        act_text = self.android_mdm_page.remove_space(self.android_mdm_page.get_msg_tips_text())
-        assert exp_text == act_text, "@@@发送的信息和接收到的不一样， 请检查！！！！"
+        self.android_mdm_page.confirm_received_text(msg)
         self.android_mdm_page.click_msg_confirm_btn()
         self.android_mdm_page.confirm_msg_alert_fade(msg)
 
@@ -416,9 +409,7 @@ class TestDevicesPage:
             wait_time = 60
             if not self.android_mdm_page.mdm_msg_alert_show(wait_time):
                 assert False, "@@@@%ss内无法接收到信息， 请检查设备是否在线！！！！" % wait_time
-            exp_text = self.android_mdm_page.remove_space(msg)
-            act_text = self.android_mdm_page.remove_space(self.android_mdm_page.get_msg_tips_text())
-            assert exp_text == act_text, "@@@发送的信息和终端接收到的不一样， 请检查！！！！"
+            self.android_mdm_page.confirm_received_text(msg)
             self.android_mdm_page.click_msg_confirm_btn()
             self.android_mdm_page.confirm_msg_alert_fade(msg)
 

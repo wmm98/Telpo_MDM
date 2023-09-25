@@ -9,6 +9,13 @@ alert = case_pack.AlertData()
 
 log = case_pack.MyLog()
 
+package_infos = [{"package_name": "Bus_Recharge_System_1.0.0_20220421.apk", "file_category": "test",
+                 "developer": "engineer", "description": "test"},
+                {"package_name": "Bus_Recharge_System_1.0.1_20220615.apk", "file_category": "test",
+                 "developer": "engineer", "description": "test"},
+                 {"package_name": "ComAssistant.apk", "file_category": "test01",
+                        "developer": "engineer", "description": "test"}]
+
 
 class TestAppPage:
 
@@ -16,12 +23,45 @@ class TestAppPage:
         self.driver = case_pack.test_driver
         self.page = case_pack.APPSPage(self.driver, 40)
         self.system_page = case_pack.SystemPage(self.driver, 40)
-        self.android_mdm_page = case_pack.AndroidAimdmPage(case_pack.client, 5, case_pack.client.serial)
+        self.android_mdm_page = case_pack.AndroidAimdmPage(case_pack.device_data, 5)
+        self.wifi_ip = case_pack.device_data["wifi_device_info"]["ip"]
 
     def teardown_class(self):
+        self.android_mdm_page.del_all_downloaded_apk()
         self.page.refresh_page()
 
-    @allure.feature('MDM_test02')
+    @allure.feature('MDM_APP-test02')
+    @allure.title("Apps-add app apk package")
+    @pytest.mark.flaky(reruns=1, reruns_delay=3)
+    @pytest.mark.parametrize('package_info', package_infos)
+    def test_add_new_apps(self, package_info, go_to_app_page):
+        exp_success_text = "Success"
+        # package_info = {"package_name": "Bus_Recharge_System_1.0.1_20220615.apk", "file_category": "test",
+        #                 "developer": "engineer", "description": "test"}
+
+        file_path = conf.project_path + "\\Param\\Package\\%s" % package_info["package_name"]
+        info = {"file_name": file_path, "file_category": "test",
+                "developer": "engineer", "description": "test"}
+        self.page.search_app_by_name(package_info["package_name"])
+        search_list = self.page.get_apps_text_list()
+        if len(search_list) == 0:
+            if package_info["file_category"] not in self.page.get_app_categories_list():
+                self.page.add_app_category(package_info["file_category"])
+            self.page.click_add_btn()
+            self.page.input_app_info(info)
+            self.page.refresh_page()
+            # check if add successfully
+            self.page.search_app_by_name(package_info["package_name"])
+            add_later_text_list = self.page.get_apps_text_list()
+            if len(add_later_text_list) == 1:
+                if package_info["package_name"] in add_later_text_list[0]:
+                    assert True
+                else:
+                    assert False, "@@@添加apk失败， 请检查"
+            else:
+                assert False, "@@@添加apk失败， 请检查"
+
+    @allure.feature('MDM_APP-test02')
     @allure.title("Apps-delete apk package")
     @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_delete_single_app(self, go_to_app_page):
@@ -37,36 +77,7 @@ class TestAppPage:
             if org_length != (new_length + 1):
                 assert False, "@@@@删除apk包失败请检查！！！"
 
-    @allure.feature('MDM_test02')
-    @allure.title("Apps-add app apk package")
-    @pytest.mark.flaky(reruns=1, reruns_delay=3)
-    def test_add_new_apps(self, go_to_app_page):
-        exp_success_text = "Success"
-        package_info = {"package_name": "Bus Recharge System_1.0.0_20220421.apk", "file_category": "test",
-                        "developer": "engineer", "description": "test"}
-
-        file_path = conf.project_path + "\\Param\\Package\\%s" % package_info["package_name"]
-        info = {"file_name": file_path, "file_category": "test",
-                "developer": "engineer", "description": "test"}
-        self.page.page_load_complete()
-        self.page.search_app_by_name(package_info["package_name"])
-        search_list = self.page.get_apps_text_list()
-        if len(search_list) == 0:
-            self.page.click_add_btn()
-            self.page.input_app_info(info)
-            self.page.refresh_page()
-            # check if add successfully
-            self.page.search_app_by_name(package_info["package_name"])
-            add_later_text_list = self.page.get_apps_text_list()
-            if len(add_later_text_list) == 1:
-                if package_info["package_name"] in add_later_text_list[0]:
-                    assert True
-                else:
-                    assert False, "@@@添加apk失败， 请检查"
-            else:
-                assert False, "@@@添加apk失败， 请检查"
-
-    @allure.feature('MDM_test02')
+    @allure.feature('MDM_APP-test01')
     @allure.title("Apps-delete all app release log")
     @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_delete_all_app_release_app(self, go_to_app_release_log):
@@ -74,7 +85,7 @@ class TestAppPage:
         self.page.delete_all_app_release_log()
         assert self.page.get_current_app_release_log_total() == 0, "@@@@没有删除完了所有的app release log, 请检查!!!"
 
-    @allure.feature('MDM_test02')
+    @allure.feature('MDM_APP-test022')
     @allure.title("Apps-release low version app")
     @pytest.mark.dependency(name="test_release_app_ok", scope='package')
     # @pytest.mark.flaky(reruns=1, reruns_delay=3)
@@ -105,12 +116,11 @@ class TestAppPage:
 
         # go to app page
         self.page.go_to_new_address("apps")
+        send_time = case_pack.time.strftime('%Y-%m-%d %H:%M', case_pack.time.localtime(self.page.get_current_time()))
         self.page.search_app_by_name(release_info["package_name"])
         app_list = self.page.get_apps_text_list()
         if len(app_list) == 0:
             assert False, "@@@@没有 %s, 请检查！！！" % release_info["package_name"]
-        send_time = case_pack.time.strftime('%Y-%m-%d %H:%M', case_pack.time.localtime(self.page.get_current_time()))
-        self.page.time_sleep(3)
         self.page.click_release_app_btn()
         self.page.input_release_app_info(release_info)
         # go to app release log
@@ -120,6 +130,10 @@ class TestAppPage:
         now_time = self.page.get_current_time()
         # print(self.page.get_app_current_release_log_list(send_time, release_info["sn"]))
         while True:
+            try:
+                release_log = self.page.get_app_latest_release_log_list(send_time, release_info)
+            except Exception as e:
+                print(e)
             release_len = len(self.page.get_app_latest_release_log_list(send_time, release_info))
             print("release_len", release_len)
             if release_len == 1:
@@ -130,7 +144,7 @@ class TestAppPage:
                 self.page.refresh_page()
             if self.page.get_current_time() > self.page.return_end_time(now_time):
                 assert False, "@@@@没有相应的 app release log， 请检查！！！"
-            self.page.time_sleep(1)
+            self.page.time_sleep(3)
 
         # check if the upgrade log appeared, if appeared, break
         self.page.go_to_new_address("apps/logs")
@@ -171,7 +185,7 @@ class TestAppPage:
             # wait 20 mins
             if self.page.get_current_time() > self.page.return_end_time(now_time, 1200):
                 assert False, "@@@@20分钟还没有下载完相应的app， 请检查！！！"
-            self.page.time_sleep(2)
+            self.page.time_sleep(5)
 
         # check upgrade
         now_time = self.page.get_current_time()
@@ -188,9 +202,9 @@ class TestAppPage:
             # wait upgrade 3 mins at most
             if self.page.get_current_time() > self.page.return_end_time(now_time, 180):
                 assert False, "@@@@3分钟还没有安装完相应的app， 请检查！！！"
-            self.page.time_sleep(2)
+            self.page.time_sleep(5)
 
-    @allure.feature('MDM_test02')
+    @allure.feature('MDM_APP-test02')
     @allure.title("Apps-release high version app")
     @pytest.mark.dependency(depends=["test_release_app_ok"], scope='package')
     # @pytest.mark.flaky(reruns=1, reruns_delay=3)
@@ -288,7 +302,8 @@ class TestAppPage:
             print("action", action)
             if self.page.get_action_status(action) == 4:
                 if self.android_mdm_page.app_is_installed(release_info["package"]):
-                    version_installed = self.page.transfer_version_into_int(self.android_mdm_page.get_app_info(release_info["package"])['versionName'])
+                    version_installed = self.page.transfer_version_into_int(
+                        self.android_mdm_page.get_app_info(release_info["package"])['versionName'])
                     if version_installed == self.page.transfer_version_into_int(release_info["version"]):
                         break
                 else:
@@ -300,7 +315,7 @@ class TestAppPage:
                 assert False, "@@@@3分钟还没有安装完相应的app， 请检查！！！"
             self.page.time_sleep(2)
 
-    @allure.feature('MDM_test02')
+    @allure.feature('MDM_APP-test02')
     @allure.title("Apps- release app again")
     @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_send_release_install_app_again(self, go_to_app_release_log, del_all_app_release_log_after):
@@ -320,15 +335,16 @@ class TestAppPage:
         self.page.select_single_app_release_log()
         self.page.click_send_release_again()
 
-    @allure.feature('MDM_test02')
+    @allure.feature('MDM_APP-test022')
     @allure.title("Apps- uninstall app")
-    @pytest.mark.dependency(depends=["test_release_app_ok"], scope='package')
+    # @pytest.mark.dependency(depends=["test_release_app_ok"], scope='package')
     @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_uninstall_app(self, del_all_app_release_log, del_all_app_uninstall_release_log):
-        # release_info = {"package_name": "APKEditor_1_9_10.apk", "sn": "A250900P03100019",
-        #                 "silent": "Yes", "version": "1.9.10", "package": "com.gmail.heagoo.apkeditor.pro"}
-        release_info = {"package_name": "ComAssistant.apk", "sn": "A250900P03100019",
-                        "silent": "Yes", "version": "1.1", "package": "com.bjw.ComAssistant"}
+        release_info = {"package_name": "Bus_Recharge_System_1.0.1_20220615.apk", "sn": "A250900P03100019",
+                        "silent": "Yes"}
+        file_path = conf.project_path + "\\Param\\Package\\%s" % release_info["package_name"]
+        package = self.page.get_apk_package_name(file_path)
+        release_info["package"] = package
 
         # check if device is online
         self.page.go_to_new_address("devices")
@@ -372,7 +388,7 @@ class TestAppPage:
                 assert False, "@@@@3分钟还没有卸载完相应的app， 请检查！！！"
             self.page.time_sleep(2)
 
-    @allure.feature('MDM_test02')
+    @allure.feature('MDM_APP-test02')
     @allure.title("Apps- release app again")
     def test_send_release_uninstall_app_again(self, del_all_app_release_log, del_all_app_uninstall_release_log_after):
         exp_release_success_text = "Sync App Release Success"
@@ -389,4 +405,3 @@ class TestAppPage:
             assert False, "@@@@没有相应的release app log, 请检查！！！"
         self.page.select_single_app_release_log()
         self.page.click_send_release_again()
-

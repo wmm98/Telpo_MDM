@@ -1,6 +1,7 @@
 import Page as public_pack
 from Page.Android_Base_Page_USB import AndroidBasePageUSB
 from Page.Android_Base_Page_WiFi import AndroidBasePageWiFi
+import time
 
 config = public_pack.Config()
 
@@ -24,6 +25,17 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
     # lock alert, input device psw relate
     lock_psw_id = "%s:id/et_pwd" % aimdm_package
     psw_confirm_id = "%s:id/confirm_pwd" % aimdm_package
+
+    def confirm_received_text(self, exp):
+        now_time = self.get_current_time()
+        while True:
+            exp_text = self.remove_space(exp)
+            act_text = self.remove_space(self.get_msg_tips_text())
+            if exp_text == act_text:
+                break
+            if self.get_current_time() > self.return_end_time(now_time, 60):
+                assert exp_text == act_text, "@@@1分钟内检测到发送的信息和接收到的不一样， 请检查！！！！"
+            self.time_sleep(1)
 
     def confirm_wifi_btn_open(self, timeout=60):
         now = self.get_current_time()
@@ -98,20 +110,18 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
             file_path = config.project_path + "\\CatchLogs\\" + lo
             if not self.path_is_existed(file_path):
                 assert False, "@@@@无%s文件， 请检查！！！" % lo
-            public_pack.allure.attach(file_path, name=file_name, attachment_type=public_pack.allure.attachment_type.TEXT)
+            public_pack.allure.attach.file(file_path, name=file_name, attachment_type=public_pack.allure.attachment_type.TEXT)
 
     def upload_log(self, file, name):
         public_pack.allure.attach(file, name=name, attachment_type=public_pack.allure.attachment_type.TEXT)
 
     def manual_unlock(self):
-        # ele = self.get_element_by_id(self.msg_confirm_id)
-        # ele = self.client(resourceId=self.msg_confirm_id)
-        ele = self.get_element_by_id_no_wait(self.msg_confirm_id)
-        print(ele.get_text())
+        ele_lock = self.get_element_by_id(self.msg_confirm_id)
+        print(ele_lock.get_text())
         try:
-            for i in range(10):
-                ele.click()
-                self.time_sleep(0.2)
+            for i in range(6):
+                self.click_element(ele_lock)
+                print(i)
         except Exception as e:
             print(e)
 

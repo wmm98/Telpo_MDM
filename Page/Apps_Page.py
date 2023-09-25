@@ -86,6 +86,33 @@ class APPSPage(TelpoMDMPage):
     loc_app_uninstall_confirm = (By.CSS_SELECTOR, "[class = 'btn btn-warning confirm_uninstall']")
     loc_uninstall_device_list = (By.ID, "labelItem1")
 
+    # category
+    loc_new_cate_btn = (By.LINK_TEXT, "Create New Category")
+    loc_input_cate_box = (By.ID, "category_name")
+    loc_save_btn_cate = (By.CSS_SELECTOR, "[class = 'btn btn-primary create_category_button']")
+    loc_cate_list = (By.CSS_SELECTOR, "[class = 'todo-list ui-sortable']")
+    loc_single_cate = (By.CLASS_NAME, "listactive")
+
+    # add category
+    def add_app_category(self, cate_name):
+        self.click(self.loc_new_cate_btn)
+        self.confirm_alert_existed(self.loc_new_cate_btn)
+        self.input_text(self.loc_input_cate_box, cate_name)
+        self.click(self.loc_save_btn_cate)
+        self.confirm_tips_alert_show(self.loc_save_btn_cate)
+        self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_save_btn_cate)
+
+    def get_app_categories_list(self):
+        if self.ele_is_existed(self.loc_cate_list):
+            if self.ele_is_existed(self.loc_cate_list):
+                eles = self.get_elements(self.loc_single_cate)
+                cates_list = [ele.text for ele in eles]
+                return cates_list
+            else:
+                return []
+        else:
+            return []
+
     def get_app_latest_upgrade_log(self, send_time, release_info):
         self.page_load_complete()
         logs_list = []
@@ -384,3 +411,5 @@ class APPSPage(TelpoMDMPage):
             if self.get_current_time() > self.return_end_time(now_time):
                 assert False, "@@@@弹窗无法关闭 出错， 请检查！！！"
             self.time_sleep(1)
+
+

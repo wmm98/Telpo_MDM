@@ -44,6 +44,26 @@ class AndroidBasePageWiFi(interface):
     def get_device_name(self):
         return self.device_ip
 
+    def get_download_list(self):
+        res = self.u2_send_command("ls /%s/aimdm/download/") % self.get_internal_storage_directory()
+        files = res.split("\n")[:-1]
+        return files
+
+    def rm_file(self, file_name):
+        self.u2_send_command("rm %s" % file_name)
+
+    def del_all_downloaded_apk(self):
+        try:
+            for apk in self.get_download_list():
+                self.rm_file("/%s/aimdm/download/%s" % (self.get_internal_storage_directory(), apk))
+        except Exception as e:
+            print(e)
+            file_list = self.get_download_list()
+            if len(file_list) != 0:
+                for apk in self.get_download_list():
+                    if "apk" in apk:
+                        self.rm_file("/%s/aimdm/download/%s" % (self.get_internal_storage_directory(), apk))
+
     def download_file_is_existed(self, file_name):
         res = self.u2_send_command("ls /%s/aimdm/download/ |grep %s" % (self.get_internal_storage_directory(), file_name))
         if self.remove_space(file_name) in self.remove_space(res):
@@ -127,15 +147,15 @@ class AndroidBasePageWiFi(interface):
         except Exception as e:
             assert False, "@@@@启动出问题，请检查设备启动情况！！！"
 
-    def click_element(self, ele):
-        ele.click()
+    def click_element(self, ele1):
+        ele1.click()
 
     def get_element_text(self, ele):
         text = ele.get_text()
         return text
 
     def input_element_text(self, ele, text):
-        # ele.clear_text()
+        ele.clear_text()
         ele.send_keys(text)
 
     def get_element_by_id(self, id_no, timeout=5):

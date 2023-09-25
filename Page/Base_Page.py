@@ -112,7 +112,9 @@ class BasePage(interface):
             if self.get_current_time() > self.return_end_time(now_time, 60):
                 self.refresh_page()
                 break
-            self.time_sleep(1)
+            self.refresh_page()
+            self.time_sleep(2)
+
 
     def move_and_click(self, ele):
         public_pack.ActionChains(self.driver).move_to_element(ele).click().perform()

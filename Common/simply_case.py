@@ -16,22 +16,42 @@ class Optimize_Case:
         self.cat_log_page = CatchLogPage(self.driver, 40)
 
     def check_single_device(self, sn):
-        self.page.search_device_by_sn(sn)
-        devices_list = self.page.get_dev_info_list()
-        if len(devices_list) == 0:
-            e = "@@@@还没有添加该设备 %s， 请检查！！！" % sn
-            log.error(e)
-            assert False, e
-        if "Off" in devices_list[0]["Status"]:
-            err = "@@@@%s: 设备不在线， 请检查！！！" % sn
-            log.error(err)
-            assert False, err
-        return devices_list
+        try:
+            self.page.search_device_by_sn(sn)
+            devices_list = self.page.get_dev_info_list()
+            if len(devices_list) == 0:
+                e = "@@@@还没有添加该设备 %s， 请检查！！！" % sn
+                log.error(e)
+                assert False, e
+            if "Off" in devices_list[0]["Status"]:
+                err = "@@@@%s: 设备不在线， 请检查！！！" % sn
+                log.error(err)
+                assert False, err
+            return devices_list
+        except Exception as e:
+            print(e)
+            self.page.search_device_by_sn(sn)
+            devices_list = self.page.get_dev_info_list()
+            if len(devices_list) == 0:
+                e = "@@@@还没有添加该设备 %s， 请检查！！！" % sn
+                log.error(e)
+                assert False, e
+            if "Off" in devices_list[0]["Status"]:
+                err = "@@@@%s: 设备不在线， 请检查！！！" % sn
+                log.error(err)
+                assert False, err
+            return devices_list
 
     def get_single_device_list(self, sn):
-        self.page.search_device_by_sn(sn)
-        devices_list = self.page.get_dev_info_list()
-        return devices_list
+        try:
+            self.page.search_device_by_sn(sn)
+            devices_list = self.page.get_dev_info_list()
+            return devices_list
+        except Exception as e:
+            print(e)
+            self.page.search_device_by_sn(sn)
+            devices_list = self.page.get_dev_info_list()
+            return devices_list
 
     def catch_logs(self, sn, duration, time_out=600):
         self.page.go_to_new_address("devices")
