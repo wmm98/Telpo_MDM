@@ -20,7 +20,6 @@ class TestOTAPage:
         self.android_mdm_page.del_all_downloaded_zip()
 
     def teardown_class(self):
-        self.android_mdm_page.del_all_downloaded_zip()
         self.page.refresh_page()
 
     @allure.feature('MDM_OTA_test02')
@@ -86,7 +85,8 @@ class TestOTAPage:
         self.android_mdm_page.reboot_device(self.wifi_ip)
         # search package
         release_info["version"] = self.page.get_ota_package_version(release_info["package_name"])
-        print("ota version:", release_info["version"])
+        device_current_firmware_version = self.android_mdm_page.check_firmware_version()
+        print("ota after upgrade version:", release_info["version"])
         ota_package_size = conf.project_path + "\\Param\\Package\\%s" % release_info["package_name"]
         act_ota_package_size = self.page.get_zip_size(ota_package_size)
         print("act_ota_package_size:",  act_ota_package_size)
@@ -141,7 +141,8 @@ class TestOTAPage:
 
         assert self.android_mdm_page.download_file_is_existed(release_info["package_name"]), "@@@平台显示已经下载完了升级包， 终端不存在升级包， 请检查！！！"
         download_file_size = self.android_mdm_page.get_file_size_in_device(release_info["package_name"])
-        print("download_file_size: ", download_file_size)
+        print("actual_ota_package_size:", act_ota_package_size)
+        print("download_ota_package_size: ", download_file_size)
         assert act_ota_package_size == download_file_size, "@@@@下载下来的ota包不完整，请检查！！！"
 
         self.android_mdm_page.confirm_received_alert(upgrade_tips)
@@ -163,6 +164,13 @@ class TestOTAPage:
             if self.page.get_current_time() > self.page.return_end_time(now_time, 1800):
                 assert False, "@@@@30分钟还没有升级相应的安卓版本， 请检查！！！"
             self.page.time_sleep(3)
+
+        self.android_mdm_page.device_boot(self.wifi_ip)
+        after_upgrade_version = self.android_mdm_page.check_firmware_version()
+        assert self.page.transfer_version_into_int(device_current_firmware_version) != self.page.transfer_version_into_int(after_upgrade_version),\
+            "@@@@ota升级失败， 还是原来的版本%s！！" % device_current_firmware_version
+        assert self.page.transfer_version_into_int(release_info["version"]) == \
+               self.page.transfer_version_into_int(after_upgrade_version), "@@@@升级后的固件版本为%s, ota升级失败， 请检查！！！" % after_upgrade_version
 
     @allure.feature('MDM_test02')
     @allure.title("OTA- release again")

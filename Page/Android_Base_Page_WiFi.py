@@ -18,6 +18,13 @@ class AndroidBasePageWiFi(interface):
         self.device_boot_complete()
         self.device_unlock()
 
+    def device_boot(self, wlan0_ip):
+        self.time_sleep(5)
+        self.confirm_wifi_adb_connected(wlan0_ip)
+        self.device_existed(wlan0_ip)
+        self.device_boot_complete()
+        self.device_unlock()
+
     def get_app_info(self, package):
         """
         Return example:

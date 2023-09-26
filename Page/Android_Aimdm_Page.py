@@ -28,6 +28,9 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
     lock_psw_id = "%s:id/et_pwd" % aimdm_package
     psw_confirm_id = "%s:id/confirm_pwd" % aimdm_package
 
+    def check_firmware_version(self):
+        return self.u2_send_command("getprop ro.product.version")
+
     def confirm_received_alert(self, exp_tips):
         self.mdm_msg_alert_show()
         self.confirm_received_text(exp_tips)
