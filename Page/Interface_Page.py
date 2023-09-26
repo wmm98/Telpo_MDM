@@ -49,7 +49,7 @@ class interface:
                 break
             self.time_sleep(2)
             if self.get_current_time() > self.return_end_time(now_time, timeout):
-                raise Exception("无法连接上WIFI adb")
+                raise Exception("%ss内无法连接上WIFI adb" % timeout)
         self.device_existed(ip)
 
     def device_existed(self, address):
@@ -69,6 +69,16 @@ class interface:
         integer_list = ver.split(".")
         integer_version = "".join(integer_list)
         return int(integer_version)
+
+    def get_ota_package_version(self, package):
+        # "TPS900_msm8937_sv10_fv1.1.16_pv1.1.16-1.1.17:.zip"
+        package_split = package.split("-")
+        package_version = package_split[-1][:-4]
+        return package_version
+
+    def get_zip_size(self, package_path):
+        file_size = public_pack.os.path.getsize(package_path)
+        return file_size
 
     def load_apk_package(self, path):
         # get apk file

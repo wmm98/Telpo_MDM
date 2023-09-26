@@ -25,6 +25,7 @@ class TestAppPage:
         self.system_page = case_pack.SystemPage(self.driver, 40)
         self.android_mdm_page = case_pack.AndroidAimdmPage(case_pack.device_data, 5)
         self.wifi_ip = case_pack.device_data["wifi_device_info"]["ip"]
+        self.android_mdm_page.del_all_downloaded_apk()
 
     def teardown_class(self):
         self.android_mdm_page.del_all_downloaded_apk()
@@ -105,9 +106,10 @@ class TestAppPage:
         # check if device is online
         self.page.go_to_new_address("devices")
         opt_case.check_single_device(release_info["sn"])
+
         # check if the app is existed, if existed, uninstall, else push
-        if self.android_mdm_page.app_is_installed(release_info["package"]):
-            self.android_mdm_page.uninstall_app(release_info["package"])
+        # if self.android_mdm_page.app_is_installed(release_info["package"]):
+        #     self.android_mdm_page.uninstall_app(release_info["package"])
 
         # app_size_mdm = self.page.get_app_size()  for web
         # check app size(bytes) in windows
@@ -157,7 +159,7 @@ class TestAppPage:
                 self.page.refresh_page()
             if self.page.get_current_time() > self.page.return_end_time(now_time):
                 assert False, "@@@@没有相应的 app upgrade log， 请检查！！！"
-            self.page.time_sleep(3)
+            self.page.time_sleep(5)
 
         """
         Upgrade action (1: downloading, 2: downloading complete, 3: upgrading,
@@ -293,7 +295,7 @@ class TestAppPage:
             # wait 20 mins
             if self.page.get_current_time() > self.page.return_end_time(now_time, 1200):
                 assert False, "@@@@20分钟还没有下载完相应的app， 请检查！！！"
-            self.page.time_sleep(2)
+            self.page.time_sleep(5)
 
         # check upgrade
         now_time = self.page.get_current_time()
@@ -313,7 +315,7 @@ class TestAppPage:
             # wait upgrade 3 mins at most
             if self.page.get_current_time() > self.page.return_end_time(now_time, 180):
                 assert False, "@@@@3分钟还没有安装完相应的app， 请检查！！！"
-            self.page.time_sleep(2)
+            self.page.time_sleep(5)
 
     @allure.feature('MDM_APP-test02')
     @allure.title("Apps- release app again")
@@ -386,7 +388,7 @@ class TestAppPage:
             # wait upgrade 3 mins at most
             if self.page.get_current_time() > self.page.return_end_time(now_time, 180):
                 assert False, "@@@@3分钟还没有卸载完相应的app， 请检查！！！"
-            self.page.time_sleep(2)
+            self.page.time_sleep(3)
 
     @allure.feature('MDM_APP-test02')
     @allure.title("Apps- release app again")

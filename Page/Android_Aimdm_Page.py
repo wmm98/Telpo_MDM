@@ -20,21 +20,29 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
     msg_header_id = "android.widget.TextView"
     msg_tips_id = "%s:id/tip" % aimdm_package
     msg_confirm_id = "%s:id/confirm" % aimdm_package
+    msg_cancel_id = "%s:id/cancel" % aimdm_package
     msg_alert_id = "%s:id/root_view" % aimdm_package
+    # 900P  confirm->download->confirm->upgrade
 
     # lock alert, input device psw relate
     lock_psw_id = "%s:id/et_pwd" % aimdm_package
     psw_confirm_id = "%s:id/confirm_pwd" % aimdm_package
 
+    def confirm_received_alert(self, exp_tips):
+        self.mdm_msg_alert_show()
+        self.confirm_received_text(exp_tips)
+        self.click_msg_confirm_btn()
+        self.confirm_msg_alert_fade(exp_tips)
+
     def confirm_received_text(self, exp):
         now_time = self.get_current_time()
         while True:
-            exp_text = self.remove_space(exp)
-            act_text = self.remove_space(self.get_msg_tips_text())
+            exp_text = self.upper_transfer(self.remove_space(exp))
+            act_text = self.upper_transfer(self.remove_space(self.get_msg_tips_text()))
             if exp_text == act_text:
                 break
             if self.get_current_time() > self.return_end_time(now_time, 60):
-                assert exp_text == act_text, "@@@1分钟内检测到发送的信息和接收到的不一样， 请检查！！！！"
+                assert exp_text == act_text, "@@@1分钟内检测到预期的提示信息和实际提示信息不一样， 请检查！！！！"
             self.time_sleep(1)
 
     def confirm_wifi_btn_open(self, timeout=60):
@@ -164,11 +172,11 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
         now_time = self.get_current_time()
         while True:
             ele = self.wait_ele_presence_by_id(self.msg_alert_id, time_out)
+            print("22222222222222222222222")
             if ele:
                 return True
             if self.get_current_time() > self.return_end_time(now_time):
                 return False
-            self.time_sleep(1)
 
     def mdm_msg_alert_show_discard(self, time_out=5):
         now_time = self.get_current_time()
@@ -180,6 +188,7 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
         while True:
             ele = self.wait_ele_gone_by_id(self.msg_alert_id, timeout)
             if ele:
+                print("5555555555555555555555555555")
                 return True
             else:
                 # deal with different alert

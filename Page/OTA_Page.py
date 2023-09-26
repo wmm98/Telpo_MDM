@@ -145,30 +145,35 @@ class OTAPage(TelpoMDMPage):
 
     def get_ota_latest_release_log_list(self, send_time, release_info):
         self.page_load_complete()
-        release_list = self.get_element(self.loc_data_body)
-        logs_list = []
-        existed = self.ele_is_existed_in_range(self.loc_data_body, self.loc_single_log)
-        if not existed:
-            self.time_sleep(2)
+        try:
+            release_list = self.get_element(self.loc_data_body)
+            logs_list = []
             existed = self.ele_is_existed_in_range(self.loc_data_body, self.loc_single_log)
-        if "No Data" in release_list.text:
-            return []
-        if existed:
-            logs = release_list.find_elements(*self.loc_single_log)
-            for single_log in logs:
-                cols = single_log.find_elements(*self.loc_single_release_col)
-                receive_time_text = cols[4].text
-                sn = cols[6].text
-                package = cols[1].text
-                version = cols[3].text
-                time_line = self.extract_integers(receive_time_text)
-                receive_time = self.format_string_time(time_line)
-                if self.compare_time(send_time, receive_time):
-                    if (release_info["sn"] in sn) and (release_info["package_name"] in package):
-                        if release_info["version"] in version:
-                            logs_list.append(single_log)
-            return logs_list
-        else:
+            if not existed:
+                self.time_sleep(2)
+                existed = self.ele_is_existed_in_range(self.loc_data_body, self.loc_single_log)
+            if "No Data" in release_list.text:
+                return []
+            if existed:
+                logs = release_list.find_elements(*self.loc_single_log)
+                for single_log in logs:
+                    cols = single_log.find_elements(*self.loc_single_release_col)
+                    receive_time_text = cols[4].text
+                    sn = cols[6].text
+                    package = cols[1].text
+                    version = cols[3].text
+                    time_line = self.extract_integers(receive_time_text)
+                    receive_time = self.format_string_time(time_line)
+                    if self.compare_time(send_time, receive_time):
+                        if (release_info["sn"] in sn) and (release_info["package_name"] in package):
+                            if release_info["version"] in version:
+                                logs_list.append(single_log)
+                print(logs_list)
+                print(len(logs_list))
+                return logs_list
+            else:
+                return []
+        except Exception as e:
             return []
 
     def delete_ota_package(self):

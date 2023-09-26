@@ -85,7 +85,7 @@ def del_all_app_release_log():
 
 
 @pytest.fixture()
-def del_all_ota_release_log():
+def del_all_ota_release_log_before():
     ota_page.go_to_new_address("ota/release")
     ota_page.delete_all_ota_release_log()
     yield
@@ -93,6 +93,15 @@ def del_all_ota_release_log():
 
 @pytest.fixture()
 def del_all_ota_release_log_after():
+    yield
+    ota_page.go_to_new_address("ota/release")
+    ota_page.delete_all_ota_release_log()
+
+
+@pytest.fixture()
+def del_all_ota_release_log():
+    ota_page.go_to_new_address("ota/release")
+    ota_page.delete_all_ota_release_log()
     yield
     ota_page.go_to_new_address("ota/release")
     ota_page.delete_all_ota_release_log()

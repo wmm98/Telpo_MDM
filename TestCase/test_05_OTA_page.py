@@ -15,11 +15,15 @@ class TestOTAPage:
         self.driver = case_pack.test_driver
         self.page = case_pack.OTAPage(self.driver, 40)
         self.system_page = case_pack.SystemPage(self.driver, 40)
+        self.android_mdm_page = case_pack.AndroidAimdmPage(case_pack.device_data, 5)
+        self.wifi_ip = case_pack.device_data["wifi_device_info"]["ip"]
+        self.android_mdm_page.del_all_downloaded_zip()
 
     def teardown_class(self):
+        self.android_mdm_page.del_all_downloaded_zip()
         self.page.refresh_page()
 
-    @allure.feature('MDM_test02')
+    @allure.feature('MDM_OTA_test02')
     @allure.title("OTA-Upgrade Packages Page")
     def test_upgrade_package_page(self, go_to_ota_upgrade_package_page):
         # self.Page.click_OTA_btn()
@@ -68,21 +72,32 @@ class TestOTAPage:
         self.page.time_sleep(3)
         assert self.page.get_current_ota_release_log_total() == 0, "@@@@没有删除完了所有的app release log, 请检查!!!"
 
-    @allure.feature('MDM_test02')
+    @allure.feature('MDM_OTA_test02')
     @allure.title("OTA-release OTA package")
     def test_release_OTA_package(self, del_all_ota_release_log, go_to_ota_page):
+        download_tips = "Foundanewfirmware,whethertoupgrade?"
+        upgrade_tips = "whethertoupgradenow?"
         exp_success_text = "success"
         exp_existed_text = "ota release already existed"
-        release_info = {"package_name": "TPS900_msm8937_sv10_fv1.1.16_pv1.1.16-1.1.18.zip", "sn": "A250900P03100019",
-                        "silent": 0, "category": "NO Limit", "network": "NO Limit", "version": "1.1.18"}
+        release_info = {"package_name": "TPS900_msm8937_sv10_fv1.1.16_pv1.1.16-1.1.17.zip", "sn": "A250900P03100019",
+                        "silent": 0, "category": "NO Limit", "network": "NO Limit"}
+        self.android_mdm_page.del_updated_zip()
+        # reboot
+        self.android_mdm_page.reboot_device(self.wifi_ip)
         # search package
+        release_info["version"] = self.page.get_ota_package_version(release_info["package_name"])
+        print("ota version:", release_info["version"])
+        ota_package_size = conf.project_path + "\\Param\\Package\\%s" % release_info["package_name"]
+        act_ota_package_size = self.page.get_zip_size(ota_package_size)
+        print("act_ota_package_size:",  act_ota_package_size)
         self.page.search_device_by_pack_name(release_info["package_name"])
         # ele = self.Page.get_package_ele(release_info["package_name"])
+        send_time = case_pack.time.strftime('%Y-%m-%d %H:%M', case_pack.time.localtime(self.page.get_current_time()))
+        print("send_time", send_time)
+        self.page.time_sleep(4)
         # if device is existed, click
         self.page.click_release_btn()
         self.page.input_release_OTA_package(release_info)
-        self.page.time_sleep(3)
-        send_time = case_pack.time.strftime('%Y-%m-%d %H:%M', case_pack.time.localtime(self.page.get_current_time()))
         self.page.go_to_new_address("ota/release")
         now_time = self.page.get_current_time()
         # print(self.page.get_app_current_release_log_list(send_time, release_info["sn"]))
@@ -99,7 +114,8 @@ class TestOTAPage:
                 assert False, "@@@@没有相应的 ota package release log， 请检查！！！"
             self.page.time_sleep(1)
 
-        alert.getAlert("请确认下载并且升级")
+        self.android_mdm_page.confirm_received_alert(download_tips)
+
         """
                 Upgrade action (1: downloading, 2: downloading complete, 3: upgrading,
                  4: upgrading complete, 5: downloading failed, 6: upgrading failed)
@@ -119,9 +135,16 @@ class TestOTAPage:
             else:
                 self.page.refresh_page()
                 # wait 20 mins
-            if self.page.get_current_time() > self.page.return_end_time(now_time, 1200):
-                assert False, "@@@@20分钟还没有下载完相应的ota package， 请检查！！！"
-            self.page.time_sleep(2)
+            if self.page.get_current_time() > self.page.return_end_time(now_time, 1800):
+                assert False, "@@@@30分钟还没有下载完相应的ota package， 请检查！！！"
+            self.page.time_sleep(5)
+
+        assert self.android_mdm_page.download_file_is_existed(release_info["package_name"]), "@@@平台显示已经下载完了升级包， 终端不存在升级包， 请检查！！！"
+        download_file_size = self.android_mdm_page.get_file_size_in_device(release_info["package_name"])
+        print("download_file_size: ", download_file_size)
+        assert act_ota_package_size == download_file_size, "@@@@下载下来的ota包不完整，请检查！！！"
+
+        self.android_mdm_page.confirm_received_alert(upgrade_tips)
 
         # check upgrade
         now_time = self.page.get_current_time()
@@ -137,9 +160,9 @@ class TestOTAPage:
             else:
                 self.page.refresh_page()
             # wait upgrade 3 mins at most
-            if self.page.get_current_time() > self.page.return_end_time(now_time, 300):
-                assert False, "@@@@3分钟还没有安装完相应的app， 请检查！！！"
-            self.page.time_sleep(2)
+            if self.page.get_current_time() > self.page.return_end_time(now_time, 1800):
+                assert False, "@@@@30分钟还没有升级相应的安卓版本， 请检查！！！"
+            self.page.time_sleep(3)
 
     @allure.feature('MDM_test02')
     @allure.title("OTA- release again")
