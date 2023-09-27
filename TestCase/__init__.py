@@ -24,6 +24,7 @@ usb_device_info = {"device": client, "serial": client.serial}
 # connect wifi adb
 connect = ClientConnect()
 connect.wifi_connect_device()
+serial_no = client.serial
 wifi_client = connect.get_wifi_device()
 wifi_ip = connect.get_wifi_ip()
 wifi_device_info = {"device": wifi_client, "ip": wifi_ip}

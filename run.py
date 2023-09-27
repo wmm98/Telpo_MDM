@@ -27,6 +27,7 @@ if __name__ == '__main__':
     # 先连接adb
     device = ClientConnect()
     device.connect_device("d")
+    device.screen_keep_alive("settings put system screen_off_timeout 0")
     # init config file
     conf = Config.Config()
     log = Log.MyLog()

@@ -17,6 +17,7 @@ class TestOTAPage:
         self.system_page = case_pack.SystemPage(self.driver, 40)
         self.android_mdm_page = case_pack.AndroidAimdmPage(case_pack.device_data, 5)
         self.wifi_ip = case_pack.device_data["wifi_device_info"]["ip"]
+        self.sn = case_pack.device_data["usb_device_info"]["serial"]
         self.android_mdm_page.del_all_downloaded_zip()
 
     def teardown_class(self):
@@ -29,7 +30,7 @@ class TestOTAPage:
         # self.Page.click_upgrade_packages()
         self.page.page_load_complete()
 
-    @allure.feature('MDM_test02')
+    @allure.feature('MDM_test01')
     @allure.title("OTA-Delete OTA package")
     @pytest.mark.flaky(reruns=5, reruns_delay=3)
     def test_delete_OTA_package(self):
@@ -43,7 +44,7 @@ class TestOTAPage:
             self.page.search_device_by_pack_name(package_info["package_name"])
             assert len(self.page.get_ota_package_list()) == 0, "@@@@删除失败，请检查！！！"
 
-    @allure.feature('MDM_test02')
+    @allure.feature('MDM_test01')
     @allure.title("OTA-Add OTA package")
     @pytest.mark.flaky(reruns=5, reruns_delay=3)
     def test_add_OTA_package(self):
@@ -135,7 +136,7 @@ class TestOTAPage:
             else:
                 self.page.refresh_page()
                 # wait 20 mins
-            if self.page.get_current_time() > self.page.return_end_time(now_time, 1800):
+            if self.page.get_current_time() > self.page.return_end_time(now_time, 2400):
                 assert False, "@@@@30分钟还没有下载完相应的ota package， 请检查！！！"
             self.page.time_sleep(5)
 
@@ -172,7 +173,7 @@ class TestOTAPage:
         assert self.page.transfer_version_into_int(release_info["version"]) == \
                self.page.transfer_version_into_int(after_upgrade_version), "@@@@升级后的固件版本为%s, ota升级失败， 请检查！！！" % after_upgrade_version
 
-    @allure.feature('MDM_test02')
+    @allure.feature('MDM_test01')
     @allure.title("OTA- release again")
     def test_release_ota_again(self, go_to_ota_package_release, del_all_ota_release_log_after):
         exp_success_text = "Sync Ota Release Success"

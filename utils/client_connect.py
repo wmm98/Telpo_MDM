@@ -19,6 +19,11 @@ class ClientConnect:
     def get_device(self):
         return dev
 
+    def screen_keep_alive(self, cmd):
+        dev.screen_off()
+        dev.unlock()
+        dev.shell(cmd)
+
     def wifi_connect_device(self):
         try:
             global dev_wifi, address
