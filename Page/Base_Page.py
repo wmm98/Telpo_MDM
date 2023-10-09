@@ -115,9 +115,11 @@ class BasePage(interface):
             self.refresh_page()
             self.time_sleep(2)
 
-
     def move_and_click(self, ele):
         public_pack.ActionChains(self.driver).move_to_element(ele).click().perform()
+
+    def move_to_element(self, ele):
+        public_pack.ActionChains(self.driver).move_to_element(ele).perform()
 
     def refresh_page(self):
         self.driver.refresh()
@@ -173,7 +175,10 @@ class BasePage(interface):
 
     def get_element(self, loc):
         self.web_driver_wait_until(public_pack.EC.presence_of_element_located(loc))
-        return self.driver.find_element(*loc)
+        ele = self.driver.find_element(*loc)
+        # self.driver.execute_script("arguments[0].style.backgroundColor = 'yellow'", ele)
+        # self.move_to_element(ele)
+        return ele
 
     def get_elements(self, loc):
         self.web_driver_wait_until(public_pack.EC.presence_of_all_elements_located(loc))
@@ -196,7 +201,10 @@ class BasePage(interface):
 
     def click(self, loc):
         self.web_driver_wait_until(public_pack.EC.presence_of_element_located(loc))
-        self.driver.find_element(*loc).click()
+        ele = self.driver.find_element(*loc)
+        # self.driver.execute_script("arguments[0].style.backgroundColor = 'yellow'", ele)
+        # self.move_to_element(ele)
+        ele.click()
 
     def get_title(self):
         return self.driver.title

@@ -3,11 +3,15 @@ import TestCase as case_pack
 import pytest
 
 conf = case_pack.Config()
+test_yml = case_pack.yaml_data
 excel = case_pack.ExcelData()
 opt_case = case_pack.Optimize_Case()
 alert = case_pack.AlertData()
 log = case_pack.MyLog()
 
+
+# if test_yml['settings']['test_version']:
+#     test_version = 'MDM_test02-no test in test version'
 
 class TestOTAPage:
 
@@ -18,24 +22,25 @@ class TestOTAPage:
         self.android_mdm_page = case_pack.AndroidAimdmPage(case_pack.device_data, 5)
         self.wifi_ip = case_pack.device_data["wifi_device_info"]["ip"]
         self.sn = case_pack.device_data["usb_device_info"]["serial"]
+        self.device_sn = self.android_mdm_page.get_device_sn()
         self.android_mdm_page.del_all_downloaded_zip()
 
     def teardown_class(self):
         self.page.refresh_page()
 
     @allure.feature('MDM_OTA_test02')
-    @allure.title("OTA-Upgrade Packages Page")
+    @allure.title("OTA-负责测试用例")
     def test_upgrade_package_page(self, go_to_ota_upgrade_package_page):
         # self.Page.click_OTA_btn()
         # self.Page.click_upgrade_packages()
         self.page.page_load_complete()
 
-    @allure.feature('MDM_test01')
+    @allure.feature('MDM_test02-no test in test version')
     @allure.title("OTA-Delete OTA package")
     @pytest.mark.flaky(reruns=5, reruns_delay=3)
     def test_delete_OTA_package(self):
-        package_info = {"package_name": "TPS900_msm8937_sv10_fv1.1.16_pv1.1.16-1.1.18.zip", "file_category": "test",
-                        "plat_form": "Android"}
+        package_info = {"package_name": test_yml['ota_packages_info']['package_name'], "file_category": "test",
+                        "plat_form": test_yml['ota_packages_info']['platform']}
         self.page.refresh_page()
         self.page.search_device_by_pack_name(package_info["package_name"])
         if len(self.page.get_ota_package_list()) == 1:
@@ -44,14 +49,14 @@ class TestOTAPage:
             self.page.search_device_by_pack_name(package_info["package_name"])
             assert len(self.page.get_ota_package_list()) == 0, "@@@@删除失败，请检查！！！"
 
-    @allure.feature('MDM_test01')
+    @allure.feature('MDM_test02- no test in test version')
     @allure.title("OTA-Add OTA package")
     @pytest.mark.flaky(reruns=5, reruns_delay=3)
     def test_add_OTA_package(self):
         exp_existed_text = "ota already existed"
         exp_success_text = "success"
-        package_info = {"package_name": "TPS900_msm8937_sv10_fv1.1.16_pv1.1.16-1.1.18.zip", "file_category": "test",
-                        "plat_form": "Android"}
+        package_info = {"package_name": test_yml['ota_packages_info']['package_name'], "file_category": "test",
+                        "plat_form": test_yml['ota_packages_info']['platform']}
         file_path = conf.project_path + "\\Param\\Package\\%s" % package_info["package_name"]
         ota_info = {"file_name": file_path, "file_category": package_info["file_category"],
                     "plat_form": package_info["plat_form"]}
@@ -65,21 +70,14 @@ class TestOTAPage:
             self.page.search_device_by_pack_name(package_info["package_name"])
             assert len(self.page.get_ota_package_list()) == 1, "@@@添加失败！！！"
 
-    @allure.feature('MDM_test01')
-    @allure.title("OTA- delete all ota release log")
-    def test_release_delete_all_ota_release_log(self, go_to_ota_package_release):
-        self.page.delete_all_ota_release_log()
-        self.page.time_sleep(3)
-        assert self.page.get_current_ota_release_log_total() == 0, "@@@@没有删除完了所有的app release log, 请检查!!!"
-
     @allure.feature('MDM_OTA_test02')
-    @allure.title("OTA-release OTA package")
-    def test_release_OTA_package(self, del_all_ota_release_log, go_to_ota_page):
+    @allure.title("OTA-OTA应用推送")
+    def test_release_OTA_package_no_limit(self, del_all_ota_release_log, go_to_ota_page):
         download_tips = "Foundanewfirmware,whethertoupgrade?"
         upgrade_tips = "whethertoupgradenow?"
         exp_success_text = "success"
         exp_existed_text = "ota release already existed"
-        release_info = {"package_name": "TPS900_msm8937_sv10_fv1.1.16_pv1.1.16-1.1.17.zip", "sn": "A250900P03100019",
+        release_info = {"package_name": test_yml['ota_packages_info']['package_name'], "sn": self.device_sn,
                         "silent": 0, "category": "NO Limit", "network": "NO Limit"}
         self.android_mdm_page.del_updated_zip()
         # reboot
@@ -90,7 +88,7 @@ class TestOTAPage:
         print("ota after upgrade version:", release_info["version"])
         ota_package_size = conf.project_path + "\\Param\\Package\\%s" % release_info["package_name"]
         act_ota_package_size = self.page.get_zip_size(ota_package_size)
-        print("act_ota_package_size:",  act_ota_package_size)
+        print("act_ota_package_size:", act_ota_package_size)
         self.page.search_device_by_pack_name(release_info["package_name"])
         # ele = self.Page.get_package_ele(release_info["package_name"])
         send_time = case_pack.time.strftime('%Y-%m-%d %H:%M', case_pack.time.localtime(self.page.get_current_time()))
@@ -140,7 +138,8 @@ class TestOTAPage:
                 assert False, "@@@@30分钟还没有下载完相应的ota package， 请检查！！！"
             self.page.time_sleep(5)
 
-        assert self.android_mdm_page.download_file_is_existed(release_info["package_name"]), "@@@平台显示已经下载完了升级包， 终端不存在升级包， 请检查！！！"
+        assert self.android_mdm_page.download_file_is_existed(
+            release_info["package_name"]), "@@@平台显示已经下载完了升级包， 终端不存在升级包， 请检查！！！"
         download_file_size = self.android_mdm_page.get_file_size_in_device(release_info["package_name"])
         print("actual_ota_package_size:", act_ota_package_size)
         print("download_ota_package_size: ", download_file_size)
@@ -168,17 +167,19 @@ class TestOTAPage:
 
         self.android_mdm_page.device_boot(self.wifi_ip)
         after_upgrade_version = self.android_mdm_page.check_firmware_version()
-        assert self.page.transfer_version_into_int(device_current_firmware_version) != self.page.transfer_version_into_int(after_upgrade_version),\
+        assert self.page.transfer_version_into_int(
+            device_current_firmware_version) != self.page.transfer_version_into_int(after_upgrade_version), \
             "@@@@ota升级失败， 还是原来的版本%s！！" % device_current_firmware_version
         assert self.page.transfer_version_into_int(release_info["version"]) == \
-               self.page.transfer_version_into_int(after_upgrade_version), "@@@@升级后的固件版本为%s, ota升级失败， 请检查！！！" % after_upgrade_version
+               self.page.transfer_version_into_int(
+                   after_upgrade_version), "@@@@升级后的固件版本为%s, ota升级失败， 请检查！！！" % after_upgrade_version
 
     @allure.feature('MDM_test01')
     @allure.title("OTA- release again")
     def test_release_ota_again(self, go_to_ota_package_release, del_all_ota_release_log_after):
         exp_success_text = "Sync Ota Release Success"
         # exp_existed_text = "ota release already existed"
-        release_info = {"package_name": "TPS900_msm8937_sv10_fv1.1.16_pv1.1.16-1.1.18.zip", "sn": "A250900P03100019",
+        release_info = {"package_name": test_yml['ota_packages_info']['package_name'], "sn": self.device_sn,
                         "silent": 0, "category": "NO Limit", "network": "NO Limit", "version": "1.1.18"}
         # self.Page.click_package_release_page()
         if self.page.get_current_ota_release_log_total() == 0:

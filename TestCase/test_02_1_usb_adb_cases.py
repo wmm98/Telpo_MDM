@@ -21,7 +21,7 @@ class TestNetworkCases:
     def teardown_class(self):
         self.page.refresh_page()
 
-    @allure.feature('MDM_test_usb_debug')
+    @allure.feature('MDM_test_usb_debug1')
     def test_usb_debug(self):
         print("================这是USB调试模式下==================================")
         print(self.android_mdm_page.get_app_installed_list_USB())

@@ -1,9 +1,10 @@
 from configparser import ConfigParser
 from Common import Log
 import os
+import yaml
 
 
-class Config():
+class Config:
     TITLE_RELEASE = "online_release"
     VALUE_CASES_PATH = "cases_path"
 
@@ -31,7 +32,21 @@ class Config():
         # self.environment_release = self.getConf(Config.TITLE_RELEASE, Config.VALUE_ENVIRONMENT)
         self.cases_path = self.getConf(Config.TITLE_RELEASE, Config.VALUE_CASES_PATH)
         # print(self.cases_path)
-        self.CN_input_method = ["com.sohu.inputmethod.sogou/.SogouIME", "com.google.android.inputmethod.pinyin/.PinyinIME", "com.android.inputmethod.pinyin /.PinyinIME"]
+        self.CN_input_method = ["com.sohu.inputmethod.sogou/.SogouIME",
+                                "com.google.android.inputmethod.pinyin/.PinyinIME",
+                                "com.android.inputmethod.pinyin /.PinyinIME"]
+
+    def load_yaml_data(self):
+        try:
+            global yaml_data
+            yaml_path = self.project_path + "\\Conf\\test_data.yaml"
+            with open(yaml_path, 'r', encoding='utf-8') as file:
+                yaml_data = yaml.load(file, Loader=yaml.FullLoader)
+        except FileNotFoundError:
+            raise Exception("@@@@Conf下不存在test_data.yaml, 请检查！！！！")
+
+    def get_yaml_data(self):
+        return yaml_data
 
     def getConf(self, title, value):
         """
@@ -41,6 +56,7 @@ class Config():
         :return:
         """
         return self.config.get(title, value)
+
 
 if __name__ == '__main__':
     conf = Config()

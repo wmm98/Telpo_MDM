@@ -19,6 +19,8 @@ from Page.Android_Aimdm_Page import AndroidAimdmPage
 from Page.Catch_Log_Page import CatchLogPage
 from utils.client_connect import ClientConnect
 
+yaml_data = Config().get_yaml_data()['MDMTestData']
+
 client = ClientConnect().get_device()
 usb_device_info = {"device": client, "serial": client.serial}
 # connect wifi adb

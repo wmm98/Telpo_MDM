@@ -10,6 +10,25 @@ class AndroidBasePageUSB(interface):
         self.times = times
         self.device_name = name
 
+    def start_app_USB(self, package_name):
+        self.USB_client.app_start(package_name)
+        self.time_sleep(3)
+        self.confirm_app_start(package_name)
+
+    def get_current_app_USB(self):
+        return self.USB_client.app_current()['package']
+
+    def confirm_app_start(self, package_name):
+        now_time = self.get_current_time()
+        while True:
+            if package_name in self.get_current_app_USB():
+                break
+            else:
+                self.start_app_USB(package_name)
+        if self.get_current_time() > self.return_end_time(now_time):
+            assert False, "@@@@app无法启动， 请检查！！！！"
+        self.time_sleep(2)
+
     def get_app_info_USB(self, package):
         """
         Return example:
@@ -45,7 +64,8 @@ class AndroidBasePageUSB(interface):
         return self.device_name
 
     def download_file_is_existed_USB(self, file_name):
-        res = self.u2_send_command_USB("ls /%s/aimdm/download/ |grep %s" % (self.get_internal_storage_directory_USB(), file_name))
+        res = self.u2_send_command_USB(
+            "ls /%s/aimdm/download/ |grep %s" % (self.get_internal_storage_directory_USB(), file_name))
         if self.remove_space(file_name) in self.remove_space(res):
             return True
         else:
@@ -53,7 +73,8 @@ class AndroidBasePageUSB(interface):
 
     def get_file_size_in_device_USB(self, file_name):
         "-rw-rw---- 1 root sdcard_rw   73015 2023-09-05 16:51 com.bjw.ComAssistant_1.1.apk"
-        res = self.u2_send_command_USB("ls -l /%s/aimdm/download/ |grep %s" % (self.get_internal_storage_directory_USB(), file_name))
+        res = self.u2_send_command_USB(
+            "ls -l /%s/aimdm/download/ |grep %s" % (self.get_internal_storage_directory_USB(), file_name))
         # get integer list in res
         integer_list = self.extract_integers(res)
         size = int(integer_list[1])
@@ -87,6 +108,28 @@ class AndroidBasePageUSB(interface):
             self.u2_send_command_USB("svc wifi disable")
             return self.wifi_close_status()
         return True
+
+    def confirm_wifi_status_open(self, timeout=120):
+        now_time = self.get_current_time()
+        while True:
+            if self.wifi_open_status():
+                break
+            else:
+                self.time_sleep(3)
+                self.open_wifi_btn()
+            if self.get_current_time() > self.return_end_time(now_time, timeout):
+                assert False, "@@@@超过2分钟打开wifi按钮， 请检查！！！"
+
+    def confirm_wifi_status_close(self, timeout=120):
+        now_time = self.get_current_time()
+        while True:
+            if self.wifi_close_status():
+                break
+            else:
+                self.time_sleep(3)
+                self.close_wifi_btn()
+            if self.get_current_time() > self.return_end_time(now_time, timeout):
+                assert False, "@@@@超过2分钟关闭wifi按钮， 请检查！！！"
 
     def ping_network(self, times=5, timeout=120):
         # 每隔0.6秒ping一次，一共ping5次
@@ -244,6 +287,16 @@ class AndroidBasePageUSB(interface):
             if self.get_current_time() > self.return_end_time(now_time):
                 return False
             self.time_sleep(1)
+
+    def open_mobile_data(self):
+        cmd = "svc data enable"
+        self.u2_send_command_USB(cmd)
+        self.time_sleep(5)
+
+    def close_mobile_data(self):
+        cmd = "svc data disable"
+        self.u2_send_command_USB(cmd)
+        self.open_wifi_btn()
 
 
 if __name__ == '__main__':

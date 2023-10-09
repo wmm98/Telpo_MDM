@@ -10,6 +10,25 @@ class AndroidBasePageWiFi(interface):
         self.times = times
         self.device_ip = ip
 
+    def start_app(self, package_name):
+        self.client.app_start(package_name)
+        self.time_sleep(3)
+        self.confirm_app_start(package_name)
+
+    def get_current_app(self):
+        return self.client.app_current()['package']
+
+    def confirm_app_start(self, package_name):
+        now_time = self.get_current_time()
+        while True:
+            if package_name in self.get_current_app():
+                break
+            else:
+                self.start_app(package_name)
+        if self.get_current_time() > self.return_end_time(now_time):
+            assert False, "@@@@app无法启动， 请检查！！！！"
+        self.time_sleep(2)
+
     def reboot_device(self, wlan0_ip):
         self.send_adb_command("reboot")
         self.time_sleep(5)
@@ -55,6 +74,16 @@ class AndroidBasePageWiFi(interface):
     def uninstall_app(self, package):
         status = self.client.app_uninstall(package)
         return status
+
+    def confirm_app_is_uninstalled(self, package):
+        self.uninstall_app(package)
+        now_time = self.get_current_time()
+        while True:
+            if not self.app_is_installed(package):
+                break
+            if self.get_current_time() > self.return_end_time(now_time):
+                assert False, "@@@@无法卸载%s--app, 请检查！！！" % package
+            self.time_sleep(3)
 
     def get_device_name(self):
         return self.device_ip
@@ -245,7 +274,6 @@ class AndroidBasePageWiFi(interface):
 
     def alert_show(self, id_no, time_to_wait):
         try:
-            print("11111111111111111111111111")
             self.wait_ele_presence_by_id(id_no, time_to_wait)
             return True
         except AssertionError:
@@ -275,6 +303,9 @@ class AndroidBasePageWiFi(interface):
             if self.get_current_time() > self.return_end_time(now_time):
                 return False
             self.time_sleep(1)
+
+    def get_device_sn(self):
+        return self.remove_space(str(self.u2_send_command("getprop ro.serialno")))
 
 
 if __name__ == '__main__':

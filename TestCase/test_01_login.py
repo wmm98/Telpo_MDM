@@ -3,6 +3,7 @@ import allure
 import pytest
 
 log = TestCase.MyLog()
+test_yaml = TestCase.yaml_data
 
 
 class TestLogin:
@@ -19,11 +20,11 @@ class TestLogin:
     @allure.title("login is ok")  # 设置case的名字
     @pytest.mark.dependency(name="test_login_ok", scope='package')
     def test_login_ok(self):
-        username = "mdm_automation"
-        password = "mm17765602533"
+        username = test_yaml['website_info']['test_user']
+        password = test_yaml['website_info']['test_password']
 
         login_ok_title = "Telpo MDM"
-        login_ok_url = "http://test.telpoai.com/device/map"
+        login_ok_url = test_yaml['website_info']['test_login_ok_url']
         try:
             self.mdm_page.input_user_name(username)
             self.mdm_page.input_pwd_value(password)

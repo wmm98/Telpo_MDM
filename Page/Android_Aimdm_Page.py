@@ -1,6 +1,6 @@
 import Page as public_pack
-from Page.Android_Base_Page_USB import AndroidBasePageUSB
-from Page.Android_Base_Page_WiFi import AndroidBasePageWiFi
+from Page.Android_Page_USB import AndroidBasePageUSB
+from Page.Android_Page_WiFi import AndroidBasePageWiFi
 import time
 
 config = public_pack.Config()
@@ -175,7 +175,6 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
         now_time = self.get_current_time()
         while True:
             ele = self.wait_ele_presence_by_id(self.msg_alert_id, time_out)
-            print("22222222222222222222222")
             if ele:
                 return True
             if self.get_current_time() > self.return_end_time(now_time):
@@ -191,7 +190,6 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
         while True:
             ele = self.wait_ele_gone_by_id(self.msg_alert_id, timeout)
             if ele:
-                print("5555555555555555555555555555")
                 return True
             else:
                 # deal with different alert

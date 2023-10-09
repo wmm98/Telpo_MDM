@@ -237,6 +237,8 @@ class DevicesPage(TelpoMDMPage):
         self.confirm_tips_alert_show(self.loc_shutdown_sure_btn)
         self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_shutdown_sure_btn)
 
+
+
     def click_server_btn(self):
         self.click(self.lco_server_btn)
         self.confirm_alert_existed(self.lco_server_btn)

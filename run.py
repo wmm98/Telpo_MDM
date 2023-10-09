@@ -24,20 +24,24 @@ from utils.client_connect import ClientConnect
 
 if __name__ == '__main__':
 
-    # 先连接adb
-    device = ClientConnect()
-    device.connect_device("d")
-    device.screen_keep_alive("settings put system screen_off_timeout 0")
     # init config file
     conf = Config.Config()
+    conf.load_yaml_data()
+    test_info = conf.get_yaml_data()['MDMTestData']
     log = Log.MyLog()
+
+    # 先连接adb
+    device = ClientConnect()
+    device.connect_device(test_info['android_device_info']['device_name'])
+    device.screen_keep_alive(test_info['android_device_info']['never_sleep_command'])
+
     shell = Shell.Shell()
 
     log.info('initialize Config, path=' + conf.conf_path)
     # 先进行登录
     web = BaseWebDriver()
     # web.test_network_connection()
-    url = 'http://test.telpoai.com/login'
+    url = test_info['website_info']['test_url']
     web.open_web_site(url)
 
     # 获取报告地址
@@ -50,7 +54,7 @@ if __name__ == '__main__':
     shutil.copy(env_path, xml_report_path)
 
     # # 定义测试集
-    allure_list = '--allure-features=MDM_test02_login,MDM_test_usb_debug,MDM_OTA_test02'
+    allure_list = '--allure-features=MDM_test02_login,MDM_test_usb_debug,MDM_APP-test022'
     # allure_story = '--allure-stories=pytest_debug_story'
     # pytest -s --allure-features pytest_debug
     # pytest -s --allure-features pytest_debug --allure-stories pytest_debug_story

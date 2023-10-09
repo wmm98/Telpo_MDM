@@ -3,6 +3,7 @@ import pytest
 import TestCase as case_pack
 
 conf = case_pack.Config()
+test_yml = case_pack.yaml_data
 excel = case_pack.ExcelData()
 opt_case = case_pack.Optimize_Case()
 alert = case_pack.AlertData()
@@ -24,13 +25,14 @@ class TestDevicesPage:
         self.telpo_mdm_page = case_pack.TelpoMDMPage(self.driver, 40)
         self.android_mdm_page = case_pack.AndroidAimdmPage(case_pack.device_data, 5)
         self.wifi_ip = case_pack.device_data["wifi_device_info"]["ip"]
+        self.device_sn = self.android_mdm_page.get_device_sn()
         # self.android_mdm_page.device_unlock()
 
     def teardown_class(self):
         self.page.refresh_page()
 
-    @allure.feature('MDM_test022')
-    @allure.title("Devices main Page")  # 设置case的名字
+    @allure.feature('MDM_device_test0222')
+    @allure.title("辅助测试用例")  # 设置case的名字
     # @pytest.mark.dependency(depends=["test_TelpoMdM_Page"], scope='package')
     def test_go_to_devices_page(self):
         exp_main_title = "Total Devices"
@@ -136,34 +138,6 @@ class TestDevicesPage:
             assert False
 
     @allure.feature('MDM_test01')
-    @allure.title("Devices- test check box")  # 设置case的名字
-    @pytest.mark.parametrize('devices_list', devices)
-    @pytest.mark.flaky(reruns=5, reruns_delay=3)
-    def test_check_boxes(self, devices_list):
-        # check all btn; select all devices
-        self.page.refresh_page()
-        se_all_btn = self.page.select_all_devices()
-        self.page.check_ele_is_selected(se_all_btn)
-        se_none_btn = self.page.select_all_devices()
-        self.page.check_ele_is_not_selected(se_none_btn)
-        self.page.time_sleep(3)
-
-        # select single device
-        devices_info = self.page.get_dev_info_list()
-        try:
-            for dev_info in devices_info:
-                if devices_list["SN"] in dev_info['SN']:
-                    ele = self.page.select_device(devices_list["SN"])
-                    # 选中
-                    self.page.check_ele_is_selected(ele)
-                    self.page.time_sleep(2)
-                    ele_not = self.page.select_device(devices_list["SN"])
-                    self.page.check_ele_is_not_selected(ele_not)
-                    self.page.time_sleep(2)
-        except Exception:
-            assert False, "@@@元素没有没选中, 请检查！！！"
-
-    @allure.feature('MDM_test01')
     @allure.title("Devices- test import btn")
     def test_import_devices(self):
         exp_success_text = "Add Device Success"
@@ -191,12 +165,12 @@ class TestDevicesPage:
 
         # need to add check length of data list
 
-    @allure.feature('MDM_test022')
-    @allure.title("Devices- lock and unlock single device")
+    @allure.feature('MDM_device_test022')
+    @allure.title("Devices- 锁机和解锁")
     @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_lock_and_unlock_single_device(self, unlock_screen):
         # case is stable
-        sn = "A250900P03100019"
+        sn = self.device_sn
         exp_lock_msg = "Device %s Locked" % sn
         exp_unlock_msg = "Device %s UnLocked" % sn
         lock_tips = "pls contact the administrator to unlock it!"
@@ -238,12 +212,12 @@ class TestDevicesPage:
                 self.page.refresh_page()
                 self.page.time_sleep(1)
 
-    @allure.feature('MDM_test022')
-    @allure.title("Devices- reboot device 5 times")
+    @allure.feature('MDM_device_test022')
+    @allure.title("Devices- 设备重启5次")
     # @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_reboot_single_device_pressure_testing(self, unlock_screen, connected_wifi_adb):
         exp_reboot_text = "Sending Reboot Comand to Devices"
-        sn = "A250900P03100019"
+        sn = self.device_sn
         self.page.refresh_page()
         for i in range(1):
             opt_case.check_single_device(sn)
@@ -275,12 +249,12 @@ class TestDevicesPage:
             print("成功运行 %s 次" % str(i))
             # case_pack.connect.reconnect(self.wifi_ip)
 
-    @allure.feature('MDM_test022')
-    @allure.title("Devices- cat_logs")
+    @allure.feature('MDM_device_test022')
+    @allure.title("Devices- 日志的抓取")
     # @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_cat_logs(self, return_device_page):
         exp_log_msg = "Device Debug Command sent"
-        sn = "A250900P03100019"
+        sn = self.device_sn
         duration = 5
         self.page.refresh_page()
         send_time = case_pack.time.strftime('%Y-%m-%d %H:%M', case_pack.time.localtime(case_pack.time.time()))
@@ -288,27 +262,12 @@ class TestDevicesPage:
         # check if device log generates and upload to allure report
         self.android_mdm_page.generate_and_upload_log(send_time, "捕捉的log")
 
-    @allure.feature('MDM_test022551')
-    @allure.title("Devices- cat_logs")
-    @allure.description
-    # @pytest.mark.flaky(reruns=1, reruns_delay=3)
-    def test_cat_logs_test_upload(self):
-        # file_path = conf.project_path + "\\TestCase\\err.txt"
-        file_path = "E:\Mingming\Telpo_Automation\Telpo_MDM\TestCase\err.txt"
-        print(file_path)
-        # with open(file_path, "rb") as file:
-        # allure.attach.file(file_path, name="测试附件下载连接", attachment_type=allure.attachment_type.TEXT)
-        # self.android_mdm_page.upload_log(file, "测试附件")
-
-        with open(file_path, 'rb') as attachment:
-            allure.attach(attachment.read(), name='附件', attachment_type=allure.attachment_type.TEXT)
-
-    @allure.feature('MDM_test0222')
-    @allure.title("Devices- reset device TPUI password")
+    @allure.feature('MDM_device_test022')
+    @allure.title("Devices- 重置设备TPUI密码")
     @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_reset_TPUI_password(self, unlock_screen, go_to_and_return_device_page):
         exp_psw_text = "Password changed"
-        sn = "A250900P03100019"
+        sn = self.device_sn
         password = ["123456", "000000", "999999"]
         self.page.refresh_page()
         for psw in password:
@@ -318,12 +277,12 @@ class TestDevicesPage:
             self.page.change_TPUI_password(psw)
             self.page.refresh_page()
 
-    @allure.feature('MDM_test0222')
-    @allure.title("Devices- reset device password")
+    @allure.feature('MDM_device_test0222')
+    @allure.title("Devices- 重置设备密码")
     @pytest.mark.flaky(reruns=5, reruns_delay=3)
     def test_reset_device_password(self, unlock_screen, go_to_and_return_device_page):
         exp_psw_text = "Password changed"
-        sn = "A250900P03100019"
+        sn = self.device_sn
         lock_tips = "pls contact the administrator to unlock it!"
         password = ["123456", "000000", "999999"]
         self.page.refresh_page()
@@ -353,13 +312,13 @@ class TestDevicesPage:
             assert self.android_mdm_page.confirm_psw_alert_fade(), "@@@@无法确认密码， 请检查！！！"
             self.page.refresh_page()
 
-    @allure.feature('MDM_test022')
-    @allure.title("Devices- AIMDM send message")
+    @allure.feature('MDM_device_test022')
+    @allure.title("Devices- AIMDM发送包含特殊字符串信息")
     @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_send_message_to_single_device(self, unlock_screen, go_to_and_return_device_page):
         exp_success_send_text = "Message Sent"
         # sn would change after debug with devices
-        sn = "A250900P03100019"
+        sn = self.device_sn
         date_time = '%m-%d %H:%M'
         self.page.refresh_page()
         now = case_pack.time.strftime(date_time, case_pack.time.localtime(case_pack.time.time()))
@@ -381,13 +340,13 @@ class TestDevicesPage:
         self.android_mdm_page.click_msg_confirm_btn()
         self.android_mdm_page.confirm_msg_alert_fade(msg)
 
-    @allure.feature('MDM_test022')
-    @allure.title("Devices- AIMDM send msg and check the log in the Message Module")
+    @allure.feature('MDM_device_test022')
+    @allure.title("Devices- AIMDM发消息压力测试")
     @pytest.mark.flaky(reruns=1, reruns_delay=1)
     def test_pressure_send_message_to_single_device(self, unlock_screen, go_to_and_return_device_page):
         exp_success_send_text = "Message Sent"
         # sn would change after debug with devices
-        sn = "A250900P03100019"
+        sn = self.device_sn
         length = 2
         self.page.refresh_page()
         # confirm if device is online and execute next step, if not, end the case execution
@@ -437,16 +396,17 @@ class TestDevicesPage:
                 assert False, "@@@终端收到信息后, 平台180s内无法收到相应的信息"
             self.page.time_sleep(1)
 
-    @allure.feature('MDM_test01')
-    @allure.title("Devices- AIMDM transfer api server ")
+    @allure.feature('MDM_device_test01')
+    @allure.title("Devices- AIMDM 切换正式测试服服务api ")
     @pytest.mark.flaky(reruns=5, reruns_delay=3)
     def test_transfer_api_server(self):
         exp_success_msg = "Updated Device Setting"
-        test_version_api = "http://test.telpopaas.com"
-        release_version_api = "http://api.telpotms.com"
-        release_version_url = "https://mdm.telpoai.com/login"
-        release_user_info = {"username": "ceshibu03", "password": "123456"}
-        sn = "A250900P03100019"
+        test_version_api = test_yml['website_info']['test_api']
+        release_version_api = test_yml['website_info']['release_api']
+        release_version_url = test_yml['website_info']['release_url']
+        release_user_info = {"username": test_yml['website_info']['release_user'],
+                             "password": test_yml['website_info']['release_password']}
+        sn = self.device_sn
         release_main_title = "Total Devices"
         release_login_ok_title = "Telpo MDM"
         self.page.refresh_page()
@@ -497,9 +457,9 @@ class TestDevicesPage:
         #     assert False
 
     @allure.feature('MDM_test01')
-    @allure.title("Devices- device shutdown -- test in the last")
+    @allure.title("Devices- 关机 -- test in the last")
     def test_device_shutdown(self):
-        sn = "A250900P03100019"
+        sn = self.device_sn
         exp_shutdown_text = "Device ShutDown Command sent"
         opt_case.check_single_device(sn)
         self.page.click_dropdown_btn()

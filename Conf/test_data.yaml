@@ -1,4 +1,44 @@
 
 
+MDMTestData:
+
+  # 设置信息
+  settings:
+    test_version: 1
+    version: 1.0
+    debug: true
+
+  #  一般只需填用户密码信息
+  website_info:
+    # 测试服相关信息
+    test_url: http://test.telpoai.com/login
+    test_login_ok_url: http://test.telpoai.com/device/map
+    test_user: mdm_automation
+    test_password: mm17765602533
+    test_api: http://test.telpopaas.com
+    # 正式服相关信息
+    release_url: https://mdm.telpoai.com/login
+    release_user: ceshibu03
+    release_password: 123456
+    release_api: http://api.telpotms.com
+
+  # app相关信息， 没有特殊要求不用填
+  app_info:
+    low_version_app: Bus_Recharge_System_1.0.0_20220421.apk
+    high_version_app: Bus_Recharge_System_1.0.1_20220615.apk
+    other_app: ComAssistant.apk
+
+  # ota升级包相关信息, 有变化需要填写
+  ota_packages_info:
+    package_name: TPS900_msm8937_sv10_fv1.1.16_pv1.1.16-1.1.17.zip
+    # 有分android和linux两种系统
+    platform: Android
+
+  # 服务器列表
+  android_device_info:
+    # 设置永不休眠信息
+    device_name: d
+    never_sleep_command: settings put system screen_off_timeout 0
+
 
 
