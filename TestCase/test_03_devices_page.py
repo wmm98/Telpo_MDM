@@ -396,6 +396,24 @@ class TestDevicesPage:
                 assert False, "@@@终端收到信息后, 平台180s内无法收到相应的信息"
             self.page.time_sleep(1)
 
+    @allure.feature('MDM_device_test02222')
+    @allure.title("Devices- 恢复出厂设置压测10次， 计算准备率")
+    @pytest.mark.flaky(reruns=1, reruns_delay=1)
+    def test_factory_recovery_pressure_testing(self, go_to_and_return_device_page):
+        self.page.factory_reset()
+        now_time = self.page.get_current_time()
+        while True:
+            if "Off" in opt_case.get_single_device_list(self.device_sn)[0]["Status"]:
+                self.page.device_not_existed(self.wifi_ip)
+                break
+            if self.page.get_current_time() > self.page.return_end_time(now_time, 60):
+                assert False, "1分钟内无法触发恢复出厂设置， 请检查！！！！"
+            self.page.time_sleep(1)
+
+        # self.android_mdm_page.confirm_wifi_adb_connected(self.wifi_ip)
+        # self.android_mdm_page.device_existed(self.wifi_ip)
+        # self.android_mdm_page.device_boot_complete()
+
     @allure.feature('MDM_device_test01')
     @allure.title("Devices- AIMDM 切换正式测试服服务api ")
     @pytest.mark.flaky(reruns=5, reruns_delay=3)

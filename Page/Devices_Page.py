@@ -124,6 +124,10 @@ class DevicesPage(TelpoMDMPage):
     loc_duration_selector = (By.CSS_SELECTOR, "[class = 'form-control catch_duration']")
     loc_duration_option = (By.TAG_NAME, "option")
 
+    # factory reset
+    loc_factory_reset_btn = (By.CSS_SELECTOR, "[class = 'fas fa-eraser']")
+    loc_factory_reset_sure_btn = (By.CSS_SELECTOR, "[class = 'btn btn-outline-dark sure_command_button']")
+
     def show_log_type(self):
         ele = self.get_element(self.loc_type_box)
         ele.click()
@@ -237,7 +241,17 @@ class DevicesPage(TelpoMDMPage):
         self.confirm_tips_alert_show(self.loc_shutdown_sure_btn)
         self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_shutdown_sure_btn)
 
-
+    def factory_reset(self):
+        self.click_dropdown_btn()
+        self.click(self.loc_factory_reset_btn)
+        self.confirm_alert_existed(self.loc_factory_reset_btn)
+        self.click(self.loc_factory_reset_sure_btn)
+        self.time_sleep(3)
+        self.click(self.loc_factory_reset_sure_btn)
+        self.time_sleep(3)
+        self.confirm_tips_alert_show(self.loc_factory_reset_sure_btn)
+        self.refresh_page()
+        # self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_factory_reset_sure_btn)
 
     def click_server_btn(self):
         self.click(self.lco_server_btn)

@@ -290,13 +290,18 @@ class AndroidBasePageUSB(interface):
 
     def open_mobile_data(self):
         cmd = "svc data enable"
-        self.u2_send_command_USB(cmd)
-        self.time_sleep(5)
+        print(cmd)
+        result = self.u2_send_command_USB(cmd)
+        print(result)
+        # self.u2_send_command_USB(cmd)
+        self.time_sleep(3)
 
     def close_mobile_data(self):
         cmd = "svc data disable"
-        self.u2_send_command_USB(cmd)
-        self.open_wifi_btn()
+        print(cmd)
+        result = self.u2_send_command_USB(cmd)
+        print(result)
+        # res1 = self.u2_send_command_USB(cmd)
 
 
 if __name__ == '__main__':

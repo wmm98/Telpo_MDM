@@ -48,6 +48,7 @@ class APPSPage(TelpoMDMPage):
     loc_app_release_alert = (By.ID, "modal-app-release")
     loc_app_release_btn = (By.CSS_SELECTOR, "[class = 'fas fa-registered']")
     loc_silent_install = (By.ID, "setsilent")
+    loc_download_network = (By.ID, "download_network")
     loc_device_selected_box = (By.CLASS_NAME, "label-selected")
     # device list and single device also work in app relate
     loc_device_list = (By.CLASS_NAME, "label-item")
@@ -299,6 +300,12 @@ class APPSPage(TelpoMDMPage):
         # if not info["package"] in text and (info["silent"] in text) and (info["version"] in text):
         #     assert False, "@@@@release app的log有误， 请检查！！！"
 
+    def delete_app_install_and_uninstall_logs(self):
+        self.go_to_new_address("apps/appUninstall")
+        self.delete_all_app_release_log()
+        self.go_to_new_address("apps/releases")
+        self.delete_all_app_release_log()
+
     def delete_all_app_release_log(self):
         try:
             if self.get_current_app_release_log_total() != 0:
@@ -319,6 +326,7 @@ class APPSPage(TelpoMDMPage):
     def input_release_app_info(self, info):
         release_box = self.get_element(self.loc_app_release_alert)
         self.select_by_text(self.loc_silent_install, info["silent"].upper())
+        self.select_by_text(self.loc_download_network, info["download_network"])
         devices = release_box.find_element(*self.loc_device_list).find_elements(*self.loc_single_device)
         for device in devices:
             if info["sn"] in device.get_attribute("data"):

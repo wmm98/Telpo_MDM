@@ -1,6 +1,7 @@
 import Page as public_pack
 
 sub_shell = public_pack.Shell.Shell()
+conf = public_pack.Config()
 
 
 class interface:
@@ -59,11 +60,20 @@ class interface:
             res = self.devices_list()
             print(res)
             if device_online in res.replace('\r', '').replace('\t', '').replace(' ', ''):
-                break
+                return True
             if self.get_current_time() > self.return_end_time(now_time, 60):
                 self.connect_ip(address)
                 assert False, "@@@@无法连接上wifi adb， 请检查！！！！"
             self.time_sleep(1)
+
+    def device_not_existed(self, address):
+        device_online = address + "device"
+        res = self.devices_list()
+        print(res)
+        if device_online not in res.replace('\r', '').replace('\t', '').replace(' ', ''):
+            return True
+        else:
+            assert False, "@@@@设备在线， 设备不应该在线请检查！！！！"
 
     def transfer_version_into_int(self, ver):
         integer_list = ver.split(".")
@@ -84,6 +94,10 @@ class interface:
         # get apk file
         apk = public_pack.APK(path)
         return apk
+
+    def get_apk_path(self, apk_name):
+        file_path = conf.project_path + "\\Param\\Package\\%s" % apk_name
+        return file_path
 
     def get_apk_package_name(self, apk_file_path):
         try:

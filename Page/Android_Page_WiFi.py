@@ -2,6 +2,8 @@ import Page as public_pack
 from Page.Interface_Page import interface
 
 sub_shell = public_pack.Shell.Shell()
+conf = public_pack.Config()
+
 
 
 class AndroidBasePageWiFi(interface):
@@ -75,6 +77,21 @@ class AndroidBasePageWiFi(interface):
         status = self.client.app_uninstall(package)
         return status
 
+    def uninstall_app_post(self, apk_name):
+        # file_path = conf.project_path + "\\Param\\Package\\%s" % apk_name
+        file_path = self.get_apk_path(apk_name)
+        if public_pack.os.path.exists(file_path):
+            package = self.get_apk_package_name(file_path)
+            status = self.client.app_uninstall(package)
+            return status
+
+    def uninstall_multi_apps(self, apps_dict):
+        for app_key in apps_dict:
+            # file_path = conf.project_path + "\\Param\\Package\\%s" % app_key[app_key]
+            file_path = self.get_apk_path(app_key[app_key])
+            package = self.get_apk_package_name(file_path)
+            self.uninstall_app(package)
+
     def confirm_app_is_uninstalled(self, package):
         self.uninstall_app(package)
         now_time = self.get_current_time()
@@ -97,6 +114,8 @@ class AndroidBasePageWiFi(interface):
         self.u2_send_command("rm %s" % file_name)
 
     def del_all_downloaded_apk(self):
+        print("ls /%s/aimdm/download" % self.get_internal_storage_directory())
+        print(self.u2_send_command("ls /%s/aimdm/download" % self.get_internal_storage_directory()))
         try:
             for apk in self.get_download_list():
                 self.rm_file("/%s/aimdm/download/%s" % (self.get_internal_storage_directory(), apk))
@@ -107,6 +126,8 @@ class AndroidBasePageWiFi(interface):
                 for apk in self.get_download_list():
                     if "apk" in apk:
                         self.rm_file("/%s/aimdm/download/%s" % (self.get_internal_storage_directory(), apk))
+        print("ls /%s/aimdm/download" % self.get_internal_storage_directory())
+        print(self.u2_send_command("ls /%s/aimdm/download" % self.get_internal_storage_directory()))
 
     def del_updated_zip(self):
         try:

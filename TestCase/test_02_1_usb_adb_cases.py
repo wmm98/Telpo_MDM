@@ -7,16 +7,18 @@ excel = case_pack.ExcelData()
 opt_case = case_pack.Optimize_Case()
 alert = case_pack.AlertData()
 log = case_pack.MyLog()
+test_yml = case_pack.yaml_data
 
 
 class TestNetworkCases:
     def setup_class(self):
         self.driver = case_pack.test_driver
-        self.page = case_pack.DevicesPage(self.driver, 40)
+        self.page = case_pack.APPSPage(self.driver, 40)
+        self.system_page = case_pack.SystemPage(self.driver, 40)
         self.android_mdm_page = case_pack.AndroidAimdmPage(case_pack.device_data, 5)
-        self.serial = case_pack.device_data["usb_device_info"]["device"]
-        self.ip = case_pack.device_data["wifi_device_info"]["ip"]
-        self.android_mdm_page.device_unlock_USB()
+        self.wifi_ip = case_pack.device_data["wifi_device_info"]["ip"]
+        self.android_mdm_page.del_all_downloaded_apk()
+        self.device_sn = self.android_mdm_page.get_device_sn()
 
     def teardown_class(self):
         self.page.refresh_page()

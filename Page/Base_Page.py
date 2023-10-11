@@ -270,7 +270,6 @@ class BasePage(interface):
                  0: Uninstall completed
         """
         action = self.upper_transfer(self.remove_space(action))
-        print("转换后的action", action)
         if self.upper_transfer(self.remove_space("Uninstall completed")) in action:
             return 0
         if self.upper_transfer(self.remove_space("Downloading")) in action:
