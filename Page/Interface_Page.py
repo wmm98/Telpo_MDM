@@ -123,6 +123,20 @@ class interface:
         else:
             assert False, "@@@@不存在%s, 请检查！！！" % file_path
 
+    def calculate_sha256_in_windows(self, file):
+        file_path = self.get_apk_path(file)
+        sha256 = public_pack.hashlib.sha256()
+        with open(file_path, "rb") as file:
+            for chunk in iter(lambda: file.read(4096), b""):
+                sha256.update(chunk)
+        return sha256.hexdigest()
+
+    def value_str_is_equal(self, value1, value2):
+        if value1 == value2:
+            return True
+        else:
+            return False
+
     def remove_space(self, text):
         return text.replace("\r", "").replace("\n", "").replace(" ", "")
 

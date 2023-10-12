@@ -5,7 +5,6 @@ sub_shell = public_pack.Shell.Shell()
 conf = public_pack.Config()
 
 
-
 class AndroidBasePageWiFi(interface):
     def __init__(self, client, times, ip):
         self.client = client
@@ -78,7 +77,6 @@ class AndroidBasePageWiFi(interface):
         return status
 
     def uninstall_app_post(self, apk_name):
-        # file_path = conf.project_path + "\\Param\\Package\\%s" % apk_name
         file_path = self.get_apk_path(apk_name)
         if public_pack.os.path.exists(file_path):
             package = self.get_apk_package_name(file_path)
@@ -87,8 +85,7 @@ class AndroidBasePageWiFi(interface):
 
     def uninstall_multi_apps(self, apps_dict):
         for app_key in apps_dict:
-            # file_path = conf.project_path + "\\Param\\Package\\%s" % app_key[app_key]
-            file_path = self.get_apk_path(app_key[app_key])
+            file_path = self.get_apk_path(apps_dict[app_key])
             package = self.get_apk_package_name(file_path)
             self.uninstall_app(package)
 
@@ -169,6 +166,13 @@ class AndroidBasePageWiFi(interface):
         integer_list = self.extract_integers(res)
         size = int(integer_list[1])
         return size
+
+    def calculate_sha256_in_device(self, file_name):
+        # sha256sum sdcard/aimdm/data/2023-10-12.txt
+        # 9fb5de71a794b9cb8b8197e6ebfbbc9168176116f7f88aca62b22bbc67c2925a  2023-10-12.txt
+        cmd = "sha256sum /%s/aimdm/download/%s" % (self.get_internal_storage_directory(), file_name)
+        result = self.u2_send_command(cmd).split(" ")[0]
+        return result
 
     def get_internal_storage_directory(self):
         if "aimdm" in self.u2_send_command("ls sdcard/"):

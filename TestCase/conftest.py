@@ -28,6 +28,13 @@ def unlock_screen():
     android_page.device_unlock()
     yield
 
+@pytest.fixture()
+def delete_ota_package_relate():
+    android_page.del_all_downloaded_zip()
+    android_page.del_updated_zip()
+    yield
+    android_page.del_all_downloaded_zip()
+    android_page.del_updated_zip()
 
 @pytest.fixture()
 def connected_wifi_adb():
@@ -144,3 +151,4 @@ def go_to_app_release_log():
 def go_to_app_uninstall_release_log():
     app_page.go_to_new_address("apps/appUninstall")
     yield
+
