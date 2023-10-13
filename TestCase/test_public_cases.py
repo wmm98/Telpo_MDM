@@ -50,6 +50,7 @@ class TestAppPage:
         file_path = self.app_page.get_apk_path(release_info["package_name"])
         package = self.app_page.get_apk_package_name(file_path)
         release_info["package"] = package
+        print("包名：", package)
         version = self.app_page.get_apk_package_version(file_path)
         release_info["version"] = version
 
@@ -157,7 +158,7 @@ class TestAppPage:
         print("*******************静默安装完成***************************")
         log.info("*******************静默安装完成***************************")
 
-        self.android_mdm_page.confirm_app_start(release_info["package"])
+        self.android_mdm_page.confirm_app_is_running(release_info["package"])
         base_directory = "APP_Full_Screen"
         image_before_reboot = "%s\\APP满屏推送效果图(重启前).jpg" % base_directory
         self.android_mdm_page.save_screenshot_to(image_before_reboot)
@@ -165,6 +166,7 @@ class TestAppPage:
         self.android_mdm_page.reboot_device(self.wifi_ip)
         self.android_mdm_page.confirm_app_start(release_info["package"])
         image_after_reboot = "%s\\APP满屏推送效果图(重启后).jpg" % base_directory
+        self.android_mdm_page.confirm_app_is_running(release_info["package"])
         self.android_mdm_page.save_screenshot_to(image_after_reboot)
         self.android_mdm_page.upload_image_JPG(conf.project_path + "\\ScreenShot\\%s" % image_after_reboot, "APP满屏推送效果图(重启后)")
         self.android_mdm_page.stop_app(release_info["package"])

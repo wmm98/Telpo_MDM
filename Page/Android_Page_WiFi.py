@@ -39,7 +39,9 @@ class AndroidBasePageWiFi(interface):
         self.confirm_app_start(package_name)
 
     def get_current_app(self):
-        return self.client.app_current()['package']
+        res = self.client.app_current()['package']
+        print(res)
+        return res
 
     def confirm_app_start(self, package_name):
         now_time = self.get_current_time()
@@ -50,6 +52,15 @@ class AndroidBasePageWiFi(interface):
                 self.start_app(package_name)
         if self.get_current_time() > self.return_end_time(now_time):
             assert False, "@@@@app无法启动， 请检查！！！！"
+        self.time_sleep(2)
+
+    def confirm_app_is_running(self, package_name):
+        now_time = self.get_current_time()
+        while True:
+            if self.remove_space(package_name) in self.remove_space(self.get_current_app()):
+                break
+        if self.get_current_time() > self.return_end_time(now_time, 60):
+            assert False, "@@@@app没在运行， 请检查！！！！"
         self.time_sleep(2)
 
     def reboot_device(self, wlan0_ip):
