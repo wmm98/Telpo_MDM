@@ -128,6 +128,9 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
     def upload_log(self, file, name):
         public_pack.allure.attach(file, name=name, attachment_type=public_pack.allure.attachment_type.TEXT)
 
+    def upload_image_JPG(self, file_path, new_name):
+        public_pack.allure.attach(file_path, name=new_name, attachment_type=public_pack.allure.attachment_type.JPG)
+
     def manual_unlock(self):
         ele_lock = self.get_element_by_id(self.msg_confirm_id)
         print(ele_lock.get_text())

@@ -159,10 +159,15 @@ class TestAppPage:
 
         self.android_mdm_page.confirm_app_start(release_info["package"])
         base_directory = "APP_Full_Screen"
-        self.android_mdm_page.save_screenshot_to("%s\\APP满屏推送效果图(重启前).jpg" % base_directory)
+        image_before_reboot = "%s\\APP满屏推送效果图(重启前).jpg" % base_directory
+        self.android_mdm_page.save_screenshot_to(image_before_reboot)
+        self.android_mdm_page.upload_image_JPG(conf.project_path + "\\ScreenShot\\%s" % image_before_reboot, "APP满屏推送效果图(重启前)")
         self.android_mdm_page.reboot_device(self.wifi_ip)
         self.android_mdm_page.confirm_app_start(release_info["package"])
-        self.android_mdm_page.save_screenshot_to("%s\\APP满屏推送效果图(重启后).jpg" % base_directory)
-        assert False,  "@@@请在文件%s-%s查看app 满屏效果" % ("ScreenShot", base_directory)
+        image_after_reboot = "%s\\APP满屏推送效果图(重启后).jpg" % base_directory
+        self.android_mdm_page.save_screenshot_to(image_after_reboot)
+        self.android_mdm_page.upload_image_JPG(conf.project_path + "\\ScreenShot\\%s" % image_after_reboot, "APP满屏推送效果图(重启后)")
+        self.android_mdm_page.stop_app(release_info["package"])
+        assert False,  "@@@请在报告查看app满屏效果截图"
 
 
