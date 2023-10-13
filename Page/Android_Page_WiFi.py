@@ -11,6 +11,28 @@ class AndroidBasePageWiFi(interface):
         self.times = times
         self.device_ip = ip
 
+    def save_screenshot_to(self, file_path):
+        base_path = conf.project_path + "\\ScreenShot\\%s" % file_path
+        try:
+            self.client.screenshot(base_path)
+        except Exception as e:
+            print(e)
+
+    def stop_app(self, package_name):
+        self.client.app_start(package_name)
+        self.confirm_app_stop(package_name)
+
+    def confirm_app_stop(self, package_name):
+        now_time = self.get_current_time()
+        while True:
+            if package_name not in self.get_current_app():
+                break
+            else:
+                self.stop_app(package_name)
+        if self.get_current_time() > self.return_end_time(now_time):
+            assert False, "@@@@app无法启动， 请检查！！！！"
+        self.time_sleep(2)
+
     def start_app(self, package_name):
         self.client.app_start(package_name)
         self.time_sleep(3)
@@ -171,7 +193,10 @@ class AndroidBasePageWiFi(interface):
         # sha256sum sdcard/aimdm/data/2023-10-12.txt
         # 9fb5de71a794b9cb8b8197e6ebfbbc9168176116f7f88aca62b22bbc67c2925a  2023-10-12.txt
         cmd = "sha256sum /%s/aimdm/download/%s" % (self.get_internal_storage_directory(), file_name)
+        print(self.u2_send_command(cmd))
+        print(self.u2_send_command(cmd).split(" "))
         result = self.u2_send_command(cmd).split(" ")[0]
+        print(result)
         return result
 
     def get_internal_storage_directory(self):

@@ -18,4 +18,5 @@ import uiautomator2 as u2
 from uiautomator2.exceptions import UiaError
 import allure
 import hashlib
+from PIL import Image
 

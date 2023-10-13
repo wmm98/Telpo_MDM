@@ -72,7 +72,7 @@ class TestOTAPage:
             self.page.search_device_by_pack_name(package_info["package_name"])
             assert len(self.page.get_ota_package_list()) == 1, "@@@添加失败！！！"
 
-    @allure.feature('MDM_APP-test-test')
+    @allure.feature('MDM_APP-test-test111')
     @allure.title("OTA-OTA重启5次断点续传")
     def test_upgrade_OTA_package_reboot_5times(self, del_all_ota_release_log, go_to_ota_page, delete_ota_package_relate):
         download_tips = "Foundanewfirmware,whethertoupgrade?"
@@ -92,7 +92,7 @@ class TestOTAPage:
         act_ota_package_size = self.page.get_zip_size(ota_package_path)
         print("act_ota_package_size:", act_ota_package_size)
         # check file hash value in directory Param/package
-        act_ota_package_hash_value = self.android_mdm_page.calculate_sha256_in_device(release_info["package_name"])
+        act_ota_package_hash_value = self.android_mdm_page.calculate_sha256_in_windows(release_info["package_name"])
         print("act_ota_package_hash_value:", act_ota_package_hash_value)
 
         self.page.search_device_by_pack_name(release_info["package_name"])
@@ -120,10 +120,6 @@ class TestOTAPage:
             self.page.time_sleep(1)
 
         self.android_mdm_page.confirm_received_alert(download_tips)
-        """
-                Upgrade action (1: downloading, 2: downloading complete, 3: upgrading,
-                 4: upgrading complete, 5: downloading failed, 6: upgrading failed)
-                """
         # check the app action in ota upgrade logs, if download complete or upgrade complete, break
         self.page.go_to_new_address("ota/log")
         now_time = self.page.get_current_time()
@@ -131,6 +127,7 @@ class TestOTAPage:
             info = self.page.get_ota_latest_upgrade_log(send_time, release_info)
             if len(info) != 0:
                 action = info[0]["Action"]
+                print("action: ", action)
                 check_file_time = self.page.get_current_time()
                 if self.page.get_action_status(action) == 1:
                     while True:
@@ -145,6 +142,7 @@ class TestOTAPage:
             self.page.time_sleep(5)
 
         package_size = self.android_mdm_page.get_file_size_in_device(release_info["package_name"])
+        print("第一次下载的的ota package size: ", package_size)
         for i in range(5):
             self.android_mdm_page.reboot_device(self.wifi_ip)
             try:
@@ -154,57 +152,66 @@ class TestOTAPage:
             now_time = self.page.get_current_time()
             while True:
                 current_size = self.android_mdm_page.get_file_size_in_device(release_info["package_name"])
+                print("重启%s次之后当前ota package 的size: %s" % (str(i+1), current_size))
+                if current_size == act_ota_package_hash_value:
+                    assert False, "@@@@请检查ota 升级包大小是否适合！！！！"
                 if current_size > package_size:
                     package_size = current_size
-                if current_size == package_size:
-                    assert False, "@@@@请检查ota 升级包大小是否适合！！！！"
+                    break
                 if self.page.get_current_time() > self.page.return_end_time(now_time, 120):
                     assert False, "@@@@确认下载提示后， 2分钟内ota升级包没有大小没变， 没在下载"
+                self.page.time_sleep(1)
+        print("*******************完成5次重启*********************************")
 
+        """
+            Upgrade action (1: downloading, 2: downloading complete, 3: upgrading,
+            4: upgrading complete, 5: downloading failed, 6: upgrading failed)
+        """
         now_time = self.page.get_current_time()
         while True:
-            if self.page.get_action_status(action) == 2 or self.page.get_action_status(action) == 4 \
-                    or self.page.get_action_status(action) == 3:
-                package_hash_value = self.android_mdm_page.calculate_sha256_in_device(release_info["package_name"])
-                assert package_hash_value == act_ota_package_hash_value, "@@@@平台显示下载完成，终端的ota升级包和原始的升级包SHA-256值不一致， 请检查！！！！"
-                break
-            if self.page.get_current_time() > self.page.return_end_time(now_time, 2400):
-                assert False, "@@@@断点重启5次， 30分钟后还没有下载完相应的ota package， 请检查！！！"
+            info = self.page.get_ota_latest_upgrade_log(send_time, release_info)
+            if len(info) != 0:
+                action = info[0]["Action"]
+                print("action: ", action)
+                if self.page.get_action_status(action) == 2 or self.page.get_action_status(action) == 4 \
+                        or self.page.get_action_status(action) == 3:
+                    package_hash_value = self.android_mdm_page.calculate_sha256_in_device(release_info["package_name"])
+                    print("原来升级包的 package_hash_value：", act_ota_package_hash_value)
+                    print("下载完成后的 package_hash_value：", package_hash_value)
+                    download_file_size = self.android_mdm_page.get_file_size_in_device(release_info["package_name"])
+                    print("actual_ota_package_size:", act_ota_package_size)
+                    print("download_ota_package_size: ", download_file_size)
+                    assert act_ota_package_size == download_file_size, "@@@@下载下来的ota包不完整，请检查！！！"
+                    assert package_hash_value == act_ota_package_hash_value, "@@@@平台显示下载完成，终端的ota升级包和原始的升级包SHA-256值不一致， 请检查！！！！"
+                    break
+            if self.page.get_current_time() > self.page.return_end_time(now_time, 3000):
+                assert False, "@@@@断点重启5次， 50分钟后还没有下载完相应的ota package， 请检查！！！"
+            self.page.time_sleep(10)
+            self.page.refresh_page()
+
+        # check upgrade
+        self.android_mdm_page.confirm_received_alert(upgrade_tips)
+        now_time = self.page.get_current_time()
+        while True:
+            info = self.page.get_ota_latest_upgrade_log(send_time, release_info)
+            if len(info) != 0:
+                action = info[0]["Action"]
+                print("action", action)
+                if self.page.get_action_status(action) == 4:
+                    break
+            # wait upgrade 30 min at most
+            if self.page.get_current_time() > self.page.return_end_time(now_time, 1800):
+                assert False, "@@@@30分钟还没有升级相应的安卓版本， 请检查！！！"
             self.page.time_sleep(5)
 
-        # download_file_size = self.android_mdm_page.get_file_size_in_device(release_info["package_name"])
-        # print("actual_ota_package_size:", act_ota_package_size)
-        # print("download_ota_package_size: ", download_file_size)
-        # assert act_ota_package_size == download_file_size, "@@@@下载下来的ota包不完整，请检查！！！"
-
-        # self.android_mdm_page.confirm_received_alert(upgrade_tips)
-        #
-        # # check upgrade
-        # now_time = self.page.get_current_time()
-        # while True:
-        #     info = self.page.get_ota_latest_upgrade_log(send_time, release_info)
-        #     if len(info) != 0:
-        #         action = info[0]["Action"]
-        #         print("action", action)
-        #         if self.page.get_action_status(action) == 4:
-        #             break
-        #         else:
-        #             self.page.refresh_page()
-        #     else:
-        #         self.page.refresh_page()
-        #     # wait upgrade 3 mins at most
-        #     if self.page.get_current_time() > self.page.return_end_time(now_time, 1800):
-        #         assert False, "@@@@30分钟还没有升级相应的安卓版本， 请检查！！！"
-        #     self.page.time_sleep(3)
-        #
-        # self.android_mdm_page.device_boot(self.wifi_ip)
-        # after_upgrade_version = self.android_mdm_page.check_firmware_version()
-        # assert self.page.transfer_version_into_int(
-        #     device_current_firmware_version) != self.page.transfer_version_into_int(after_upgrade_version), \
-        #     "@@@@ota升级失败， 还是原来的版本%s！！" % device_current_firmware_version
-        # assert self.page.transfer_version_into_int(release_info["version"]) == \
-        #        self.page.transfer_version_into_int(
-        #            after_upgrade_version), "@@@@升级后的固件版本为%s, ota升级失败， 请检查！！！" % after_upgrade_version
+        self.android_mdm_page.device_boot(self.wifi_ip)
+        after_upgrade_version = self.android_mdm_page.check_firmware_version()
+        assert self.page.transfer_version_into_int(
+            device_current_firmware_version) != self.page.transfer_version_into_int(after_upgrade_version), \
+            "@@@@ota升级失败， 还是原来的版本%s！！" % device_current_firmware_version
+        assert self.page.transfer_version_into_int(release_info["version"]) == \
+               self.page.transfer_version_into_int(
+                   after_upgrade_version), "@@@@升级后的固件版本为%s, ota升级失败， 请检查！！！" % after_upgrade_version
 
     @allure.feature('MDM_OTA_test02')
     @allure.title("OTA-OTA应用推送")
@@ -269,7 +276,7 @@ class TestOTAPage:
                     self.page.refresh_page()
             else:
                 self.page.refresh_page()
-                # wait 20 mins
+                # wait 20 min
             if self.page.get_current_time() > self.page.return_end_time(now_time, 2400):
                 assert False, "@@@@30分钟还没有下载完相应的ota package， 请检查！！！"
             self.page.time_sleep(5)

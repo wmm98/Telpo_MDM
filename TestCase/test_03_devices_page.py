@@ -366,7 +366,7 @@ class TestDevicesPage:
             message_list.append(msg)
             # check message in device
             wait_time = 60
-            if not self.android_mdm_page.mdm_msg_alert_show(wait_time):
+            if not self.android_mdm_page.confirm_alert_show(wait_time):
                 assert False, "@@@@%ss内无法接收到信息， 请检查设备是否在线！！！！" % wait_time
             self.android_mdm_page.confirm_received_text(msg)
             self.android_mdm_page.click_msg_confirm_btn()

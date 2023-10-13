@@ -108,7 +108,7 @@ class TestAppPage:
         # check app size(bytes) in windows
         app_size = self.page.get_file_size_in_windows(file_path)
         print("获取到的app 的size(bytes): ", app_size)
-
+        self.android_mdm_page.start_app()
         # go to app page
         self.page.go_to_new_address("apps")
         send_time = case_pack.time.strftime('%Y-%m-%d %H:%M', case_pack.time.localtime(self.page.get_current_time()))

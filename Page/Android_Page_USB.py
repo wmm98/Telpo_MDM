@@ -13,12 +13,12 @@ class AndroidBasePageUSB(interface):
     def start_app_USB(self, package_name):
         self.USB_client.app_start(package_name)
         self.time_sleep(3)
-        self.confirm_app_start(package_name)
+        self.confirm_app_start_USB(package_name)
 
     def get_current_app_USB(self):
         return self.USB_client.app_current()['package']
 
-    def confirm_app_start(self, package_name):
+    def confirm_app_start_USB(self, package_name):
         now_time = self.get_current_time()
         while True:
             if package_name in self.get_current_app_USB():
@@ -138,7 +138,8 @@ class AndroidBasePageUSB(interface):
         exp = self.remove_space("ping: unknown host %s" % "www.baidu.com")
         now_time = self.get_current_time()
         while True:
-            res = self.remove_space(self.send_shell_command_USB(cmd))
+            print(cmd)
+            res = self.remove_space(self.u2_send_command_USB(cmd))
             print(res)
             if exp not in res:
                 break
@@ -147,13 +148,33 @@ class AndroidBasePageUSB(interface):
                     assert False, "@@@@超过2分钟无法上网,请检查网络"
             public_pack.t_time.sleep(2)
 
+    def no_network(self, times=5, timeout=30):
+        # 每隔0.6秒ping一次，一共ping5次
+        # ping - c 5 - i 0.6 qq.com
+        cmd = "ping -c %s %s" % (times, "www.baidu.com")
+        exp = self.remove_space("ping: unknown host %s" % "www.baidu.com")
+        now_time = self.get_current_time()
+        while True:
+            print(cmd)
+            res = self.remove_space(self.u2_send_command_USB(cmd))
+            print(res)
+            if exp in res:
+                break
+            if self.get_current_time() > self.return_end_time(now_time, timeout):
+                if exp in self.remove_space(self.send_shell_command_USB(cmd)):
+                    assert False, "@@@@网络还没有关闭， 请检查！！！！"
+            public_pack.t_time.sleep(2)
+
     def device_unlock_USB(self):
         self.USB_client.screen_off()
         self.USB_client.unlock()
 
     def u2_send_command_USB(self, cmd):
         try:
-            return self.USB_client.shell(cmd, timeout=120).output
+            print(cmd)
+            res = self.USB_client.shell(cmd, timeout=120).output
+            print(res)
+            return res
         except Exception as e:
             print(e)
         # except TypeError:

@@ -42,7 +42,7 @@ class interface:
         else:
             return False
 
-    def confirm_wifi_adb_connected(self, ip, timeout=90):
+    def confirm_wifi_adb_connected(self, ip, timeout=120):
         now_time = self.get_current_time()
         while True:
             res = self.connect_ip(ip)
@@ -58,7 +58,6 @@ class interface:
         while True:
             device_online = address + "device"
             res = self.devices_list()
-            print(res)
             if device_online in res.replace('\r', '').replace('\t', '').replace(' ', ''):
                 return True
             if self.get_current_time() > self.return_end_time(now_time, 60):

@@ -32,7 +32,8 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
         return self.u2_send_command("getprop ro.product.version")
 
     def confirm_received_alert(self, exp_tips):
-        self.mdm_msg_alert_show()
+        # self.mdm_msg_alert_show()
+        self.confirm_alert_show()
         self.confirm_received_text(exp_tips)
         self.click_msg_confirm_btn()
         self.confirm_msg_alert_fade(exp_tips)
@@ -121,7 +122,8 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
             file_path = config.project_path + "\\CatchLogs\\" + lo
             if not self.path_is_existed(file_path):
                 assert False, "@@@@无%s文件， 请检查！！！" % lo
-            public_pack.allure.attach.file(file_path, name=file_name, attachment_type=public_pack.allure.attachment_type.TEXT)
+            public_pack.allure.attach.file(file_path, name=file_name,
+                                           attachment_type=public_pack.allure.attachment_type.TEXT)
 
     def upload_log(self, file, name):
         public_pack.allure.attach(file, name=name, attachment_type=public_pack.allure.attachment_type.TEXT)
@@ -179,6 +181,15 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
                 return True
             if self.get_current_time() > self.return_end_time(now_time):
                 return False
+
+    def confirm_alert_show(self, timeout=120):
+        now_time = self.get_current_time()
+        while True:
+            if self.mdm_msg_alert_show():
+                break
+            if self.get_current_time() > self.return_end_time(now_time):
+                assert False, "@@@@%d内还没弹出弹框， 请检查！！！！" % timeout
+            self.time_sleep(1)
 
     def mdm_msg_alert_show_discard(self, time_out=5):
         now_time = self.get_current_time()

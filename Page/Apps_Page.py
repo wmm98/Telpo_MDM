@@ -49,6 +49,7 @@ class APPSPage(TelpoMDMPage):
     loc_app_release_btn = (By.CSS_SELECTOR, "[class = 'fas fa-registered']")
     loc_silent_install = (By.ID, "setsilent")
     loc_download_network = (By.ID, "download_network")
+    loc_set_kiosk_mode = (By.ID, "setkioskmode")
     loc_device_selected_box = (By.CLASS_NAME, "label-selected")
     # device list and single device also work in app relate
     loc_device_list = (By.CLASS_NAME, "label-item")
@@ -323,8 +324,12 @@ class APPSPage(TelpoMDMPage):
         self.click(self.loc_app_release_btn)
         self.confirm_alert_existed(self.loc_app_release_btn)
 
-    def input_release_app_info(self, info):
+    def input_release_app_info(self, info, kiosk_mode=False):
         release_box = self.get_element(self.loc_app_release_alert)
+        if kiosk_mode:
+            self.select_by_text(self.loc_set_kiosk_mode, "YES")
+        else:
+            self.select_by_text(self.loc_set_kiosk_mode, "NO")
         self.select_by_text(self.loc_silent_install, info["silent"].upper())
         self.select_by_text(self.loc_download_network, info["download_network"])
         devices = release_box.find_element(*self.loc_device_list).find_elements(*self.loc_single_device)
