@@ -19,7 +19,7 @@ class AndroidBasePageWiFi(interface):
             print(e)
 
     def stop_app(self, package_name):
-        self.client.app_start(package_name)
+        self.client.app_stop(package_name)
         self.confirm_app_stop(package_name)
 
     def confirm_app_stop(self, package_name):

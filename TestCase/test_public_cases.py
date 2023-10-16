@@ -29,20 +29,20 @@ class TestAppPage:
         self.app_page = case_pack.APPSPage(self.driver, 40)
         self.system_page = case_pack.SystemPage(self.driver, 40)
         self.android_mdm_page = case_pack.AndroidAimdmPage(case_pack.device_data, 5)
+        self.content_page = case_pack.ContentPage(self.driver, 40)
         self.wifi_ip = case_pack.device_data["wifi_device_info"]["ip"]
         self.android_mdm_page.del_all_downloaded_apk()
         self.device_sn = self.android_mdm_page.get_device_sn()
-        self.app_page.go_to_new_address("apps")
 
     def teardown_class(self):
         self.app_page.delete_app_install_and_uninstall_logs()
         self.android_mdm_page.del_all_downloaded_apk()
         self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
         self.app_page.refresh_page()
-        self.android_mdm_page.reboot_device(self.wifi_ip)
+        # self.android_mdm_page.reboot_device(self.wifi_ip)
 
-    @allure.feature('MDM_public-test-test')
-    @allure.title("public case-应用满屏推送")
+    @allure.feature('MDM_public')
+    @allure.title("public case-应用满屏推送--请在附件查看满屏截图效果")
     # @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_release_app_full_screen(self, del_all_app_release_log, del_all_app_uninstall_release_log, go_to_app_page):
         release_info = {"package_name": test_yml['app_info']['other_app'], "sn": self.device_sn,
@@ -160,16 +160,24 @@ class TestAppPage:
 
         self.android_mdm_page.confirm_app_is_running(release_info["package"])
         base_directory = "APP_Full_Screen"
-        image_before_reboot = "%s\\APP满屏推送效果图(重启前).jpg" % base_directory
+        image_before_reboot = "%s\\app_full_screen_before_reboot.jpg" % base_directory
         self.android_mdm_page.save_screenshot_to(image_before_reboot)
-        self.android_mdm_page.upload_image_JPG(conf.project_path + "\\ScreenShot\\%s" % image_before_reboot, "APP满屏推送效果图(重启前)")
+        self.android_mdm_page.upload_image_JPG(conf.project_path + "\\ScreenShot\\%s" % image_before_reboot, "app_full_screen_before_reboot")
         self.android_mdm_page.reboot_device(self.wifi_ip)
         self.android_mdm_page.confirm_app_start(release_info["package"])
-        image_after_reboot = "%s\\APP满屏推送效果图(重启后).jpg" % base_directory
+        image_after_reboot = "%s\\app_full_screen_after_reboot.jpg" % base_directory
         self.android_mdm_page.confirm_app_is_running(release_info["package"])
         self.android_mdm_page.save_screenshot_to(image_after_reboot)
-        self.android_mdm_page.upload_image_JPG(conf.project_path + "\\ScreenShot\\%s" % image_after_reboot, "APP满屏推送效果图(重启后)")
+        self.android_mdm_page.upload_image_JPG(conf.project_path + "\\ScreenShot\\%s" % image_after_reboot, "app_full_screen_after_reboot")
         self.android_mdm_page.stop_app(release_info["package"])
-        assert False,  "@@@请在报告查看app满屏效果截图"
+        # assert False,  "@@@请在报告查看app满屏效果截图"
+
+    @allure.feature('MDM_public-test-test')
+    @allure.title("public case-推送壁纸--请在附件查看壁纸截图效果")
+    def test_release_wallpaper(self, go_to_content_page):
+        # "All Files" "Normal Files" "Boot Animations" "Wallpaper" "LOGO"
+        self.content_page.search_content("Wallpaper", "test_background_image_png.png")
+
+
 
 

@@ -218,7 +218,7 @@ class OTAPage(TelpoMDMPage):
                 assert False, "@@@@没有%s, %s 的release记录， 请检查！！！" % (release_info["package_name"], release_info["sn"])
 
     def search_single_release_log(self, info, count=True):
-        ele = self.web_driver_wait_until(EC.presence_of_element_located(self.loc_release_search_btn))
+        self.web_driver_wait_until(EC.presence_of_element_located(self.loc_release_search_btn))
         self.click(self.loc_release_search_btn)
         self.confirm_alert_existed(self.loc_release_search_btn)
         self.input_text(self.loc_search_release_package_name, info["package_name"])

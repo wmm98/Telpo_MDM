@@ -325,6 +325,7 @@ class APPSPage(TelpoMDMPage):
         self.confirm_alert_existed(self.loc_app_release_btn)
 
     def input_release_app_info(self, info, kiosk_mode=False):
+        self.time_sleep(3)
         release_box = self.get_element(self.loc_app_release_alert)
         if kiosk_mode:
             self.select_by_text(self.loc_set_kiosk_mode, "YES")

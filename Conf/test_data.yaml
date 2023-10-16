@@ -39,7 +39,25 @@ MDMTestData:
     # 有分android和linux两种系统
     platform: Android
 
-  # 服务器列表
+
+  # Content相关信息， 没有特殊要求不用填写
+  Content_info:
+    # txt 文件
+    normal_file:
+      - test_txt_file.txt
+      - test_zip_file.zip
+    # 开机动画
+    boot_animation: test_bootanimation.zip
+    # 壁纸
+    wallpaper:
+      - test_background_image_png.png
+      - test_background_image_webp.webp
+    # 开机logo
+    boot_logo:
+      - test_boot_logo_jpg.jpg
+      - test_boot_logo_png.png
+
+  # 设备信息，需要修改
   android_device_info:
     # 设置永不休眠信息
     device_name: d

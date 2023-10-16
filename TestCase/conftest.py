@@ -20,6 +20,7 @@ driver = TestCase.test_driver
 device_page = TestCase.DevicesPage(driver, 40)
 ota_page = TestCase.OTAPage(driver, 40)
 app_page = TestCase.APPSPage(driver, 40)
+content_page = TestCase.ContentPage(driver, 40)
 android_page = TestCase.AndroidAimdmPage(TestCase.device_data, 30)
 
 
@@ -28,6 +29,7 @@ def unlock_screen():
     android_page.device_unlock()
     yield
 
+
 @pytest.fixture()
 def delete_ota_package_relate():
     android_page.del_all_downloaded_zip()
@@ -35,6 +37,7 @@ def delete_ota_package_relate():
     yield
     android_page.del_all_downloaded_zip()
     android_page.del_updated_zip()
+
 
 @pytest.fixture()
 def connected_wifi_adb():
@@ -128,6 +131,25 @@ def del_all_app_release_log_after():
 
 
 @pytest.fixture()
+def go_to_content_page():
+    content_page.go_to_new_address("content")
+    yield
+    content_page.go_to_new_address("content")
+
+
+@pytest.fixture()
+def go_to_content_release_page():
+    content_page.go_to_new_address("content/release")
+    yield
+
+
+@pytest.fixture()
+def go_to_content_upgrade_page():
+    content_page.go_to_new_address("content/log")
+    yield
+
+
+@pytest.fixture()
 def del_all_app_uninstall_release_log():
     app_page.go_to_new_address("apps/appUninstall")
     app_page.delete_all_app_release_log()
@@ -151,4 +173,3 @@ def go_to_app_release_log():
 def go_to_app_uninstall_release_log():
     app_page.go_to_new_address("apps/appUninstall")
     yield
-
