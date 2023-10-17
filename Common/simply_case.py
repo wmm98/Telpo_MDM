@@ -17,6 +17,7 @@ class Optimize_Case:
 
     def check_single_device(self, sn):
         try:
+            self.page.go_to_new_address("devices")
             self.page.search_device_by_sn(sn)
             devices_list = self.page.get_dev_info_list()
             if len(devices_list) == 0:

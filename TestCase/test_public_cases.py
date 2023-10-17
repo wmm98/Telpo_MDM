@@ -178,9 +178,11 @@ class TestAppPage:
     @allure.title("public case-推送壁纸--请在附件查看壁纸截图效果")
     def test_release_wallpaper(self, unlock_screen, del_all_content_release_logs):
         # "All Files" "Normal Files" "Boot Animations" "Wallpaper" "LOGO"
-        opt_case.check_single_device(self.device_sn)
         wallpapers = test_yml["Content_info"]["wallpaper"]
         for paper in wallpapers:
+            opt_case.check_single_device(self.device_sn)
+            print(paper)
+            self.content_page.go_to_new_address("content")
             file_path = conf.project_path + "\\Param\\Content\\%s" % paper
             file_size = self.content_page.get_file_size_in_windows(file_path)
             print("获取到的文件 的size(bytes): ", file_size)
@@ -189,9 +191,11 @@ class TestAppPage:
             self.content_page.time_sleep(4)
             self.content_page.search_content('Wallpaper', paper)
             release_info = {"sn": self.device_sn, "content_name": paper}
+            self.content_page.time_sleep(3)
             if len(self.content_page.get_content_list()) == 1:
                 self.content_page.release_wallpaper(self.device_sn)
                 # check release log
+                self.content_page.go_to_new_address("content/release")
                 now_time = self.content_page.get_current_time()
                 while True:
                     release_len = len(self.content_page.get_content_latest_release_log_list(send_time, release_info))
@@ -248,16 +252,26 @@ class TestAppPage:
                                 action = upgrade_list[0]["Action"]
                                 print("action", action)
                                 if self.content_page.get_action_status(action) == 7:
-                                    if self.android_mdm_page.app_is_installed(release_info["package"]):
-                                        break
-                                    else:
-                                        assert False, "@@@@平台显示已经完成安装了app, 终端发现没有安装此app， 请检查！！！！"
+                                    break
                             # wait upgrade 3 min at most
                             if self.content_page.get_current_time() > self.content_page.return_end_time(now_time, 180):
                                 assert False, "@@@@3分钟还没有设置完相应的壁纸， 请检查！！！"
                             self.content_page.time_sleep(5)
                             self.content_page.refresh_page()
-                        self.
+                        base_directory = "Wallpaper"
+                        wallpaper_before_reboot = "%s\\wallpaper_before_reboot.jpg" % base_directory
+                        self.android_mdm_page.save_screenshot_to(wallpaper_before_reboot)
+                        self.android_mdm_page.upload_image_JPG(
+                            conf.project_path + "\\ScreenShot\\%s" % wallpaper_before_reboot,
+                            "setting_wallpaper-%s" % paper)
+                        self.android_mdm_page.reboot_device(self.wifi_ip)
+                        self.android_mdm_page.confirm_app_start(release_info["package"])
+                        wallpaper_after_reboot = "%s\\wallpaper_after_reboot.jpg" % base_directory
+                        self.android_mdm_page.save_screenshot_to(wallpaper_after_reboot)
+                        self.android_mdm_page.upload_image_JPG(
+                            conf.project_path + "\\ScreenShot\\%s" % wallpaper_after_reboot, "setting_wallpaper-%s" % paper)
+                        # assert False,  "@@@请在报告查看app满屏效果截图"
+
             else:
                 assert False, "@@@@平台上没有该壁纸： %s, 请检查" % paper
 

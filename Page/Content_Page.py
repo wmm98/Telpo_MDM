@@ -17,16 +17,16 @@ class ContentPage(TelpoMDMPage):
     loc_single_content = (By.CLASS_NAME, "fg-file")
     loc_content_detail_btn = (By.CSS_SELECTOR, "[class = 'fas fa-list-ul']")
     loc_detail_box = (By.CLASS_NAME, "fd-panel-detail")
-    loc_detail_release_btn = (By.CLASS_NAME, "fas fa-registered")
+    loc_detail_release_btn = (By.CSS_SELECTOR, "[class = 'fas fa-registered']")
     # release btn related
     loc_content_release_alert = (By.ID, "modal-release")
     loc_device_list = (By.ID, "snlist")
     loc_single_device = (By.TAG_NAME, "li")
-    loc_content_release_confirm = (By.CSS_SELECTOR, "[class = 'loc_app_release_confirm']")
+    loc_content_release_confirm = (By.CSS_SELECTOR, "[class = 'btn btn-danger btn-release']")
 
     # search related
     loc_search_box_show = (By.CSS_SELECTOR, "[class = 'btn btn-tool btn-searchbar']")  # open status  display: inline-block;  default status: display: none;
-    loc_search_btn = (By.CSS_SELECTOR, "[class = 'fas fa-search']")
+    loc_content_search_btn = (By.CSS_SELECTOR, "[class = 'fas fa-search']")
     loc_files_type = (By.CSS_SELECTOR, "[class = 'form-control form-control-sm file-search-usefor']")
     loc_input_name_box = (By.CSS_SELECTOR, "[class = 'form-control file-search-name']")
 
@@ -132,6 +132,8 @@ class ContentPage(TelpoMDMPage):
             for single_log in logs:
                 cols = single_log.find_elements(*self.loc_single_release_col)
                 receive_time_text = cols[-1].text
+                print(send_time)
+                print(receive_time_text)
                 sn = cols[-3].text
                 file_name = cols[1].text
                 time_line = self.extract_integers(receive_time_text)
@@ -175,6 +177,7 @@ class ContentPage(TelpoMDMPage):
         now_time = self.get_current_time()
         while True:
             if "block" in self.get_element(self.loc_detail_box).get_attribute("style"):
+                print("================运行到这里来了")
                 break
             else:
                 self.click(self.loc_content_detail_btn)
@@ -184,16 +187,18 @@ class ContentPage(TelpoMDMPage):
 
     def search_content(self, f_type, f_name):
         try:
-            search_ele = self.get_element(self.loc_search_box_show).find_element(*self.loc_search_btn)
-            search_ele.click()
             self.time_sleep(3)
+            search_ele = self.get_element(self.loc_search_box_show).find_element(*self.loc_content_search_btn)
+            search_ele.click()
+            # self.exc_js_click(search_ele)
             self.confirm_search_box_show()
             self.select_file_type(f_type)
             self.input_text(self.loc_input_name_box, f_name)
             self.time_sleep(1)
             self.input_keyboard(self.loc_input_name_box, public_pack.Keys.ENTER)
         except public_pack.ElementNotInteractableException:
-            search_ele = self.get_element(self.loc_search_box_show).find_element(*self.loc_search_btn)
+            search_ele = self.get_element(self.loc_search_box_show).find_element(*self.loc_content_search_btn)
+            # .find_element(*self.loc_search_btn)
             search_ele.click()
             self.time_sleep(3)
             self.confirm_search_box_show()
@@ -218,8 +223,8 @@ class ContentPage(TelpoMDMPage):
             if "inline-block" in self.get_element(self.loc_search_box_show).get_attribute("style"):
                 break
             else:
-                self.ele_is_existed_in_range(self.loc_search_box_show, self.loc_search_btn)
-                ele = self.get_element(self.loc_search_box_show).find_element(self.loc_search_btn)
+                self.ele_is_existed_in_range(self.loc_search_box_show, self.loc_content_search_btn)
+                ele = self.get_element(self.loc_search_box_show).find_element(self.loc_content_search_btn)
                 ele.click()
             if self.get_current_time() > self.return_end_time(now_time):
                 assert False, "@@@无法打开搜索框， 请检查！！！！"
@@ -231,8 +236,8 @@ class ContentPage(TelpoMDMPage):
             if "none" in self.get_element(self.loc_search_box_show).get_attribute("style"):
                 break
             else:
-                self.ele_is_existed_in_range(self.loc_search_box_show, self.loc_search_btn)
-                ele = self.get_element(self.loc_search_box_show).find_element(self.loc_search_btn)
+                self.ele_is_existed_in_range(self.loc_search_box_show, self.loc_content_search_btn)
+                ele = self.get_element(self.loc_search_box_show).find_element(self.loc_content_search_btn)
                 ele.click()
             if self.get_current_time() > self.return_end_time(now_time):
                 assert False, "@@@无法进行搜索， 请检查！！！！"

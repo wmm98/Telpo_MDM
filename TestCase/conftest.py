@@ -144,6 +144,7 @@ def del_all_content_release_logs():
     content_page.go_to_new_address("content/release")
     content_page.delete_all_content_release_log()
 
+
 @pytest.fixture()
 def go_to_content_release_page():
     content_page.go_to_new_address("content/release")
