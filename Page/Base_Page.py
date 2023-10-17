@@ -284,6 +284,8 @@ class BasePage(interface):
             return 5
         if self.upper_transfer(self.remove_space("Upgrade Fail")) in action:
             return 6
+        if self.upper_transfer(self.remove_space("Process completed")) in action:
+            return 7
 
 
 

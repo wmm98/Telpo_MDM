@@ -32,12 +32,14 @@ class TestAppPage:
         self.content_page = case_pack.ContentPage(self.driver, 40)
         self.wifi_ip = case_pack.device_data["wifi_device_info"]["ip"]
         self.android_mdm_page.del_all_downloaded_apk()
+        self.android_mdm_page.del_all_content_file()
         self.device_sn = self.android_mdm_page.get_device_sn()
 
     def teardown_class(self):
         self.app_page.delete_app_install_and_uninstall_logs()
         self.android_mdm_page.del_all_downloaded_apk()
         self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
+        self.android_mdm_page.del_all_content_file()
         self.app_page.refresh_page()
         # self.android_mdm_page.reboot_device(self.wifi_ip)
 
@@ -174,9 +176,95 @@ class TestAppPage:
 
     @allure.feature('MDM_public-test-test')
     @allure.title("public case-推送壁纸--请在附件查看壁纸截图效果")
-    def test_release_wallpaper(self, go_to_content_page):
+    def test_release_wallpaper(self, unlock_screen, del_all_content_release_logs):
         # "All Files" "Normal Files" "Boot Animations" "Wallpaper" "LOGO"
-        self.content_page.search_content("Wallpaper", "test_background_image_png.png")
+        opt_case.check_single_device(self.device_sn)
+        wallpapers = test_yml["Content_info"]["wallpaper"]
+        for paper in wallpapers:
+            file_path = conf.project_path + "\\Param\\Content\\%s" % paper
+            file_size = self.content_page.get_file_size_in_windows(file_path)
+            print("获取到的文件 的size(bytes): ", file_size)
+            send_time = case_pack.time.strftime('%Y-%m-%d %H:%M',
+                                                case_pack.time.localtime(self.content_page.get_current_time()))
+            self.content_page.time_sleep(4)
+            self.content_page.search_content('Wallpaper', paper)
+            release_info = {"sn": self.device_sn, "content_name": paper}
+            if len(self.content_page.get_content_list()) == 1:
+                self.content_page.release_wallpaper(self.device_sn)
+                # check release log
+                now_time = self.content_page.get_current_time()
+                while True:
+                    release_len = len(self.content_page.get_content_latest_release_log_list(send_time, release_info))
+                    print("release_len", release_len)
+                    if release_len == 1:
+                        break
+                    elif release_len > 1:
+                        assert False, "@@@@推送一次壁纸，有多条释放记录，请检查！！！"
+                    else:
+                        self.content_page.refresh_page()
+                    if self.content_page.get_current_time() > self.content_page.return_end_time(now_time):
+                        assert False, "@@@@没有相应的壁纸 release log， 请检查！！！"
+                    self.content_page.time_sleep(3)
+
+                # check upgrade log
+                    # check if the upgrade log appeared, if appeared, break
+                    self.content_page.go_to_new_address("content/log")
+                    now_time = self.content_page.get_current_time()
+                    while True:
+                        release_len = len(self.content_page.get_content_latest_upgrade_log(send_time, release_info))
+                        if release_len == 1:
+                            break
+                        if self.content_page.get_current_time() > self.content_page.return_end_time(now_time):
+                            assert False, "@@@@没有相应的 upgrade log， 请检查！！！"
+                        self.content_page.time_sleep(5)
+                        self.content_page.refresh_page()
+
+                        # check the app action in app upgrade logs, if download complete or upgrade complete, break
+                        now_time = self.content_page.get_current_time()
+                        while True:
+                            upgrade_list = self.content_page.get_content_latest_upgrade_log(send_time, release_info)
+                            if len(upgrade_list) != 0:
+                                action = upgrade_list[0]["Action"]
+                                print(action)
+                                if self.content_page.get_action_status(action) == 2 or self.content_page.get_action_status(action) == 7:
+                                    # check the app size in device, check if app download fully
+                                    if not self.android_mdm_page.download_file_is_existed(paper):
+                                        assert False, "@@@@平台显示下载完整， 终端查询不存在此文件， 请检查！！！！"
+                                    size = self.android_mdm_page.get_file_size_in_device(paper)
+                                    print("终端下载后的的size大小：", size)
+                                    assert file_size == size, "@@@@平台显示下载完成， 终端的包下载不完整，请检查！！！"
+                                    break
+                            # wait 20 min
+                            if self.content_page.get_current_time() > self.content_page.return_end_time(now_time, 1800):
+                                assert False, "@@@@20分钟还没有下载完相应的文件， 请检查！！！"
+                            self.content_page.time_sleep(5)
+                            self.content_page.refresh_page()
+
+                        # check upgrade
+                        now_time = self.content_page.get_current_time()
+                        while True:
+                            upgrade_list = self.content_page.get_content_latest_upgrade_log(send_time, release_info)
+                            if len(upgrade_list) != 0:
+                                action = upgrade_list[0]["Action"]
+                                print("action", action)
+                                if self.content_page.get_action_status(action) == 7:
+                                    if self.android_mdm_page.app_is_installed(release_info["package"]):
+                                        break
+                                    else:
+                                        assert False, "@@@@平台显示已经完成安装了app, 终端发现没有安装此app， 请检查！！！！"
+                            # wait upgrade 3 min at most
+                            if self.content_page.get_current_time() > self.content_page.return_end_time(now_time, 180):
+                                assert False, "@@@@3分钟还没有设置完相应的壁纸， 请检查！！！"
+                            self.content_page.time_sleep(5)
+                            self.content_page.refresh_page()
+                        self.
+            else:
+                assert False, "@@@@平台上没有该壁纸： %s, 请检查" % paper
+
+
+
+
+
 
 
 

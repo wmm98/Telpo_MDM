@@ -144,46 +144,32 @@ class AndroidBasePageWiFi(interface):
         self.u2_send_command("rm %s" % file_name)
 
     def del_all_downloaded_apk(self):
-        print("ls /%s/aimdm/download" % self.get_internal_storage_directory())
-        print(self.u2_send_command("ls /%s/aimdm/download" % self.get_internal_storage_directory()))
-        try:
+        file_list = self.get_download_list()
+        if len(file_list) != 0:
             for apk in self.get_download_list():
-                self.rm_file("/%s/aimdm/download/%s" % (self.get_internal_storage_directory(), apk))
-        except Exception as e:
-            print(e)
-            file_list = self.get_download_list()
-            if len(file_list) != 0:
-                for apk in self.get_download_list():
-                    if "apk" in apk:
-                        self.rm_file("/%s/aimdm/download/%s" % (self.get_internal_storage_directory(), apk))
-        print("ls /%s/aimdm/download" % self.get_internal_storage_directory())
-        print(self.u2_send_command("ls /%s/aimdm/download" % self.get_internal_storage_directory()))
+                if "apk" in apk:
+                    self.rm_file("/%s/aimdm/download/%s" % (self.get_internal_storage_directory(), apk))
+
+    def del_all_content_file(self):
+        image_list = [".png", ".jpg", ".webp", "jpeg", ".txt"]
+        file_list = self.get_download_list()
+        if len(file_list) != 0:
+            for content in image_list:
+                for file in self.get_download_list():
+                    if content in file:
+                        self.rm_file("/%s/aimdm/download/%s" % (self.get_internal_storage_directory(), file))
 
     def del_updated_zip(self):
-        try:
-            print(self.u2_send_command("ls /sdcard"))
-            if "update.zip" in self.u2_send_command("ls /sdcard"):
-                print("================存在update文件========================")
-                self.rm_file("/%s/%s" % (self.get_internal_storage_directory(), "update.zip"))
-        except Exception as e:
-            print(e)
-            file_list = self.get_download_list()
-            if len(file_list) != 0:
-                for apk in self.get_download_list():
-                    if "apk" in apk:
-                        self.rm_file("/%s/aimdm/download/%s" % (self.get_internal_storage_directory(), apk))
+        if "update.zip" in self.u2_send_command("ls /sdcard"):
+            print("================存在update文件========================")
+            self.rm_file("/%s/%s" % (self.get_internal_storage_directory(), "update.zip"))
 
     def del_all_downloaded_zip(self):
-        try:
+        file_list = self.get_download_list()
+        if len(file_list) != 0:
             for zip_package in self.get_download_list():
-                self.rm_file("/%s/aimdm/download/%s" % (self.get_internal_storage_directory(), zip_package))
-        except Exception as e:
-            print(e)
-            file_list = self.get_download_list()
-            if len(file_list) != 0:
-                for zip_package in self.get_download_list():
-                    if "zip" in zip_package:
-                        self.rm_file("/%s/aimdm/download/%s" % (self.get_internal_storage_directory(), zip_package))
+                if "zip" in zip_package:
+                    self.rm_file("/%s/aimdm/download/%s" % (self.get_internal_storage_directory(), zip_package))
 
     def download_file_is_existed(self, file_name):
         res = self.u2_send_command("ls /%s/aimdm/download/ |grep %s" % (self.get_internal_storage_directory(), file_name))

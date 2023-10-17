@@ -50,8 +50,8 @@ MDMTestData:
     boot_animation: test_bootanimation.zip
     # 壁纸
     wallpaper:
-      - test_background_image_png.png
-      - test_background_image_webp.webp
+      - test_background_png.png
+      - test_background_webp.webp
     # 开机logo
     boot_logo:
       - test_boot_logo_jpg.jpg
