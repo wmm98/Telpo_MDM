@@ -49,6 +49,20 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
                 assert exp_text == act_text, "@@@1分钟内检测到预期的提示信息和实际提示信息不一样， 请检查！！！！"
             self.time_sleep(1)
 
+    def clear_download_and_upgrade_alert(self):
+        tips = []
+        lock_tips = self.remove_space_and_upper("pls contact the administrator to unlock it!")
+        download_tips = self.remove_space_and_upper("Foundanewfirmware,whethertoupgrade?")
+        upgrade_tips = self.remove_space_and_upper("whethertoupgradenow?")
+        tips.append(lock_tips)
+        tips.append(download_tips)
+        tips.append(upgrade_tips)
+        current_tip = self.remove_space_and_upper(self.get_msg_tips_text())
+        if download_tips in current_tip:
+            self.click_cancel_btn()
+        if upgrade_tips in current_tip:
+            self.click_cancel_btn()
+
     def confirm_wifi_btn_open(self, timeout=60):
         now = self.get_current_time()
         while True:
@@ -179,6 +193,10 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
         ele = self.get_element_by_id(self.msg_confirm_id)
         self.click_element(ele)
 
+    def click_cancel_btn(self):
+        ele = self.get_element_by_id(self.msg_cancel_id)
+        self.click_element(ele)
+
     def mdm_msg_alert_show(self, time_out=5):
         now_time = self.get_current_time()
         while True:
@@ -195,6 +213,15 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
                 break
             if self.get_current_time() > self.return_end_time(now_time):
                 assert False, "@@@@%d内还没弹出弹框， 请检查！！！！" % timeout
+            self.time_sleep(1)
+
+    def public_alert_show(self, timeout=60):
+        now_time = self.get_current_time()
+        while True:
+            if self.mdm_msg_alert_show():
+                return True
+            if self.get_current_time() > self.return_end_time(now_time, timeout):
+                return False
             self.time_sleep(1)
 
     def mdm_msg_alert_show_discard(self, time_out=5):

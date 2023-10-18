@@ -151,7 +151,7 @@ class AndroidBasePageWiFi(interface):
                     self.rm_file("/%s/aimdm/download/%s" % (self.get_internal_storage_directory(), apk))
 
     def del_all_content_file(self):
-        image_list = [".png", ".jpg", ".webp", "jpeg", ".txt"]
+        image_list = [".png", ".jpg", ".webp", "jpeg", ".txt", ".zip"]
         file_list = self.get_download_list()
         if len(file_list) != 0:
             for content in image_list:

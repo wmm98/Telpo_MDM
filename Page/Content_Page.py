@@ -45,7 +45,8 @@ class ContentPage(TelpoMDMPage):
     loc_release_confirm_del_btn = (By.CSS_SELECTOR, "[class = 'btn btn-danger btn-dels']")
     loc_release_list = (By.ID, "databody")
     loc_single_release = (By.TAG_NAME, "tr")
-    loc_single_release_col = (By.CLASS_NAME, "center v-center")
+    loc_single_release_col = (By.TAG_NAME, "td")
+    loc_release_path = (By.ID, "device_path")
 
     # content upgrade logs relate
     loc_app_upgrade_logs_body = (By.ID, "databody")
@@ -59,20 +60,6 @@ class ContentPage(TelpoMDMPage):
                 upgrade_list = self.get_element(self.loc_app_upgrade_logs_body)
                 if self.remove_space("No Data") in self.remove_space(upgrade_list.text):
                     return []
-                try:
-                    now = self.get_current_time()
-                    while True:
-                        single_log = upgrade_list.find_elements(*self.loc_app_upgrade_single_log)
-                        if len(single_log) > 0:
-                            break
-                        else:
-                            self.refresh_page()
-                        if self.get_current_time() > self.return_end_time(now, 15):
-                            assert False
-                        self.time_sleep(2)
-                except Exception:
-                    self.refresh_page()
-
                 single_log = upgrade_list.find_elements(*self.loc_app_upgrade_single_log)[0]
                 cols = single_log.find_elements(*self.loc_app_upgrade_log_col)
                 receive_time_text = cols[-2].text
@@ -126,14 +113,12 @@ class ContentPage(TelpoMDMPage):
         try:
             release_list = self.get_element(self.loc_release_list)
             logs_list = []
-            if self.remove_space("No Data") in self.remove_space(release_list.text):
+            if self.remove_space("NO Data") in self.remove_space(release_list.text):
                 return []
             logs = release_list.find_elements(*self.loc_single_release)
             for single_log in logs:
                 cols = single_log.find_elements(*self.loc_single_release_col)
                 receive_time_text = cols[-1].text
-                print(send_time)
-                print(receive_time_text)
                 sn = cols[-3].text
                 file_name = cols[1].text
                 time_line = self.extract_integers(receive_time_text)
@@ -141,13 +126,13 @@ class ContentPage(TelpoMDMPage):
                 if self.compare_time(send_time, receive_time):
                     if (release_info["sn"] in sn) and (release_info["content_name"] in file_name):
                         logs_list.append(single_log)
-                return logs_list
+            return logs_list
         except Exception:
             return []
 
-    def release_wallpaper(self, sn):
+    def release_content_file(self, sn, file=False):
         self.show_detail_box()
-        self.input_release_content_info(sn)
+        self.input_release_content_info(sn, file)
 
     def show_detail_box(self):
         self.click(self.loc_content_detail_btn)
@@ -156,7 +141,9 @@ class ContentPage(TelpoMDMPage):
         release_btn.click()
         self.confirm_alert_existed(self.loc_detail_release_btn)
 
-    def input_release_content_info(self, sn):
+    def input_release_content_info(self, sn, file):
+        if file:
+            self.input_text(self.loc_release_path, "sdcard/aimdm")
         release_box = self.get_element(self.loc_content_release_alert)
         # click show devices btn， check if device is show, if now, click it
         btn = self.get_element(self.loc_show_device_btn)
@@ -177,7 +164,6 @@ class ContentPage(TelpoMDMPage):
         now_time = self.get_current_time()
         while True:
             if "block" in self.get_element(self.loc_detail_box).get_attribute("style"):
-                print("================运行到这里来了")
                 break
             else:
                 self.click(self.loc_content_detail_btn)

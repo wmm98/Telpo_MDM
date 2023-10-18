@@ -64,6 +64,12 @@ def go_to_and_return_device_page():
 
 
 @pytest.fixture()
+def go_to_device_page():
+    device_page.go_to_new_address("devices")
+    yield
+
+
+@pytest.fixture()
 def go_to_ota_upgrade_logs_page():
     ota_page.go_to_new_address("ota/log")
     yield
