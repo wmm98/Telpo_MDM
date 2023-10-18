@@ -180,8 +180,8 @@ class TestAppPage:
     @allure.title("public case-推送壁纸--请在附件查看壁纸截图效果")
     def test_release_wallpaper(self, unlock_screen, del_all_content_release_logs):
         # "All Files" "Normal Files" "Boot Animations" "Wallpaper" "LOGO"
+        self.android_mdm_page.back_to_home()
         wallpapers = test_yml["Content_info"]["wallpaper"]
-        print(wallpapers)
         i = 0
         for paper in wallpapers:
             i += 1
@@ -190,6 +190,8 @@ class TestAppPage:
             file_path = conf.project_path + "\\Param\\Content\\%s" % paper
             file_size = self.content_page.get_file_size_in_windows(file_path)
             print("获取到的文件 的size(bytes): ", file_size)
+            file_hash_value = self.android_mdm_page.calculate_sha256_in_windows("Content\\%s " % paper)
+            print("file_hash_value:", file_hash_value)
             send_time = case_pack.time.strftime('%Y-%m-%d %H:%M',
                                                 case_pack.time.localtime(self.content_page.get_current_time()))
             self.content_page.time_sleep(4)
@@ -241,6 +243,7 @@ class TestAppPage:
                             size = self.android_mdm_page.get_file_size_in_device(paper)
                             print("终端下载后的的size大小：", size)
                             assert file_size == size, "@@@@平台显示下载完成， 终端的包下载不完整，请检查！！！"
+                            assert file_hash_value == self.android_mdm_page.calculate_sha256_in_device(paper)
                             break
                     # wait 20 min
                     if self.content_page.get_current_time() > self.content_page.return_end_time(now_time, 1800):
@@ -288,6 +291,8 @@ class TestAppPage:
         file_path = conf.project_path + "\\Param\\Content\\%s" % animation
         file_size = self.content_page.get_file_size_in_windows(file_path)
         print("获取到的文件 的size(bytes): ", file_size)
+        file_hash_value = self.android_mdm_page.calculate_sha256_in_windows("Content\\%s " % animation)
+        print("file_hash_value:", file_hash_value)
         send_time = case_pack.time.strftime('%Y-%m-%d %H:%M',
                                             case_pack.time.localtime(self.content_page.get_current_time()))
         self.content_page.time_sleep(4)
@@ -340,6 +345,7 @@ class TestAppPage:
                     size = self.android_mdm_page.get_file_size_in_device(animation)
                     print("终端下载后的的size大小：", size)
                     assert file_size == size, "@@@@平台显示下载完成， 终端的包下载不完整，请检查！！！"
+                    assert file_hash_value == self.android_mdm_page.calculate_sha256_in_device(animation), "@@@@平台显示下载完成， 终端的包下载不完整，请检查！！！"
                     break
             # wait 20 min
             if self.content_page.get_current_time() > self.content_page.return_end_time(now_time, 1800):
@@ -548,7 +554,7 @@ class TestAppPage:
     @allure.title("public case-开机在线成功率")
     def test_device_online_pressure(self, go_to_device_page):
         sn = self.device_sn
-        length = 1
+        length = 5
         self.device_page.refresh_page()
         # confirm if device is online and execute next step, if not, end the case execution
         data = opt_case.check_single_device(sn)
@@ -558,10 +564,12 @@ class TestAppPage:
         for i in range(length):
             self.device_page.refresh_page()
             msg = "%s:test%d" % (now, i)
-            device_info = opt_case.get_single_device_list(sn)
-            if "On" in device_info["Status"]:
+            device_info = opt_case.get_single_device_list(sn)[0]
+            if self.device_page.upper_transfer("on") in self.device_page.remove_space_and_upper(device_info["Status"]):
                 if self.device_page.upper_transfer("Locked") in self.device_page.remove_space_and_upper(device_info["Lock Status"]):
+                    self.device_page.select_device(sn)
                     self.device_page.click_unlock()
+                    self.device_page.refresh_page()
                 self.device_page.select_device(sn)
                 self.device_page.click_send_btn()
                 self.device_page.msg_input_and_send(msg)

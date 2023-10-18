@@ -329,7 +329,7 @@ class DevicesPage(TelpoMDMPage):
         try:
             self.click(self.loc_unlock_btn)
             self.confirm_tips_alert_show(self.loc_unlock_btn)
-        except public_pack.StaleElementReferenceException:
+        except Exception:
             self.click(self.loc_unlock_btn)
             self.confirm_tips_alert_show(self.loc_unlock_btn)
 
