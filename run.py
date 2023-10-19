@@ -20,6 +20,7 @@ import shutil
 import datetime
 from utils.base_web_driver import BaseWebDriver
 from utils.client_connect import ClientConnect
+from Common.check_yaml_file import CheckYaml
 
 
 if __name__ == '__main__':
@@ -27,6 +28,7 @@ if __name__ == '__main__':
     # init config file
     conf = Config.Config()
     conf.load_yaml_data()
+    CheckYaml().check_test_data()
     test_info = conf.get_yaml_data()['MDMTestData']
     log = Log.MyLog()
 

@@ -37,7 +37,7 @@ MDMTestData:
   # ota升级包相关信息, 有变化需要填写
   ota_packages_info:
     package_name: TPS900_msm8937_sv10_fv1.1.16_pv1.1.16-1.1.17.zip
-    # 有分android和linux两种系统
+    # 有分android和linux两种系统  Android Linux
     platform: Android
 
   # Content相关信息， 没有特殊要求不用填写
