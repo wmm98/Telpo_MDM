@@ -181,6 +181,12 @@ class TestAppPage:
     def test_release_wallpaper(self, unlock_screen, del_all_content_release_logs):
         # "All Files" "Normal Files" "Boot Animations" "Wallpaper" "LOGO"
         self.android_mdm_page.back_to_home()
+        self.android_mdm_page.time_sleep(3)
+        base_directory = "Wallpaper"
+        org_wallpaper = "%s\\org_wallpaper.jpg" % base_directory
+        self.android_mdm_page.save_screenshot_to(org_wallpaper)
+        self.android_mdm_page.upload_image_JPG(
+            conf.project_path + "\\ScreenShot\\%s" % org_wallpaper, "original_wallpaper")
         wallpapers = test_yml["Content_info"]["wallpaper"]
         i = 0
         for paper in wallpapers:
@@ -265,7 +271,7 @@ class TestAppPage:
                         assert False, "@@@@3分钟还没有设置完相应的壁纸， 请检查！！！"
                     self.content_page.time_sleep(5)
                     self.content_page.refresh_page()
-                base_directory = "Wallpaper"
+
                 wallpaper_before_reboot = "%s\\wallpaper.jpg" % base_directory
                 self.android_mdm_page.save_screenshot_to(wallpaper_before_reboot)
                 self.android_mdm_page.upload_image_JPG(
@@ -551,10 +557,10 @@ class TestAppPage:
                 self.content_page.refresh_page()
 
     @allure.feature('MDM_public-test-test')
-    @allure.title("public case-开机在线成功率")
+    @allure.title("public case-开机在线成功率--请在报告右侧log文件查看在线率")
     def test_device_online_pressure(self, go_to_device_page):
         sn = self.device_sn
-        length = 5
+        length = 10
         self.device_page.refresh_page()
         # confirm if device is online and execute next step, if not, end the case execution
         data = opt_case.check_single_device(sn)
@@ -562,6 +568,8 @@ class TestAppPage:
         now = case_pack.time.strftime('%Y-%m-%d %H:%M', case_pack.time.localtime(case_pack.time.time()))
         online_flag = 0
         for i in range(length):
+            if self.android_mdm_page.public_alert_show(3):
+                self.android_mdm_page.clear_download_and_upgrade_alert()
             self.device_page.refresh_page()
             msg = "%s:test%d" % (now, i)
             device_info = opt_case.get_single_device_list(sn)[0]
@@ -577,11 +585,8 @@ class TestAppPage:
                 # check message in device
                 if not self.android_mdm_page.public_alert_show(60):
                     continue
-                self.android_mdm_page.clear_download_and_upgrade_alert()
-                if not self.android_mdm_page.public_alert_show(60):
-                    continue
                 try:
-                    self.android_mdm_page.confirm_received_text(msg)
+                    self.android_mdm_page.confirm_received_text(msg, timeout=5)
                 except AttributeError:
                     continue
                 try:
@@ -590,10 +595,11 @@ class TestAppPage:
                 except Exception:
                     pass
             self.android_mdm_page.reboot_device(self.wifi_ip)
+            if self.android_mdm_page.public_alert_show(timeout=5):
+                self.android_mdm_page.clear_download_and_upgrade_alert()
             self.device_page.refresh_page()
-            if self.device_page.upper_transfer("on") in self.device_page.remove_space_and_upper(device_info["Status"]):
-                if self.device_page.upper_transfer("Locked") in self.device_page.remove_space_and_upper(device_info["Lock Status"]):
-                    self.device_page.click_unlock()
+            device_info_after_reboot = opt_case.get_single_device_list(sn)[0]
+            if self.device_page.upper_transfer("on") in self.device_page.remove_space_and_upper(device_info_after_reboot["Status"]):
                 self.device_page.select_device(sn)
                 self.device_page.click_send_btn()
                 self.device_page.msg_input_and_send(msg)
@@ -601,11 +607,8 @@ class TestAppPage:
                 # check message in device
                 if not self.android_mdm_page.public_alert_show(60):
                     continue
-                self.android_mdm_page.clear_download_and_upgrade_alert()
-                if not self.android_mdm_page.public_alert_show(60):
-                    continue
                 try:
-                    self.android_mdm_page.confirm_received_text(msg)
+                    self.android_mdm_page.confirm_received_text(msg, timeout=5)
                 except AttributeError:
                     continue
                 try:
@@ -616,6 +619,11 @@ class TestAppPage:
             online_flag += 1
             self.device_page.refresh_page()
         print(online_flag)
+        msg = "重启%d次1分钟内在线成功率为%s" % (length, str(online_flag/length))
+        log.info(msg)
+        print(msg)
+
+
 
 
 

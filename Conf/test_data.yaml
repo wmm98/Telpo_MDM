@@ -4,7 +4,7 @@ MDMTestData:
 
   # 设置信息
   settings:
-    test_version: 1
+    test_version:
     version: 1.0
     debug: true
 
@@ -12,6 +12,7 @@ MDMTestData:
   website_info:
     # 测试服相关信息
     test_url: http://test.telpoai.com/login
+    test_base_url: http://test.telpoai.com
     test_login_ok_url: http://test.telpoai.com/device/map
     test_user: mdm_automation
     test_password: mm17765602533
@@ -38,7 +39,6 @@ MDMTestData:
     package_name: TPS900_msm8937_sv10_fv1.1.16_pv1.1.16-1.1.17.zip
     # 有分android和linux两种系统
     platform: Android
-
 
   # Content相关信息， 没有特殊要求不用填写
   Content_info:

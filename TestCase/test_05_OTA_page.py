@@ -81,10 +81,16 @@ class TestOTAPage:
         exp_existed_text = "ota release already existed"
         release_info = {"package_name": test_yml['ota_packages_info']['package_name'], "sn": self.device_sn,
                         "silent": 0, "category": "NO Limit", "network": "NO Limit"}
+        # get release ota package version
+        release_info["version"] = self.page.get_ota_package_version(release_info["package_name"])
+        current_firmware_version = self.android_mdm_page.check_firmware_version()
+        # compare current version and exp version
+        assert self.page.transfer_version_into_int(current_firmware_version) < self.page.transfer_version_into_int(
+            release_info["version"]), \
+            "@@@@释放的ota升级包比当前固件版本版本低， 请检查！！！"
         # reboot and sync data with platform
         self.android_mdm_page.reboot_device(self.wifi_ip)
         # search package
-        release_info["version"] = self.page.get_ota_package_version(release_info["package_name"])
         device_current_firmware_version = self.android_mdm_page.check_firmware_version()
         print("ota after upgrade version:", release_info["version"])
         # check file size and hash value in directory Param/package
@@ -223,10 +229,16 @@ class TestOTAPage:
         release_info = {"package_name": test_yml['ota_packages_info']['package_name'], "sn": self.device_sn,
                         "silent": 0, "category": "NO Limit", "network": "NO Limit"}
         self.android_mdm_page.del_updated_zip()
+        release_info["version"] = self.page.get_ota_package_version(release_info["package_name"])
+        current_firmware_version = self.android_mdm_page.check_firmware_version()
+        # compare current version and exp version
+        assert self.page.transfer_version_into_int(current_firmware_version) < self.page.transfer_version_into_int(release_info["version"]),\
+            "@@@@释放的ota升级包比当前固件版本版本低， 请检查！！！"
+
         # reboot
         self.android_mdm_page.reboot_device(self.wifi_ip)
         # search package
-        release_info["version"] = self.page.get_ota_package_version(release_info["package_name"])
+
         device_current_firmware_version = self.android_mdm_page.check_firmware_version()
         print("ota after upgrade version:", release_info["version"])
         ota_package_size = conf.project_path + "\\Param\\Package\\%s" % release_info["package_name"]

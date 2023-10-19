@@ -19,4 +19,5 @@ from uiautomator2.exceptions import UiaError
 import allure
 import hashlib
 from PIL import Image
+yaml_data = Config().get_yaml_data()['MDMTestData']
 

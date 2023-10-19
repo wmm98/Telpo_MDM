@@ -81,6 +81,7 @@ class OTAPage(TelpoMDMPage):
 
     def get_ota_latest_upgrade_log(self, send_time, release_info):
         self.page_load_complete()
+        self.time_sleep(2)
         upgrade_list = self.get_element(self.loc_app_upgrade_logs_body)
         logs_list = []
         if "No Data" in upgrade_list.text:

@@ -7,7 +7,6 @@ import time
 from utils.base_web_driver import BaseWebDriver
 
 
-
 class ElementsOperations:
 
     def __init__(self):
@@ -44,7 +43,7 @@ class ElementsOperations:
             wait_times = times
         return WebDriverWait(self.driver, wait_times).until(condition)
 
-    def web_driver_wait_until_not(self, condition,  times=0):
+    def web_driver_wait_until_not(self, condition, times=0):
         if times == 0:
             wait_times = self.times
         else:

@@ -95,7 +95,7 @@ class interface:
         return apk
 
     def get_apk_path(self, apk_name):
-        file_path = conf.project_path + "\\Param\\%s" % apk_name
+        file_path = conf.project_path + "\\Param\\Package\\%s" % apk_name
         return file_path
 
     def get_apk_package_name(self, apk_file_path):

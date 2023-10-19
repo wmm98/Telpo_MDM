@@ -38,14 +38,14 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
         self.click_msg_confirm_btn()
         self.confirm_msg_alert_fade(exp_tips)
 
-    def confirm_received_text(self, exp):
+    def confirm_received_text(self, exp, timeout=60):
         now_time = self.get_current_time()
         while True:
             exp_text = self.upper_transfer(self.remove_space(exp))
             act_text = self.upper_transfer(self.remove_space(self.get_msg_tips_text()))
             if exp_text == act_text:
                 break
-            if self.get_current_time() > self.return_end_time(now_time, 60):
+            if self.get_current_time() > self.return_end_time(now_time, timeout):
                 assert exp_text == act_text, "@@@1分钟内检测到预期的提示信息和实际提示信息不一样， 请检查！！！！"
             self.time_sleep(1)
 
@@ -218,7 +218,8 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
     def public_alert_show(self, timeout=60):
         now_time = self.get_current_time()
         while True:
-            if self.mdm_msg_alert_show():
+            ele = self.wait_ele_presence_by_id(self.msg_alert_id, timeout)
+            if ele:
                 return True
             if self.get_current_time() > self.return_end_time(now_time, timeout):
                 return False

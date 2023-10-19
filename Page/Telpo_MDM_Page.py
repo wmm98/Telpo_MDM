@@ -4,6 +4,7 @@ from Page.Base_Page import BasePage
 By = public_pack.By
 EC = public_pack.EC
 t_time = public_pack.t_time
+test_yml = public_pack.yaml_data
 
 
 class TelpoMDMPage(BasePage):
@@ -91,7 +92,7 @@ class TelpoMDMPage(BasePage):
             self.time_sleep(1)
 
     def go_to_new_address(self, url):
-        address = "http://test.telpoai.com/%s" % url
+        address = "%s/%s" % (test_yml["website_info"]["test_base_url"], url)
         self.driver.get(address)
         now_time = self.get_current_time()
         if self.driver.current_url != address:
