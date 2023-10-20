@@ -11,6 +11,15 @@ class AndroidBasePageWiFi(interface):
         self.times = times
         self.device_ip = ip
 
+    def get_app_userid(self, package):
+        id_info = self.u2_send_command("dumpsys package %s | grep userId" % package)
+        id_list = self.extract_integers(id_info)
+        userid = str(id_list[0])
+        return userid
+
+    def screen_off(self):
+        self.device_unlock()
+
     def back_to_home(self):
         self.client.press("home")
 
@@ -216,8 +225,29 @@ class AndroidBasePageWiFi(interface):
             return True
 
     def device_unlock(self):
-        self.client.screen_off()
+        self.device_sleep()
         self.client.unlock()
+
+    def device_sleep(self):
+        self.client.screen_off()
+        # self.time_sleep(3)
+        self.confirm_screen_off()
+
+    def is_usb_power(self):
+        self.time_sleep(1)
+        return self.client.device_info["battery"]["usbPowered"]
+
+    def confirm_screen_off(self):
+        now_time = self.get_current_time()
+        while True:
+            result = self.client.info.get("screenOn")
+            if not result:
+                break
+            else:
+                self.client.screen_off()
+            if self.get_current_time() > self.return_end_time(now_time, 30):
+                assert False, "@@@@无法熄屏， 请检查！！！"
+            self.time_sleep(1)
 
     def u2_send_command(self, cmd):
         try:

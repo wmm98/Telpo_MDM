@@ -26,6 +26,7 @@ class TestDevicesPage:
         self.android_mdm_page = case_pack.AndroidAimdmPage(case_pack.device_data, 5)
         self.wifi_ip = case_pack.device_data["wifi_device_info"]["ip"]
         self.device_sn = self.android_mdm_page.get_device_sn()
+        self.page.go_to_new_address("devices")
         # self.android_mdm_page.device_unlock()
 
     def teardown_class(self):

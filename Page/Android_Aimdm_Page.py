@@ -28,6 +28,14 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
     lock_psw_id = "%s:id/et_pwd" % aimdm_package
     psw_confirm_id = "%s:id/confirm_pwd" % aimdm_package
 
+    def confirm_unplug_usb_wire(self):
+        public_pack.AlertData().getAlert("请拔开USB线后点击确定!!!!!")
+        while True:
+            if not self.is_usb_power():
+                break
+            else:
+                public_pack.AlertData().getAlert("还没有拔开USB线， 请拨开后点击确定!!!!!")
+
     def check_firmware_version(self):
         return self.u2_send_command("getprop ro.product.version")
 

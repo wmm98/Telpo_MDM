@@ -25,9 +25,11 @@ class Optimize_Case:
                 log.error(e)
                 assert False, e
             if "Off" in devices_list[0]["Status"]:
-                err = "@@@@%s: 设备不在线， 请检查！！！" % sn
-                log.error(err)
-                assert False, err
+                self.page.refresh_page()
+                if "Off" in self.page.get_dev_info_list()[0]:
+                    err = "@@@@%s: 设备不在线， 请检查！！！" % sn
+                    log.error(err)
+                    assert False, err
             return devices_list
         except Exception as e:
             print(e)

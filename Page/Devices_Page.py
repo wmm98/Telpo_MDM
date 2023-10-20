@@ -375,6 +375,10 @@ class DevicesPage(TelpoMDMPage):
         self.refresh_page()
         # self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_msg_input_send_btn)
 
+    def send_message(self, msg):
+        self.click_send_btn()
+        self.msg_input_and_send(msg)
+
     def confirm_msg_alert_fade(self):
         self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_msg_input_send_btn)
 

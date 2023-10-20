@@ -62,6 +62,9 @@ MDMTestData:
     # 设置永不休眠信息
     device_name: d
     never_sleep_command: settings put system screen_off_timeout 0
+    # 休眠推送app的时候设置的时间， 默认10分钟， 有要求可修改
+    sleep_time: 6000
+    battery: True
 
 
 

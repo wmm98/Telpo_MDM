@@ -74,6 +74,13 @@ class interface:
         else:
             assert False, "@@@@设备在线， 设备不应该在线请检查！！！！"
 
+    def device_is_existed(self, address):
+        device_online = address + "device"
+        res = self.devices_list()
+        print(res)
+        if device_online not in res.replace('\r', '').replace('\t', '').replace(' ', ''):
+            assert False, "@@@@设备不在线， 设备不应该在线请检查！！！！"
+
     def transfer_version_into_int(self, ver):
         integer_list = ver.split(".")
         integer_version = "".join(integer_list)
@@ -194,7 +201,9 @@ class interface:
 
 if __name__ == '__main__':
     path = "E:\Mingming\Telpo_Automation\Telpo_MDM\Param\Package\ComAssistant.apk"
+    public_pack.Config().load_yaml_data()
     case = interface()
+    case.extract_integers(" userId=10106")
     # name = case.get_apk_package_name(path)
     # print(name)
     # version = case.get_apk_package_version(path)
