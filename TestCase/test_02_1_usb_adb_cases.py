@@ -15,7 +15,9 @@ class TestNetworkCases:
         self.driver = case_pack.test_driver
         self.page = case_pack.APPSPage(self.driver, 40)
         self.ota_page = case_pack.OTAPage(self.driver, 40)
+        self.device_page = case_pack.DevicesPage(self.driver, 40)
         self.system_page = case_pack.SystemPage(self.driver, 40)
+        self.cat_log_page = case_pack.CatchLogPage(self.driver, 40)
         self.android_mdm_page = case_pack.AndroidAimdmPage(case_pack.device_data, 5)
         self.wifi_ip = case_pack.device_data["wifi_device_info"]["ip"]
         self.android_mdm_page.del_all_downloaded_apk()
@@ -23,15 +25,16 @@ class TestNetworkCases:
         self.android_mdm_page.device_unlock()
 
     def teardown_class(self):
-        self.android_mdm_page.open_wifi_btn()
-        self.android_mdm_page.confirm_wifi_adb_connected(self.wifi_ip)
-        self.page.delete_app_install_and_uninstall_logs()
-        self.android_mdm_page.del_all_downloaded_apk()
-        self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
-        self.android_mdm_page.del_updated_zip()
-        self.android_mdm_page.reboot_device(self.wifi_ip)
+        pass
+        # self.android_mdm_page.open_wifi_btn()
+        # self.android_mdm_page.confirm_wifi_adb_connected(self.wifi_ip)
+        # self.page.delete_app_install_and_uninstall_logs()
+        # self.android_mdm_page.del_all_downloaded_apk()
+        # self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
+        # self.android_mdm_page.del_updated_zip()
+        # self.android_mdm_page.reboot_device(self.wifi_ip)
 
-    @allure.feature('MDM_network-test')
+    @allure.feature('MDM_usb-test')
     @allure.title("Apps-限定4G网络推送app")
     # @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_release_app_limit_4G(self, del_all_app_release_log, del_all_app_uninstall_release_log, go_to_app_page):
@@ -162,7 +165,7 @@ class TestNetworkCases:
         print("*******************限制4G网络下载安装完成***************************")
         log.info("*******************限制4G网络下载安装完成***************************")
 
-    @allure.feature('MDM_APP-test')
+    @allure.feature('MDM_usb-test')
     @allure.title("Apps-限定WIFI网络推送app")
     # @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_release_app_limit_wifi(self, del_all_app_release_log, del_all_app_uninstall_release_log, go_to_app_page):
@@ -292,7 +295,7 @@ class TestNetworkCases:
         print("*******************限制wifi网络下载安装完成***************************")
         log.info("*******************限制wifi网络下载安装完成***************************")
 
-    @allure.feature('MDM_APP-test-test')
+    @allure.feature('MDM_usb-test')
     @allure.title("OTA-OTA断网重连5次断点续传")
     def test_upgrade_OTA_package_reconnect_network_5times(self, del_all_ota_release_log, go_to_ota_page,
                                                           delete_ota_package_relate):
@@ -429,3 +432,194 @@ class TestNetworkCases:
         print("===============================ota升级升级包下载完成============================================")
         self.android_mdm_page.confirm_alert_show()
         self.android_mdm_page.click_cancel_btn()
+
+    @allure.feature('MDM_usb-test')
+    @allure.title("public case-有线休眠推送app")
+    def test_report_device_sleep_status_usb(self, unlock_screen, del_all_app_release_log,
+                                            del_all_app_uninstall_release_log, go_to_device_page):
+        self.android_mdm_page.del_all_downloaded_apk()
+        self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
+        self.android_mdm_page.reboot_device(self.wifi_ip)
+        self.android_mdm_page.back_to_home()
+        # self.android_mdm_page.confirm_unplug_usb_wire()
+
+        release_info = {"package_name": test_yml['app_info']['other_app'], "sn": self.device_sn,
+                        "silent": "Yes", "download_network": "NO Limit"}
+        file_path = self.page.get_apk_path(release_info["package_name"])
+        package = self.page.get_apk_package_name(file_path)
+        release_info["package"] = package
+        version = self.page.get_apk_package_version(file_path)
+        release_info["version"] = version
+
+        app_size = self.page.get_file_size_in_windows(file_path)
+        print("获取到的app 的size(bytes): ", app_size)
+        # check file hash value in directory Param/package
+        act_apk_package_hash_value = self.android_mdm_page.calculate_sha256_in_windows(release_info["package_name"])
+        print("act_ota_package_hash_value:", act_apk_package_hash_value)
+
+        device_info = opt_case.check_single_device(self.device_sn)[0]
+        msg = "online"
+        # clear other alert
+        if self.device_page.upper_transfer("on") in self.device_page.remove_space_and_upper(device_info["Status"]):
+            if self.device_page.upper_transfer("Locked") in self.device_page.remove_space_and_upper(
+                    device_info["Lock Status"]):
+                self.device_page.select_device(self.device_sn)
+                self.device_page.click_unlock()
+        if self.android_mdm_page.public_alert_show(2):
+            self.android_mdm_page.clear_download_and_upgrade_alert()
+
+        self.device_page.select_device(self.device_sn)
+        self.device_page.send_message(msg)
+        if not self.android_mdm_page.public_alert_show(60):
+            assert False, "@@@@平台显示设备在线， 发送消息一分钟后还没收到消息"
+        self.android_mdm_page.confirm_received_text(msg, timeout=5)
+        try:
+            self.android_mdm_page.click_msg_confirm_btn()
+            self.android_mdm_page.confirm_msg_alert_fade(msg)
+        except Exception:
+            pass
+
+        self.android_mdm_page.device_sleep()
+        # self.android_mdm_page.time_sleep(60)
+        self.android_mdm_page.time_sleep(test_yml["android_device_info"]["sleep_time"])
+        self.device_page.refresh_page()
+        opt_case.check_single_device(self.device_sn)
+        self.android_mdm_page.device_is_existed(self.wifi_ip)
+        # self.device_page.select_device(self.device_sn)
+        # self.device_page.send_message(msg)
+        # if not self.android_mdm_page.public_alert_show(60):
+        #     assert False, "@@@@平台显示设备在线， 发送消息一分钟后还没收到消息"
+        # self.android_mdm_page.confirm_received_text(msg, timeout=5)
+        # try:
+        #     self.android_mdm_page.click_msg_confirm_btn()
+        #     self.android_mdm_page.confirm_msg_alert_fade(msg)
+        # except Exception:
+        #     pass
+
+        # go to app page
+        self.page.go_to_new_address("apps")
+        send_time = case_pack.time.strftime('%Y-%m-%d %H:%M',
+                                            case_pack.time.localtime(self.page.get_current_time()))
+        self.page.time_sleep(4)
+        self.page.search_app_by_name(release_info["package_name"])
+        app_list = self.page.get_apps_text_list()
+        if len(app_list) == 0:
+            assert False, "@@@@没有 %s, 请检查！！！" % release_info["package_name"]
+        self.page.click_release_app_btn()
+        self.page.input_release_app_info(release_info)
+        # go to app release log
+        self.page.go_to_new_address("apps/releases")
+
+        now_time = self.page.get_current_time()
+        # print(self.page.get_app_current_release_log_list(send_time, release_info["sn"]))
+        while True:
+            release_len = len(self.page.get_app_latest_release_log_list(send_time, release_info))
+            print("release_len", release_len)
+            if release_len == 1:
+                break
+            elif release_len > 1:
+                assert False, "@@@@释放一次app，有多条释放记录，请检查！！！"
+            else:
+                self.page.refresh_page()
+            if self.page.get_current_time() > self.page.return_end_time(now_time):
+                assert False, "@@@@没有相应的 app release log， 请检查！！！"
+            self.page.time_sleep(3)
+
+        # check if the upgrade log appeared, if appeared, break
+        self.page.go_to_new_address("apps/logs")
+        now_time = self.page.get_current_time()
+        while True:
+            release_len = len(self.page.get_app_latest_upgrade_log(send_time, release_info))
+            if release_len == 1:
+                break
+            if self.page.get_current_time() > self.page.return_end_time(now_time):
+                assert False, "@@@@没有相应的 app upgrade log， 请检查！！！"
+            self.page.time_sleep(5)
+            self.page.refresh_page()
+
+        """
+        Upgrade action (1: downloading, 2: downloading complete, 3: upgrading,
+         4: upgrading complete, 5: downloading failed, 6: upgrading failed)
+         0: Uninstall completed
+        """
+        # check the app action in app upgrade logs, if download complete or upgrade complete, break
+        now_time = self.page.get_current_time()
+        while True:
+            upgrade_list = self.page.get_app_latest_upgrade_log(send_time, release_info)
+            if len(upgrade_list) != 0:
+                action = upgrade_list[0]["Action"]
+                print(action)
+                if self.page.get_action_status(action) == 2 or self.page.get_action_status(action) == 4 \
+                        or self.page.get_action_status(action) == 3:
+                    # check the app size in device, check if app download fully
+                    shell_app_apk_name = release_info["package"] + "_%s.apk" % release_info["version"]
+                    if not self.android_mdm_page.download_file_is_existed(shell_app_apk_name):
+                        assert False, "@@@@平台显示下载完apk包， 终端查询不存在此包， 请检查！！！！"
+                    size = self.android_mdm_page.get_file_size_in_device(shell_app_apk_name)
+                    print("终端下载后的的size大小：", size)
+                    package_hash_value = self.android_mdm_page.calculate_sha256_in_device(shell_app_apk_name)
+                    print("原来升级包的 package_hash_value：", act_apk_package_hash_value)
+                    print("下载完成后的 package_hash_value：", package_hash_value)
+                    assert app_size == size, "@@@@平台显示下载完成， 终端的包下载不完整，请检查！！！"
+                    assert package_hash_value == act_apk_package_hash_value, "@@@@平台显示下载完成，终端的apk和原始的apkSHA-256值不一致， 请检查！！！！"
+                    break
+            # wait 20 mins
+            if self.page.get_current_time() > self.page.return_end_time(now_time, 1800):
+                assert False, "@@@@30分钟还没有下载完相应的app， 请检查！！！"
+            self.page.time_sleep(5)
+            self.page.refresh_page()
+
+        # check upgrade
+        now_time = self.page.get_current_time()
+        while True:
+            upgrade_list = self.page.get_app_latest_upgrade_log(send_time, release_info)
+            if len(upgrade_list) != 0:
+                action = upgrade_list[0]["Action"]
+                print("action", action)
+                if self.page.get_action_status(action) == 4:
+                    if self.android_mdm_page.app_is_installed(release_info["package"]):
+                        break
+                    else:
+                        assert False, "@@@@平台显示已经完成安装了app, 终端发现没有安装此app， 请检查！！！！"
+            # wait upgrade 3 min at most
+            if self.page.get_current_time() > self.page.return_end_time(now_time, 180):
+                assert False, "@@@@3分钟还没有安装完相应的app， 请检查！！！"
+            self.page.time_sleep(5)
+            self.page.refresh_page()
+        self.page.time_sleep(5)
+
+    @allure.feature('MDM_usb-test1')
+    @allure.title("public case- 设备下线无法发送捕捉日志命令")
+    def test_fail_to_catch_log_when_offline(self, go_to_device_page):
+        print("111111111111111111111")
+        self.android_mdm_page.disconnect_ip(self.wifi_ip)
+        self.android_mdm_page.confirm_wifi_btn_close()
+        self.android_mdm_page.close_mobile_data()
+        self.android_mdm_page.no_network()
+        self.device_page.refresh_page()
+        device_msg = opt_case.get_single_device_list(self.device_sn)[0]
+        assert "Off" in device_msg["Status"], "@@@设备网络已经关掉， 平台显示设备还在线， 请检查！！！"
+        self.device_page.select_device(self.device_sn)
+        send_time = case_pack.time.strftime('%Y-%m-%d %H:%M', case_pack.time.localtime(case_pack.time.time()))
+        self.device_page.click_dropdown_btn()
+
+        self.device_page.click_cat_log()
+        self.device_page.show_log_type()
+        self.device_page.select_app_log()
+        self.device_page.click_save_catch_log_fail()
+        self.device_page.refresh_page()
+        self.page.go_to_new_address("catchlog/task")
+        now_time = self.page.get_current_time()
+        while True:
+            if len(self.cat_log_page.get_latest_catch_log_list(send_time, self.device_sn)) >= 1:
+                assert False, "@@@@设备不在线，不应该有相应的catch log！！！"
+            else:
+                self.page.refresh_page()
+            # wait 20 min
+            if self.page.get_current_time() > self.page.return_end_time(now_time, 60):
+                break
+            self.page.time_sleep(2)
+
+
+
+

@@ -225,6 +225,12 @@ class DevicesPage(TelpoMDMPage):
         self.confirm_tips_alert_show(self.loc_save_catch_btn)
         self.refresh_page()
 
+    def click_save_catch_log_fail(self):
+        for i in range(5):
+            self.click(self.loc_save_catch_btn)
+            self.confirm_tips_alert_show(self.loc_save_catch_btn)
+            self.alert_show()
+
     def catch_all_log(self, minutes):
         self.click_cat_log()
         self.show_log_type()

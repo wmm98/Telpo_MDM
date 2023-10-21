@@ -296,8 +296,6 @@ class TestDevicesPage:
             self.page.select_device(sn)
             self.page.click_lock()
             # input password in device
-
-            print(self.android_mdm_page.get_app_installed_list())
             assert self.android_mdm_page.mdm_msg_alert_show(time_out=5), "@@@@180s后还没显示锁机，请检查！！！"
             self.android_mdm_page.confirm_received_text(lock_tips)
             # need to click confirm btn six times, device would disappear

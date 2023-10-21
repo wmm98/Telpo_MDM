@@ -39,13 +39,12 @@ class TestAppPage:
         self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
 
     def teardown_class(self):
-        pass
-        # self.app_page.delete_app_install_and_uninstall_logs()
-        # self.android_mdm_page.del_all_downloaded_apk()
-        # self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
-        # self.android_mdm_page.del_all_content_file()
-        # self.app_page.refresh_page()
-        # self.android_mdm_page.reboot_device(self.wifi_ip)
+        self.app_page.delete_app_install_and_uninstall_logs()
+        self.android_mdm_page.del_all_downloaded_apk()
+        self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
+        self.android_mdm_page.del_all_content_file()
+        self.app_page.refresh_page()
+        self.android_mdm_page.reboot_device(self.wifi_ip)
 
     @allure.feature('MDM_public')
     @allure.title("public case-应用满屏推送--请在附件查看满屏截图效果")
@@ -73,7 +72,8 @@ class TestAppPage:
         print("act_ota_package_hash_value:", act_apk_package_hash_value)
         # go to app page
         self.app_page.go_to_new_address("apps")
-        send_time = case_pack.time.strftime('%Y-%m-%d %H:%M', case_pack.time.localtime(self.app_page.get_current_time()))
+        send_time = case_pack.time.strftime('%Y-%m-%d %H:%M',
+                                            case_pack.time.localtime(self.app_page.get_current_time()))
         self.app_page.time_sleep(4)
         self.app_page.search_app_by_name(release_info["package_name"])
         app_list = self.app_page.get_apps_text_list()
@@ -168,13 +168,15 @@ class TestAppPage:
         base_directory = "APP_Full_Screen"
         image_before_reboot = "%s\\app_full_screen_before_reboot.jpg" % base_directory
         self.android_mdm_page.save_screenshot_to(image_before_reboot)
-        self.android_mdm_page.upload_image_JPG(conf.project_path + "\\ScreenShot\\%s" % image_before_reboot, "app_full_screen_before_reboot")
+        self.android_mdm_page.upload_image_JPG(conf.project_path + "\\ScreenShot\\%s" % image_before_reboot,
+                                               "app_full_screen_before_reboot")
         self.android_mdm_page.reboot_device(self.wifi_ip)
         self.android_mdm_page.confirm_app_start(release_info["package"])
         image_after_reboot = "%s\\app_full_screen_after_reboot.jpg" % base_directory
         self.android_mdm_page.confirm_app_is_running(release_info["package"])
         self.android_mdm_page.save_screenshot_to(image_after_reboot)
-        self.android_mdm_page.upload_image_JPG(conf.project_path + "\\ScreenShot\\%s" % image_after_reboot, "app_full_screen_after_reboot")
+        self.android_mdm_page.upload_image_JPG(conf.project_path + "\\ScreenShot\\%s" % image_after_reboot,
+                                               "app_full_screen_after_reboot")
         self.android_mdm_page.stop_app(release_info["package"])
         # assert False,  "@@@请在报告查看app满屏效果截图"
 
@@ -244,7 +246,8 @@ class TestAppPage:
                     if len(upgrade_list) != 0:
                         action = upgrade_list[0]["Action"]
                         print(action)
-                        if self.content_page.get_action_status(action) == 2 or self.content_page.get_action_status(action) == 7:
+                        if self.content_page.get_action_status(action) == 2 or self.content_page.get_action_status(
+                                action) == 7:
                             # check the app size in device, check if app download fully
                             if not self.android_mdm_page.download_file_is_existed(paper):
                                 assert False, "@@@@平台显示下载完整， 终端查询不存在此文件， 请检查！！！！"
@@ -283,7 +286,8 @@ class TestAppPage:
                 wallpaper_after_reboot = "%s\\wallpaper_after_reboot.jpg" % base_directory
                 self.android_mdm_page.save_screenshot_to(wallpaper_after_reboot)
                 self.android_mdm_page.upload_image_JPG(
-                    conf.project_path + "\\ScreenShot\\%s" % wallpaper_after_reboot, "wallpaper_after_reboot-%s" % str(i))
+                    conf.project_path + "\\ScreenShot\\%s" % wallpaper_after_reboot,
+                    "wallpaper_after_reboot-%s" % str(i))
             else:
                 assert False, "@@@@平台上没有该壁纸： %s, 请检查" % paper
 
@@ -353,7 +357,8 @@ class TestAppPage:
                     size = self.android_mdm_page.get_file_size_in_device(animation)
                     print("终端下载后的的size大小：", size)
                     assert file_size == size, "@@@@平台显示下载完成， 终端的包下载不完整，请检查！！！"
-                    assert file_hash_value == self.android_mdm_page.calculate_sha256_in_device(animation), "@@@@平台显示下载完成， 终端的包下载不完整，请检查！！！"
+                    assert file_hash_value == self.android_mdm_page.calculate_sha256_in_device(
+                        animation), "@@@@平台显示下载完成， 终端的包下载不完整，请检查！！！"
                     break
             # wait 20 min
             if self.content_page.get_current_time() > self.content_page.return_end_time(now_time, 1800):
@@ -554,7 +559,8 @@ class TestAppPage:
                 # wait upgrade 3 min at most
                 if self.content_page.get_current_time() > self.content_page.return_end_time(now_time, 180):
                     assert False, "@@@@3分钟还没有设置完相应的文件， 请检查！！！"
-                assert animation in self.android_mdm_page.u2_send_command(grep_cmd), "@@@@文件没有释放到设备指定的路径%s, 请检查！！！" % release_to_path
+                assert animation in self.android_mdm_page.u2_send_command(
+                    grep_cmd), "@@@@文件没有释放到设备指定的路径%s, 请检查！！！" % release_to_path
                 self.content_page.time_sleep(5)
                 self.content_page.refresh_page()
 
@@ -576,7 +582,8 @@ class TestAppPage:
             msg = "%s:test%d" % (now, i)
             device_info = opt_case.get_single_device_list(sn)[0]
             if self.device_page.upper_transfer("on") in self.device_page.remove_space_and_upper(device_info["Status"]):
-                if self.device_page.upper_transfer("Locked") in self.device_page.remove_space_and_upper(device_info["Lock Status"]):
+                if self.device_page.upper_transfer("Locked") in self.device_page.remove_space_and_upper(
+                        device_info["Lock Status"]):
                     self.device_page.select_device(sn)
                     self.device_page.click_unlock()
                     self.device_page.refresh_page()
@@ -601,7 +608,8 @@ class TestAppPage:
                 self.android_mdm_page.clear_download_and_upgrade_alert()
             self.device_page.refresh_page()
             device_info_after_reboot = opt_case.get_single_device_list(sn)[0]
-            if self.device_page.upper_transfer("on") in self.device_page.remove_space_and_upper(device_info_after_reboot["Status"]):
+            if self.device_page.upper_transfer("on") in self.device_page.remove_space_and_upper(
+                    device_info_after_reboot["Status"]):
                 self.device_page.select_device(sn)
                 self.device_page.click_send_btn()
                 self.device_page.msg_input_and_send(msg)
@@ -621,7 +629,7 @@ class TestAppPage:
             online_flag += 1
             self.device_page.refresh_page()
         print(online_flag)
-        msg = "重启%d次1分钟内在线成功率为%s" % (length, str(online_flag/length))
+        msg = "重启%d次1分钟内在线成功率为%s" % (length, str(online_flag / length))
         log.info(msg)
         print(msg)
 
@@ -633,7 +641,8 @@ class TestAppPage:
         self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
         self.android_mdm_page.reboot_device(self.wifi_ip)
         self.android_mdm_page.back_to_home()
-        self.android_mdm_page.confirm_unplug_usb_wire()
+        # self.android_mdm_page.confirm_unplug_usb_wire()
+        case_pack.AlertData().getAlert("请拔开USB线再点击确定")
 
         release_info = {"package_name": test_yml['app_info']['other_app'], "sn": self.device_sn,
                         "silent": "Yes", "download_network": "NO Limit"}
@@ -671,9 +680,9 @@ class TestAppPage:
         except Exception:
             pass
 
-        # self.android_mdm_page.time_sleep(test_yml["android_device_info"]["sleep_time"])
         self.android_mdm_page.device_sleep()
-        self.android_mdm_page.time_sleep(60)
+        self.android_mdm_page.time_sleep(test_yml["android_device_info"]["sleep_time"])
+        # self.android_mdm_page.time_sleep(60)
         self.device_page.refresh_page()
         opt_case.check_single_device(self.device_sn)
         self.android_mdm_page.device_is_existed(self.wifi_ip)
@@ -779,26 +788,3 @@ class TestAppPage:
             self.app_page.time_sleep(5)
             self.app_page.refresh_page()
         self.app_page.time_sleep(5)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
