@@ -25,6 +25,20 @@ android_page = TestCase.AndroidAimdmPage(TestCase.device_data, 30)
 
 
 @pytest.fixture()
+def uninstall_multi_apps():
+    android_page.uninstall_multi_apps(TestCase.yaml_data["app_info"])
+    yield
+    android_page.uninstall_multi_apps(TestCase.yaml_data["app_info"])
+
+
+@pytest.fixture()
+def del_download_apk():
+    android_page.del_all_downloaded_apk()
+    yield
+    android_page.del_all_downloaded_apk()
+
+
+@pytest.fixture()
 def unlock_screen():
     android_page.device_unlock()
     yield
@@ -187,3 +201,10 @@ def go_to_app_release_log():
 def go_to_app_uninstall_release_log():
     app_page.go_to_new_address("apps/appUninstall")
     yield
+
+
+@pytest.fixture()
+def connect_wifi_adb():
+    yield
+    android_page.open_wifi_btn()
+    android_page.confirm_wifi_adb_connected(TestCase.wifi_ip)

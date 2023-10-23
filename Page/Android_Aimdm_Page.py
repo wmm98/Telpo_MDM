@@ -4,6 +4,7 @@ from Page.Android_Page_WiFi import AndroidBasePageWiFi
 import time
 
 config = public_pack.Config()
+aimdm_package = public_pack.yaml_data["aidmd_apk"]
 
 
 class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
@@ -15,7 +16,7 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
         AndroidBasePageUSB.__init__(self, self.client, times, self.serial)
         AndroidBasePageWiFi.__init__(self, self.wifi_client, times, self.device_ip)
 
-    aimdm_package = "com.tpos.aimdm"
+    # aimdm_package = "com.tpos.aimdm"
     # msg_box related
     msg_header_id = "android.widget.TextView"
     msg_tips_id = "%s:id/tip" % aimdm_package

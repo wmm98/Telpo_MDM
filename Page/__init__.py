@@ -20,5 +20,7 @@ import allure
 import hashlib
 from PIL import Image
 from Common.DealAlert import AlertData
+
 yaml_data = Config().get_yaml_data()['MDMTestData']
+
 

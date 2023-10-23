@@ -2,10 +2,12 @@ from utils.base_web_driver import BaseWebDriver
 from Common import Log
 from Page.Devices_Page import DevicesPage
 from Page.Catch_Log_Page import CatchLogPage
-from Page.Android_Aimdm_Page import AndroidAimdmPage
+from Conf.Config import Config
 import time
+from androguard.core.bytecodes.apk import APK
 
 log = Log.MyLog()
+conf = Config()
 
 
 class Optimize_Case:

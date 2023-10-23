@@ -230,6 +230,7 @@ class DevicesPage(TelpoMDMPage):
             self.click(self.loc_save_catch_btn)
             self.confirm_tips_alert_show(self.loc_save_catch_btn)
             self.alert_show()
+            self.time_sleep(2)
 
     def catch_all_log(self, minutes):
         self.click_cat_log()

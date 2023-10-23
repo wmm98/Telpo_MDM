@@ -564,6 +564,129 @@ class TestAppPage:
                 self.content_page.time_sleep(5)
                 self.content_page.refresh_page()
 
+    @allure.feature('MDM_public-test-test')
+    @allure.title("public case-推送text.zip文件")
+    def test_release_multi_apps(self, del_all_app_release_log, del_download_apk, uninstall_multi_apps):
+        release_info = {"sn": self.device_sn, "silent": "Yes", "download_network": "NO Limit"}
+        apks = [test_yml["app_info"][apk_name] for apk_name in test_yml["app_info"] if apk_name != "high_version_app"]
+        apks_packages = [self.android_mdm_page.get_apk_package_name(apk) for apk in apks]
+        apks_versions = [self.android_mdm_page.get_apk_package_version(apk) for apk in apks]
+
+        # self.android_mdm_page.reboot_device(self.wifi_ip)
+        self.app_page.refresh_page()
+
+        # check if device is online
+        self.app_page.go_to_new_address("devices")
+        opt_case.check_single_device(release_info["sn"])
+        # go to app page and release multi apps one by one
+        self.app_page.go_to_new_address("apps")
+        send_time = case_pack.time.strftime('%Y-%m-%d %H:%M', case_pack.time.localtime(self.app_page.get_current_time()))
+        self.app_page.time_sleep(4)
+        for release_app in apks:
+            self.app_page.search_app_by_name(release_app)
+            app_list = self.app_page.get_apps_text_list()
+            if len(app_list) == 0:
+                assert False, "@@@@没有 %s, 请检查！！！" % release_app
+            self.app_page.click_release_app_btn()
+            self.app_page.input_release_app_info(release_info)
+
+            # go to app release log
+            self.app_page.go_to_new_address("apps/releases")
+            now_time = self.app_page.get_current_time()
+            # print(self.page.get_app_current_release_log_list(send_time, release_info["sn"]))
+            while True:
+                release_len = len(self.app_page.get_app_latest_release_log_list(send_time, release_info))
+                print("release_len", release_len)
+                if release_len == len(apks):
+                    break
+                elif release_len > len(apks):
+                    assert False, "@@@@释放%s次app，有多条释放记录，请检查！！！" % len(apks)
+                else:
+                    self.app_page.refresh_page()
+                if self.app_page.get_current_time() > self.app_page.return_end_time(now_time):
+                    assert False, "@@@@没有相应的 app release log， 请检查！！！"
+                self.app_page.time_sleep(3)
+
+        # check the app download record in device
+        downloading_apks = []
+        now_time = self.app_page.get_current_time()
+        while True:
+            for d_record in range(len(apks_packages)):
+                if apks[d_record] not in downloading_apks:
+                    # check if app in download list
+                    shell_app_apk_name = apks_packages[d_record] + "_%s.apk" % apks_versions[d_record]
+                    if self.android_mdm_page.download_file_is_existed(shell_app_apk_name):
+                        downloading_apks.append(apks_packages[d_record])
+            diff_list = [package for package in apks_packages if package not in downloading_apks]
+            if len(diff_list) == len(apks_packages):
+                break
+            if self.app_page.get_current_time() > self.app_page.return_end_time(now_time, 180):
+                download_record = ",".join(downloading_apks)
+                assert False, "@@@@多应用推送中超过3分钟还没有%s的下载记录" % download_record
+
+        # check if app download completed in the settings time
+        file_path = conf.project_path + "\\Param\\Package\\"
+        download_completed_apks = []
+        now_time = self.app_page.get_current_time()
+        while True:
+            for d_completed in range(len(apks_packages)):
+                if apks_packages[d_completed] not in download_completed_apks:
+                    # check the app hash value in Param/Package and aimdm/download list
+                    shell_app_apk_name = apks_packages[d_completed] + "_%s.apk" % apks_versions[d_completed]
+                    shell_hash_value = self.android_mdm_page.calculate_sha256_in_device(shell_app_apk_name)
+                    original_hash_value = self.android_mdm_page.calculate_sha256_in_windows("%s%s" % (file_path, apks[d_completed]))
+                    if original_hash_value == shell_hash_value:
+                        download_completed_apks.append(apks_packages[d_completed])
+            diff_list = [package for package in apks_packages if package not in download_completed_apks]
+            if len(diff_list) == len(apks_packages):
+                break
+            if self.app_page.get_current_time() > self.app_page.return_end_time(now_time, 1800):
+                download_completed_record = ",".join(download_completed_apks)
+                assert False, "@@@@多应用推送中超过30分钟还没有%s的下载" % download_completed_record
+
+        # check if app installed in settings time
+        now_time = self.app_page.get_current_time()
+        installed_apks = []
+        while True:
+            for d_installed in range(len(apks_packages)):
+                # check if app in download list
+                if apks[d_installed] not in installed_apks:
+                    shell_app_apk_name = apks_packages[d_installed] + "_%s.apk" % apks_versions[d_installed]
+                    if self.android_mdm_page.download_file_is_existed(shell_app_apk_name):
+                        installed_apks.append(apks_packages[d_installed])
+            diff_list = [package for package in apks_packages if package not in installed_apks]
+            if len(diff_list) == len(apks_packages):
+                break
+            if self.app_page.get_current_time() > self.app_page.return_end_time(now_time, 180):
+                installed_record = ",".join(installed_apks)
+                assert False, "@@@@多应用推送中超过3分钟还没有%s的安装记录" % installed_record
+
+        # check if all installed success logs in app upgrade logs
+        self.app_page.go_to_new_address("apps/logs")
+        report_installed = []
+        now_time = self.app_page.get_current_time()
+        while True:
+            for installed_app in apks_packages:
+                if installed_app not in report_installed:
+                    self.app_page.search_upgrade_logs(installed_app, self.device_sn)
+                    upgrade_list = self.app_page.get_app_latest_upgrade_log(send_time, release_info)
+                    if len(upgrade_list) != 0:
+                        action = upgrade_list[0]["Action"]
+                        print(action)
+                        if self.app_page.get_action_status(action) == 4:
+                            installed_app.append(installed_app)
+                    if self.app_page.get_current_time() > self.app_page.return_end_time(now_time, 180):
+                        assert False, "@@@@设备已经安装完相应的， 请检查！！！"
+                    self.app_page.time_sleep(3)
+                    self.app_page.refresh_page()
+
+            diff_list = [package for package in apks_packages if package not in report_installed]
+            if len(diff_list) == len(apks_packages):
+                break
+            if self.app_page.get_current_time() > self.app_page.return_end_time(now_time, 300):
+                installed_report = ",".join(diff_list)
+                assert False, "@@@@多应用推送中设备已经安装完毕所有的app, 平套超过5分钟还上报%s的安装记录" % installed_report
+
     @allure.feature('MDM_public')
     @allure.title("public case-开机在线成功率--请在报告右侧log文件查看在线率")
     def test_device_online_pressure(self, go_to_device_page):
@@ -633,7 +756,7 @@ class TestAppPage:
         log.info(msg)
         print(msg)
 
-    @allure.feature('MDM_public-test-test')
+    @allure.feature('MDM_public')
     @allure.title("public case-无线休眠推送app")
     def test_report_device_sleep_status(self, unlock_screen, del_all_app_release_log,
                                         del_all_app_uninstall_release_log, go_to_device_page):

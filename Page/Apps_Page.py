@@ -80,6 +80,9 @@ class APPSPage(TelpoMDMPage):
     loc_app_upgrade_logs_body = (By.ID, "logs_list")
     loc_app_upgrade_single_log = (By.TAG_NAME, "tr")
     loc_app_upgrade_log_col = (By.TAG_NAME, "td")
+    loc_package_name_box = (By.ID, "search_package_name")
+    loc_sn_input_box = (By.ID, "search_device_sn")
+    loc_upgrade_search_ensure = (By.CSS_SELECTOR, "[class = 'btn btn-primary comfirm_search_app_release']")
 
     # app uninstall relate
     loc_uninstall_btn = (By.CSS_SELECTOR, "[class = 'fas fa-eraser']")
@@ -94,6 +97,14 @@ class APPSPage(TelpoMDMPage):
     loc_save_btn_cate = (By.CSS_SELECTOR, "[class = 'btn btn-primary create_category_button']")
     loc_cate_list = (By.CSS_SELECTOR, "[class = 'todo-list ui-sortable']")
     loc_single_cate = (By.CLASS_NAME, "listactive")
+
+    def search_upgrade_logs(self, package_name, sn):
+        self.click(self.loc_search_btn)
+        self.confirm_alert_existed(self.loc_search_btn)
+        self.input_text(self.loc_package_name_box, package_name)
+        self.input_text(self.loc_sn_input_box, sn)
+        self.click(self.loc_upgrade_search_ensure)
+        self.confirm_alert_not_existed(self.loc_upgrade_search_ensure)
 
     # add category
     def add_app_category(self, cate_name):

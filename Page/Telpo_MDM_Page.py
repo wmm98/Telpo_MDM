@@ -11,7 +11,7 @@ class TelpoMDMPage(BasePage):
     def __init__(self, driver, times):
         BasePage.__init__(self, driver, times)
 
-    # loc_devics_map_btn =
+    # loc_devices_map_btn =
     # loc_apps_btn =
     loc_main_title = (By.CLASS_NAME, "m-0")
     loc_devices_page_btn = (By.XPATH, "/html/body/div[1]/aside[1]/div/div[4]/div/div/nav/ul/li[2]")

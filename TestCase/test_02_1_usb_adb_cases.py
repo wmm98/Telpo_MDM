@@ -590,12 +590,13 @@ class TestNetworkCases:
 
     @allure.feature('MDM_usb-test1')
     @allure.title("public case- 设备下线无法发送捕捉日志命令")
-    def test_fail_to_catch_log_when_offline(self, go_to_device_page):
+    def test_fail_to_catch_log_when_offline(self, go_to_device_page, connect_wifi_adb):
         print("111111111111111111111")
         self.android_mdm_page.disconnect_ip(self.wifi_ip)
         self.android_mdm_page.confirm_wifi_btn_close()
         self.android_mdm_page.close_mobile_data()
         self.android_mdm_page.no_network()
+        self.page.time_sleep(60)
         self.device_page.refresh_page()
         device_msg = opt_case.get_single_device_list(self.device_sn)[0]
         assert "Off" in device_msg["Status"], "@@@设备网络已经关掉， 平台显示设备还在线， 请检查！！！"
@@ -618,7 +619,9 @@ class TestNetworkCases:
             # wait 20 min
             if self.page.get_current_time() > self.page.return_end_time(now_time, 60):
                 break
-            self.page.time_sleep(2)
+            self.page.time_sleep(5)
+
+
 
 
 
