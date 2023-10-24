@@ -27,7 +27,7 @@ MDMTestData:
 
   # app相关信息， 没有特殊要求不用填
   app_info:
-    # Bus_Recharge_System_1.0.0_20220421.apk
+#     Bus_Recharge_System_1.0.0_20220421.apk
     low_version_app: Bus_Recharge_System_1.0.0_20220421.apk
     high_version_app: Bus_Recharge_System_1.0.1_20220615.apk
     other_app: ComAssistant.apk
