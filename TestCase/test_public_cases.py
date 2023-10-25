@@ -564,7 +564,7 @@ class TestAppPage:
                 self.content_page.time_sleep(5)
                 self.content_page.refresh_page()
 
-    @allure.feature('MDM_public-test-test')
+    @allure.feature('MDM_public')
     @allure.title("public case-推送text.zip文件")
     def test_release_multi_apps(self, del_all_app_release_log, del_download_apk, uninstall_multi_apps):
         release_info = {"sn": self.device_sn, "silent": "Yes", "download_network": "NO Limit", "version": False}
@@ -691,6 +691,123 @@ class TestAppPage:
                 diff_list = [package for package in apks_packages if package not in report_installed]
                 uninstalled_report = ",".join(diff_list)
                 assert False, "@@@@多应用推送中设备已经安装完毕所有的app, 平套超过5分钟还上报%s的安装记录" % uninstalled_report
+
+    @allure.feature('MDM_public-test-test')
+    @allure.title("public case- 静默升级系统引用")
+    def test_upgrade_system_app(self, del_all_app_release_log, del_download_apk, uninstall_system_app):
+        release_info = {"package_name": test_yml['system_app']['high_version'], "sn": self.device_sn,
+                        "silent": "Yes", "download_network": "NO Limit"}
+        file_path = self.android_mdm_page.get_apk_path(release_info["package_name"])
+
+        # install low version system application
+        # set app as system app
+        self.android_mdm_page.wifi_adb_root(self.wifi_ip)
+        # push file to system/app
+        self.android_mdm_page.push_file_to_device(
+            self.android_mdm_page.get_apk_path(test_yml['system_app']['low_version']), "/system/app/")
+        self.android_mdm_page.reboot_device(self.wifi_ip)
+        assert self.android_mdm_page.app_is_installed(
+            self.android_mdm_page.get_apk_package_name(file_path)), "@@@没有安装系统应用， 请检查！！！！"
+
+        # release high version system app
+        package = self.app_page.get_apk_package_name(file_path)
+        release_info["package"] = package
+        version = self.app_page.get_apk_package_version(file_path)
+        release_info["version"] = version
+        # check if device is online
+        self.app_page.go_to_new_address("devices")
+        opt_case.check_single_device(release_info["sn"])
+        # app_size_mdm = self.page.get_app_size()  for web
+        # check app size(bytes) in windows
+        app_size = self.app_page.get_file_size_in_windows(file_path)
+        print("获取到的app 的size(bytes): ", app_size)
+
+        # go to app page
+        self.app_page.go_to_new_address("apps")
+        self.app_page.search_app_by_name(release_info["package_name"])
+        app_list = self.app_page.get_apps_text_list()
+        if len(app_list) == 0:
+            assert False, "@@@@没有 %s, 请检查！！！" % release_info["package_name"]
+        send_time = case_pack.time.strftime('%Y-%m-%d %H:%M', case_pack.time.localtime(self.app_page.get_current_time()))
+        self.app_page.time_sleep(3)
+        self.app_page.click_release_app_btn()
+        self.app_page.input_release_app_info(release_info)
+        # go to app release log
+        self.app_page.go_to_new_address("apps/releases")
+        # self.page.check_release_log_info(send_time, release_info["sn"])
+
+        now_time = self.app_page.get_current_time()
+        # print(self.page.get_app_current_release_log_list(send_time, release_info["sn"]))
+        while True:
+            release_len = len(self.app_page.get_app_latest_release_log_list(send_time, release_info))
+            print("release_len", release_len)
+            if release_len == 1:
+                break
+            elif release_len > 1:
+                assert False, "@@@@释放一次app，有多条释放记录，请检查！！！"
+            if self.app_page.get_current_time() > self.app_page.return_end_time(now_time):
+                assert False, "@@@@没有相应的 app release log， 请检查！！！"
+            self.app_page.time_sleep(1)
+            self.app_page.refresh_page()
+
+        # check if the upgrade log appeared, if appeared, break
+        self.app_page.go_to_new_address("apps/logs")
+        now_time = self.app_page.get_current_time()
+        while True:
+            release_len = len(self.app_page.get_app_latest_upgrade_log(send_time, release_info))
+            if release_len == 1:
+                break
+            if self.app_page.get_current_time() > self.app_page.return_end_time(now_time):
+                assert False, "@@@@没有相应的 app upgrade log， 请检查！！！"
+            self.app_page.time_sleep(3)
+            self.app_page.refresh_page()
+
+        # check the app action in app upgrade logs, if download complete or upgrade complete, break
+        now_time = self.app_page.get_current_time()
+        while True:
+            upgrade_list = self.app_page.get_app_latest_upgrade_log(send_time, release_info)
+            if len(upgrade_list) != 0:
+                action = upgrade_list[0]["Action"]
+                if self.app_page.get_action_status(action) == 2 or self.app_page.get_action_status(action) == 4 \
+                        or self.app_page.get_action_status(action) == 3:
+                    # check the app size in device, check if app download fully
+                    shell_app_apk_name = release_info["package"] + "_%s.apk" % release_info["version"]
+                    if not self.android_mdm_page.download_file_is_existed(shell_app_apk_name):
+                        assert False, "@@@@平台显示下载完apk包， 终端查询不存在此包， 请检查！！！！"
+
+                    size = self.android_mdm_page.get_file_size_in_device(shell_app_apk_name)
+                    print("终端下载后的的size大小：", size)
+                    if app_size != size:
+                        assert False, "@@@@平台显示下载完成， 终端的包下载不完整，请检查！！！"
+                    break
+                # wait 20 mins
+            if self.app_page.get_current_time() > self.app_page.return_end_time(now_time, 1200):
+                assert False, "@@@@20分钟还没有下载完相应的app， 请检查！！！"
+            self.app_page.refresh_page()
+            self.app_page.time_sleep(5)
+
+        # check upgrade
+        now_time = self.app_page.get_current_time()
+        while True:
+            upgrade_list = self.app_page.get_app_latest_upgrade_log(send_time, release_info)
+            if len(upgrade_list) != 0:
+                action = upgrade_list[0]["Action"]
+                print("action", action)
+                if self.app_page.get_action_status(action) == 4:
+                    if self.android_mdm_page.app_is_installed(release_info["package"]):
+                        version_installed = self.app_page.transfer_version_into_int(
+                            self.android_mdm_page.get_app_info(release_info["package"])['versionName'])
+                        if version_installed == self.app_page.transfer_version_into_int(release_info["version"]):
+                            break
+                        else:
+                            assert False, "@@@@平台显示已经完成覆盖安装了app, 终端发现没有安装高版本的app，还是原来的版本， 请检查！！！！"
+            # wait upgrade 3 mins at most
+            if self.app_page.get_current_time() > self.app_page.return_end_time(now_time, 180):
+                assert False, "@@@@3分钟还没有静默安装完相应的app， 请检查！！！"
+            self.app_page.refresh_page()
+            self.app_page.time_sleep(5)
+
+        self.android_mdm_page.rm_file("system/app/%s" % test_yml['system_app']['low_version'])
 
     @allure.feature('MDM_public')
     @allure.title("public case-开机在线成功率--请在报告右侧log文件查看在线率")

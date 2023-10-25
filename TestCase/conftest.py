@@ -22,6 +22,16 @@ ota_page = TestCase.OTAPage(driver, 40)
 app_page = TestCase.APPSPage(driver, 40)
 content_page = TestCase.ContentPage(driver, 40)
 android_page = TestCase.AndroidAimdmPage(TestCase.device_data, 30)
+wifi_ip = TestCase.device_data["wifi_device_info"]["ip"]
+
+
+@pytest.fixture()
+def uninstall_system_app():
+    android_page.rm_file("system/app/%s" % TestCase.yaml_data["system_app"]["low_version"])
+    android_page.reboot_device(wifi_ip)
+    yield
+    android_page.rm_file("system/app/%s" % TestCase.yaml_data["system_app"]["low_version"])
+    android_page.reboot_device(wifi_ip)
 
 
 @pytest.fixture()

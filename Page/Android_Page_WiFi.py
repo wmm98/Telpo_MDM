@@ -84,6 +84,7 @@ class AndroidBasePageWiFi(interface):
         self.confirm_wifi_adb_connected(wlan0_ip)
         self.device_existed(wlan0_ip)
         self.device_boot_complete()
+        self.wifi_adb_root(wlan0_ip)
         self.device_unlock()
 
     def wifi_adb_root(self, wlan_ip):
@@ -92,6 +93,7 @@ class AndroidBasePageWiFi(interface):
         except AssertionError:
             pass
         self.confirm_wifi_adb_connected(wlan_ip)
+        self.open_root_auth()
 
     def device_boot(self, wlan0_ip):
         self.time_sleep(5)
@@ -279,14 +281,13 @@ class AndroidBasePageWiFi(interface):
         except Exception as e:
             assert False, "@@@remount出错， 请检查！！！"
 
-    def open_root_auth_usb(self):
+    def open_root_auth(self):
         act = self.open_root()
         if not act:
             assert False, "@@@@无法root, 请检查！！！"
         ret = self.open_remount()
         if not ret:
             assert False, "@@@@无法remount, 请检查！！！"
-
 
     def u2_send_command(self, cmd):
         try:

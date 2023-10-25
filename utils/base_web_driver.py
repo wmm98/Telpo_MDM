@@ -29,7 +29,8 @@ class BaseWebDriver:
                     driver.refresh()
                     break
                 pack.time.sleep(1)
-        except pack.WebDriverException:
+        except pack.WebDriverException as e:
+            print(e)
             raise Exception("@@@@谷歌驱动异常或者电脑没连接网络！！！！")
 
     def get_web_driver(self):
