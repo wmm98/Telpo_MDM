@@ -695,7 +695,7 @@ class TestAppPage:
     @allure.feature('MDM_public-test-test')
     @allure.title("public case- 静默升级系统引用")
     def test_upgrade_system_app(self, del_all_app_release_log, del_download_apk, uninstall_system_app):
-        release_info = {"package_name": test_yml['system_app']['high_version'], "sn": self.device_sn,
+        release_info = {"package_name": test_yml['app_info']['high_version_app'], "sn": self.device_sn,
                         "silent": "Yes", "download_network": "NO Limit"}
         file_path = self.android_mdm_page.get_apk_path(release_info["package_name"])
 
@@ -704,7 +704,8 @@ class TestAppPage:
         self.android_mdm_page.wifi_adb_root(self.wifi_ip)
         # push file to system/app
         self.android_mdm_page.push_file_to_device(
-            self.android_mdm_page.get_apk_path(test_yml['system_app']['low_version']), "/system/app/")
+            self.android_mdm_page.get_apk_path(test_yml['app_info']['low_version_app']), "/system/app/")
+        print(self.android_mdm_page.u2_send_command("ls /system/app"))
         self.android_mdm_page.reboot_device(self.wifi_ip)
         assert self.android_mdm_page.app_is_installed(
             self.android_mdm_page.get_apk_package_name(file_path)), "@@@没有安装系统应用， 请检查！！！！"
@@ -729,7 +730,7 @@ class TestAppPage:
         if len(app_list) == 0:
             assert False, "@@@@没有 %s, 请检查！！！" % release_info["package_name"]
         send_time = case_pack.time.strftime('%Y-%m-%d %H:%M', case_pack.time.localtime(self.app_page.get_current_time()))
-        self.app_page.time_sleep(3)
+        self.app_page.time_sleep(10)
         self.app_page.click_release_app_btn()
         self.app_page.input_release_app_info(release_info)
         # go to app release log
@@ -807,7 +808,8 @@ class TestAppPage:
             self.app_page.refresh_page()
             self.app_page.time_sleep(5)
 
-        self.android_mdm_page.rm_file("system/app/%s" % test_yml['system_app']['low_version'])
+        # self.android_mdm_page.rm_file("system/app/%s" % test_yml['app_info']['high_version_app'])
+        # self.android_mdm_page.uninstall_app(release_info["package"])
 
     @allure.feature('MDM_public')
     @allure.title("public case-开机在线成功率--请在报告右侧log文件查看在线率")

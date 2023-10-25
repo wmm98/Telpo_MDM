@@ -14,7 +14,7 @@ class BaseWebDriver:
             chrome_options.add_argument("--ignore-certificate-errors")  # 忽略证书错误
             driver = pack.webdriver.Chrome(options=chrome_options)
 
-            # driver = webdriver.Chrome()
+            # driver = pack.webdriver.Chrome()
             driver.implicitly_wait(5)
             driver.maximize_window()
             # url = 'http://test.telpoai.com/login'

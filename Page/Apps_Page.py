@@ -250,7 +250,6 @@ class APPSPage(TelpoMDMPage):
         try:
             self.web_driver_wait_until(EC.text_to_be_present_in_element(self.loc_release_list, release_info["package"]))
             release_list = self.get_element(self.loc_release_list)
-            print("release_list: ", len(release_list))
             logs_list = []
             existed = self.ele_is_existed_in_range(self.loc_release_list, self.loc_single_release)
             if not existed:
@@ -266,8 +265,6 @@ class APPSPage(TelpoMDMPage):
                         package = cols[1].text
                         version = cols[2].text
                         time_line = self.extract_integers(receive_time_text)
-                        print(send_time)
-                        print(time_line)
                         receive_time = self.format_string_time(time_line)
                         if self.compare_time(send_time, receive_time):
                             if (release_info["sn"] in sn) and (release_info["package"] in package):

@@ -27,11 +27,13 @@ wifi_ip = TestCase.device_data["wifi_device_info"]["ip"]
 
 @pytest.fixture()
 def uninstall_system_app():
-    android_page.rm_file("system/app/%s" % TestCase.yaml_data["system_app"]["low_version"])
+    android_page.rm_file("system/app/%s" % TestCase.yaml_data['app_info']['high_version_app'])
     android_page.reboot_device(wifi_ip)
+    android_page.uninstall_multi_apps(TestCase.yaml_data['app_info'])
     yield
-    android_page.rm_file("system/app/%s" % TestCase.yaml_data["system_app"]["low_version"])
+    android_page.rm_file("system/app/%s" % TestCase.yaml_data['app_info']['high_version_app'])
     android_page.reboot_device(wifi_ip)
+    android_page.uninstall_multi_apps(TestCase.yaml_data['app_info'])
 
 
 @pytest.fixture()
