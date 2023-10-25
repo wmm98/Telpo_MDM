@@ -4,7 +4,7 @@ from Page.Android_Page_WiFi import AndroidBasePageWiFi
 import time
 
 config = public_pack.Config()
-aimdm_package = public_pack.yaml_data["aidmd_apk"]
+aimdm_package = public_pack.yaml_data["work_app"]["aidmd_apk"]
 
 
 class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):

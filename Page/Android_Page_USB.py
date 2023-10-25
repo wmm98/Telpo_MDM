@@ -189,11 +189,11 @@ class AndroidBasePageUSB(interface):
         except Exception:
             print("@@@@发送指令有异常， 请检查！！！")
 
-    def send_adb_command_USB(self, cmd):
+    def send_adb_command_USB(self, cmd, timeout=30):
         try:
             command = "adb -s %s %s" % (self.device_name, cmd)
             print("command:", command)
-            res = sub_shell.invoke(command, runtime=30)
+            res = sub_shell.invoke(command, runtime=timeout)
             return res
         except Exception:
             print("@@@@发送指令有异常， 请检查！！！")
@@ -323,6 +323,36 @@ class AndroidBasePageUSB(interface):
         result = self.u2_send_command_USB(cmd)
         print(result)
         # res1 = self.u2_send_command_USB(cmd)
+
+    def open_root_usb(self):
+        try:
+            res = self.send_adb_command_USB("root")
+            if len(res) == 0:
+                return True
+            else:
+                return False
+        except Exception as e:
+            assert False, e
+
+    def open_remount_usb(self):
+        try:
+            act = self.send_adb_command_USB("remount")
+            if "remount succeeded" in act:
+                return True
+            else:
+                return False
+        except Exception as e:
+            assert False, "@@@remount出错， 请检查！！！"
+
+    def open_root_auth_usb(self):
+        act = self.open_root_usb()
+        if not act:
+            assert False, "@@@@无法root, 请检查！！！"
+        ret = self.open_remount_usb()
+        if not ret:
+            assert False, "@@@@无法remount, 请检查！！！"
+
+
 
 
 if __name__ == '__main__':

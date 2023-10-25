@@ -16,9 +16,11 @@ class CheckYaml:
         self.check_value_existed(yaml_data["app_info"])
         self.check_value_existed(yaml_data["ota_packages_info"])
         self.check_value_existed(yaml_data["android_device_info"])
-        self.check_value_existed(yaml_data["aidmd_apk"], dict_=False)
+        self.check_value_existed(yaml_data["work_app"])
+        self.check_value_existed(yaml_data["system_app"])
 
-        self.check_file_existed(yaml_data["aidmd_apk"], "Package", dict_=False)
+        self.check_file_existed(yaml_data["system_app"], "Package")
+        self.check_file_existed(yaml_data["work_app"], "Work_APP")
         self.check_file_existed(yaml_data["app_info"], "Package")
         self.check_file_existed(yaml_data["ota_packages_info"], "Package")
         self.check_file_existed(yaml_data["Content_info"], "Content")

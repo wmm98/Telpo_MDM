@@ -11,6 +11,9 @@ class AndroidBasePageWiFi(interface):
         self.times = times
         self.device_ip = ip
 
+    def push_file_to_device(self, orig, des):
+        self.client.push(orig, des)
+
     def get_app_userid(self, package):
         id_info = self.u2_send_command("dumpsys package %s | grep userId" % package)
         id_list = self.extract_integers(id_info)
@@ -82,6 +85,13 @@ class AndroidBasePageWiFi(interface):
         self.device_existed(wlan0_ip)
         self.device_boot_complete()
         self.device_unlock()
+
+    def wifi_adb_root(self, wlan_ip):
+        try:
+            self.send_adb_command("root", timeout=5)
+        except AssertionError:
+            pass
+        self.confirm_wifi_adb_connected(wlan_ip)
 
     def device_boot(self, wlan0_ip):
         self.time_sleep(5)
@@ -249,6 +259,35 @@ class AndroidBasePageWiFi(interface):
                 assert False, "@@@@无法熄屏， 请检查！！！"
             self.time_sleep(1)
 
+    def open_root(self):
+        try:
+            res = self.send_adb_command("root")
+            if len(res) == 0:
+                return True
+            else:
+                return False
+        except Exception as e:
+            assert False, e
+
+    def open_remount(self):
+        try:
+            act = self.send_adb_command("remount")
+            if "remount succeeded" in act:
+                return True
+            else:
+                return False
+        except Exception as e:
+            assert False, "@@@remount出错， 请检查！！！"
+
+    def open_root_auth_usb(self):
+        act = self.open_root()
+        if not act:
+            assert False, "@@@@无法root, 请检查！！！"
+        ret = self.open_remount()
+        if not ret:
+            assert False, "@@@@无法remount, 请检查！！！"
+
+
     def u2_send_command(self, cmd):
         try:
             return self.client.shell(cmd, timeout=120).output
@@ -262,15 +301,17 @@ class AndroidBasePageWiFi(interface):
             command = "adb -s %s shell %s" % (self.device_ip, cmd)
             return sub_shell.invoke(command, runtime=30)
         except Exception:
-            print("@@@@发送指令有异常， 请检查！！！")
+            print("@@@@发送指令超时， 请检查！！！")
+            assert False, "@@@@发送指令超时， 请检查！！！"
 
-    def send_adb_command(self, cmd):
+    def send_adb_command(self, cmd, timeout=30):
         try:
             command = "adb -s %s %s" % (self.device_ip, cmd)
-            res = sub_shell.invoke(command, runtime=30)
+            res = sub_shell.invoke(command, runtime=timeout)
             return res
         except Exception:
-            print("@@@@发送指令有异常， 请检查！！！")
+            print("@@@@发送指令超时， 请检查！！！")
+            assert False, "@@@@发送指令超时， 请检查！！！"
 
     def device_boot_complete(self):
         time_out = self.get_current_time() + 60

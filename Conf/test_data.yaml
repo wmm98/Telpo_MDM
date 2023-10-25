@@ -23,17 +23,26 @@ MDMTestData:
     release_password: 123456
     release_api: http://api.telpotms.com
 
-  aidmd_apk: app_aimdm_V1.0.0_osapi_202308301153.apk
+  work_app:
+    #  适用 tpos 系统， 没特殊需求不用修改
+    root_apk_name: open_root_apk_v1.1.3.apk
+      #  新的版本需要修改
+    aidmd_apk: app_aimdm_V1.0.0_osapi_202308301153.apk
 
   # app相关信息， 没有特殊要求不用填
   app_info:
-#     Bus_Recharge_System_1.0.0_20220421.apk
+    #  Bus_Recharge_System_1.0.0_20220421.apk
     low_version_app: Bus_Recharge_System_1.0.0_20220421.apk
     high_version_app: Bus_Recharge_System_1.0.1_20220615.apk
     other_app: ComAssistant.apk
     #    A： sim card 测试， B： wifi 测试
     other_app_limit_network_A: diancilu.apk
     other_app_limit_network_B: perfmon.apk
+
+  #  系统app一般不需要修改
+  system_app:
+    low_version: TELPO_DEMO_NEW_V1.0.apk
+    high_version: TELPO_DEMO_NEW_V1.1.apk
 
 
   # ota升级包相关信息, 有变化需要填写
