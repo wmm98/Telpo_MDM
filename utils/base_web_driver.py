@@ -47,5 +47,5 @@ class BaseWebDriver:
 
 if __name__ == '__main__':
     case = BaseWebDriver()
-    case.open_web_site("")
+    case.open_web_site("https://www.baidu.com")
     case.get_web_driver()

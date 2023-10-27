@@ -1,19 +1,14 @@
 import Page as public_pack
-from Page.Android_Page_USB import AndroidBasePageUSB
 from Page.Android_Page_WiFi import AndroidBasePageWiFi
-import time
 
 config = public_pack.Config()
 aimdm_package = public_pack.yaml_data["work_app"]["aidmd_apk"]
 
 
-class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
+class AndroidAimdmPageWiFi(AndroidBasePageWiFi):
     def __init__(self, devices_data, times):
-        self.client = devices_data["usb_device_info"]["device"]
-        self.serial = devices_data["usb_device_info"]["serial"]
-        self.wifi_client = devices_data["wifi_device_info"]["device"]
-        self.device_ip = devices_data["wifi_device_info"]["ip"]
-        AndroidBasePageUSB.__init__(self, self.client, times, self.serial)
+        self.wifi_client = devices_data["device"]
+        self.device_ip = devices_data["ip"]
         AndroidBasePageWiFi.__init__(self, self.wifi_client, times, self.device_ip)
 
     # aimdm_package = "com.tpos.aimdm"

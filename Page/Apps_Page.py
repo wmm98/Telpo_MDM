@@ -50,6 +50,7 @@ class APPSPage(TelpoMDMPage):
     loc_silent_install = (By.ID, "setsilent")
     loc_download_network = (By.ID, "download_network")
     loc_set_kiosk_mode = (By.ID, "setkioskmode")
+    loc_set_auto_open = (By.ID, "release_app_autoopen")
     loc_device_selected_box = (By.CLASS_NAME, "label-selected")
     # device list and single device also work in app relate
     loc_device_list = (By.CLASS_NAME, "label-item")
@@ -344,6 +345,9 @@ class APPSPage(TelpoMDMPage):
             self.select_by_text(self.loc_set_kiosk_mode, "YES")
         else:
             self.select_by_text(self.loc_set_kiosk_mode, "NO")
+        if info.get("auto_open"):
+            if info["auto_open"] == "YES":
+                self.select_by_text(self.loc_set_auto_open, "YES")
         self.select_by_text(self.loc_silent_install, info["silent"].upper())
         self.select_by_text(self.loc_download_network, info["download_network"])
         devices = release_box.find_element(*self.loc_device_list).find_elements(*self.loc_single_device)

@@ -1,5 +1,4 @@
 import allure
-import pytest
 import TestCase as case_pack
 
 conf = case_pack.Config()
@@ -39,13 +38,13 @@ class TestAppPage:
         self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
 
     def teardown_class(self):
-        pass
-        # self.app_page.delete_app_install_and_uninstall_logs()
-        # self.android_mdm_page.del_all_downloaded_apk()
-        # self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
-        # self.android_mdm_page.del_all_content_file()
-        # self.app_page.refresh_page()
-        # self.android_mdm_page.reboot_device(self.wifi_ip)
+        # pass
+        self.app_page.delete_app_install_and_uninstall_logs()
+        self.android_mdm_page.del_all_downloaded_apk()
+        self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
+        self.android_mdm_page.del_all_content_file()
+        self.app_page.refresh_page()
+        self.android_mdm_page.reboot_device(self.wifi_ip)
 
     @allure.feature('MDM_public')
     @allure.title("public case-应用满屏推送--请在附件查看满屏截图效果")
@@ -569,10 +568,13 @@ class TestAppPage:
     @allure.title("public case-推送text.zip文件")
     def test_release_multi_apps(self, del_all_app_release_log, del_download_apk, uninstall_multi_apps):
         release_info = {"sn": self.device_sn, "silent": "Yes", "download_network": "NO Limit", "version": False}
-        apks = [test_yml["app_info"][apk_name] for apk_name in test_yml["app_info"] if apk_name not in ["high_version_app", "low_version_app"]]
+        apks = [test_yml["app_info"][apk_name] for apk_name in test_yml["app_info"] if
+                apk_name not in ["high_version_app", "low_version_app"]]
 
-        apks_packages = [self.android_mdm_page.get_apk_package_name(self.android_mdm_page.get_apk_path(apk)) for apk in apks]
-        apks_versions = [self.android_mdm_page.get_apk_package_version(self.android_mdm_page.get_apk_path(apk)) for apk in apks]
+        apks_packages = [self.android_mdm_page.get_apk_package_name(self.android_mdm_page.get_apk_path(apk)) for apk in
+                         apks]
+        apks_versions = [self.android_mdm_page.get_apk_package_version(self.android_mdm_page.get_apk_path(apk)) for apk
+                         in apks]
 
         self.android_mdm_page.reboot_device(self.wifi_ip)
         self.app_page.refresh_page()
@@ -581,7 +583,8 @@ class TestAppPage:
         self.app_page.go_to_new_address("devices")
         opt_case.check_single_device(release_info["sn"])
         # go to app page and release multi apps one by one
-        send_time = case_pack.time.strftime('%Y-%m-%d %H:%M', case_pack.time.localtime(self.app_page.get_current_time()))
+        send_time = case_pack.time.strftime('%Y-%m-%d %H:%M',
+                                            case_pack.time.localtime(self.app_page.get_current_time()))
         self.app_page.time_sleep(5)
         flag = -1
         for release_app in apks:
@@ -675,7 +678,8 @@ class TestAppPage:
                 if installed_app not in report_installed:
                     self.app_page.search_upgrade_logs(installed_app, self.device_sn)
                     release_info["package"] = installed_app
-                    release_info["version"] = self.android_mdm_page.get_apk_package_version(self.android_mdm_page.get_apk_path(apks[flag]))
+                    release_info["version"] = self.android_mdm_page.get_apk_package_version(
+                        self.android_mdm_page.get_apk_path(apks[flag]))
                     upgrade_list = self.app_page.get_app_latest_upgrade_log(send_time, release_info)
                     if len(upgrade_list) != 0:
                         action = upgrade_list[0]["Action"]
@@ -694,11 +698,11 @@ class TestAppPage:
                 assert False, "@@@@多应用推送中设备已经安装完毕所有的app, 平套超过5分钟还上报%s的安装记录" % uninstalled_report
 
     @allure.feature('MDM_public-test-test')
-    @allure.title("public case- 静默升级系统引用")
+    @allure.title("public case- 静默升级系统app")
     def test_upgrade_system_app(self, del_all_app_release_log, del_download_apk, uninstall_system_app):
         pass
         release_info = {"package_name": test_yml['app_info']['high_version_app'], "sn": self.device_sn,
-                        "silent": "Yes", "download_network": "NO Limit"}
+                        "silent": "Yes", "download_network": "NO Limit", "auto_open": "YES"}
         file_path = self.android_mdm_page.get_apk_path(release_info["package_name"])
         #
         # # install low version system application
@@ -734,7 +738,8 @@ class TestAppPage:
         app_list = self.app_page.get_apps_text_list()
         if len(app_list) == 0:
             assert False, "@@@@没有 %s, 请检查！！！" % release_info["package_name"]
-        send_time = case_pack.time.strftime('%Y-%m-%d %H:%M', case_pack.time.localtime(self.app_page.get_current_time()))
+        send_time = case_pack.time.strftime('%Y-%m-%d %H:%M',
+                                            case_pack.time.localtime(self.app_page.get_current_time()))
         self.app_page.time_sleep(10)
         self.app_page.click_release_app_btn()
         self.app_page.input_release_app_info(release_info)
@@ -813,78 +818,12 @@ class TestAppPage:
             self.app_page.refresh_page()
             self.app_page.time_sleep(5)
 
+        try:
+            self.android_mdm_page.confirm_app_is_running(release_info["package"])
+        except AttributeError:
+            print("app 推送选择了安装完成后自动运行app, app安装完后2分钟内还没自动运行")
+        self.android_mdm_page.stop_app(release_info["package"])
         self.android_mdm_page.rm_file("system/app/%s" % test_yml['app_info']['low_version_app'])
-        # print(self.android_mdm_page.u2_send_command("ls /system/app"))
-        # self.android_mdm_page.uninstall_app(release_info["package"])
-
-    @allure.feature('MDM_public')
-    @allure.title("public case-开机在线成功率--请在报告右侧log文件查看在线率")
-    def test_device_online_pressure(self, go_to_device_page):
-        sn = self.device_sn
-        length = 50
-        self.device_page.refresh_page()
-        # confirm if device is online and execute next step, if not, end the case execution
-        data = opt_case.check_single_device(sn)
-        print(data)
-        now = case_pack.time.strftime('%Y-%m-%d %H:%M', case_pack.time.localtime(case_pack.time.time()))
-        online_flag = 0
-        for i in range(length):
-            if self.android_mdm_page.public_alert_show(3):
-                self.android_mdm_page.clear_download_and_upgrade_alert()
-            self.device_page.refresh_page()
-            msg = "%s:test%d" % (now, i)
-            device_info = opt_case.get_single_device_list(sn)[0]
-            if self.device_page.upper_transfer("on") in self.device_page.remove_space_and_upper(device_info["Status"]):
-                if self.device_page.upper_transfer("Locked") in self.device_page.remove_space_and_upper(
-                        device_info["Lock Status"]):
-                    self.device_page.select_device(sn)
-                    self.device_page.click_unlock()
-                    self.device_page.refresh_page()
-                self.device_page.select_device(sn)
-                self.device_page.click_send_btn()
-                self.device_page.msg_input_and_send(msg)
-                # message_list.append(msg)
-                # check message in device
-                if not self.android_mdm_page.public_alert_show(60):
-                    continue
-                try:
-                    self.android_mdm_page.confirm_received_text(msg, timeout=5)
-                except AttributeError:
-                    continue
-                try:
-                    self.android_mdm_page.click_msg_confirm_btn()
-                    self.android_mdm_page.confirm_msg_alert_fade(msg)
-                except Exception:
-                    pass
-            self.android_mdm_page.reboot_device(self.wifi_ip)
-            if self.android_mdm_page.public_alert_show(timeout=5):
-                self.android_mdm_page.clear_download_and_upgrade_alert()
-            self.device_page.refresh_page()
-            device_info_after_reboot = opt_case.get_single_device_list(sn)[0]
-            if self.device_page.upper_transfer("on") in self.device_page.remove_space_and_upper(
-                    device_info_after_reboot["Status"]):
-                self.device_page.select_device(sn)
-                self.device_page.click_send_btn()
-                self.device_page.msg_input_and_send(msg)
-                # message_list.append(msg)
-                # check message in device
-                if not self.android_mdm_page.public_alert_show(60):
-                    continue
-                try:
-                    self.android_mdm_page.confirm_received_text(msg, timeout=5)
-                except AttributeError:
-                    continue
-                try:
-                    self.android_mdm_page.click_msg_confirm_btn()
-                    self.android_mdm_page.confirm_msg_alert_fade(msg)
-                except Exception:
-                    pass
-            online_flag += 1
-            self.device_page.refresh_page()
-        print(online_flag)
-        msg = "重启%d次1分钟内在线成功率为%s" % (length, str(online_flag / length))
-        log.info(msg)
-        print(msg)
 
     @allure.feature('MDM_public')
     @allure.title("public case-无线休眠推送app")

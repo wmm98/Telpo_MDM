@@ -12,8 +12,6 @@
 
 """
 import pytest
-# from utils.base_web_driver import BaseWebDriver
-# from Page import Telpo_MDM_Page, Devices_Page, OTA_Page, Apps_Page
 import TestCase
 
 driver = TestCase.test_driver
@@ -27,15 +25,9 @@ wifi_ip = TestCase.device_data["wifi_device_info"]["ip"]
 
 @pytest.fixture()
 def uninstall_system_app():
-    android_page.rm_file("system/app/%s" % TestCase.yaml_data['app_info']['low_version_app'])
-    android_page.reboot_device(wifi_ip)
-    android_page.reboot_device(wifi_ip)
-    android_page.uninstall_multi_apps(TestCase.yaml_data['app_info'])
+    android_page.confirm_system_app_uninstalled()
     yield
-    android_page.rm_file("system/app/%s" % TestCase.yaml_data['app_info']['low_version_app'])
-    android_page.reboot_device(wifi_ip)
-    android_page.reboot_device(wifi_ip)
-    android_page.uninstall_multi_apps(TestCase.yaml_data['app_info'])
+    android_page.confirm_system_app_uninstalled()
 
 
 @pytest.fixture()

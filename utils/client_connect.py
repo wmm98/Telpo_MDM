@@ -45,10 +45,29 @@ class ClientConnect:
         u2.connect_adb_wifi(link)
 
 
+class WIFIADBConnect:
+    def __init__(self):
+        pass
+
+    def wifi_connect_device(self, ip_):
+        try:
+            port = "5555"
+            address = ip_ + ":" + port
+            dev_wifi = u2.connect_adb_wifi(address)
+            return dev_wifi
+        except Exception as e:
+            raise Exception(e)
+            # raise Exception("保持电脑和设备在统一局域网下， 请连接同一wifi!!!!")
+
+
 if __name__ == '__main__':
-    d = ClientConnect()
-    d.connect_device("d")
-    print(d.get_device())
-    d.wifi_connect_device()
-    print(d.get_wifi_device())
+    # d = ClientConnect()
+    # d.connect_device("d")
+    # print(d.get_device())
+    # d.wifi_connect_device()
+    # print(d.get_wifi_device())
     # print(d.get_wifi_ip())
+
+    d = WIFIADBConnect()
+    test = d.wifi_connect_device('10.168.1.159')
+    print(test.info)
