@@ -38,13 +38,13 @@ class TestAppPage:
         self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
 
     def teardown_class(self):
-        # pass
-        self.app_page.delete_app_install_and_uninstall_logs()
-        self.android_mdm_page.del_all_downloaded_apk()
-        self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
-        self.android_mdm_page.del_all_content_file()
-        self.app_page.refresh_page()
-        self.android_mdm_page.reboot_device(self.wifi_ip)
+        pass
+        # self.app_page.delete_app_install_and_uninstall_logs()
+        # self.android_mdm_page.del_all_downloaded_apk()
+        # self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
+        # self.android_mdm_page.del_all_content_file()
+        # self.app_page.refresh_page()
+        # self.android_mdm_page.reboot_device(self.wifi_ip)
 
     @allure.feature('MDM_public')
     @allure.title("public case-应用满屏推送--请在附件查看满屏截图效果")
@@ -980,3 +980,75 @@ class TestAppPage:
             self.app_page.time_sleep(5)
             self.app_page.refresh_page()
         self.app_page.time_sleep(5)
+
+    @allure.feature('MDM_public_test_test')
+    @allure.title("public case- 长时间检测设备在线情况")
+    def test_online_long_test(self):
+        # param = {"android_page": td, "sn": sn, "ip": ip}
+        data = opt_case.check_single_device(self.device_sn)
+        length = 1
+        now = case_pack.time.strftime('%Y-%m-%d %H:%M', case_pack.time.localtime(case_pack.time.time()))
+        for i in range(length):
+            if self.android_mdm_page.public_alert_show(3):
+                self.android_mdm_page.clear_download_and_upgrade_alert()
+            msg = "%s:test%d" % (now, i)
+            # get thread lock
+            # lock.acquire()
+            self.device_page.refresh_page()
+            device_info = opt_case.get_single_device_list(self.device_sn)[0]
+            if self.device_page.upper_transfer("on") in self.device_page.remove_space_and_upper(
+                    device_info["Status"]):
+                if self.device_page.upper_transfer("Locked") in self.device_page.remove_space_and_upper(
+                        device_info["Lock Status"]):
+                    self.device_page.select_device(self.device_sn)
+                    self.device_page.click_unlock()
+                    self.device_page.refresh_page()
+                self.device_page.select_device(self.device_sn)
+                self.device_page.click_send_btn()
+                self.device_page.msg_input_and_send(msg)
+                # unlock thread
+                # lock.release()
+                # check message in device
+                # self.android_mdm_page.screen_keep_on()
+                if not self.android_mdm_page.public_alert_show(60):
+                    continue
+                # try:
+                self.android_mdm_page.confirm_received_text(msg, timeout=5)
+                # except AttributeError:
+                #     continue
+                # try:
+                self.android_mdm_page.click_msg_confirm_btn()
+                self.android_mdm_page.confirm_msg_alert_fade(msg)
+                # except Exception:
+                #     pass
+            self.android_mdm_page.reboot_device(self.device_sn)
+            if self.android_mdm_page.public_alert_show(timeout=5):
+                self.android_mdm_page.clear_download_and_upgrade_alert()
+            self.device_page.refresh_page()
+            # get lock
+            # lock.acquire()
+            device_info_after_reboot = opt_case.get_single_device_list(self.device_sn)[0]
+            if self.device_page.upper_transfer("on") in self.device_page.remove_space_and_upper(
+                    device_info_after_reboot["Status"]):
+                self.device_page.select_device(self.device_sn)
+                self.device_page.click_send_btn()
+                self.device_page.msg_input_and_send(msg)
+                # lock.release()
+                # check message in device
+                # self.android_mdm_page.screen_keep_on()
+                if not self.android_mdm_page.public_alert_show(60):
+                    continue
+                try:
+                    self.android_mdm_page.confirm_received_text(msg, timeout=5)
+                except AttributeError:
+                    continue
+                try:
+                    self.android_mdm_page.click_msg_confirm_btn()
+                    self.android_mdm_page.confirm_msg_alert_fade(msg)
+                except Exception:
+                    pass
+            # online_flag += 1
+            self.device_page.refresh_page()
+
+
+

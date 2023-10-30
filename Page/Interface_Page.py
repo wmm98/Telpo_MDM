@@ -110,6 +110,7 @@ class interface:
             # get apk package file name
             return self.load_apk_package(apk_file_path).get_package()
         except Exception as e:
+            print(e)
             assert False, "@@@@获取包名时出现错误"
 
     def get_apk_package_version(self, apk_file_path):

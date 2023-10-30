@@ -4,7 +4,7 @@ from Page.Android_Page_WiFi import AndroidBasePageWiFi
 import time
 
 config = public_pack.Config()
-aimdm_package = public_pack.yaml_data["work_app"]["aidmd_apk"]
+# aimdm_package = public_pack.yaml_data["work_app"]["aidmd_apk"]
 
 
 class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
@@ -15,19 +15,34 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
         self.device_ip = devices_data["wifi_device_info"]["ip"]
         AndroidBasePageUSB.__init__(self, self.client, times, self.serial)
         AndroidBasePageWiFi.__init__(self, self.wifi_client, times, self.device_ip)
+        aimdm_apk = public_pack.yaml_data["work_app"]["aidmd_apk"]
+        self.aimdm_package = self.get_apk_package_name(config.project_path + "\\Param\\Work_APP\\%s" % aimdm_apk)
 
-    # aimdm_package = "com.tpos.aimdm"
-    # msg_box related
-    msg_header_id = "android.widget.TextView"
-    msg_tips_id = "%s:id/tip" % aimdm_package
-    msg_confirm_id = "%s:id/confirm" % aimdm_package
-    msg_cancel_id = "%s:id/cancel" % aimdm_package
-    msg_alert_id = "%s:id/root_view" % aimdm_package
-    # 900P  confirm->download->confirm->upgrade
+        # aimdm_package = "com.tpos.aimdm"
+        # msg_box related
+        self.msg_header_id = "android.widget.TextView"
+        self.msg_tips_id = "%s:id/tip" % self.aimdm_package
+        self.msg_confirm_id = "%s:id/confirm" % self.aimdm_package
+        self.msg_cancel_id = "%s:id/cancel" % self.aimdm_package
+        self.msg_alert_id = "%s:id/root_view" % self.aimdm_package
+        # 900P  confirm->download->confirm->upgrade
 
-    # lock alert, input device psw relate
-    lock_psw_id = "%s:id/et_pwd" % aimdm_package
-    psw_confirm_id = "%s:id/confirm_pwd" % aimdm_package
+        # lock alert, input device psw relate
+        self.lock_psw_id = "%s:id/et_pwd" % self.aimdm_package
+        self.psw_confirm_id = "%s:id/confirm_pwd" % self.aimdm_package
+
+    # # aimdm_package = "com.tpos.aimdm"
+    # # msg_box related
+    # msg_header_id = "android.widget.TextView"
+    # msg_tips_id = "%s:id/tip" % aimdm_package
+    # msg_confirm_id = "%s:id/confirm" % aimdm_package
+    # msg_cancel_id = "%s:id/cancel" % aimdm_package
+    # msg_alert_id = "%s:id/root_view" % aimdm_package
+    # # 900P  confirm->download->confirm->upgrade
+    #
+    # # lock alert, input device psw relate
+    # lock_psw_id = "%s:id/et_pwd" % aimdm_package
+    # psw_confirm_id = "%s:id/confirm_pwd" % aimdm_package
 
     def confirm_system_app_uninstalled(self):
         apk_file = public_pack.yaml_data['app_info']['low_version_app']
@@ -242,6 +257,7 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
         now_time = self.get_current_time()
         while True:
             ele = self.wait_ele_presence_by_id(self.msg_alert_id, timeout)
+            print(ele)
             if ele:
                 return True
             if self.get_current_time() > self.return_end_time(now_time, timeout):

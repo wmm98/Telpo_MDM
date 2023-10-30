@@ -2,7 +2,6 @@ import Page as public_pack
 from Page.Android_Page_WiFi import AndroidBasePageWiFi
 
 config = public_pack.Config()
-aimdm_package = public_pack.yaml_data["work_app"]["aidmd_apk"]
 
 
 class AndroidAimdmPageWiFi(AndroidBasePageWiFi):
@@ -10,19 +9,21 @@ class AndroidAimdmPageWiFi(AndroidBasePageWiFi):
         self.wifi_client = devices_data["device"]
         self.device_ip = devices_data["ip"]
         AndroidBasePageWiFi.__init__(self, self.wifi_client, times, self.device_ip)
+        aimdm_apk = public_pack.yaml_data["work_app"]["aidmd_apk"]
+        self.aimdm_package = self.get_apk_package_name(config.project_path + "\\Param\\Work_APP\\%s" % aimdm_apk)
 
-    # aimdm_package = "com.tpos.aimdm"
-    # msg_box related
-    msg_header_id = "android.widget.TextView"
-    msg_tips_id = "%s:id/tip" % aimdm_package
-    msg_confirm_id = "%s:id/confirm" % aimdm_package
-    msg_cancel_id = "%s:id/cancel" % aimdm_package
-    msg_alert_id = "%s:id/root_view" % aimdm_package
-    # 900P  confirm->download->confirm->upgrade
+        # aimdm_package = "com.tpos.aimdm"
+        # msg_box related
+        self.msg_header_id = "android.widget.TextView"
+        self.msg_tips_id = "%s:id/tip" % self.aimdm_package
+        self.msg_confirm_id = "%s:id/confirm" % self.aimdm_package
+        self.msg_cancel_id = "%s:id/cancel" % self.aimdm_package
+        self.msg_alert_id = "%s:id/root_view" % self.aimdm_package
+        # 900P  confirm->download->confirm->upgrade
 
-    # lock alert, input device psw relate
-    lock_psw_id = "%s:id/et_pwd" % aimdm_package
-    psw_confirm_id = "%s:id/confirm_pwd" % aimdm_package
+        # lock alert, input device psw relate
+        self.lock_psw_id = "%s:id/et_pwd" % self.aimdm_package
+        self.psw_confirm_id = "%s:id/confirm_pwd" % self.aimdm_package
 
     def confirm_system_app_uninstalled(self):
         apk_file = public_pack.yaml_data['app_info']['low_version_app']
@@ -60,7 +61,9 @@ class AndroidAimdmPageWiFi(AndroidBasePageWiFi):
         now_time = self.get_current_time()
         while True:
             exp_text = self.upper_transfer(self.remove_space(exp))
+            print(exp)
             act_text = self.upper_transfer(self.remove_space(self.get_msg_tips_text()))
+            print(act_text)
             if exp_text == act_text:
                 break
             if self.get_current_time() > self.return_end_time(now_time, timeout):
@@ -164,7 +167,8 @@ class AndroidAimdmPageWiFi(AndroidBasePageWiFi):
         # print(file_path)
         # public_pack.allure.attach(file_path, name=new_name, attachment_type=public_pack.allure.attachment_type.JPG)
         with open(file_path, 'rb') as image_file:
-            public_pack.allure.attach(image_file.read(), name=new_name, attachment_type=public_pack.allure.attachment_type.JPG)
+            public_pack.allure.attach(image_file.read(), name=new_name,
+                                      attachment_type=public_pack.allure.attachment_type.JPG)
 
     def manual_unlock(self):
         ele_lock = self.get_element_by_id(self.msg_confirm_id)

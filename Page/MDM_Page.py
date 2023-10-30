@@ -45,6 +45,12 @@ class MDMPage(BasePage):
         self.confirm_tips_alert_show(self.loc_login_btn)
         # self.
 
+    def login_ok(self, name, password):
+        self.input_user_name(name)
+        self.input_pwd_value(password)
+        self.choose_agree_btn()
+        self.click_login_btn()
+
 # if __name__ == '__main__':
 #     from selenium import webdriver
 #     driver = webdriver.Chrome()

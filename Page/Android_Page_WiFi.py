@@ -236,6 +236,10 @@ class AndroidBasePageWiFi(interface):
         else:
             return True
 
+    def screen_keep_on(self):
+        self.u2_send_command("settings put system screen_off_timeout 1800000")
+        self.device_unlock()
+
     def device_unlock(self):
         self.device_sleep()
         self.client.unlock()
