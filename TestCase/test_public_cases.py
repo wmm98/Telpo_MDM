@@ -981,9 +981,9 @@ class TestAppPage:
             self.app_page.refresh_page()
         self.app_page.time_sleep(5)
 
-    @allure.feature('MDM_public_test_test')
+    @allure.feature('MDM_public1111_test_test111')
     @allure.title("public case- 长时间检测设备在线情况")
-    def test_online_long_test(self):
+    def test_test(self):
         # param = {"android_page": td, "sn": sn, "ip": ip}
         data = opt_case.check_single_device(self.device_sn)
         length = 1

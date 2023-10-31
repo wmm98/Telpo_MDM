@@ -415,16 +415,17 @@ class DevicesPage(TelpoMDMPage):
         self.click(self.loc_new_btn)
         self.confirm_alert_existed(self.loc_new_btn)
 
-    def add_devices_info(self, dev_info):
+    def add_devices_info(self, dev_info, cate_model=True):
         # name
         self.input_text(self.loc_input_dev_name, dev_info['name'])
         # SN
         self.input_text(self.loc_input_dev_SN, dev_info['SN'])
-        # cate
-        self.select_by_text(self.loc_select_dev_cate, dev_info['cate'])
-        # model
-        self.select_by_text(self.loc_select_dev_mode, dev_info['model'])
-        # 保存
+        if cate_model:
+            # cate
+            self.select_by_text(self.loc_select_dev_cate, dev_info['cate'])
+            # model
+            self.select_by_text(self.loc_select_dev_mode, dev_info['model'])
+        # save
         self.click(self.loc_save_dev_btn)
 
     def get_add_dev_warning_alert(self):

@@ -133,6 +133,21 @@ class AndroidBasePageWiFi(interface):
         status = self.client.app_uninstall(package)
         return status
 
+    def confirm_app_installed(self, apk_path):
+        try:
+            # self.client.app_install(apk_path)
+            package = self.get_apk_package_name(apk_path)
+            now_time = self.get_current_time()
+            while True:
+                if self.app_is_installed(package):
+                    break
+                self.client.app_install(apk_path)
+                if self.get_current_time() > self.return_end_time(now_time):
+                    assert False, "@@@@无法安装%s--app, 请检查！！！" % package
+                self.time_sleep(3)
+        except RuntimeError as e:
+            print(e)
+
     def uninstall_app_post(self, apk_name):
         file_path = self.get_apk_path(apk_name)
         if public_pack.os.path.exists(file_path):
@@ -152,6 +167,7 @@ class AndroidBasePageWiFi(interface):
         while True:
             if not self.app_is_installed(package):
                 break
+            self.uninstall_app(package)
             if self.get_current_time() > self.return_end_time(now_time):
                 assert False, "@@@@无法卸载%s--app, 请检查！！！" % package
             self.time_sleep(3)
@@ -196,7 +212,8 @@ class AndroidBasePageWiFi(interface):
                     self.rm_file("/%s/aimdm/download/%s" % (self.get_internal_storage_directory(), zip_package))
 
     def download_file_is_existed(self, file_name):
-        res = self.u2_send_command("ls /%s/aimdm/download/ |grep %s" % (self.get_internal_storage_directory(), file_name))
+        res = self.u2_send_command(
+            "ls /%s/aimdm/download/ |grep %s" % (self.get_internal_storage_directory(), file_name))
         if self.remove_space(file_name) in self.remove_space(res):
             return True
         else:
@@ -204,7 +221,8 @@ class AndroidBasePageWiFi(interface):
 
     def get_file_size_in_device(self, file_name):
         "-rw-rw---- 1 root sdcard_rw   73015 2023-09-05 16:51 com.bjw.ComAssistant_1.1.apk"
-        res = self.u2_send_command("ls -l /%s/aimdm/download/ |grep %s" % (self.get_internal_storage_directory(), file_name))
+        res = self.u2_send_command(
+            "ls -l /%s/aimdm/download/ |grep %s" % (self.get_internal_storage_directory(), file_name))
         # get integer list in res
         integer_list = self.extract_integers(res)
         size = int(integer_list[1])
