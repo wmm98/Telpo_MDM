@@ -77,8 +77,6 @@ class TestOTAPage:
     def test_upgrade_OTA_package_reboot_5times(self, del_all_ota_release_log, go_to_ota_page, delete_ota_package_relate):
         download_tips = "Foundanewfirmware,whethertoupgrade?"
         upgrade_tips = "whethertoupgradenow?"
-        exp_success_text = "success"
-        exp_existed_text = "ota release already existed"
         release_info = {"package_name": test_yml['ota_packages_info']['package_name'], "sn": self.device_sn,
                         "silent": 0, "category": "NO Limit", "network": "NO Limit"}
         # get release ota package version

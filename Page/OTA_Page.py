@@ -117,6 +117,7 @@ class OTAPage(TelpoMDMPage):
         self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_release_confirm_del)
 
     def delete_all_ota_release_log(self):
+        self.go_to_new_address("ota/release")
         try:
             if self.get_current_ota_release_log_total() != 0:
                 self.click_select_all_box()
@@ -314,11 +315,19 @@ class OTAPage(TelpoMDMPage):
             btn.click()
         sn_list = self.get_element(self.loc_sn_list)
         eles_sn = sn_list.find_elements(*self.loc_sn_text)
-        for ele_sn in eles_sn:
-            if release_info["sn"] in ele_sn.text:
-                if ele_sn.get_attribute("class") == "selected":
-                    break
-                self.confirm_sn_is_selected(ele_sn)
+        if isinstance(release_info["sn"], list):
+            for sn in release_info["sn"]:
+                for ele_sn in eles_sn:
+                    if sn in ele_sn.text:
+                        if ele_sn.get_attribute("class") == "selected":
+                            break
+                        self.confirm_sn_is_selected(ele_sn)
+        else:
+            for ele_sn in eles_sn:
+                if release_info["sn"] in ele_sn.text:
+                    if ele_sn.get_attribute("class") == "selected":
+                        break
+                    self.confirm_sn_is_selected(ele_sn)
         self.exc_js_click(self.get_element(self.loc_release_package_btn))
         self.confirm_tips_alert_show(self.loc_release_package_btn, ex_js=1)
         self.refresh_page()
