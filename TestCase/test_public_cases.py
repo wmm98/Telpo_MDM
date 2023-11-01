@@ -645,7 +645,7 @@ class TestAppPage:
             if self.app_page.get_current_time() > self.app_page.return_end_time(now_time, 1800):
                 diff_list = [package for package in apks_packages if package not in download_completed_apks]
                 download_missing_record = ",".join(diff_list)
-                assert False, "@@@@多应用推送中超过30分钟还没有%s的下载" % download_missing_record
+                assert False, "@@@@多应用推送中超过30分钟还没有完成%s的下载" % download_missing_record
 
         print("**********************下载完成检测完毕*************************************")
 
@@ -657,7 +657,8 @@ class TestAppPage:
                 # check if app in download list
                 if apks[d_installed] not in installed_apks:
                     shell_app_apk_name = apks_packages[d_installed] + "_%s.apk" % apks_versions[d_installed]
-                    if self.android_mdm_page.download_file_is_existed(shell_app_apk_name):
+                    # if self.android_mdm_page.download_file_is_existed(shell_app_apk_name):
+                    if self.android_mdm_page.app_is_installed(apks[d_installed]):
                         installed_apks.append(apks_packages[d_installed])
             if len(installed_apks) == len(apks_packages):
                 break

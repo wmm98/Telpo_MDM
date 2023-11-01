@@ -351,11 +351,19 @@ class APPSPage(TelpoMDMPage):
         self.select_by_text(self.loc_silent_install, info["silent"].upper())
         self.select_by_text(self.loc_download_network, info["download_network"])
         devices = release_box.find_element(*self.loc_device_list).find_elements(*self.loc_single_device)
-        for device in devices:
-            if info["sn"] in device.get_attribute("data"):
-                if device.get_attribute("class") == "selected":
-                    break
-                self.confirm_sn_is_selected(device)
+        if isinstance(info["sn"], list):
+            for sn in info["sn"]:
+                for device in devices:
+                    if sn in device.get_attribute("data"):
+                        if device.get_attribute("class") == "selected":
+                            break
+                        self.confirm_sn_is_selected(device)
+        else:
+            for device in devices:
+                if info["sn"] in device.get_attribute("data"):
+                    if device.get_attribute("class") == "selected":
+                        break
+                    self.confirm_sn_is_selected(device)
         self.click(self.loc_app_release_confirm)
         self.confirm_tips_alert_show(self.loc_app_release_confirm)
         self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_app_release_confirm)
