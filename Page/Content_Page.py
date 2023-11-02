@@ -25,15 +25,18 @@ class ContentPage(TelpoMDMPage):
     loc_content_release_confirm = (By.CSS_SELECTOR, "[class = 'btn btn-danger btn-release']")
 
     # search related
-    loc_search_box_show = (By.CSS_SELECTOR, "[class = 'btn btn-tool btn-searchbar']")  # open status  display: inline-block;  default status: display: none;
+    loc_search_box_show = (By.CSS_SELECTOR,
+                           "[class = 'btn btn-tool btn-searchbar']")  # open status  display: inline-block;  default status: display: none;
     loc_content_search_btn = (By.CSS_SELECTOR, "[class = 'fas fa-search']")
     loc_files_type = (By.CSS_SELECTOR, "[class = 'form-control form-control-sm file-search-usefor']")
     loc_input_name_box = (By.CSS_SELECTOR, "[class = 'form-control file-search-name']")
 
     # add content file relate
     loc_new_file = (By.CSS_SELECTOR, "[class = 'fas fa-plus']")
-    loc_normal_files = (By.ID, "customRadio1")
-    loc_boot_animation = (By.ID, "customRadio1")
+    loc_user_for_box = (By.CLASS_NAME, "fs-use-bar")
+    loc_use_files = (By.CLASS_NAME, "fs-use-file")
+    loc_upload_content_btn = (By.CSS_SELECTOR, "[class = 'fas fa-cloud-upload-alt']")
+    loc_upload_save = (By.CSS_SELECTOR, "[class = 'btn btn-primary btn-submit']")
 
     # alert show
     loc_alert_show = (By.CSS_SELECTOR, "[class = 'modal fade show']")
@@ -52,6 +55,105 @@ class ContentPage(TelpoMDMPage):
     loc_app_upgrade_logs_body = (By.ID, "databody")
     loc_app_upgrade_single_log = (By.TAG_NAME, "tr")
     loc_app_upgrade_log_col = (By.TAG_NAME, "td")
+    loc_upgrade_search_sn_box = (By.ID, "sn")
+    loc_upgrade_search_ensure = (By.CSS_SELECTOR, "[class = 'btn btn-primary btn-search']")
+
+    # category relate
+    loc_new_cate_btn = (By.LINK_TEXT, "Create New Category")
+    loc_input_cate_box = (By.ID, "categoryname")
+    loc_save_btn_cate = (By.CSS_SELECTOR, "[class = 'btn btn-primary category_submit']")
+    loc_cate_list = (By.CSS_SELECTOR, "[class = 'todo-list ui-sortable category-ul']")
+    loc_single_cate = (By.CLASS_NAME, "listactive")
+
+    def new_content_category(self, cate_name):
+        # add category
+        self.click(self.loc_new_cate_btn)
+        self.confirm_alert_existed(self.loc_new_cate_btn)
+        self.input_text(self.loc_input_cate_box, cate_name)
+        self.click(self.loc_save_btn_cate)
+        self.confirm_tips_alert_show(self.loc_save_btn_cate)
+        self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_save_btn_cate)
+
+    def get_content_categories_list(self):
+        if self.ele_is_existed(self.loc_cate_list):
+            if self.ele_is_existed(self.loc_cate_list):
+                eles = self.get_elements(self.loc_single_cate)
+                cates_list = [self.remove_space(ele.text) for ele in eles]
+                return cates_list
+            else:
+                return []
+        else:
+            return []
+
+    def add_content_file(self, file_type, file_path):
+        # file_type
+        # normal_file, boot_animation wallpaper, logo
+        self.click(self.loc_new_file)
+        self.confirm_alert_existed(self.loc_alert_show, self.loc_new_file)
+        uses_for = self.get_element(self.loc_user_for_box).find_elements(*self.loc_use_files)
+        if file_type == "normal_file":
+            uses_for[0].click()
+        elif file_type == "boot_animation":
+            uses_for[1].click()
+        elif file_type == "wallpaper":
+            uses_for[2].click()
+        elif file_type == "logo":
+            uses_for[3].click()
+        self.input_text(self.loc_upload_content_btn, file_path)
+        self.click(self.loc_upload_save)
+        self.confirm_tips_alert_show(self.loc_upload_save)
+        self.refresh_page()
+
+    def click_add_btn(self):
+        self.click(self.loc_add_package_btn)
+        self.confirm_alert_existed(self.loc_add_package_btn)
+
+    def input_ota_package_info(self, info):
+        self.input_text(self.loc_choose_package_btn, info["file_name"])
+        self.select_by_text(self.loc_file_category, info["file_category"])
+        android_check_box = self.get_element(self.loc_android_checkbox)
+        linux_check_box = self.get_element(self.loc_linux_checkbox)
+        if info["plat_form"] == "Android":
+            if not android_check_box.is_selected():
+                android_check_box.click()
+        elif info["plat_form"] == "Linux":
+            if not linux_check_box.is_selected():
+                linux_check_box.click()
+
+    def click_save_add_ota_pack(self):
+        self.click(self.loc_save_package_info_btn)
+        now_time = t_time.time()
+        while True:
+            if self.uploading_box_show():
+                break
+            else:
+                self.click(self.loc_save_package_info_btn)
+            if t_time.time() > self.return_end_time(now_time):
+                assert False, "@@@@无法上传OTA， 请检查！！！"
+            self.time_sleep(1)
+        # if not self.uploading_box_fade():
+        #     print("333333333333333333333333333333333333")
+        #     assert False, "@@@@上传OTA文件超过3分钟， 请检查！！！！"
+        if not self.get_tips_alert(180):
+            assert False, "@@@@上传OTA文件超过3分钟， 请检查！！！！"
+
+    def search_upgrade_log_by_sn(self, sn):
+        try:
+            self.time_sleep(3)
+            self.click(self.loc_content_search_btn)
+            self.confirm_alert_existed(self.loc_alert_show, self.loc_content_search_btn)
+            self.input_text(self.loc_upgrade_search_sn_box, sn)
+            self.time_sleep(1)
+            self.click(self.loc_upgrade_search_ensure)
+            self.confirm_alert_not_existed(self.loc_upgrade_search_ensure)
+        except Exception:
+            self.refresh_page()
+            self.click(self.loc_content_search_btn)
+            self.confirm_alert_existed(self.loc_alert_show, self.loc_content_search_btn)
+            self.input_text(self.loc_upgrade_search_sn_box, sn)
+            self.time_sleep(1)
+            self.click(self.loc_upgrade_search_ensure)
+            self.confirm_alert_not_existed(self.loc_upgrade_search_ensure)
 
     def get_content_latest_upgrade_log(self, send_time, release_info):
         try:
@@ -78,6 +180,7 @@ class ContentPage(TelpoMDMPage):
             return []
 
     def delete_all_content_release_log(self):
+        self.go_to_new_address("content/release")
         try:
             if self.get_current_content_release_log_total() != 0:
                 self.click_select_all_box()
@@ -130,9 +233,9 @@ class ContentPage(TelpoMDMPage):
         except Exception:
             return []
 
-    def release_content_file(self, sn, file=False):
+    def release_content_file(self, sn, file_path=False):
         self.show_detail_box()
-        self.input_release_content_info(sn, file)
+        self.input_release_content_info(sn, file_path)
 
     def show_detail_box(self):
         self.click(self.loc_content_detail_btn)
@@ -141,20 +244,28 @@ class ContentPage(TelpoMDMPage):
         release_btn.click()
         self.confirm_alert_existed(self.loc_detail_release_btn)
 
-    def input_release_content_info(self, sn, file):
-        if file:
-            self.input_text(self.loc_release_path, "sdcard/aimdm")
+    def input_release_content_info(self, sn_, file_path):
+        if file_path:
+            self.input_text(self.loc_release_path, file_path)
         release_box = self.get_element(self.loc_content_release_alert)
         # click show devices btn， check if device is show, if now, click it
         btn = self.get_element(self.loc_show_device_btn)
         if "block" in btn.get_attribute("style"):
             btn.click()
         devices = release_box.find_element(*self.loc_device_list).find_elements(*self.loc_single_device)
-        for device in devices:
-            if sn in device.get_attribute("data"):
-                if device.get_attribute("class") == "selected":
-                    break
-                self.confirm_sn_is_selected(device)
+        if isinstance(sn_, list):
+            for sn in sn_:
+                for device in devices:
+                    if sn in device.get_attribute("data"):
+                        if device.get_attribute("class") == "selected":
+                            break
+                        self.confirm_sn_is_selected(device)
+        else:
+            for device in devices:
+                if sn_ in device.get_attribute("data"):
+                    if device.get_attribute("class") == "selected":
+                        break
+                    self.confirm_sn_is_selected(device)
         self.click(self.loc_content_release_confirm)
         self.confirm_tips_alert_show(self.loc_content_release_confirm)
         self.refresh_page()

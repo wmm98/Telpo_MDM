@@ -50,7 +50,8 @@ MDMTestData:
   # ota升级包相关信息, 有变化需要填写
   ota_packages_info:
     #    TPS900_msm8937_sv10_fv1.1.16_pv1.1.16-1.1.17.zip
-    package_name: TPS900_msm8937_sv10_fv1.1.16_pv1.1.16-1.1.18.zip
+    # TPS900_msm8937_sv10_fv1.1.16_pv1.1.16-1.1.18.zip
+    package_name: TPS900_msm8937_sv10_fv1.1.16_pv1.1.16-1.1.17.zip
     # 有分android和linux两种系统  Android Linux
     platform: Android
 
@@ -60,6 +61,7 @@ MDMTestData:
     normal_file:
       - test_txt_file.txt
       - test_zip_file.zip
+
     # 开机动画
     boot_animation: test_bootanimation.zip
     # 壁纸
@@ -71,11 +73,17 @@ MDMTestData:
       - test_boot_logo_jpg.jpg
       - test_boot_logo_png.png
 
+    #  - test_stability_file
+    stability_test_file:
+      - test_stability_file_1.txt
+      - test_stability_file_2.txt
+      - test_stability_file_3.txt
+
   # 设备信息，需要修改
   android_device_info:
     # 设置永不休眠信息
     device_name: d
-    never_sleep_command: settings put system screen_off_timeout 0
+    #  never_sleep_command: settings put system screen_off_timeout 0
     # 休眠推送app的时候设置的时间， 默认10分钟， 有要求可修改
     sleep_time: 120
     battery: True

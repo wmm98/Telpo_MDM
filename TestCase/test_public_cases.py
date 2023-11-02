@@ -493,7 +493,7 @@ class TestAppPage:
             release_info = {"sn": self.device_sn, "content_name": animation}
             self.content_page.time_sleep(3)
             assert len(self.content_page.get_content_list()) == 1, "@@@@平台上没有相关文件： %s, 请检查" % animation
-            self.content_page.release_content_file(self.device_sn, file=True)
+            self.content_page.release_content_file(self.device_sn, file_path=release_to_path)
             # check release log
             self.content_page.go_to_new_address("content/release")
             self.content_page.time_sleep(3)

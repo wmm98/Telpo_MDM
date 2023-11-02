@@ -81,11 +81,21 @@ class AndroidBasePageWiFi(interface):
     def reboot_device(self, wlan0_ip):
         self.send_adb_command("reboot")
         self.time_sleep(5)
+        self.kill_server()
+        self.start_server()
         self.confirm_wifi_adb_connected(wlan0_ip)
         self.device_existed(wlan0_ip)
         self.device_boot_complete()
         self.wifi_adb_root(wlan0_ip)
-        self.device_unlock()
+        self.screen_keep_on()
+        # self.device_unlock()
+
+    def kill_server(self, timeout=120):
+        sub_shell.invoke('adb kill-server', runtime=timeout)
+
+    def start_server(self, timeout=120):
+        res = sub_shell.invoke('adb start-server', runtime=timeout)
+        print(res)
 
     def wifi_adb_root(self, wlan_ip):
         try:

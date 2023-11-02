@@ -30,6 +30,7 @@ class ClientConnect:
             port = "5555"
             ip_wifi = dev.wlan_ip
             address = ip_wifi + ":" + port
+            u2.connect_adb_wifi(address)
             dev_wifi = u2.connect_adb_wifi(address)
         except Exception as e:
             raise Exception(e)
@@ -53,6 +54,7 @@ class WIFIADBConnect:
         try:
             port = "5555"
             address = ip_ + ":" + port
+            u2.connect_adb_wifi(address)
             dev_wifi = u2.connect_adb_wifi(address)
             return dev_wifi
         except Exception as e:
