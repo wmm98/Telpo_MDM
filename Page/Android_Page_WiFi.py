@@ -11,6 +11,9 @@ class AndroidBasePageWiFi(interface):
         self.times = times
         self.device_ip = ip
 
+    def open_usb_debug_btn(self):
+        self.u2_send_command("setprop persist.telpo.debug.mode 1")
+
     def push_file_to_device(self, orig, des):
         self.client.push(orig, des)
 
@@ -241,7 +244,11 @@ class AndroidBasePageWiFi(interface):
     def calculate_sha256_in_device(self, file_name):
         # sha256sum sdcard/aimdm/data/2023-10-12.txt
         # 9fb5de71a794b9cb8b8197e6ebfbbc9168176116f7f88aca62b22bbc67c2925a  2023-10-12.txt
-        cmd = "sha256sum /%s/aimdm/download/%s" % (self.get_internal_storage_directory(), file_name)
+        res = self.u2_send_command(
+            "ls /%s/aimdm/download/ |grep %s" % (self.get_internal_storage_directory(), file_name))
+        print(res.split("\n")[0])
+        download_file_name = res.split("\n")[0]
+        cmd = "sha256sum /%s/aimdm/download/%s" % (self.get_internal_storage_directory(), download_file_name)
         print(self.u2_send_command(cmd))
         print(self.u2_send_command(cmd).split(" "))
         result = self.u2_send_command(cmd).split(" ")[0]
@@ -327,7 +334,9 @@ class AndroidBasePageWiFi(interface):
         except TypeError:
             raise Exception("@@@@传入的指令无效！！！")
         except RuntimeError:
-            raise Exception("@@@@设备无响应， 查看设备的连接情况！！！")
+            self.confirm_wifi_adb_connected(self.device_ip, 120)
+            return self.client.shell(cmd, timeout=120).output
+            # raise Exception("@@@@设备无响应， 查看设备的连接情况！！！")
 
     def send_shell_command(self, cmd):
         try:

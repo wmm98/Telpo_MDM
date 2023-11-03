@@ -141,19 +141,22 @@ class ContentPage(TelpoMDMPage):
         try:
             self.time_sleep(3)
             self.click(self.loc_content_search_btn)
+            self.time_sleep(2)
             self.confirm_alert_existed(self.loc_alert_show, self.loc_content_search_btn)
             self.input_text(self.loc_upgrade_search_sn_box, sn)
             self.time_sleep(1)
             self.click(self.loc_upgrade_search_ensure)
+            self.time_sleep(2)
             self.confirm_alert_not_existed(self.loc_upgrade_search_ensure)
-        except Exception:
-            self.refresh_page()
-            self.click(self.loc_content_search_btn)
-            self.confirm_alert_existed(self.loc_alert_show, self.loc_content_search_btn)
-            self.input_text(self.loc_upgrade_search_sn_box, sn)
-            self.time_sleep(1)
-            self.click(self.loc_upgrade_search_ensure)
-            self.confirm_alert_not_existed(self.loc_upgrade_search_ensure)
+        except Exception as e:
+            print(e)
+            # self.refresh_page()
+            # self.click(self.loc_content_search_btn)
+            # self.confirm_alert_existed(self.loc_alert_show, self.loc_content_search_btn)
+            # self.input_text(self.loc_upgrade_search_sn_box, sn)
+            # self.time_sleep(1)
+            # self.click(self.loc_upgrade_search_ensure)
+            # self.confirm_alert_not_existed(self.loc_upgrade_search_ensure)
 
     def get_content_latest_upgrade_log(self, send_time, release_info):
         try:

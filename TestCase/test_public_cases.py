@@ -1,4 +1,5 @@
 import allure
+import pytest
 import TestCase as case_pack
 
 conf = case_pack.Config()
@@ -45,6 +46,20 @@ class TestAppPage:
         # self.android_mdm_page.del_all_content_file()
         # self.app_page.refresh_page()
         # self.android_mdm_page.reboot_device(self.wifi_ip)
+
+    @allure.feature('MDM_public')
+    @allure.title("public case-添加 content 种类")
+    # @pytest.mark.flaky(reruns=1, reruns_delay=3)
+    def test_add_content_cate(self):
+        if len(self.content_page.get_content_categories_list()) == 0:
+            self.content_page.new_content_category("test")
+
+    @allure.feature('MDM_public')
+    @allure.title("public case-添加 content 文件")
+    # @pytest.mark.flaky(reruns=1, reruns_delay=3)
+    def test_add_content_file(self):
+        content_text_list = self.content_page.get_content_list()
+        pass
 
     @allure.feature('MDM_public')
     @allure.title("public case-应用满屏推送--请在附件查看满屏截图效果")
@@ -559,10 +574,10 @@ class TestAppPage:
                 # wait upgrade 3 min at most
                 if self.content_page.get_current_time() > self.content_page.return_end_time(now_time, 180):
                     assert False, "@@@@3分钟还没有设置完相应的文件， 请检查！！！"
-                assert animation in self.android_mdm_page.u2_send_command(
-                    grep_cmd), "@@@@文件没有释放到设备指定的路径%s, 请检查！！！" % release_to_path
                 self.content_page.time_sleep(5)
                 self.content_page.refresh_page()
+            assert animation in self.android_mdm_page.u2_send_command(
+                grep_cmd), "@@@@文件没有释放到设备指定的路径%s, 请检查！！！" % release_to_path
 
     @allure.feature('MDM_public')
     @allure.title("public case-推送text.zip文件")

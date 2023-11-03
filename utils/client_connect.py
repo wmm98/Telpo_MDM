@@ -1,6 +1,8 @@
 import utils as public_pack
+from Common.Shell import Shell
 
 u2 = public_pack.u2
+conn_shell = Shell()
 
 
 class ClientConnect:
@@ -50,11 +52,26 @@ class WIFIADBConnect:
     def __init__(self):
         pass
 
+    def shell_devices_list(self):
+        res = conn_shell.invoke("adb devices").replace('\r', '').replace('\t', '').replace(' ', '')
+        return res
+
+    def confirm_connected_wifi_adb(self, ip):
+        now_time = public_pack.time.time()
+        while True:
+            res = conn_shell.invoke("adb connect %s" % ip)
+            print(res)
+            if (ip + "device") in self.shell_devices_list():
+                break
+            if public_pack.time.time() > now_time + 60:
+                raise Exception("无法连接上设备%s" % ip)
+            public_pack.time.sleep(1)
+
     def wifi_connect_device(self, ip_):
         try:
             port = "5555"
             address = ip_ + ":" + port
-            u2.connect_adb_wifi(address)
+            self.confirm_connected_wifi_adb(address)
             dev_wifi = u2.connect_adb_wifi(address)
             return dev_wifi
         except Exception as e:

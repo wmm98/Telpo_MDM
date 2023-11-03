@@ -35,7 +35,7 @@ if __name__ == '__main__':
     # 先连接adb
     device = ClientConnect()
     device.connect_device(test_info['android_device_info']['device_name'])
-    device.screen_keep_alive(test_info['android_device_info']['never_sleep_command'])
+    # device.screen_keep_alive(test_info['android_device_info']['never_sleep_command'])
 
     shell = Shell.Shell()
 

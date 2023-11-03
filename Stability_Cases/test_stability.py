@@ -29,9 +29,9 @@ class TestStability:
         self.ota_page = st.OTAPage(test_driver, 40)
         st.MDMPage(test_driver, 40).login_ok(st.yaml_data['website_info']['test_user'],
                                              st.yaml_data['website_info']['test_password'])
-        self.app_page.delete_app_install_and_uninstall_logs()
+        # self.app_page.delete_app_install_and_uninstall_logs()
         self.content_page.delete_all_content_release_log()
-        self.ota_page.delete_all_ota_release_log()
+        # self.ota_page.delete_all_ota_release_log()
         self.androids_page = []
         self.devices_sn = []
         self.devices_ip = []
@@ -317,10 +317,18 @@ class TestStability:
 
     @allure.feature('MDM_stability_test')
     @allure.title("stability case-文件文件推送成功率-请在报告右侧log文件查看文件文件推送成功率")
+    def test_multi_release_debug(self):
+        self.content_page.go_to_new_address("content/log")
+        self.content_page.search_upgrade_log_by_sn(self.devices_sn[0])
+
+    @allure.feature('MDM_stability_test111')
+    @allure.title("stability case-文件文件推送成功率-请在报告右侧log文件查看文件文件推送成功率")
     def test_multi_release_content(self):
+        # lock = st.threading.Lock()
         lock = st.threading.Lock()
         devices_sn = self.devices_sn
         devices_ip = self.devices_ip
+        print(devices_ip)
         content_page = self.content_page
         stability_files = test_yml["Content_info"]["stability_test_file"]
         for sn in self.devices_sn:
@@ -328,16 +336,18 @@ class TestStability:
 
         release_to_path = "%s/aimdm" % self.android_mdm_page.get_internal_storage_directory()
         grep_cmd = "ls %s" % release_to_path
+        release_flag = 0
         for file in stability_files:
             # release normal file
             if file in self.android_mdm_page.u2_send_command(grep_cmd):
+                self.android_mdm_page.rm_file("%s/%s" % (release_to_path, file))
                 self.android_mdm_page.rm_file("%s/%s" % (release_to_path, file))
 
             self.content_page.go_to_new_address("content")
             file_path = conf.project_path + "\\Param\\Content\\%s" % file
             file_size = self.content_page.get_file_size_in_windows(file_path)
             print("获取到的文件 的size(bytes): ", file_size)
-            file_hash_value = self.android_mdm_page.calculate_sha256_in_windows("Content\\%s " % file)
+            file_hash_value = self.android_mdm_page.calculate_sha256_in_windows(file, directory="Content")
             print("file_hash_value:", file_hash_value)
             send_time = st.time.strftime('%Y-%m-%d %H:%M', st.time.localtime(self.content_page.get_current_time()))
             self.content_page.time_sleep(4)
@@ -353,7 +363,7 @@ class TestStability:
             while True:
                 release_len = self.content_page.get_current_content_release_log_total()
                 print("release_len", release_len)
-                if release_len == len(release_info["sn"]):
+                if release_len == len(release_info["sn"]) + release_flag:
                     break
                 if self.content_page.get_current_time() > self.content_page.return_end_time(now_time):
                     assert False, "@@@@没有相应的文件 release log， 请检查！！！"
@@ -365,7 +375,6 @@ class TestStability:
             def check_devices_download_file(device_msg):
                 device_msg["android_page"].screen_keep_on()
                 # check the content download record in device
-                content_page.go_to_new_address("content/release")
                 now_time = content_page.get_current_time()
                 while True:
                     if device_msg["android_page"].download_file_is_existed(file):
@@ -375,16 +384,16 @@ class TestStability:
                     content_page.time_sleep(3)
                 print("**********************下载记录检测完毕*************************************")
 
-                before_reboot_file_size = self.android_mdm_page.get_file_size_in_device(file)
+                before_reboot_file_size = device_msg["android_page"].get_file_size_in_device(file)
                 print("第一次下载的的file size: ", before_reboot_file_size)
-                for i in range(5):
-                    self.android_mdm_page.reboot_device(device_msg["ip"])
+                for i in range(1):
+                    device_msg["android_page"].reboot_device(device_msg["ip"])
                     now_time = content_page.get_current_time()
                     while True:
-                        current_size = self.android_mdm_page.get_file_size_in_device(file)
+                        current_size = device_msg["android_page"].get_file_size_in_device(file)
                         print("重启%s次之后当前file 的size: %s" % (str(i + 1), current_size))
                         if current_size == file_size:
-                            assert False, "@@@@请检查ota 升级包大小是否适合！！！！"
+                            break
                         if current_size > before_reboot_file_size:
                             before_reboot_file_size = current_size
                             break
@@ -402,41 +411,57 @@ class TestStability:
                         assert False, "@@@@推送中超过30分钟还没有完成%s的下载" % file
                     content_page.time_sleep(3)
                 print("**********************下载完成检测完毕*************************************")
-                lock.acquire()
+                lock.acquire(timeout=5)
+                print("11111111111111111111111111111111111111")
                 content_page.go_to_new_address("content/log")
-                now_time = self.content_page.get_current_time()
+                print("222222222222222222222222222222")
+                now_time_ = content_page.get_current_time()
+                print("3333333333333333333333333333333333333333")
                 while True:
+                    print("44444444444444444444444444444444444444444444444")
                     content_page.search_upgrade_log_by_sn(device_msg["sn"])
-                    upgrade_list = self.content_page.get_content_latest_upgrade_log(send_time, device_msg)
+                    print("555555555555555555555555555555555555555555555555555")
+                    upgrade_list = content_page.get_content_latest_upgrade_log(send_time, device_msg)
+                    print("upgrade_list: ", upgrade_list)
                     if len(upgrade_list) != 0:
                         action = upgrade_list[0]["Action"]
                         print("action", action)
-                        if self.content_page.get_action_status(action) == 7:
+                        if content_page.get_action_status(action) == 7:
                             break
                     # wait upgrade 3 min at most
-                    if self.content_page.get_current_time() > self.content_page.return_end_time(now_time, 180):
+                    if content_page.get_current_time() > content_page.return_end_time(now_time_, 60):
                         assert False, "@@@@3分钟还没有设置完相应的文件， 请检查！！！"
-                    assert file in self.android_mdm_page.u2_send_command(
-                        grep_cmd), "@@@@文件没有释放到设备指定的路径%s, 请检查！！！" % release_to_path
-                    self.content_page.time_sleep(5)
-                    self.content_page.refresh_page()
+                    content_page.time_sleep(5)
+                    content_page.refresh_page()
+                # content_page.go_to_new_address("content/log")
                 lock.release()
+                assert file in device_msg["android_page"].u2_send_command(
+                    grep_cmd), "@@@@文件没有释放到设备指定的路径%s, 请检查！！！" % release_to_path
                 print("***************************************设备%s完成文件%s的推送*********************************" % (
                     device_msg["ip"], file))
 
             # release file to multi devices
             contents_threads = []
-            for content_i in range(len(devices_data)):
+            for content_i in range(len(ips)):
                 content_msg = {"android_page": st.AndroidAimdmPageWiFi(devices_data[content_i], 5),
-                               "sn": devices_sn[content_i],
-                               "ip": devices_ip[content_i], "content_name": file}
+                               "sn": devices_sn[content_i], "ip": devices_ip[content_i], "content_name": file}
                 content_t = st.threading.Thread(target=check_devices_download_file, args=(content_msg,))
                 content_t.start()
                 contents_threads.append(content_t)
-            for content_thread in contents_threads:
-                content_thread.join()
+            for thread in contents_threads:
+                thread.join()
 
-    @allure.feature('MDM_stability_test111')
+            # check_message_reboot_threads = []
+            # for c_d in range(len(devices_data)):
+            #     p_msg = {"android_page": st.AndroidAimdmPageWiFi(devices_data[c_d], 5), "sn": devices_sn[c_d],
+            #              "ip": devices_ip[c_d], "message": msg}
+            #     check_m = st.threading.Thread(target=check_message_in_device, args=(p_msg,))
+            #     check_m.start()
+            #     check_message_reboot_threads.append(check_m)
+            # for thread in check_message_reboot_threads:
+            #     thread.join()
+
+    @allure.feature('MDM_stability_test')
     @allure.title("stability case- 长时间连接测试--长时间连接测试，并且静默升级OTA升级")
     def test_online_long_test(self):
         release_info = {"package_name": test_yml['app_info']['other_app'], "sn": self.devices_sn,

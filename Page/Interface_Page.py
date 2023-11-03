@@ -130,8 +130,11 @@ class interface:
         else:
             assert False, "@@@@不存在%s, 请检查！！！" % file_path
 
-    def calculate_sha256_in_windows(self, file):
-        file_path = self.get_apk_path(file)
+    def calculate_sha256_in_windows(self, file, directory="Package"):
+        if directory == "Package":
+            file_path = self.get_apk_path(file)
+        else:
+            file_path = conf.project_path + "\\Param\\%s\\%s" % (directory, file)
         sha256 = public_pack.hashlib.sha256()
         with open(file_path, "rb") as file:
             for chunk in iter(lambda: file.read(4096), b""):

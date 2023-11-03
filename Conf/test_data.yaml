@@ -27,9 +27,9 @@ MDMTestData:
     #  适用 tpos 系统， 没特殊需求不用修改
     root_apk_name: open_root_apk_v1.1.3.apk
       #  新的版本需要修改
-    aidmd_apk: app_aimdm_V1.0.0_osapi_202308301153.apk
+    aidmd_apk: app_aimdm_V2.0.0_osapi_202310171556.apk
     # 测试服的api
-    api_txt: config.txt
+    api_txt: mdmApiUrl.txt
 
   # app相关信息， 没有特殊要求不用填
   app_info:
@@ -75,9 +75,10 @@ MDMTestData:
 
     #  - test_stability_file
     stability_test_file:
-      - test_stability_file_1.txt
-      - test_stability_file_2.txt
-      - test_stability_file_3.txt
+      - test_txt_file.txt
+#      - test_stability_file_1.txt
+#      - test_stability_file_2.txt
+#      - test_stability_file_3.txt
 
   # 设备信息，需要修改
   android_device_info:

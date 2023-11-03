@@ -12,6 +12,8 @@ class TestLogin:
         self.driver = TestCase.test_driver
         self.mdm_page = TestCase.MDMPage(self.driver, 40)
         self.android_mdm_page = TestCase.AndroidAimdmPage(TestCase.device_data, 5)
+        self.android_mdm_page.open_usb_debug_btn()
+        self.android_mdm_page.screen_keep_on()
         self.wifi_ip = TestCase.device_data["wifi_device_info"]["ip"]
         self.android_mdm_page.back_to_home()
         self.wait_times = 10
