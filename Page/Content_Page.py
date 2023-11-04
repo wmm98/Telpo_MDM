@@ -15,6 +15,7 @@ class ContentPage(TelpoMDMPage):
 
     loc_content_list = (By.ID, "fgdata")
     loc_single_content = (By.CLASS_NAME, "fg-file")
+    loc_content_name = (By.CLASS_NAME, "fg-file-name")
     loc_content_detail_btn = (By.CSS_SELECTOR, "[class = 'fas fa-list-ul']")
     loc_detail_box = (By.CLASS_NAME, "fd-panel-detail")
     loc_detail_release_btn = (By.CSS_SELECTOR, "[class = 'fas fa-registered']")
@@ -35,7 +36,7 @@ class ContentPage(TelpoMDMPage):
     loc_new_file = (By.CSS_SELECTOR, "[class = 'fas fa-plus']")
     loc_user_for_box = (By.CLASS_NAME, "fs-use-bar")
     loc_use_files = (By.CLASS_NAME, "fs-use-file")
-    loc_upload_content_btn = (By.CSS_SELECTOR, "[class = 'fas fa-cloud-upload-alt']")
+    loc_upload_content_btn = (By.CLASS_NAME, "cf-upload-input")
     loc_upload_save = (By.CSS_SELECTOR, "[class = 'btn btn-primary btn-submit']")
 
     # alert show
@@ -99,43 +100,10 @@ class ContentPage(TelpoMDMPage):
             uses_for[2].click()
         elif file_type == "logo":
             uses_for[3].click()
-        self.input_text(self.loc_upload_content_btn, file_path)
+        self.input_text(self.loc_upload_content_btn, file_path, clear=False)
         self.click(self.loc_upload_save)
         self.confirm_tips_alert_show(self.loc_upload_save)
         self.refresh_page()
-
-    def click_add_btn(self):
-        self.click(self.loc_add_package_btn)
-        self.confirm_alert_existed(self.loc_add_package_btn)
-
-    def input_ota_package_info(self, info):
-        self.input_text(self.loc_choose_package_btn, info["file_name"])
-        self.select_by_text(self.loc_file_category, info["file_category"])
-        android_check_box = self.get_element(self.loc_android_checkbox)
-        linux_check_box = self.get_element(self.loc_linux_checkbox)
-        if info["plat_form"] == "Android":
-            if not android_check_box.is_selected():
-                android_check_box.click()
-        elif info["plat_form"] == "Linux":
-            if not linux_check_box.is_selected():
-                linux_check_box.click()
-
-    def click_save_add_ota_pack(self):
-        self.click(self.loc_save_package_info_btn)
-        now_time = t_time.time()
-        while True:
-            if self.uploading_box_show():
-                break
-            else:
-                self.click(self.loc_save_package_info_btn)
-            if t_time.time() > self.return_end_time(now_time):
-                assert False, "@@@@无法上传OTA， 请检查！！！"
-            self.time_sleep(1)
-        # if not self.uploading_box_fade():
-        #     print("333333333333333333333333333333333333")
-        #     assert False, "@@@@上传OTA文件超过3分钟， 请检查！！！！"
-        if not self.get_tips_alert(180):
-            assert False, "@@@@上传OTA文件超过3分钟， 请检查！！！！"
 
     def search_upgrade_log_by_sn(self, sn):
         try:
@@ -315,7 +283,8 @@ class ContentPage(TelpoMDMPage):
             return []
         else:
             boxes = self.get_elements_in_range(self.loc_content_list, self.loc_single_content)
-            return boxes
+            boxes_text = [self.remove_space(box.find_element(*self.loc_content_name).text) for box in boxes]
+            return boxes_text
 
     def confirm_search_box_fade(self):
         now_time = self.get_current_time()

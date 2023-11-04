@@ -25,14 +25,14 @@ class TestNetworkCases:
         self.android_mdm_page.device_unlock()
 
     def teardown_class(self):
-        pass
-        # self.android_mdm_page.open_wifi_btn()
-        # self.android_mdm_page.confirm_wifi_adb_connected(self.wifi_ip)
-        # self.page.delete_app_install_and_uninstall_logs()
-        # self.android_mdm_page.del_all_downloaded_apk()
-        # self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
-        # self.android_mdm_page.del_updated_zip()
-        # self.android_mdm_page.reboot_device(self.wifi_ip)
+        # pass
+        self.android_mdm_page.open_wifi_btn()
+        self.android_mdm_page.confirm_wifi_adb_connected(self.wifi_ip)
+        self.page.delete_app_install_and_uninstall_logs()
+        self.android_mdm_page.del_all_downloaded_apk()
+        self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
+        self.android_mdm_page.del_updated_zip()
+        self.android_mdm_page.reboot_device(self.wifi_ip)
 
     @allure.feature('MDM_usb-test')
     @allure.title("Apps-限定4G网络推送app")
@@ -42,6 +42,10 @@ class TestNetworkCases:
                         "silent": "Yes", "download_network": "Sim Card"}
         # release_info = {"package_name": test_yml['app_info']['other_app_limit_network_A'], "sn": self.device_sn,
         #                 "silent": "Yes", "network": "Wifi/Ethernet"
+        log.info("***********************************限定4G网络推送app用例开始**************************************")
+        print("***********************************限定4G网络推送app用例开始**************************************")
+        send_time = case_pack.time.strftime('%Y-%m-%d %H:%M', case_pack.time.localtime(self.page.get_current_time()))
+        self.page.time_sleep(5)
 
         self.android_mdm_page.confirm_wifi_adb_connected(self.wifi_ip)
 
@@ -58,17 +62,18 @@ class TestNetworkCases:
         # check app size(bytes) in windows
         app_size = self.page.get_file_size_in_windows(file_path)
         print("获取到的app 的size(bytes): ", app_size)
+        log.info("获取到 app的size: %s" % app_size)
 
         # go to app page
         self.page.go_to_new_address("apps")
-        send_time = case_pack.time.strftime('%Y-%m-%d %H:%M', case_pack.time.localtime(self.page.get_current_time()))
-        self.page.time_sleep(4)
+
         self.page.search_app_by_name(release_info["package_name"])
         app_list = self.page.get_apps_text_list()
         if len(app_list) == 0:
             assert False, "@@@@没有 %s, 请检查！！！" % release_info["package_name"]
         self.page.click_release_app_btn()
         self.page.input_release_app_info(release_info)
+        log.info("推送app： %s" % release_info["package_name"])
         # go to app release log
         self.page.go_to_new_address("apps/releases")
         # self.page.check_release_log_info(send_time, release_info["sn"])
@@ -87,26 +92,28 @@ class TestNetworkCases:
             if self.page.get_current_time() > self.page.return_end_time(now_time):
                 assert False, "@@@@没有相应的 app release log， 请检查！！！"
             self.page.time_sleep(3)
+        log.info("检测到%s的下载记录" % release_info["package_name"])
 
         # check if no upgrade log in wifi network environment
         # check the app action in app upgrade logs, if download complete or upgrade complete, break
         self.page.go_to_new_address("apps/logs")
-        now_time = self.page.get_current_time()
+        shell_app_apk_name = release_info["package"] + "_%s.apk" % release_info["version"]
         while True:
-            upgrade_list = self.page.get_app_latest_upgrade_log(send_time, release_info)
-            if len(upgrade_list) != 0:
-                assert False, "@@@@在非4G网络下可以下载app， 请检查！！！！"
+            if self.android_mdm_page.download_file_is_existed(shell_app_apk_name):
+                err_msg = "@@@@在非4G网络可以下载app， 请检查！！！！"
+                log.error(err_msg)
+                assert False, err_msg
             if self.page.get_current_time() > self.page.return_end_time(now_time, 60):
+                log.info("在非4G网络下无法2分钟内没检测到有下载记录")
                 break
-            self.page.time_sleep(5)
-            self.page.refresh_page()
-
         # disconnect wifi
         self.android_mdm_page.disconnect_ip(self.wifi_ip)
         self.android_mdm_page.confirm_wifi_btn_close()
+        log.info("成功断开wifi")
         self.page.time_sleep(3)
+        log.info("打开流量数据")
         self.android_mdm_page.open_mobile_data()
-
+        log.info("成功过打开流量数据")
         # check if app download in 4G environment
         # check the app action in app upgrade logs, if download complete or upgrade complete, break
         now_time = self.page.get_current_time()
@@ -120,18 +127,27 @@ class TestNetworkCases:
                     # check the app size in device, check if app download fully
                     shell_app_apk_name = release_info["package"] + "_%s.apk" % release_info["version"]
                     if not self.android_mdm_page.download_file_is_existed_USB(shell_app_apk_name):
-                        assert False, "@@@@平台显示下载完apk包， 终端查询不存在此包， 请检查！！！！"
+                        err_msg = "@@@@平台显示下载完apk包， 终端查询不存在此包， 请检查！！！！"
+                        log.error(err_msg)
+                        assert False, err_msg
 
                     size = self.android_mdm_page.get_file_size_in_device_USB(shell_app_apk_name)
                     print("终端下载后的的size大小：", size)
+                    log.info("终端下载后的的size大小：%s" % size)
                     if app_size != size:
-                        assert False, "@@@@平台显示下载完成， 终端的包下载不完整，请检查！！！"
+                        print("电脑端下载后的的size大小：%s" % size)
+                        err_msg = "@@@@平台显示下载完成， 终端的包下载不完整，请检查！！！"
+                        log.error(err_msg)
+                        assert False, err_msg
                     break
             # wait 20 mins
             if self.page.get_current_time() > self.page.return_end_time(now_time, 1800):
-                assert False, "@@@@20分钟还没有下载完相应的app， 请检查！！！"
+                err_msg = "@@@@20分钟还没有下载完相应的app， 请检查！！！"
+                log.error(err_msg)
+                assert False, err_msg
             self.page.time_sleep(5)
             self.page.refresh_page()
+        log.info("app下载完成")
 
         # connect wifi
         self.android_mdm_page.open_wifi_btn()
@@ -162,8 +178,8 @@ class TestNetworkCases:
             self.page.time_sleep(5)
             self.page.refresh_page()
         self.page.time_sleep(5)
-        print("*******************限制4G网络下载安装完成***************************")
-        log.info("*******************限制4G网络下载安装完成***************************")
+        log.info("***********************************限定4G网络推送app用例运行成功**************************************")
+        print("***********************************限定4G网络推送app用例运行成功**************************************")
 
     @allure.feature('MDM_usb-test')
     @allure.title("Apps-限定WIFI网络推送app")
@@ -347,7 +363,7 @@ class TestNetworkCases:
             if self.ota_page.get_current_time() > self.ota_page.return_end_time(now_time):
                 assert False, "@@@@没有相应的 ota package release log， 请检查！！！"
             self.ota_page.time_sleep(1)
-
+        self.android_mdm_page.screen_keep_on()
         self.android_mdm_page.confirm_received_alert(download_tips)
         # check the app action in ota upgrade logs page, if download complete or upgrade complete, break
         self.ota_page.go_to_new_address("ota/log")
@@ -430,6 +446,7 @@ class TestNetworkCases:
             self.ota_page.time_sleep(10)
             self.ota_page.refresh_page()
         print("===============================ota升级升级包下载完成============================================")
+        self.android_mdm_page.screen_keep_on()
         self.android_mdm_page.confirm_alert_show()
         self.android_mdm_page.click_cancel_btn()
 
@@ -437,6 +454,7 @@ class TestNetworkCases:
     @allure.title("public case-有线休眠推送app")
     def test_report_device_sleep_status_usb(self, unlock_screen, del_all_app_release_log,
                                             del_all_app_uninstall_release_log, go_to_device_page):
+        self.android_mdm_page.screen_keep_on()
         self.android_mdm_page.del_all_downloaded_apk()
         self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
         self.android_mdm_page.reboot_device(self.wifi_ip)
@@ -588,7 +606,7 @@ class TestNetworkCases:
             self.page.refresh_page()
         self.page.time_sleep(5)
 
-    @allure.feature('MDM_usb-test1')
+    @allure.feature('MDM_usb-test')
     @allure.title("public case- 设备下线无法发送捕捉日志命令")
     def test_fail_to_catch_log_when_offline(self, go_to_device_page, connect_wifi_adb):
         self.android_mdm_page.disconnect_ip(self.wifi_ip)

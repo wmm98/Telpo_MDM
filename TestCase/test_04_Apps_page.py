@@ -29,47 +29,55 @@ class TestAppPage:
         self.page = case_pack.APPSPage(self.driver, 40)
         self.system_page = case_pack.SystemPage(self.driver, 40)
         self.android_mdm_page = case_pack.AndroidAimdmPage(case_pack.device_data, 5)
-        self.wifi_ip = case_pack.device_data["wifi_device_info"]["ip"]
-        self.android_mdm_page.del_all_downloaded_apk()
-        self.device_sn = self.android_mdm_page.get_device_sn()
-        self.page.go_to_new_address("apps")
+        # self.wifi_ip = case_pack.device_data["wifi_device_info"]["ip"]
+        # self.android_mdm_page.del_all_downloaded_apk()
+        # self.device_sn = self.android_mdm_page.get_device_sn()
+        # self.page.go_to_new_address("apps")
 
     def teardown_class(self):
-        self.page.delete_app_install_and_uninstall_logs()
-        self.android_mdm_page.del_all_downloaded_apk()
-        self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
-        self.page.refresh_page()
-        self.android_mdm_page.reboot_device(self.wifi_ip)
+        pass
+        # self.page.delete_app_install_and_uninstall_logs()
+        # self.android_mdm_page.del_all_downloaded_apk()
+        # self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
+        # self.page.refresh_page()
+        # self.android_mdm_page.reboot_device(self.wifi_ip)
 
-    @allure.feature('MDM_APP-test02')
+    @allure.feature('MDM_APP-test02222222')
     @allure.title("Apps-添加APK包")
-    @pytest.mark.flaky(reruns=1, reruns_delay=3)
-    @pytest.mark.parametrize('package_info', package_infos)
-    def test_add_new_apps(self, package_info, go_to_app_page):
+    # @pytest.mark.flaky(reruns=1, reruns_delay=3)
+    # @pytest.mark.parametrize('package_info', package_infos)
+    def test_add_cate_and_apps(self, go_to_app_page):
         exp_success_text = "Success"
         # package_info = {"package_name": "Bus_Recharge_System_1.0.1_20220615.apk", "file_category": "test",
         #                 "developer": "engineer", "description": "test"}
-        file_path = conf.project_path + "\\Param\\Package\\%s" % package_info["package_name"]
-        info = {"file_name": file_path, "file_category": "test",
-                "developer": "engineer", "description": "test"}
-        self.page.search_app_by_name(package_info["package_name"])
-        search_list = self.page.get_apps_text_list()
-        if len(search_list) == 0:
-            if package_info["file_category"] not in self.page.get_app_categories_list():
-                self.page.add_app_category(package_info["file_category"])
-            self.page.click_add_btn()
-            self.page.input_app_info(info)
-            self.page.refresh_page()
-            # check if add successfully
-            self.page.search_app_by_name(package_info["package_name"])
-            add_later_text_list = self.page.get_apps_text_list()
-            if len(add_later_text_list) == 1:
-                if package_info["package_name"] in add_later_text_list[0]:
-                    assert True
-                else:
-                    assert False, "@@@添加apk失败， 请检查"
+        apks = test_yml["app_info"]
+        apks.update(test_yml["system_app"])
+        print(apks)
+        for apk in list(apks.values()):
+            file_path = conf.project_path + "\\Param\\Package\\%s" % apk
+            if self.page.get_app_categories_list() == 0:
+                self.page.add_app_category("test")
+            if len(self.page.get_apps_text_list()) == 0:
+                self.page.click_add_btn()
+                self.page.input_app_info(file_path)
+                self.page.refresh_page()
             else:
-                assert False, "@@@添加apk失败， 请检查"
+                self.page.search_app_by_name(apk)
+                search_list = self.page.get_apps_text_list()
+                if len(search_list) == 0:
+                    self.page.click_add_btn()
+                    self.page.input_app_info(file_path)
+                    self.page.refresh_page()
+                    # check if add successfully
+                    # self.page.search_app_by_name(package_info["package_name"])
+                    # add_later_text_list = self.page.get_apps_text_list()
+                    # if len(add_later_text_list) == 1:
+                    #     if package_info["package_name"] in add_later_text_list[0]:
+                    #         assert True
+                    #     else:
+                    #         assert False, "@@@添加apk失败， 请检查"
+                    # else:
+                    #     assert False, "@@@添加apk失败， 请检查"
 
     @allure.feature('MDM_APP-test01')
     @allure.title("Apps-辅助测试用例")

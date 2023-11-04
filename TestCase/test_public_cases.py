@@ -50,16 +50,29 @@ class TestAppPage:
     @allure.feature('MDM_public')
     @allure.title("public case-添加 content 种类")
     # @pytest.mark.flaky(reruns=1, reruns_delay=3)
-    def test_add_content_cate(self):
+    def test_add_content_relate(self, go_to_content_page):
         if len(self.content_page.get_content_categories_list()) == 0:
-            self.content_page.new_content_category("test")
+            self.content_page.new_content_category("test-debug")
 
-    @allure.feature('MDM_public')
+    @allure.feature('MDM_public-test1111')
     @allure.title("public case-添加 content 文件")
     # @pytest.mark.flaky(reruns=1, reruns_delay=3)
-    def test_add_content_file(self):
-        content_text_list = self.content_page.get_content_list()
-        pass
+    def test_add_content_file(self, go_to_content_page):
+        file_path = conf.project_path + "\\Param\\Content\\"
+        content_name_list = self.content_page.get_content_list()
+
+        for test_file in test_yml["Content_info"].values():
+            for file_name in test_file:
+                if file_name not in content_name_list:
+                    if "file" in file_name:
+                        print(file_path + file_name)
+                        self.content_page.add_content_file("normal_file", file_path + file_name)
+                    elif "bootanimation" in file_name:
+                        self.content_page.add_content_file("boot_animation", file_path + file_name)
+                    elif "background" in file_name:
+                        self.content_page.add_content_file("wallpaper", file_path + file_name)
+                    elif "logo" in file_name:
+                        self.content_page.add_content_file("logo", file_path + file_name)
 
     @allure.feature('MDM_public')
     @allure.title("public case-应用满屏推送--请在附件查看满屏截图效果")
@@ -311,7 +324,7 @@ class TestAppPage:
     def test_release_boot_logo_and_animation(self, unlock_screen, del_all_content_release_logs):
         # "All Files" "Normal Files" "Boot Animations" "Wallpaper" "LOGO"
         logos = test_yml["Content_info"]["boot_logo"]
-        animation = test_yml["Content_info"]["boot_animation"]
+        animation = test_yml["Content_info"]["boot_animation"][0]
 
         opt_case.check_single_device(self.device_sn)
         self.content_page.go_to_new_address("content")

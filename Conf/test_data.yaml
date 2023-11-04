@@ -51,7 +51,7 @@ MDMTestData:
   ota_packages_info:
     #    TPS900_msm8937_sv10_fv1.1.16_pv1.1.16-1.1.17.zip
     # TPS900_msm8937_sv10_fv1.1.16_pv1.1.16-1.1.18.zip
-    package_name: TPS900_msm8937_sv10_fv1.1.16_pv1.1.16-1.1.17.zip
+    package_name: TPS900_msm8937_sv10_fv1.1.19_pv1.1.19-1.2.20.zip
     # 有分android和linux两种系统  Android Linux
     platform: Android
 
@@ -63,7 +63,9 @@ MDMTestData:
       - test_zip_file.zip
 
     # 开机动画
-    boot_animation: test_bootanimation.zip
+    boot_animation:
+      - test_bootanimation.zip
+
     # 壁纸
     wallpaper:
       - test_background_png.png
@@ -75,9 +77,9 @@ MDMTestData:
 
     #  - test_stability_file
     stability_test_file:
-      - test_txt_file.txt
-#      - test_stability_file_1.txt
-#      - test_stability_file_2.txt
+#      - test_txt_file.txt
+      - test_stability_file_1.txt
+      - test_stability_file_2.txt
 #      - test_stability_file_3.txt
 
   # 设备信息，需要修改

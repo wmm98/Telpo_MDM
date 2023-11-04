@@ -120,7 +120,7 @@ class APPSPage(TelpoMDMPage):
         if self.ele_is_existed(self.loc_cate_list):
             if self.ele_is_existed(self.loc_cate_list):
                 eles = self.get_elements(self.loc_single_cate)
-                cates_list = [ele.text for ele in eles]
+                cates_list = [self.remove_space(ele.text) for ele in eles]
                 return cates_list
             else:
                 return []
@@ -388,12 +388,20 @@ class APPSPage(TelpoMDMPage):
         return size
 
     def search_app_by_name(self, app_name):
-        self.click(self.loc_search_btn)
-        self.confirm_alert_existed(self.loc_search_btn)
-        self.input_text(self.loc_search_app_name, app_name)
-        self.time_sleep(1)
-        self.click(self.loc_search_search)
-        self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_search_search)
+        try:
+            self.click(self.loc_search_btn)
+            self.confirm_alert_existed(self.loc_search_btn)
+            self.input_text(self.loc_search_app_name, app_name)
+            self.time_sleep(1)
+            self.click(self.loc_search_search)
+            self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_search_search)
+        except Exception:
+            self.click(self.loc_search_btn)
+            self.confirm_alert_existed(self.loc_search_btn)
+            self.input_text(self.loc_search_app_name, app_name)
+            self.time_sleep(1)
+            self.click(self.loc_search_search)
+            self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_search_search)
 
     def click_private_app_btn(self):
         self.click(self.loc_private_app_btn)
@@ -411,15 +419,18 @@ class APPSPage(TelpoMDMPage):
         self.click(self.loc_new_btn)
         self.confirm_alert_existed(self.loc_new_btn)
 
-    def input_app_info(self, info):
-        self.input_text(self.loc_choose_file, info["file_name"])
-        self.select_by_text(self.loc_choose_category, info["file_category"])
-        self.input_text(self.loc_developer_box, info["developer"])
-        self.input_text(self.loc_des_box, info["description"])
+    def input_app_info(self, file):
+        self.input_text(self.loc_choose_file, file)
+        # self.select_by_text(self.loc_choose_category,"file_category")
+        self.input_text(self.loc_developer_box, "test_engineer")
+        self.input_text(self.loc_des_box, "just for automation test")
         self.time_sleep(1)
         self.click(self.loc_apk_save_btn)
-        self.confirm_alert_existed(self.loc_apk_save_btn)
-        self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_apk_save_btn)
+        self.confirm_tips_alert_show(self.loc_apk_save_btn, timeout=300)
+        self.time_sleep(2)
+        self.refresh_page()
+        # self.confirm_alert_existed(self.loc_apk_save_btn)
+        # self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_apk_save_btn)
 
     def check_add_app_save_btn(self):
         self.confirm_alert_not_existed(self.loc_apk_save_btn)

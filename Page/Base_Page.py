@@ -188,10 +188,11 @@ class BasePage(interface):
         self.web_driver_wait_until(public_pack.EC.presence_of_element_located(loc_pre))
         return self.driver.find_element(*loc_pre).find_elements(*loc_pos)
 
-    def input_text(self, loc, text):
+    def input_text(self, loc, text, clear=True):
         self.web_driver_wait_until(public_pack.EC.presence_of_element_located(loc))
         ele = self.get_element(loc)
-        ele.clear()
+        if clear:
+            ele.clear()
         ele.send_keys(text)
 
     def input_keyboard(self, loc, keyboard):
@@ -244,10 +245,10 @@ class BasePage(interface):
                 assert False, "@@@无法选中device sn, 请检查！！！"
             self.time_sleep(1)
 
-    def confirm_tips_alert_show(self, loc):
+    def confirm_tips_alert_show(self, loc, timeout=6):
         now_time = self.get_current_time()
         while True:
-            if self.get_tips_alert():
+            if self.get_tips_alert(timeout):
                 break
             else:
                 self.click(loc)
@@ -255,9 +256,9 @@ class BasePage(interface):
                 assert False, "@@@@弹窗无法关闭，请检查！！！"
             self.time_sleep(1)
 
-    def get_tips_alert(self):
+    def get_tips_alert(self, timeout=6):
         try:
-            ele = self.web_driver_wait_until(public_pack.EC.presence_of_element_located(self.loc_tips), 6)
+            ele = self.web_driver_wait_until(public_pack.EC.presence_of_element_located(self.loc_tips), timeout)
             print(ele.text)
             return True
         except public_pack.TimeoutException:

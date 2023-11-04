@@ -51,10 +51,10 @@ class TestOTAPage:
             self.page.search_device_by_pack_name(package_info["package_name"])
             assert len(self.page.get_ota_package_list()) == 0, "@@@@删除失败，请检查！！！"
 
-    @allure.feature('MDM_test02- no test in test version')
+    @allure.feature('MDM_test02-11122231111')
     @allure.title("OTA-Add OTA package")
-    @pytest.mark.flaky(reruns=5, reruns_delay=3)
-    def test_add_OTA_package(self):
+    # @pytest.mark.flaky(reruns=1, reruns_delay=3)
+    def test_add_OTA_package_and_cate(self, go_to_ota_page):
         exp_existed_text = "ota already existed"
         exp_success_text = "success"
         package_info = {"package_name": test_yml['ota_packages_info']['package_name'], "file_category": "test",
@@ -62,8 +62,14 @@ class TestOTAPage:
         file_path = conf.project_path + "\\Param\\Package\\%s" % package_info["package_name"]
         ota_info = {"file_name": file_path, "file_category": package_info["file_category"],
                     "plat_form": package_info["plat_form"]}
+        # check if category is existed
+        try:
+            if len(self.page.get_ota_categories_list()) == 0:
+                self.page.add_ota_category("test")
+                self.page.refresh_page()
+        except Exception as e:
+            print(e)
         # check if ota package is existed, if not, add package, else skip
-        self.page.refresh_page()
         self.page.search_device_by_pack_name(package_info["package_name"])
         if len(self.page.get_ota_package_list()) == 0:
             self.page.click_add_btn()

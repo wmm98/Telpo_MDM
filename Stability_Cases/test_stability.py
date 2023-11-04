@@ -393,7 +393,7 @@ class TestStability:
                         current_size = device_msg["android_page"].get_file_size_in_device(file)
                         print("重启%s次之后当前file 的size: %s" % (str(i + 1), current_size))
                         if current_size == file_size:
-                            break
+                            assert False, "@@@@文件太小，请上传大附件！！！！"
                         if current_size > before_reboot_file_size:
                             before_reboot_file_size = current_size
                             break
@@ -411,16 +411,11 @@ class TestStability:
                         assert False, "@@@@推送中超过30分钟还没有完成%s的下载" % file
                     content_page.time_sleep(3)
                 print("**********************下载完成检测完毕*************************************")
-                lock.acquire(timeout=5)
-                print("11111111111111111111111111111111111111")
+                lock.acquire()
                 content_page.go_to_new_address("content/log")
-                print("222222222222222222222222222222")
                 now_time_ = content_page.get_current_time()
-                print("3333333333333333333333333333333333333333")
                 while True:
-                    print("44444444444444444444444444444444444444444444444")
                     content_page.search_upgrade_log_by_sn(device_msg["sn"])
-                    print("555555555555555555555555555555555555555555555555555")
                     upgrade_list = content_page.get_content_latest_upgrade_log(send_time, device_msg)
                     print("upgrade_list: ", upgrade_list)
                     if len(upgrade_list) != 0:
