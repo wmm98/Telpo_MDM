@@ -31,6 +31,14 @@ def uninstall_system_app():
 
 
 @pytest.fixture()
+def push_test_api_to_device():
+    yield
+    api_path = TestCase.Config().project_path + "\\Param\\Work_APP\\%s" % TestCase.yaml_data["work_app"]["api_txt"]
+    android_page.push_file_to_device(api_path, "/" + android_page.get_internal_storage_directory() + "/")
+    android_page.reboot_device(wifi_ip)
+
+
+@pytest.fixture()
 def uninstall_multi_apps():
     android_page.uninstall_multi_apps(TestCase.yaml_data["app_info"])
     yield

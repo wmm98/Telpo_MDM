@@ -32,7 +32,7 @@ class TestDevicesPage:
     def teardown_class(self):
         self.page.refresh_page()
 
-    @allure.feature('MDM_device_test0222')
+    @allure.feature('MDM_device-no need to test')
     @allure.title("辅助测试用例")  # 设置case的名字
     # @pytest.mark.dependency(depends=["test_TelpoMdM_Page"], scope='package')
     def test_go_to_devices_page(self):
@@ -60,7 +60,7 @@ class TestDevicesPage:
             log.error(str(e))
             assert False
 
-    @allure.feature('MDM_test01')
+    @allure.feature('MDM_test-no need to test')
     @allure.title("Devices-add category and  model")  # 设置case的名字
     @pytest.mark.parametrize('cate_model', data_cate_mode)
     def test_add_category_model(self, cate_model):
@@ -97,7 +97,7 @@ class TestDevicesPage:
         self.page.find_category()
         self.page.find_model()
 
-    @allure.feature('MDM_test01')
+    @allure.feature('MDM_test0- no need to test')
     @allure.title("Devices-new devices")  # 设置case的名字
     @pytest.mark.parametrize('devices_list', devices)
     def test_new_devices(self, devices_list):
@@ -138,7 +138,7 @@ class TestDevicesPage:
             print("发生的异常是", e)
             assert False
 
-    @allure.feature('MDM_test01')
+    @allure.feature('MDM_test- no need to test')
     @allure.title("Devices- test import btn")
     def test_import_devices(self):
         exp_success_text = "Add Device Success"
@@ -166,10 +166,11 @@ class TestDevicesPage:
 
         # need to add check length of data list
 
-    @allure.feature('MDM_device_test022')
+    @allure.feature('MDM_device_test')
     @allure.title("Devices- 锁机和解锁")
     @pytest.mark.flaky(reruns=1, reruns_delay=3)
-    def test_lock_and_unlock_single_device(self, unlock_screen):
+    def test_lock_and_unlock_single_device(self, go_to_and_return_device_page):
+        self.android_mdm_page.screen_keep_on()
         # case is stable
         sn = self.device_sn
         exp_lock_msg = "Device %s Locked" % sn
@@ -213,11 +214,12 @@ class TestDevicesPage:
                 self.page.refresh_page()
                 self.page.time_sleep(1)
 
-    @allure.feature('MDM_device_test022')
+    @allure.feature('MDM_device_test')
     @allure.title("Devices- 设备重启5次")
     # @pytest.mark.flaky(reruns=1, reruns_delay=3)
-    def test_reboot_single_device_pressure_testing(self, unlock_screen, connected_wifi_adb):
+    def test_reboot_single_device_pressure_testing(self, connected_wifi_adb, go_to_and_return_device_page):
         exp_reboot_text = "Sending Reboot Comand to Devices"
+        self.android_mdm_page.screen_keep_on()
         sn = self.device_sn
         self.page.refresh_page()
         for i in range(1):
@@ -237,6 +239,7 @@ class TestDevicesPage:
             self.android_mdm_page.confirm_wifi_adb_connected(self.wifi_ip)
             self.android_mdm_page.device_existed(self.wifi_ip)
             self.android_mdm_page.device_boot_complete()
+            self.android_mdm_page.screen_keep_on()
             # wait device network normal
             self.android_mdm_page.ping_network(5)
             now_time = self.page.get_current_time()
@@ -250,20 +253,21 @@ class TestDevicesPage:
             print("成功运行 %s 次" % str(i))
             # case_pack.connect.reconnect(self.wifi_ip)
 
-    @allure.feature('MDM_device_test022')
+    @allure.feature('MDM_device_test')
     @allure.title("Devices- 日志的抓取")
     # @pytest.mark.flaky(reruns=1, reruns_delay=3)
-    def test_cat_logs(self, return_device_page):
+    def test_cat_logs(self, go_to_and_return_device_page):
         exp_log_msg = "Device Debug Command sent"
         sn = self.device_sn
         duration = 5
+        self.android_mdm_page.reboot_device(self.wifi_ip)
         self.page.refresh_page()
         send_time = case_pack.time.strftime('%Y-%m-%d %H:%M', case_pack.time.localtime(case_pack.time.time()))
         opt_case.catch_logs(sn, duration)
         # check if device log generates and upload to allure report
         self.android_mdm_page.generate_and_upload_log(send_time, "捕捉的log")
 
-    @allure.feature('MDM_device_test022')
+    @allure.feature('MDM_device_test')
     @allure.title("Devices- 重置设备TPUI密码")
     @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_reset_TPUI_password(self, unlock_screen, go_to_and_return_device_page):
@@ -278,11 +282,12 @@ class TestDevicesPage:
             self.page.change_TPUI_password(psw)
             self.page.refresh_page()
 
-    @allure.feature('MDM_device_test0222')
+    @allure.feature('MDM_device_test')
     @allure.title("Devices- 重置设备密码")
-    @pytest.mark.flaky(reruns=5, reruns_delay=3)
+    @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_reset_device_password(self, unlock_screen, go_to_and_return_device_page):
         exp_psw_text = "Password changed"
+        self.android_mdm_page.screen_keep_on()
         sn = self.device_sn
         lock_tips = "pls contact the administrator to unlock it!"
         password = ["123456", "000000", "999999"]
@@ -311,12 +316,13 @@ class TestDevicesPage:
             assert self.android_mdm_page.confirm_psw_alert_fade(), "@@@@无法确认密码， 请检查！！！"
             self.page.refresh_page()
 
-    @allure.feature('MDM_device_test022')
+    @allure.feature('MDM_device_test')
     @allure.title("Devices- AIMDM发送包含特殊字符串信息")
     @pytest.mark.flaky(reruns=1, reruns_delay=3)
-    def test_send_message_to_single_device(self, unlock_screen, go_to_and_return_device_page):
+    def test_send_message_to_single_device(self, go_to_and_return_device_page):
         exp_success_send_text = "Message Sent"
         # sn would change after debug with devices
+        self.android_mdm_page.screen_keep_on()
         sn = self.device_sn
         date_time = '%m-%d %H:%M'
         self.page.refresh_page()
@@ -339,25 +345,30 @@ class TestDevicesPage:
         self.android_mdm_page.click_msg_confirm_btn()
         self.android_mdm_page.confirm_msg_alert_fade(msg)
 
-    @allure.feature('MDM_device_test022')
+    @allure.feature('MDM_device_test')
     @allure.title("Devices- AIMDM发消息压力测试")
-    @pytest.mark.flaky(reruns=1, reruns_delay=1)
+    # @pytest.mark.flaky(reruns=1, reruns_delay=1)
     def test_pressure_send_message_to_single_device(self, unlock_screen, go_to_and_return_device_page):
         exp_success_send_text = "Message Sent"
         # sn would change after debug with devices
+        self.android_mdm_page.screen_keep_on()
         sn = self.device_sn
         length = 2
         self.page.refresh_page()
         # confirm if device is online and execute next step, if not, end the case execution
         data = opt_case.check_single_device(sn)
-        print(data)
+        # print(data)
+        if self.page.upper_transfer("Locked") in self.page.remove_space_and_upper(
+                data[0]["Lock Status"]):
+            self.page.select_device(sn)
+            self.page.click_unlock()
         # get device category
         device_cate = data[0]['Category']
         now = case_pack.time.strftime('%Y-%m-%d %H:%M', case_pack.time.localtime(case_pack.time.time()))
         message_list = []
         for i in range(length):
             self.page.refresh_page()
-            msg = "%s:test%d" % (now, i)
+            msg = "%s:#$*%d" % (now, i)
             opt_case.check_single_device(sn)
             self.page.select_device(sn)
             self.page.click_send_btn()
@@ -365,8 +376,13 @@ class TestDevicesPage:
             message_list.append(msg)
             # check message in device
             wait_time = 60
-            if not self.android_mdm_page.confirm_alert_show(wait_time):
-                assert False, "@@@@%ss内无法接收到信息， 请检查设备是否在线！！！！" % wait_time
+            now_time = self.page.get_current_time()
+            while True:
+                if self.android_mdm_page.mdm_msg_alert_show():
+                    break
+                if self.page.get_current_time() > self.page.return_end_time(now_time, wait_time):
+                    assert False, "@@@@%ss内无法接收到信息， 请检查设备是否在线！！！！" % wait_time
+
             self.android_mdm_page.confirm_received_text(msg)
             self.android_mdm_page.click_msg_confirm_btn()
             self.android_mdm_page.confirm_msg_alert_fade(msg)
@@ -413,10 +429,10 @@ class TestDevicesPage:
         # self.android_mdm_page.device_existed(self.wifi_ip)
         # self.android_mdm_page.device_boot_complete()
 
-    @allure.feature('MDM_device_test01')
+    @allure.feature('MDM_device_test111')
     @allure.title("Devices- AIMDM 切换正式测试服服务api ")
-    @pytest.mark.flaky(reruns=5, reruns_delay=3)
-    def test_transfer_api_server(self):
+    # @pytest.mark.flaky(reruns=5, reruns_delay=3)
+    def test_transfer_api_server(self, push_test_api_to_device):
         exp_success_msg = "Updated Device Setting"
         test_version_api = test_yml['website_info']['test_api']
         release_version_api = test_yml['website_info']['release_api']
@@ -426,6 +442,7 @@ class TestDevicesPage:
         sn = self.device_sn
         release_main_title = "Total Devices"
         release_login_ok_title = "Telpo MDM"
+        root_dir = self.android_mdm_page.get_internal_storage_directory()
         self.page.refresh_page()
         self.page.page_load_complete()
 
@@ -437,11 +454,21 @@ class TestDevicesPage:
         self.page.select_device(sn)
         self.page.click_server_btn()
         self.page.api_transfer(release_version_api)
-        # time.sleep(150)
+        self.android_mdm_page.reboot_device(self.wifi_ip)
+        # check if the api had changed in device
+        now_time = self.page.get_current_time()
+        while True:
+            if release_version_api in self.android_mdm_page.u2_send_command("cat /%s/%s" % (root_dir, test_yml["work_app"]["api_txt"])):
+                log.info("终端根目录下的aip 已经改变")
+                print("终端根目录下的aip 已经改变")
+                break
+            if self.page.get_current_time() > self.page.return_end_time(now_time):
+                assert False, "完全启动超过3分钟api还没有改变， 请检查！！！"
         # check if device is offline in test version
         self.page.refresh_page()
         test_device_info = opt_case.get_single_device_list(sn)
         print(test_device_info)
+        assert "OFF" in test_device_info[0]["Status"]
 
         # go to release version and check if device is online
         release_page.refresh_page()
@@ -449,6 +476,7 @@ class TestDevicesPage:
         release_page.go_to_device_page(release_main_title)
         release_data_list = release_page.get_single_device_list_release(sn)
         print(release_data_list)
+        assert "ON" in release_data_list[0]["Status"]
 
         # if release_data_list[0]["Status"] == "Off":
         #     assert False
@@ -456,41 +484,30 @@ class TestDevicesPage:
         release_page.select_device(sn)
         release_page.click_server_btn()
         release_page.api_transfer(test_version_api)
-
+        self.android_mdm_page.reboot_device(self.wifi_ip)
         # time.sleep(150)
         # check if device is offline in release version
         release_page.refresh_page()
         release_data_info_again = release_page.get_single_device_list_release(sn)
         print(release_data_info_again)
+        # no fixed
+        # assert "OFF" in release_data_info_again[0]["Status"]
         # if release_data_list[0]["Status"] == "On":
         #     assert False
         release_page.quit_browser()
+
+        while True:
+            if test_version_api in self.android_mdm_page.u2_send_command("cat /%s/%s" % (root_dir, test_yml["work_app"]["api_txt"])):
+                log.info("终端根目录下的aip 已经改变")
+                print("终端根目录下的aip 已经改变")
+                break
+            if self.page.get_current_time() > self.page.return_end_time(now_time):
+                assert False, "完全启动超过3分钟api还没有改变， 请检查！！！"
 
         # go to test version and check if device is online
         self.page.refresh_page()
         test_data_info = opt_case.get_single_device_list(sn)
         print(test_data_info)
+        assert "ON" in test_data_info[0]["Status"]
         # if release_data_list[0]["Status"] == "Off":
         #     assert False
-
-    @allure.feature('MDM_test01')
-    @allure.title("Devices- 关机 -- test in the last")
-    def test_device_shutdown(self):
-        sn = self.device_sn
-        exp_shutdown_text = "Device ShutDown Command sent"
-        opt_case.check_single_device(sn)
-        self.page.click_dropdown_btn()
-        self.page.click_shutdown_btn()
-        # check if shutdown command works in 3 sec
-        self.page.time_sleep(3)
-        assert "%sdevice" % self.android_mdm_page.get_device_name() not in self.page.remove_space(
-            self.android_mdm_page.devices_list()), "@@@@3s内还没触发关机， 请检查！！！"
-        self.page.refresh_page()
-        assert "Off" in opt_case.get_single_device_list(sn)[0]["Status"], "@@@@已发送关机命令， 设备还显示在线状态"
-        # check device
-
-    @allure.feature('MDM_test03')
-    @allure.title("Devices-debug")
-    def test_devices_test(self):
-        res = self.android_mdm_page.u2_send_command("ls /sdcard/aimdm/log")
-        print(res)

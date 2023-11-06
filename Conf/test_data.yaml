@@ -19,9 +19,9 @@ MDMTestData:
     test_api: http://test.telpopaas.com
     # 正式服相关信息
     release_url: https://mdm.telpoai.com/login
-    release_user: ceshibu03
-    release_password: 123456
-    release_api: http://api.telpotms.com
+    release_user: ceshibu_automation
+    release_password: automation
+    release_api: https://www.telpopaas.com
 
   work_app:
     #  适用 tpos 系统， 没特殊需求不用修改

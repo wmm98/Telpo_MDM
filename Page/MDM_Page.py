@@ -17,6 +17,7 @@ class MDMPage(BasePage):
     loc_pwd_btn = (By.ID, "password")
     loc_user_btn = (By.ID, "username")
     loc_agree_btn = (By.XPATH, "//*[@id=\"agreeTerms\"]")  # //*[@id="agreeTerms"]
+    # loc_agree_btn = (By.ID, "agreeTerms")
     loc_login_btn = (By.XPATH, "//*[@id=\"loginform\"]/div[3]/a")
 
     loc_success_tips = (By.ID, "swal2-title")

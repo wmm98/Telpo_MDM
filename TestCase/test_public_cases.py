@@ -1010,6 +1010,22 @@ class TestAppPage:
             self.app_page.refresh_page()
         self.app_page.time_sleep(5)
 
+    @allure.feature('MDM_public')
+    @allure.title("Devices- 关机 -- test in the last")
+    def test_device_shutdown(self):
+        sn = self.device_sn
+        exp_shutdown_text = "Device ShutDown Command sent"
+        opt_case.check_single_device(sn)
+        self.device_page.click_dropdown_btn()
+        self.device_page.click_shutdown_btn()
+        # check if shutdown command works in 3 sec
+        self.device_page.time_sleep(3)
+        assert "%sdevice" % self.android_mdm_page.get_device_name() not in self.device_page.remove_space(
+            self.android_mdm_page.devices_list()), "@@@@3s内还没触发关机， 请检查！！！"
+        self.device_page.refresh_page()
+        assert "Off" in opt_case.get_single_device_list(sn)[0]["Status"], "@@@@已发送关机命令， 设备还显示在线状态"
+        # check device
+
     @allure.feature('MDM_public1111_test_test111')
     @allure.title("public case- 长时间检测设备在线情况")
     def test_test(self):

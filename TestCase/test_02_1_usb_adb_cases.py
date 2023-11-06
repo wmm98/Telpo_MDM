@@ -48,9 +48,11 @@ class TestNetworkCases:
         print("***********************************限定4G网络推送app用例开始**************************************")
         send_time = case_pack.time.strftime('%Y-%m-%d %H:%M', case_pack.time.localtime(self.page.get_current_time()))
         self.page.time_sleep(5)
-
+        log.info("准备连接wifi")
+        print("准备连接wifi")
         self.android_mdm_page.confirm_wifi_adb_connected(self.wifi_ip)
-
+        log.info("成功连接wifi")
+        print("准备连接wifi")
         # file_path = conf.project_path + "\\Param\\Package\\%s" % release_info["package_name"]
         file_path = self.page.get_apk_path(release_info["package_name"])
         package = self.page.get_apk_package_name(file_path)
@@ -72,7 +74,10 @@ class TestNetworkCases:
         self.page.search_app_by_name(release_info["package_name"])
         app_list = self.page.get_apps_text_list()
         if len(app_list) == 0:
-            assert False, "@@@@没有 %s, 请检查！！！" % release_info["package_name"]
+            err_msg = "没有相应的升级包 %s, 请检查！！！" % release_info["package_name"]
+            log.error(err_msg)
+            print(err_msg)
+            assert False, err_msg
         self.page.click_release_app_btn()
         self.page.input_release_app_info(release_info)
         log.info("推送app： %s" % release_info["package_name"])
@@ -153,10 +158,11 @@ class TestNetworkCases:
 
         # connect wifi
         self.android_mdm_page.open_wifi_btn()
+        log.info("打开wifi按钮")
         self.android_mdm_page.confirm_wifi_status_open()
         self.android_mdm_page.connect_ip(self.wifi_ip)
         self.android_mdm_page.confirm_wifi_adb_connected(self.wifi_ip)
-
+        log.info("连接上wifi adb ")
         """
                 Upgrade action (1: downloading, 2: downloading complete, 3: upgrading,
                  4: upgrading complete, 5: downloading failed, 6: upgrading failed)
@@ -171,12 +177,21 @@ class TestNetworkCases:
                 print("action", action)
                 if self.page.get_action_status(action) == 4:
                     if self.android_mdm_page.app_is_installed(release_info["package"]):
+                        msg = "成功安装%s" % release_info
+                        log.info(msg)
+                        print(msg)
                         break
                     else:
-                        assert False, "@@@@平台显示已经完成安装了app, 终端发现没有安装此app， 请检查！！！！"
+                        err_msg = "@@@@平台显示已经完成安装了app, 终端发现没有安装此app， 请检查！！！！"
+                        print(err_msg)
+                        log.error(err_msg)
+                        assert False, err_msg
             # wait upgrade 3 min at most
             if self.page.get_current_time() > self.page.return_end_time(now_time, 180):
-                assert False, "@@@@3分钟还没有安装完相应的app， 请检查！！！"
+                error_msg = "@@@@3分钟还没有安装完相应的app， 请检查！！！"
+                print(error_msg)
+                log.error(error_msg)
+                assert False, error_msg
             self.page.time_sleep(5)
             self.page.refresh_page()
         self.page.time_sleep(5)
@@ -358,6 +373,7 @@ class TestNetworkCases:
         exp_existed_text = "ota release already existed"
         release_info = {"package_name": test_yml['ota_packages_info']['package_name'], "sn": self.device_sn,
                         "silent": 0, "category": "NO Limit", "network": "NO Limit"}
+        self.android_mdm_page.screen_keep_on()
         self.android_mdm_page.back_to_home()
         # close mobile data first
         self.android_mdm_page.close_mobile_data()
@@ -489,8 +505,40 @@ class TestNetworkCases:
         self.android_mdm_page.click_cancel_btn()
 
     @allure.feature('MDM_usb-test')
+    @allure.title("public case- 设备下线无法发送捕捉日志命令")
+    def test_fail_to_catch_log_when_offline(self, go_to_device_page, connect_wifi_adb):
+        self.android_mdm_page.disconnect_ip(self.wifi_ip)
+        self.android_mdm_page.confirm_wifi_btn_close()
+        self.android_mdm_page.close_mobile_data()
+        self.android_mdm_page.no_network()
+        self.page.time_sleep(120)
+        self.device_page.refresh_page()
+        device_msg = opt_case.get_single_device_list(self.device_sn)[0]
+        assert "Off" in device_msg["Status"], "@@@设备网络已经关掉， 平台显示设备还在线， 请检查！！！"
+        self.device_page.select_device(self.device_sn)
+        send_time = case_pack.time.strftime('%Y-%m-%d %H:%M', case_pack.time.localtime(case_pack.time.time()))
+        self.device_page.click_dropdown_btn()
+
+        self.device_page.click_cat_log()
+        self.device_page.show_log_type()
+        self.device_page.select_app_log()
+        self.device_page.click_save_catch_log_fail()
+        self.device_page.refresh_page()
+        self.page.go_to_new_address("catchlog/task")
+        now_time = self.page.get_current_time()
+        while True:
+            if len(self.cat_log_page.get_latest_catch_log_list(send_time, self.device_sn)) >= 1:
+                assert False, "@@@@设备不在线，不应该有相应的catch log！！！"
+            else:
+                self.page.refresh_page()
+            # wait 20 min
+            if self.page.get_current_time() > self.page.return_end_time(now_time, 60):
+                break
+            self.page.time_sleep(5)
+
+    @allure.feature('MDM_usb-test')
     @allure.title("public case-有线休眠推送app")
-    def test_report_device_sleep_status_usb(self, unlock_screen, del_all_app_release_log,
+    def test_report_device_sleep_status_usb(self, del_all_app_release_log,
                                             del_all_app_uninstall_release_log, go_to_device_page):
         self.android_mdm_page.screen_keep_on()
         self.android_mdm_page.del_all_downloaded_apk()
@@ -644,37 +692,7 @@ class TestNetworkCases:
             self.page.refresh_page()
         self.page.time_sleep(5)
 
-    @allure.feature('MDM_usb-test')
-    @allure.title("public case- 设备下线无法发送捕捉日志命令")
-    def test_fail_to_catch_log_when_offline(self, go_to_device_page, connect_wifi_adb):
-        self.android_mdm_page.disconnect_ip(self.wifi_ip)
-        self.android_mdm_page.confirm_wifi_btn_close()
-        self.android_mdm_page.close_mobile_data()
-        self.android_mdm_page.no_network()
-        self.page.time_sleep(60)
-        self.device_page.refresh_page()
-        device_msg = opt_case.get_single_device_list(self.device_sn)[0]
-        assert "Off" in device_msg["Status"], "@@@设备网络已经关掉， 平台显示设备还在线， 请检查！！！"
-        self.device_page.select_device(self.device_sn)
-        send_time = case_pack.time.strftime('%Y-%m-%d %H:%M', case_pack.time.localtime(case_pack.time.time()))
-        self.device_page.click_dropdown_btn()
 
-        self.device_page.click_cat_log()
-        self.device_page.show_log_type()
-        self.device_page.select_app_log()
-        self.device_page.click_save_catch_log_fail()
-        self.device_page.refresh_page()
-        self.page.go_to_new_address("catchlog/task")
-        now_time = self.page.get_current_time()
-        while True:
-            if len(self.cat_log_page.get_latest_catch_log_list(send_time, self.device_sn)) >= 1:
-                assert False, "@@@@设备不在线，不应该有相应的catch log！！！"
-            else:
-                self.page.refresh_page()
-            # wait 20 min
-            if self.page.get_current_time() > self.page.return_end_time(now_time, 60):
-                break
-            self.page.time_sleep(5)
 
 
 
