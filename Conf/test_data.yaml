@@ -27,7 +27,7 @@ MDMTestData:
     #  适用 tpos 系统， 没特殊需求不用修改
     root_apk_name: open_root_apk_v1.1.3.apk
       #  新的版本需要修改
-    aidmd_apk: app_aimdm_V2.0.0_osapi_202310171556.apk
+    aidmd_apk: app_aimdm_V2.0.1_osapi_202311041522.apk
     # 测试服的api
     api_txt: mdmApiUrl.txt
 
@@ -51,7 +51,8 @@ MDMTestData:
   ota_packages_info:
     #    TPS900_msm8937_sv10_fv1.1.16_pv1.1.16-1.1.17.zip
     # TPS900_msm8937_sv10_fv1.1.16_pv1.1.16-1.1.18.zip
-    package_name: TPS900_msm8937_sv10_fv1.1.19_pv1.1.19-1.2.20.zip
+    # TPS900_msm8937_sv10_fv1.1.19_pv1.1.19-1.2.20.zip
+    package_name: TPS900_msm8937_sv10_fv1.1.19_pv1.1.19-1.2.22.zip
     # 有分android和linux两种系统  Android Linux
     platform: Android
 

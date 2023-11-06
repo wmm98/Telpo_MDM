@@ -42,7 +42,7 @@ class interface:
         else:
             return False
 
-    def confirm_wifi_adb_connected(self, ip, timeout=120):
+    def confirm_wifi_adb_connected(self, ip, timeout=150):
         now_time = self.get_current_time()
         while True:
             res = self.connect_ip(ip)

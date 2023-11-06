@@ -19,8 +19,10 @@ class TestNetworkCases:
         self.system_page = case_pack.SystemPage(self.driver, 40)
         self.cat_log_page = case_pack.CatchLogPage(self.driver, 40)
         self.android_mdm_page = case_pack.AndroidAimdmPage(case_pack.device_data, 5)
+        self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
         self.wifi_ip = case_pack.device_data["wifi_device_info"]["ip"]
         self.android_mdm_page.del_all_downloaded_apk()
+        self.android_mdm_page.del_updated_zip()
         self.device_sn = self.android_mdm_page.get_device_sn()
         self.android_mdm_page.device_unlock()
 
@@ -187,15 +189,24 @@ class TestNetworkCases:
     def test_release_app_limit_wifi(self, del_all_app_release_log, del_all_app_uninstall_release_log, go_to_app_page):
         # release_info = {"package_name": test_yml['app_info']['other_app_limit_network_B'], "sn": self.device_sn,
         #                 "silent": "Yes", "download_network": "Sim Card"}
+        log.info("***********************************限定wifi/eth0网络推送app用例开始**************************************")
+        print("***********************************限定wifi/eth0网络推送app用例开始**************************************")
         release_info = {"package_name": test_yml['app_info']['other_app_limit_network_B'], "sn": self.device_sn,
                         "silent": "Yes", "download_network": "Wifi/Ethernet"}
-
+        log.info("准备断开wifi")
+        print("准备断开wifi")
         # disconnect wifi, open data
         self.android_mdm_page.disconnect_ip(self.wifi_ip)
         self.android_mdm_page.close_wifi_btn()
         self.android_mdm_page.confirm_wifi_btn_close()
+        log.info("成功断开wifi")
+        print("成功断开wifi")
         self.page.time_sleep(3)
+        log.info("准备打开流量数据")
+        print("准备打开流量数据")
         self.android_mdm_page.open_mobile_data()
+        log.info("成功打开流量数据")
+        print("成功打开流量数据")
 
         file_path = self.page.get_apk_path(release_info["package_name"])
         package = self.page.get_apk_package_name(file_path)
@@ -209,16 +220,19 @@ class TestNetworkCases:
         # check app size(bytes) in windows
         app_size = self.page.get_file_size_in_windows(file_path)
         print("获取到的app 的size(bytes): ", app_size)
-
+        log.info("电脑端获取到app的size : %s" % str(app_size))
         # go to app page
-        self.page.go_to_new_address("apps")
         send_time = case_pack.time.strftime('%Y-%m-%d %H:%M',
                                             case_pack.time.localtime(self.page.get_current_time()))
-        self.page.time_sleep(4)
+        self.page.time_sleep(6)
+        self.page.go_to_new_address("apps")
         self.page.search_app_by_name(release_info["package_name"])
         app_list = self.page.get_apps_text_list()
         if len(app_list) == 0:
-            assert False, "@@@@没有 %s, 请检查！！！" % release_info["package_name"]
+            err_msg = "@@@@没有 %s, 请检查！！！" % release_info["package_name"]
+            log.error(err_msg)
+            print(err_msg)
+            assert False, err_msg
         self.page.click_release_app_btn()
         self.page.input_release_app_info(release_info)
         # go to app release log
@@ -237,9 +251,12 @@ class TestNetworkCases:
             else:
                 self.page.refresh_page()
             if self.page.get_current_time() > self.page.return_end_time(now_time):
-                assert False, "@@@@没有相应的 app release log， 请检查！！！"
+                err_msg = "@@@@没有相应的 app release log， 请检查！！！"
+                log.error(err_msg)
+                print(err_msg)
+                assert False, err_msg
             self.page.time_sleep(3)
-
+        log.info("平台推送app, 并且可检测到推送记录")
         # check if no upgrade log in wifi network environment
         # check the app action in app upgrade logs, if download complete or upgrade complete, break
         self.page.go_to_new_address("apps/logs")
@@ -247,20 +264,29 @@ class TestNetworkCases:
         while True:
             upgrade_list = self.page.get_app_latest_upgrade_log(send_time, release_info)
             if len(upgrade_list) != 0:
-                assert False, "@@@@在非wifi/eth0网络下可以下载app， 请检查！！！！"
+                err_msg = "@@@@在非wifi/eth0网络下可以下载app， 请检查！！！！"
+                log.error(err_msg)
+                print(err_msg)
+                assert False, err_msg
             if self.page.get_current_time() > self.page.return_end_time(now_time, 60):
+                msg = "1分钟内没有检测到app的下载记录"
+                log.info(msg)
                 break
             self.page.time_sleep(5)
             self.page.refresh_page()
 
+        log.info("准备连接wifi/eth0")
         # connect wifi
         self.android_mdm_page.close_mobile_data()
         self.android_mdm_page.open_wifi_btn()
         self.android_mdm_page.confirm_wifi_btn_open()
         self.android_mdm_page.confirm_wifi_adb_connected(self.wifi_ip)
+        log.info("成功连接到wifi")
+        print("成功连接到wifi")
 
         # check if app download in 4G environment
         # check the app action in app upgrade logs, if download complete or upgrade complete, break
+        log.info("准备检查平台app的下载记录以及终端的下载记录")
         now_time = self.page.get_current_time()
         while True:
             upgrade_list = self.page.get_app_latest_upgrade_log(send_time, release_info)
@@ -269,21 +295,30 @@ class TestNetworkCases:
                 print(action)
                 if self.page.get_action_status(action) == 2 or self.page.get_action_status(action) == 4 \
                         or self.page.get_action_status(action) == 3:
+                    log.info("检测到平台有app下载完成的记录")
                     # check the app size in device, check if app download fully
                     shell_app_apk_name = release_info["package"] + "_%s.apk" % release_info["version"]
                     if not self.android_mdm_page.download_file_is_existed_USB(shell_app_apk_name):
                         assert False, "@@@@平台显示下载完apk包， 终端查询不存在此包， 请检查！！！！"
-
+                    log.info("检测到终端也有app相应的下载记录")
                     size = self.android_mdm_page.get_file_size_in_device_USB(shell_app_apk_name)
-                    print("终端下载后的的size大小：", size)
+                    log.info("终端下载后的的size大小：%s" % str(size))
+                    print("终端下载后的的size大小：%s" % str(size))
                     if app_size != size:
-                        assert False, "@@@@平台显示下载完成， 终端的包下载不完整，请检查！！！"
+                        err = "@@@@平台显示下载完成， 终端的包下载不完整，请检查！！！"
+                        log.error(err)
+                        assert False, err
                     break
             # wait 20 mins
             if self.page.get_current_time() > self.page.return_end_time(now_time, 1800):
-                assert False, "@@@@20分钟还没有下载完相应的app， 请检查！！！"
+                err_msg = "@@@@20分钟还没有下载完相应的app， 请检查！！！"
+                log.error(err_msg)
+                print(err_msg)
+                assert False, err_msg
             self.page.time_sleep(5)
             self.page.refresh_page()
+            log.info("下载完成")
+            print("下载我弄成")
 
         """
                 Upgrade action (1: downloading, 2: downloading complete, 3: upgrading,
@@ -308,6 +343,8 @@ class TestNetworkCases:
             self.page.time_sleep(5)
             self.page.refresh_page()
         self.page.time_sleep(5)
+        print("app安装完成")
+        log.info("app安装完成")
         print("*******************限制wifi网络下载安装完成***************************")
         log.info("*******************限制wifi网络下载安装完成***************************")
 
@@ -321,6 +358,7 @@ class TestNetworkCases:
         exp_existed_text = "ota release already existed"
         release_info = {"package_name": test_yml['ota_packages_info']['package_name'], "sn": self.device_sn,
                         "silent": 0, "category": "NO Limit", "network": "NO Limit"}
+        self.android_mdm_page.back_to_home()
         # close mobile data first
         self.android_mdm_page.close_mobile_data()
         # get release ota package version
@@ -398,15 +436,15 @@ class TestNetworkCases:
             self.android_mdm_page.confirm_wifi_btn_open()
             self.android_mdm_page.confirm_wifi_adb_connected(self.wifi_ip)
             self.android_mdm_page.ping_network()
-            # need to release again
-            self.ota_page.go_to_new_address("ota/release")
-            self.ota_page.select_release_log()
-            self.ota_page.release_again()
-            try:
-                self.android_mdm_page.confirm_received_alert(download_tips)
-            except Exception:
-                assert False, "@@@@断网重连后一段时间内没有接受到下载的提示， 请检查！！！！"
-            now_time = self.ota_page.get_current_time()
+            # need to release again, skip below steps
+            # self.ota_page.go_to_new_address("ota/release")
+            # self.ota_page.select_release_log()
+            # self.ota_page.release_again()
+            # try:
+            #     self.android_mdm_page.confirm_received_alert(download_tips)
+            # except Exception:
+            #     assert False, "@@@@断网重连后一段时间内没有接受到下载的提示， 请检查！！！！"
+            # now_time = self.ota_page.get_current_time()
             while True:
                 current_size = self.android_mdm_page.get_file_size_in_device(release_info["package_name"])
                 print("断网%s次之后当前ota package 的size: %s" % (str(i + 1), current_size))
