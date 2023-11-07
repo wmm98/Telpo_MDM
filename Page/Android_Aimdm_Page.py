@@ -44,6 +44,17 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
     # lock_psw_id = "%s:id/et_pwd" % aimdm_package
     # psw_confirm_id = "%s:id/confirm_pwd" % aimdm_package
 
+    def manual_unlock(self):
+        ele_lock = self.get_element_by_id(self.msg_confirm_id)
+        print(ele_lock.get_text())
+        try:
+            for i in range(7):
+                self.click_element(ele_lock)
+                # self.time_sleep(0.1)
+                # print(i)
+        except Exception as e:
+            print(e)
+
     def confirm_system_app_uninstalled(self):
         apk_file = public_pack.yaml_data['app_info']['low_version_app']
         self.rm_file("system/app/%s" % apk_file)
@@ -186,15 +197,6 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
         with open(file_path, 'rb') as image_file:
             public_pack.allure.attach(image_file.read(), name=new_name, attachment_type=public_pack.allure.attachment_type.JPG)
 
-    def manual_unlock(self):
-        ele_lock = self.get_element_by_id(self.msg_confirm_id)
-        print(ele_lock.get_text())
-        try:
-            for i in range(6):
-                self.click_element(ele_lock)
-                print(i)
-        except Exception as e:
-            print(e)
 
     def lock_psw_box_presence(self, time_to_wait=3):
         self.wait_ele_presence_by_id(self.lock_psw_id, time_to_wait)

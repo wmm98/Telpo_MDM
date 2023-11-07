@@ -49,8 +49,11 @@ class TestLogin:
         self.mdm_page.login_ok(username, password)
         now_time = self.mdm_page.get_current_time()
         while True:
-            if self.mdm_page.web_driver_wait_until(TestCase.EC.url_contains("device")):
-                break
+            try:
+                if self.mdm_page.web_driver_wait_until(TestCase.EC.url_contains("device")):
+                    break
+            except Exception:
+                pass
             if self.mdm_page.get_current_time() > self.mdm_page.return_end_time(now_time):
                 assert False, "无法登录，请检查！！！"
             self.mdm_page.refresh_page()

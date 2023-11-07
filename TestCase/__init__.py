@@ -16,6 +16,7 @@ from Page.System_Page import SystemPage
 from Page.Apps_Page import APPSPage
 import time
 from Page.Android_Aimdm_Page import AndroidAimdmPage
+from Page.Andriod_Aimdm_Page_WIFI import AndroidAimdmPageWiFi
 from Page.Catch_Log_Page import CatchLogPage
 from Page.Content_Page import ContentPage
 from utils.client_connect import ClientConnect

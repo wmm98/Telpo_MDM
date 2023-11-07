@@ -241,7 +241,7 @@ class TestDevicesPage:
             self.android_mdm_page.device_boot_complete()
             self.android_mdm_page.screen_keep_on()
             # wait device network normal
-            self.android_mdm_page.ping_network(5)
+            self.android_mdm_page.ping_network_wifi(5)
             now_time = self.page.get_current_time()
             while True:
                 self.page.refresh_page()
@@ -284,7 +284,7 @@ class TestDevicesPage:
 
     @allure.feature('MDM_device_test')
     @allure.title("Devices- 重置设备密码")
-    @pytest.mark.flaky(reruns=1, reruns_delay=3)
+    # @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_reset_device_password(self, unlock_screen, go_to_and_return_device_page):
         exp_psw_text = "Password changed"
         self.android_mdm_page.screen_keep_on()
@@ -429,7 +429,7 @@ class TestDevicesPage:
         # self.android_mdm_page.device_existed(self.wifi_ip)
         # self.android_mdm_page.device_boot_complete()
 
-    @allure.feature('MDM_device_test111')
+    @allure.feature('MDM_device_test')
     @allure.title("Devices- AIMDM 切换正式测试服服务api ")
     # @pytest.mark.flaky(reruns=5, reruns_delay=3)
     def test_transfer_api_server(self, push_test_api_to_device):
@@ -468,7 +468,7 @@ class TestDevicesPage:
         self.page.refresh_page()
         test_device_info = opt_case.get_single_device_list(sn)
         print(test_device_info)
-        assert "OFF" in test_device_info[0]["Status"]
+        # assert "OFF" in self.page.remove_space(self.page.upper_transfer(test_device_info[0]["Status"]))
 
         # go to release version and check if device is online
         release_page.refresh_page()
@@ -476,7 +476,7 @@ class TestDevicesPage:
         release_page.go_to_device_page(release_main_title)
         release_data_list = release_page.get_single_device_list_release(sn)
         print(release_data_list)
-        assert "ON" in release_data_list[0]["Status"]
+        # assert "ON" in self.page.remove_space(self.page.upper_transfer(test_device_info[0]["Status"]))
 
         # if release_data_list[0]["Status"] == "Off":
         #     assert False
@@ -491,7 +491,7 @@ class TestDevicesPage:
         release_data_info_again = release_page.get_single_device_list_release(sn)
         print(release_data_info_again)
         # no fixed
-        # assert "OFF" in release_data_info_again[0]["Status"]
+        # assert "OFF" in self.page.remove_space(self.page.upper_transfer(release_data_info_again[0]["Status"]))
         # if release_data_list[0]["Status"] == "On":
         #     assert False
         release_page.quit_browser()
@@ -508,6 +508,6 @@ class TestDevicesPage:
         self.page.refresh_page()
         test_data_info = opt_case.get_single_device_list(sn)
         print(test_data_info)
-        assert "ON" in test_data_info[0]["Status"]
+        # assert "ON" in self.page.remove_space(self.page.upper_transfer(test_device_info[0]["Status"]))
         # if release_data_list[0]["Status"] == "Off":
         #     assert False

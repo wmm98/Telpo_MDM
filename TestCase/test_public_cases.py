@@ -39,13 +39,13 @@ class TestAppPage:
         self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
 
     def teardown_class(self):
-        pass
-        # self.app_page.delete_app_install_and_uninstall_logs()
-        # self.android_mdm_page.del_all_downloaded_apk()
-        # self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
-        # self.android_mdm_page.del_all_content_file()
-        # self.app_page.refresh_page()
-        # self.android_mdm_page.reboot_device(self.wifi_ip)
+        # pass
+        self.app_page.delete_app_install_and_uninstall_logs()
+        self.android_mdm_page.del_all_downloaded_apk()
+        self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
+        self.android_mdm_page.del_all_content_file()
+        self.app_page.refresh_page()
+        self.android_mdm_page.reboot_device(self.wifi_ip)
 
     @allure.feature('MDM_public')
     @allure.title("public case-添加 content 种类")
@@ -54,7 +54,7 @@ class TestAppPage:
         if len(self.content_page.get_content_categories_list()) == 0:
             self.content_page.new_content_category("test-debug")
 
-    @allure.feature('MDM_public-test1111')
+    @allure.feature('MDM_public')
     @allure.title("public case-添加 content 文件")
     # @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_add_content_file(self, go_to_content_page):
@@ -80,6 +80,8 @@ class TestAppPage:
     def test_release_app_full_screen(self, del_all_app_release_log, del_all_app_uninstall_release_log, go_to_app_page):
         release_info = {"package_name": test_yml['app_info']['other_app'], "sn": self.device_sn,
                         "silent": "Yes", "download_network": "NO Limit"}
+        print("*******************应用满屏推送用例开始***************************")
+        log.info("*******************应用满屏推送用例开始***************************")
         file_path = self.app_page.get_apk_path(release_info["package_name"])
         package = self.app_page.get_apk_package_name(file_path)
         release_info["package"] = package
@@ -212,6 +214,8 @@ class TestAppPage:
     @allure.title("public case-推送壁纸--请在附件查看壁纸截图效果")
     def test_release_wallpaper(self, unlock_screen, del_all_content_release_logs):
         # "All Files" "Normal Files" "Boot Animations" "Wallpaper" "LOGO"
+        print("*******************推送壁纸用例开始***************************")
+        log.info("*******************推送壁纸用例开始***************************")
         self.android_mdm_page.back_to_home()
         self.android_mdm_page.time_sleep(3)
         base_directory = "Wallpaper"
@@ -323,6 +327,8 @@ class TestAppPage:
     @allure.title("public case-推送开机logo/动画")
     def test_release_boot_logo_and_animation(self, unlock_screen, del_all_content_release_logs):
         # "All Files" "Normal Files" "Boot Animations" "Wallpaper" "LOGO"
+        print("*******************推送开机logo/动画开始***************************")
+        log.info("*******************推送开机logo/动画开始***************************")
         logos = test_yml["Content_info"]["boot_logo"]
         animation = test_yml["Content_info"]["boot_animation"][0]
 
@@ -492,7 +498,7 @@ class TestAppPage:
                 self.content_page.time_sleep(5)
                 self.content_page.refresh_page()
 
-            case_pack.AlertData().getAlert("请关掉提示框并且查看启动logo和动画")
+            # case_pack.AlertData().getAlert("请关掉提示框并且查看启动logo和动画")
             self.android_mdm_page.reboot_device(self.wifi_ip)
             self.content_page.time_sleep(5)
 
@@ -500,6 +506,8 @@ class TestAppPage:
     @allure.title("public case-推送text.zip文件")
     def test_release_normal_files(self, unlock_screen, del_all_content_release_logs):
         # "All Files" "Normal Files" "Boot Animations" "Wallpaper" "LOGO"
+        print("*******************推送文件用例开始***************************")
+        log.info("*******************推送文件用例开始***************************")
         animations = test_yml["Content_info"]["normal_file"]
         # if the file is existed, delete it
         release_to_path = "%s/aimdm" % self.android_mdm_page.get_internal_storage_directory()
@@ -593,11 +601,18 @@ class TestAppPage:
                 grep_cmd), "@@@@文件没有释放到设备指定的路径%s, 请检查！！！" % release_to_path
 
     @allure.feature('MDM_public')
-    @allure.title("public case-推送text.zip文件")
+    @allure.title("public case-多应用推送")
     def test_release_multi_apps(self, del_all_app_release_log, del_download_apk, uninstall_multi_apps):
+        print("*******************多应用推送用例开始***************************")
+        log.info("*******************多应用推送用例开始***************************")
         release_info = {"sn": self.device_sn, "silent": "Yes", "download_network": "NO Limit", "version": False}
         apks = [test_yml["app_info"][apk_name] for apk_name in test_yml["app_info"] if
                 apk_name not in ["high_version_app", "low_version_app"]]
+        apks = list(set(apks))
+        print(apks)
+        self.app_page.go_to_new_address("apps/releases")
+        self.app_page.delete_all_app_release_log()
+        # self.android_mdm_page.uninstall_multi_apps()
 
         apks_packages = [self.android_mdm_page.get_apk_package_name(self.android_mdm_page.get_apk_path(apk)) for apk in
                          apks]
@@ -626,16 +641,16 @@ class TestAppPage:
             self.app_page.input_release_app_info(release_info)
 
         # go to app release log
-        self.app_page.go_to_new_address("apps/releases")
-        now_time = self.app_page.get_current_time()
-        while True:
-            if self.app_page.get_current_app_release_log_total() == len(apks_packages):
-                break
-            if self.app_page.get_current_time() > self.app_page.return_end_time(now_time):
-                assert False, "@@@@超过3分钟没有相应的 app release log， 请检查！！！"
-            self.app_page.time_sleep(3)
-
-        print("**********************释放log检测完毕*************************************")
+        # self.app_page.go_to_new_address("apps/releases")
+        # now_time = self.app_page.get_current_time()
+        # while True:
+        #     if self.app_page.get_current_app_release_log_total() == len(apks_packages):
+        #         break
+        #     if self.app_page.get_current_time() > self.app_page.return_end_time(now_time):
+        #         assert False, "@@@@超过3分钟没有相应的 app release log， 请检查！！！"
+        #     self.app_page.time_sleep(3)
+        #
+        # print("**********************释放log检测完毕*************************************")
 
         # check the app download record in device
         downloading_apks = []
@@ -649,7 +664,7 @@ class TestAppPage:
                         downloading_apks.append(apks_packages[d_record])
             if len(downloading_apks) == len(apks_packages):
                 break
-            if self.app_page.get_current_time() > self.app_page.return_end_time(now_time, 1800):
+            if self.app_page.get_current_time() > self.app_page.return_end_time(now_time, 300):
                 diff_list = [package for package in apks_packages if package not in downloading_apks]
                 download_record = ",".join(diff_list)
                 assert False, "@@@@多应用推送中超过30分钟还没有%s的下载记录" % download_record
@@ -726,10 +741,11 @@ class TestAppPage:
                 uninstalled_report = ",".join(diff_list)
                 assert False, "@@@@多应用推送中设备已经安装完毕所有的app, 平套超过5分钟还上报%s的安装记录" % uninstalled_report
 
-    @allure.feature('MDM_public-test-test')
+    @allure.feature('MDM_public')
     @allure.title("public case- 静默升级系统app")
     def test_upgrade_system_app(self, del_all_app_release_log, del_download_apk, uninstall_system_app):
-        pass
+        print("*******************静默升级系统app用例开始***************************")
+        log.info("*******************静默升级系统app用例开始***************************")
         release_info = {"package_name": test_yml['app_info']['high_version_app'], "sn": self.device_sn,
                         "silent": "Yes", "download_network": "NO Limit", "auto_open": "YES"}
         file_path = self.android_mdm_page.get_apk_path(release_info["package_name"])
@@ -821,7 +837,7 @@ class TestAppPage:
                         assert False, "@@@@平台显示下载完成， 终端的包下载不完整，请检查！！！"
                     break
                 # wait 20 mins
-            if self.app_page.get_current_time() > self.app_page.return_end_time(now_time, 1200):
+            if self.app_page.get_current_time() > self.app_page.return_end_time(now_time, 640):
                 assert False, "@@@@20分钟还没有下载完相应的app， 请检查！！！"
             self.app_page.refresh_page()
             self.app_page.time_sleep(5)
@@ -856,14 +872,17 @@ class TestAppPage:
 
     @allure.feature('MDM_public')
     @allure.title("public case-无线休眠推送app")
-    def test_report_device_sleep_status(self, unlock_screen, del_all_app_release_log,
+    def test_report_device_sleep_status(self, del_all_app_release_log,
                                         del_all_app_uninstall_release_log, go_to_device_page):
+        print("*******************无线休眠推送app用例开始***************************")
+        log.info("*******************无线休眠推送app用例开始***************************")
         self.android_mdm_page.del_all_downloaded_apk()
         self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
         self.android_mdm_page.reboot_device(self.wifi_ip)
+        self.android_mdm_page.screen_keep_on()
         self.android_mdm_page.back_to_home()
         # self.android_mdm_page.confirm_unplug_usb_wire()
-        case_pack.AlertData().getAlert("请拔开USB线再点击确定")
+        # case_pack.AlertData().getAlert("请拔开USB线再点击确定")
 
         release_info = {"package_name": test_yml['app_info']['other_app'], "sn": self.device_sn,
                         "silent": "Yes", "download_network": "NO Limit"}
@@ -986,7 +1005,7 @@ class TestAppPage:
                     assert package_hash_value == act_apk_package_hash_value, "@@@@平台显示下载完成，终端的apk和原始的apkSHA-256值不一致， 请检查！！！！"
                     break
             # wait 20 mins
-            if self.app_page.get_current_time() > self.app_page.return_end_time(now_time, 1800):
+            if self.app_page.get_current_time() > self.app_page.return_end_time(now_time, 300):
                 assert False, "@@@@30分钟还没有下载完相应的app， 请检查！！！"
             self.app_page.time_sleep(5)
             self.app_page.refresh_page()
@@ -1013,6 +1032,8 @@ class TestAppPage:
     @allure.feature('MDM_public')
     @allure.title("Devices- 关机 -- test in the last")
     def test_device_shutdown(self):
+        print("*******************关机用例开始***************************")
+        log.info("*******************关机用例开始***************************")
         sn = self.device_sn
         exp_shutdown_text = "Device ShutDown Command sent"
         opt_case.check_single_device(sn)

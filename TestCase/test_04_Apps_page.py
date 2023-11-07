@@ -29,20 +29,24 @@ class TestAppPage:
         self.page = case_pack.APPSPage(self.driver, 40)
         self.system_page = case_pack.SystemPage(self.driver, 40)
         self.android_mdm_page = case_pack.AndroidAimdmPage(case_pack.device_data, 5)
-        # self.wifi_ip = case_pack.device_data["wifi_device_info"]["ip"]
-        # self.android_mdm_page.del_all_downloaded_apk()
-        # self.device_sn = self.android_mdm_page.get_device_sn()
-        # self.page.go_to_new_address("apps")
+        self.page.delete_app_install_and_uninstall_logs()
+        self.android_mdm_page.confirm_system_app_uninstalled()
+        self.android_mdm_page.uninstall_multi_apps(test_yml["app_info"])
+        self.wifi_ip = case_pack.device_data["wifi_device_info"]["ip"]
+        self.android_mdm_page.del_all_downloaded_apk()
+        self.device_sn = self.android_mdm_page.get_device_sn()
+        self.page.go_to_new_address("apps")
 
     def teardown_class(self):
-        pass
-        # self.page.delete_app_install_and_uninstall_logs()
-        # self.android_mdm_page.del_all_downloaded_apk()
-        # self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
-        # self.page.refresh_page()
-        # self.android_mdm_page.reboot_device(self.wifi_ip)
+        # pass
+        self.page.delete_app_install_and_uninstall_logs()
+        self.android_mdm_page.del_all_downloaded_apk()
+        self.android_mdm_page.confirm_system_app_uninstalled()
+        self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
+        self.page.refresh_page()
+        self.android_mdm_page.reboot_device(self.wifi_ip)
 
-    @allure.feature('MDM_APP-test02222222')
+    @allure.feature('MDM_APP-test')
     @allure.title("Apps-添加APK包")
     # @pytest.mark.flaky(reruns=1, reruns_delay=3)
     # @pytest.mark.parametrize('package_info', package_infos)
@@ -87,7 +91,7 @@ class TestAppPage:
         self.page.delete_all_app_release_log()
         assert self.page.get_current_app_release_log_total() == 0, "@@@@没有删除完了所有的app release log, 请检查!!!"
 
-    @allure.feature('MDM_APP-test022')
+    @allure.feature('MDM_APP-test')
     @allure.title("Apps-推送低版本的APP")
     @pytest.mark.dependency(name="test_release_app_ok", scope='package')
     # @pytest.mark.flaky(reruns=1, reruns_delay=3)
@@ -248,7 +252,7 @@ class TestAppPage:
         log.info("*******************卸载后重新安装成功***************************")
         print("*******************卸载后重新安装成功***************************")
 
-    @allure.feature('MDM_APP-test02')
+    @allure.feature('MDM_APP-test')
     @allure.title("Apps-推送高版本APP覆盖安装/卸载后检测重新下载/卸载重启检查安装")
     @pytest.mark.dependency(depends=["test_release_app_ok"], scope='package')
     # @pytest.mark.flaky(reruns=1, reruns_delay=3)
@@ -393,7 +397,7 @@ class TestAppPage:
         log.info("*******************卸载并重启后重新安装成功***************************")
         print("*******************卸载并重启后重新安装成功***************************")
 
-    @allure.feature('MDM_APP-test02')
+    @allure.feature('MDM_APP-test')
     @allure.title("Apps- 在原有的记录上再次释放app")
     @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_send_release_install_app_again(self, go_to_app_release_log, del_all_app_release_log_after):
@@ -411,7 +415,7 @@ class TestAppPage:
         self.page.select_single_app_release_log()
         self.page.click_send_release_again()
 
-    @allure.feature('MDM_APP-test02')
+    @allure.feature('MDM_APP-test')
     @allure.title("Apps- 卸载正在运行的APP")
     # @pytest.mark.dependency(depends=["test_release_app_ok"], scope='package')
     @pytest.mark.flaky(reruns=1, reruns_delay=3)
@@ -468,7 +472,7 @@ class TestAppPage:
                 assert False, "@@@@3分钟还没有卸载完相应的app， 请检查！！！"
             self.page.time_sleep(3)
 
-    @allure.feature('MDM_APP-test02')
+    @allure.feature('MDM_APP-test')
     @allure.title("Apps- release app again")
     def test_send_release_uninstall_app_again(self, del_all_app_release_log, del_all_app_uninstall_release_log_after):
         exp_release_success_text = "Sync App Release Success"

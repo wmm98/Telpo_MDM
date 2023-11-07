@@ -222,3 +222,5 @@ def connect_wifi_adb():
     yield
     android_page.open_wifi_btn()
     android_page.confirm_wifi_adb_connected(TestCase.wifi_ip)
+
+
