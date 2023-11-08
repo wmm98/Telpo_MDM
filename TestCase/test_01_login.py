@@ -50,7 +50,7 @@ class TestLogin:
         now_time = self.mdm_page.get_current_time()
         while True:
             try:
-                if self.mdm_page.web_driver_wait_until(TestCase.EC.url_contains("device")):
+                if self.mdm_page.web_driver_wait_until(TestCase.EC.url_contains("device"), 10):
                     break
             except Exception:
                 pass
