@@ -314,7 +314,7 @@ class TestNetworkCases:
         shell_app_apk_name = release_info["package"] + "_%s.apk" % release_info["version"]
         now_time = self.page.get_current_time()
         while True:
-            if self.android_mdm_page.download_file_is_existed(shell_app_apk_name):
+            if self.android_mdm_page.download_file_is_existed_USB(shell_app_apk_name):
                 err_msg = "@@@@在非wifi/eth0网络可以下载app， 请检查！！！！"
                 log.error(err_msg)
                 assert False, err_msg
