@@ -128,6 +128,7 @@ class APPSPage(TelpoMDMPage):
             return []
 
     def get_app_latest_upgrade_log(self, send_time, release_info):
+        self.time_sleep(5)
         try:
             logs_list = []
             if self.ele_is_existed_in_range(self.loc_app_upgrade_logs_body, self.loc_app_upgrade_single_log):
