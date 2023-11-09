@@ -36,7 +36,7 @@ class TestNetworkCases:
         self.android_mdm_page.del_updated_zip()
         self.android_mdm_page.reboot_device(self.wifi_ip)
 
-    @allure.feature('MDM_usb-test')
+    @allure.feature('MDM_usb-test111')
     @allure.title("Apps-限定4G网络推送app")
     # @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_release_app_limit_4G(self, connect_wifi_adb_USB, del_all_app_release_log, del_all_app_uninstall_release_log,
@@ -527,7 +527,7 @@ class TestNetworkCases:
             if self.android_mdm_page.download_file_is_existed_USB(release_info["package_name"]):
                 break
             if self.page.get_current_time() > self.page.return_end_time(now_time, 180):
-                assert False, "@@@@多应用推送中超过3分钟还没有升级包: %s的下载记录" % release_info["package_name"]
+                assert False, "@@@@推送中超过3分钟还没有升级包: %s的下载记录" % release_info["package_name"]
 
         log.info("检测到下载记录")
 
