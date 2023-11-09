@@ -9,16 +9,16 @@ class AndroidBasePageUSB(interface):
         self.USB_client = client
         self.times = times
         self.device_name = name
+    #
+    # def download_file_is_existed_USB(self, file_name):
+    #     res = self.u2_send_command_USB(
+    #         "ls /%s/aimdm/download/ |grep %s" % (self.get_internal_storage_directory_USB(), file_name))
+    #     if self.remove_space(file_name) in self.remove_space(res):
+    #         return True
+    #     else:
+    #         return False
 
-    def download_file_is_existed_USB(self, file_name):
-        res = self.u2_send_command_USB(
-            "ls /%s/aimdm/download/ |grep %s" % (self.get_internal_storage_directory_USB(), file_name))
-        if self.remove_space(file_name) in self.remove_space(res):
-            return True
-        else:
-            return False
-
-    def calculate_sha256_in_device(self, file_name):
+    def calculate_sha256_in_device_USB(self, file_name):
         # sha256sum sdcard/aimdm/data/2023-10-12.txt
         # 9fb5de71a794b9cb8b8197e6ebfbbc9168176116f7f88aca62b22bbc67c2925a  2023-10-12.txt
         res = self.u2_send_command_USB(

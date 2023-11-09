@@ -76,6 +76,13 @@ def connected_wifi_adb():
 
 
 @pytest.fixture()
+def connect_wifi_adb_USB():
+    yield
+    android_page.open_wifi_btn()
+    android_page.confirm_wifi_adb_connected(TestCase.wifi_ip)
+
+
+@pytest.fixture()
 def return_device_page():
     yield
     device_page.go_to_new_address("devices")
@@ -215,12 +222,3 @@ def go_to_app_release_log():
 def go_to_app_uninstall_release_log():
     app_page.go_to_new_address("apps/appUninstall")
     yield
-
-
-@pytest.fixture()
-def connect_wifi_adb():
-    yield
-    android_page.open_wifi_btn()
-    android_page.confirm_wifi_adb_connected(TestCase.wifi_ip)
-
-

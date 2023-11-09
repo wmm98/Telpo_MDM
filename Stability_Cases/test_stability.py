@@ -75,43 +75,43 @@ class TestStability:
             pre_reboot_thread[i].join()
 
     def teardown_class(self):
-        pass
-        # self.app_page.delete_app_install_and_uninstall_logs()
-        # self.ota_page.delete_all_ota_release_log()
-        # pos_del_apk_thread = []
-        # uninstall_apps_thread = []
-        # pos_del_content_thread = []
-        # pos_reboot_thread = []
-        # for device_data in devices_data:
-        #     self.android_mdm_page = st.AndroidAimdmPageWiFi(device_data, 5)
-        #     pos_d_apk_t = st.threading.Thread(target=self.android_mdm_page.del_all_downloaded_apk(), args=())
-        #     pos_d_apk_t.start()
-        #     pos_del_apk_thread.append(pos_d_apk_t)
-        #
-        #     pos_uninstall_t = st.threading.Thread(target=self.android_mdm_page.uninstall_multi_apps,
-        #                                           args=(test_yml['app_info'],))
-        #     pos_uninstall_t.start()
-        #     uninstall_apps_thread.append(pos_uninstall_t)
-        #
-        #     pos_del_content_t = st.threading.Thread(target=self.android_mdm_page.del_all_content_file, args=())
-        #     pos_del_content_t.start()
-        #     pos_del_content_thread.append(pos_del_content_t)
-        #
-        #     # self.android_mdm_page.del_all_downloaded_apk()
-        #     # self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
-        #     # self.android_mdm_page.del_all_content_file()
-        #     # self.android_mdm_page.reboot_device(device_data["ip"])
-        #     r_t = st.threading.Thread(target=self.android_mdm_page.reboot_device, args=(device_data["ip"],))
-        #     r_t.start()
-        #     pos_reboot_thread.append(r_t)
-        #
-        # for j in range(len(pos_del_apk_thread)):
-        #     pos_del_apk_thread[j].join()
-        #     uninstall_apps_thread[j].join()
-        #     pos_del_content_thread[j].join()
-        #     pos_reboot_thread[j].join()
-        #
-        # self.app_page.refresh_page()
+        # pass
+        self.app_page.delete_app_install_and_uninstall_logs()
+        self.ota_page.delete_all_ota_release_log()
+        pos_del_apk_thread = []
+        uninstall_apps_thread = []
+        pos_del_content_thread = []
+        pos_reboot_thread = []
+        for device_data in devices_data:
+            self.android_mdm_page = st.AndroidAimdmPageWiFi(device_data, 5)
+            pos_d_apk_t = st.threading.Thread(target=self.android_mdm_page.del_all_downloaded_apk(), args=())
+            pos_d_apk_t.start()
+            pos_del_apk_thread.append(pos_d_apk_t)
+
+            pos_uninstall_t = st.threading.Thread(target=self.android_mdm_page.uninstall_multi_apps,
+                                                  args=(test_yml['app_info'],))
+            pos_uninstall_t.start()
+            uninstall_apps_thread.append(pos_uninstall_t)
+
+            pos_del_content_t = st.threading.Thread(target=self.android_mdm_page.del_all_content_file, args=())
+            pos_del_content_t.start()
+            pos_del_content_thread.append(pos_del_content_t)
+
+            # self.android_mdm_page.del_all_downloaded_apk()
+            # self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
+            # self.android_mdm_page.del_all_content_file()
+            # self.android_mdm_page.reboot_device(device_data["ip"])
+            r_t = st.threading.Thread(target=self.android_mdm_page.reboot_device, args=(device_data["ip"],))
+            r_t.start()
+            pos_reboot_thread.append(r_t)
+
+        for j in range(len(pos_del_apk_thread)):
+            pos_del_apk_thread[j].join()
+            uninstall_apps_thread[j].join()
+            pos_del_content_thread[j].join()
+            pos_reboot_thread[j].join()
+
+        self.app_page.refresh_page()
 
     @allure.feature('MDM_stability1')
     @allure.title("stability case- 多设备添加--辅助测试用例")

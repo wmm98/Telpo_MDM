@@ -43,7 +43,7 @@ class MDMPage(BasePage):
 
     def click_login_btn(self):
         self.click(self.loc_login_btn)
-        self.confirm_tips_alert_show(self.loc_login_btn)
+        # self.confirm_tips_alert_show(self.loc_login_btn)
         # self.
 
     def login_ok(self, name, password):
