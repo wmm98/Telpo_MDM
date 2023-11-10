@@ -27,11 +27,10 @@ class TestStability:
         self.app_page = st.APPSPage(test_driver, 40)
         self.content_page = st.ContentPage(test_driver, 40)
         self.ota_page = st.OTAPage(test_driver, 40)
-        st.MDMPage(test_driver, 40).login_ok(st.yaml_data['website_info']['test_user'],
-                                             st.yaml_data['website_info']['test_password'])
-        # self.app_page.delete_app_install_and_uninstall_logs()
+        self.mdm_page = st.MDMPage(test_driver, 40)
+        self.app_page.delete_app_install_and_uninstall_logs()
         self.content_page.delete_all_content_release_log()
-        # self.ota_page.delete_all_ota_release_log()
+        self.ota_page.delete_all_ota_release_log()
         self.androids_page = []
         self.devices_sn = []
         self.devices_ip = []
@@ -97,10 +96,10 @@ class TestStability:
             pos_del_content_t.start()
             pos_del_content_thread.append(pos_del_content_t)
 
-            # self.android_mdm_page.del_all_downloaded_apk()
-            # self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
-            # self.android_mdm_page.del_all_content_file()
-            # self.android_mdm_page.reboot_device(device_data["ip"])
+            self.android_mdm_page.del_all_downloaded_apk()
+            self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
+            self.android_mdm_page.del_all_content_file()
+            self.android_mdm_page.reboot_device(device_data["ip"])
             r_t = st.threading.Thread(target=self.android_mdm_page.reboot_device, args=(device_data["ip"],))
             r_t.start()
             pos_reboot_thread.append(r_t)
@@ -112,6 +111,25 @@ class TestStability:
             pos_reboot_thread[j].join()
 
         self.app_page.refresh_page()
+
+    @allure.feature('MDM_stability—login')
+    @allure.title("stability case- 登录--辅助测试用例")
+    def test_stability_login(self):
+        username = st.yaml_data['website_info']['test_user']
+        password = st.yaml_data['website_info']['test_password']
+
+        self.mdm_page.login_ok(username, password)
+        now_time = self.app_page.get_current_time()
+        while True:
+            try:
+                if self.mdm_page.web_driver_wait_until(st.EC.url_contains("device"), 10):
+                    break
+            except Exception:
+                pass
+            if self.mdm_page.get_current_time() > self.mdm_page.return_end_time(now_time):
+                assert False, "无法登录，请检查！！！"
+            self.mdm_page.refresh_page()
+            self.mdm_page.login_ok(username, password)
 
     @allure.feature('MDM_stability1')
     @allure.title("stability case- 多设备添加--辅助测试用例")
