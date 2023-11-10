@@ -28,9 +28,13 @@ class TestStability:
         self.content_page = st.ContentPage(test_driver, 40)
         self.ota_page = st.OTAPage(test_driver, 40)
         self.mdm_page = st.MDMPage(test_driver, 40)
+        print("1111111111111111111111111")
+        self.mdm_page.login_ok(st.yaml_data['website_info']['test_user'], st.yaml_data['website_info']['test_password'])
+        self.mdm_page.time_sleep(5)
+        print("22222222222222222222222")
         self.app_page.delete_app_install_and_uninstall_logs()
-        self.content_page.delete_all_content_release_log()
-        self.ota_page.delete_all_ota_release_log()
+        # self.content_page.delete_all_content_release_log()
+        # self.ota_page.delete_all_ota_release_log()
         self.androids_page = []
         self.devices_sn = []
         self.devices_ip = []
@@ -112,7 +116,7 @@ class TestStability:
 
         self.app_page.refresh_page()
 
-    @allure.feature('MDM_stability—login')
+    @allure.feature('MDM_stability—login11111')
     @allure.title("stability case- 登录--辅助测试用例")
     def test_stability_login(self):
         username = st.yaml_data['website_info']['test_user']
