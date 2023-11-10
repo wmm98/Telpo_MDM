@@ -32,7 +32,7 @@ class TestPubilcPage:
         self.android_mdm_page = case_pack.AndroidAimdmPage(case_pack.device_data, 5)
         self.content_page = case_pack.ContentPage(self.driver, 40)
         self.wifi_ip = case_pack.device_data["wifi_device_info"]["ip"]
-        # self.android_mdm_page.reboot_device(self.wifi_ip)
+        self.android_mdm_page.reboot_device(self.wifi_ip)
         self.android_mdm_page.del_all_content_file()
         self.device_sn = self.android_mdm_page.get_device_sn()
         self.app_page.delete_app_install_and_uninstall_logs()
@@ -296,7 +296,7 @@ class TestPubilcPage:
             else:
                 assert False, "@@@@平台上没有该壁纸： %s, 请检查" % paper
 
-    @allure.feature('MDM_public1111')
+    @allure.feature('MDM_public')
     @allure.title("public case-推送开机logo/动画")
     def test_release_boot_logo_and_animation(self, unlock_screen, del_all_content_release_logs):
         # "All Files" "Normal Files" "Boot Animations" "Wallpaper" "LOGO"
@@ -646,7 +646,7 @@ class TestPubilcPage:
             assert animation in self.android_mdm_page.u2_send_command(
                 grep_cmd), "@@@@文件没有释放到设备指定的路径%s, 请检查！！！" % release_to_path
 
-    @allure.feature('MDM_public')
+    @allure.feature('MDM_public11111')
     @allure.title("public case-多应用推送")
     def test_release_multi_apps(self, del_all_app_release_log, del_download_apk, uninstall_multi_apps):
         print("*******************多应用推送用例开始***************************")
@@ -735,6 +735,7 @@ class TestPubilcPage:
                 diff_list = [package for package in apks_packages if package not in download_completed_apks]
                 download_missing_record = ",".join(diff_list)
                 assert False, "@@@@多应用推送中超过30分钟还没有完成%s的下载" % download_missing_record
+        print("已经下载完的app： ", download_completed_apks)
 
         print("**********************下载完成检测完毕*************************************")
 
@@ -744,16 +745,16 @@ class TestPubilcPage:
         while True:
             for d_installed in range(len(apks_packages)):
                 # check if app in download list
-                if apks[d_installed] not in installed_apks:
-                    shell_app_apk_name = apks_packages[d_installed] + "_%s.apk" % apks_versions[d_installed]
-                    # if self.android_mdm_page.download_file_is_existed(shell_app_apk_name):
-                    if self.android_mdm_page.app_is_installed(apks[d_installed]):
+                if apks_packages[d_installed] not in installed_apks:
+                    if self.android_mdm_page.app_is_installed(apks_packages[d_installed]):
                         installed_apks.append(apks_packages[d_installed])
+                        print(installed_apks)
             if len(installed_apks) == len(apks_packages):
                 break
             if self.app_page.get_current_time() > self.app_page.return_end_time(now_time, 180):
                 diff_list = [package for package in apks_packages if package not in installed_apks]
                 uninstalled_record = ",".join(diff_list)
+                print(uninstalled_record)
                 assert False, "@@@@多应用推送中超过3分钟还没有%s的安装记录" % uninstalled_record
         print("******************************安装记录检测完毕****************************************")
 
@@ -1129,7 +1130,7 @@ class TestPubilcPage:
             self.app_page.refresh_page()
         self.app_page.time_sleep(5)
 
-    @allure.feature('MDM_public')
+    @allure.feature('MDM_public111')
     @allure.title("Devices- 关机 -- test in the last")
     def test_device_shutdown(self):
         print("*******************关机用例开始***************************")

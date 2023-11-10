@@ -614,7 +614,7 @@ class TestNetworkCases:
                 log.info("下载完成后的 package_hash_value：%s" % str(package_hash_value))
                 break
 
-            if self.ota_page.get_current_time() > self.ota_page.return_end_time(now_time, 3000):
+            if self.ota_page.get_current_time() > self.ota_page.return_end_time(now_time, 300):
                 err_msg = "@@@@断网重连%d次， 50分钟后还没有下载完相应的ota package， 请检查！！！" % times
                 log.error(err_msg)
                 print(err_msg)
