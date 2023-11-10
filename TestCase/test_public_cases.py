@@ -23,7 +23,7 @@ package_infos = [{"package_name": test_yml['app_info']['low_version_app'], "file
                  ]
 
 
-class TestAppPage:
+class TestPubilcPage:
     def setup_class(self):
         self.driver = case_pack.test_driver
         self.device_page = case_pack.DevicesPage(self.driver, 40)
@@ -32,11 +32,13 @@ class TestAppPage:
         self.android_mdm_page = case_pack.AndroidAimdmPage(case_pack.device_data, 5)
         self.content_page = case_pack.ContentPage(self.driver, 40)
         self.wifi_ip = case_pack.device_data["wifi_device_info"]["ip"]
+        # self.android_mdm_page.reboot_device(self.wifi_ip)
         self.android_mdm_page.del_all_content_file()
         self.device_sn = self.android_mdm_page.get_device_sn()
-        # self.app_page.delete_app_install_and_uninstall_logs()
+        self.app_page.delete_app_install_and_uninstall_logs()
         self.android_mdm_page.del_all_downloaded_apk()
         self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
+        self.android_mdm_page.reboot_device(self.wifi_ip)
 
     def teardown_class(self):
         # pass
@@ -203,7 +205,7 @@ class TestAppPage:
             file_path = conf.project_path + "\\Param\\Content\\%s" % paper
             file_size = self.content_page.get_file_size_in_windows(file_path)
             print("获取到的文件 的size(bytes): ", file_size)
-            file_hash_value = self.android_mdm_page.calculate_sha256_in_windows("Content\\%s " % paper)
+            file_hash_value = self.android_mdm_page.calculate_sha256_in_windows("%s" % paper, directory="Content")
             print("file_hash_value:", file_hash_value)
             send_time = case_pack.time.strftime('%Y-%m-%d %H:%M',
                                                 case_pack.time.localtime(self.content_page.get_current_time()))
@@ -294,7 +296,7 @@ class TestAppPage:
             else:
                 assert False, "@@@@平台上没有该壁纸： %s, 请检查" % paper
 
-    @allure.feature('MDM_public')
+    @allure.feature('MDM_public1111')
     @allure.title("public case-推送开机logo/动画")
     def test_release_boot_logo_and_animation(self, unlock_screen, del_all_content_release_logs):
         # "All Files" "Normal Files" "Boot Animations" "Wallpaper" "LOGO"
@@ -308,7 +310,7 @@ class TestAppPage:
         file_path = conf.project_path + "\\Param\\Content\\%s" % animation
         file_size = self.content_page.get_file_size_in_windows(file_path)
         print("获取到的文件 的size(bytes): ", file_size)
-        file_hash_value = self.android_mdm_page.calculate_sha256_in_windows("Content\\%s " % animation)
+        file_hash_value = self.android_mdm_page.calculate_sha256_in_windows("%s " % animation, directory="Content")
         print("file_hash_value:", file_hash_value)
         send_time = case_pack.time.strftime('%Y-%m-%d %H:%M',
                                             case_pack.time.localtime(self.content_page.get_current_time()))
@@ -390,6 +392,7 @@ class TestAppPage:
         #     self.content_page.refresh_page()
 
         # check upgrade
+        self.content_page.go_to_new_address("content/log")
         now_time = self.content_page.get_current_time()
         while True:
             upgrade_list = self.content_page.get_content_latest_upgrade_log(send_time, release_info)
@@ -476,7 +479,7 @@ class TestAppPage:
 
             now_time = self.content_page.get_current_time()
             while True:
-                if self.android_mdm_page.download_file_is_existed(log):
+                if self.android_mdm_page.download_file_is_existed(logo):
                     break
                 if self.content_page.get_current_time() > self.content_page.return_end_time(now_time):
                     assert False, "@@@@没有相应的下载记录， 请检查！！！"
@@ -490,6 +493,7 @@ class TestAppPage:
                     assert False, "@@@@超过15分钟还没有下载完毕，请检查！！！"
                 self.content_page.time_sleep(5)
             print("*************************************文件下载完毕**************************************")
+            self.content_page.go_to_new_address("content/log")
             now_time = self.content_page.get_current_time()
             while True:
                 upgrade_list = self.content_page.get_content_latest_upgrade_log(send_time, release_info)
@@ -526,7 +530,7 @@ class TestAppPage:
             file_path = conf.project_path + "\\Param\\Content\\%s" % animation
             file_size = self.content_page.get_file_size_in_windows(file_path)
             print("获取到的文件 的size(bytes): ", file_size)
-            file_hash_value = self.android_mdm_page.calculate_sha256_in_windows("Content\\%s " % animation)
+            file_hash_value = self.android_mdm_page.calculate_sha256_in_windows("%s " % animation, directory="Content")
             print("file_hash_value:", file_hash_value)
             send_time = case_pack.time.strftime('%Y-%m-%d %H:%M',
                                                 case_pack.time.localtime(self.content_page.get_current_time()))
@@ -623,6 +627,7 @@ class TestAppPage:
                     assert False, "@@@@超过15分钟还没有下载完毕，请检查！！！"
                 self.content_page.time_sleep(5)
             print("*************************************文件下载完毕**************************************")
+            self.content_page.go_to_new_address("content/log")
             now_time = self.content_page.get_current_time()
             while True:
                 upgrade_list = self.content_page.get_content_latest_upgrade_log(send_time, release_info)
@@ -633,6 +638,7 @@ class TestAppPage:
                         break
                 # wait upgrade 3 min at most
                 if self.content_page.get_current_time() > self.content_page.return_end_time(now_time, 180):
+                    print(upgrade_list)
                     assert False, "@@@@3分钟还没有设置完相应的开机logo， 请检查！！！"
                 self.content_page.time_sleep(5)
                 self.content_page.refresh_page()

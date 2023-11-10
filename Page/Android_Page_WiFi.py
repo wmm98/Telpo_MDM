@@ -34,6 +34,7 @@ class AndroidBasePageWiFi(interface):
         try:
             self.client.screenshot(base_path)
         except Exception as e:
+            self.client.screenshot(base_path)
             print(e)
 
     def stop_app(self, package_name):

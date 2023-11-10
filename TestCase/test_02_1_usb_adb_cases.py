@@ -24,6 +24,7 @@ class TestNetworkCases:
         self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
         self.wifi_ip = case_pack.device_data["wifi_device_info"]["ip"]
         self.android_mdm_page.del_all_downloaded_apk()
+        self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
         self.android_mdm_page.del_updated_zip()
         self.device_sn = self.android_mdm_page.get_device_sn()
         self.android_mdm_page.device_unlock()
@@ -36,7 +37,7 @@ class TestNetworkCases:
         self.android_mdm_page.del_updated_zip()
         self.android_mdm_page.reboot_device(self.wifi_ip)
 
-    @allure.feature('MDM_usb-test111')
+    @allure.feature('MDM_usb-test')
     @allure.title("Apps-限定4G网络推送app")
     # @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_release_app_limit_4G(self, connect_wifi_adb_USB, del_all_app_release_log, del_all_app_uninstall_release_log,
@@ -172,7 +173,7 @@ class TestNetworkCases:
         original_hash_value = self.android_mdm_page.calculate_sha256_in_windows("%s" % release_info["package_name"])
         print("original hash value: %s" % original_hash_value)
         while True:
-            shell_hash_value = self.android_mdm_page.calculate_sha256_in_device(shell_app_apk_name)
+            shell_hash_value = self.android_mdm_page.calculate_sha256_in_device_USB(shell_app_apk_name)
             print("shell_hash_value: %s" % original_hash_value)
             if original_hash_value == shell_hash_value:
                 break
