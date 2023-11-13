@@ -11,23 +11,34 @@ class AndroidBasePageWiFi(interface):
         self.times = times
         self.device_ip = ip
 
-    def click_all_recent_app(self, id_no):
+    def click_cleat_recent_app_btn(self, id_no):
         # self.click_element(self.get_current_app() + ele)
         # self.u2_send_command(self.get_current_app() + )
         recent_app = self.get_current_app()
-        if self.wait_ele_presence_by_id(recent_app + id_no, 5):
-            self.click_element(self.get_element_by_id(recent_app + id_no))
-        else:
-            return True
-        self.time_sleep(3)
-        desktop_app = self.get_current_app()
-        if recent_app != desktop_app:
-            return True
-        else:
-            return False
+        now_time = self.get_current_time()
+        while True:
+            if self.wait_ele_presence_by_id(recent_app + id_no, 5):
+                self.click_element(self.get_element_by_id(recent_app + id_no))
+                self.time_sleep(3)
+                desktop_app = self.get_current_app()
+                if recent_app != desktop_app:
+                    return True
+            if self.get_current_time() < self.return_end_time(now_time, 60):
+                assert False, "@@@@午饭清除最近应用， 请检查！！！！"
+            self.time_sleep(1)
 
     def open_recent_page(self):
-        self.u2_send_command("input keyevent KEYCODE_APP_SWITCH")
+        self.back_to_home()
+        first_app = self.get_current_app()
+        now_time = self.get_current_time()
+        while True:
+            self.u2_send_command("input keyevent KEYCODE_APP_SWITCH")
+            self.time_sleep(2)
+            next_app = self.get_current_app()
+            if first_app != next_app:
+                break
+            if self.get_current_time() > self.return_end_time(now_time, 60):
+                assert False, "@@@无法打开最近应用页面， 请检查！！！！"
 
     def open_app_detail_info_page(self, package):
         result = self.u2_send_command("am start -n com.android.settings/.applications.InstalledAppDetails -d package:%s" % package)

@@ -17,6 +17,9 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
         AndroidBasePageWiFi.__init__(self, self.wifi_client, times, self.device_ip)
         aimdm_apk = public_pack.yaml_data["work_app"]["aidmd_apk"]
         self.aimdm_package = self.get_apk_package_name(config.project_path + "\\Param\\Work_APP\\%s" % aimdm_apk)
+        self.android_settings_package = "com.android.settings"
+        self.android_relatelayout_package = "android"
+        # self.recent_package = self.get_current_app()
 
         # aimdm_package = "com.tpos.aimdm"
         # msg_box related
@@ -31,18 +34,18 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
         self.lock_psw_id = "%s:id/et_pwd" % self.aimdm_package
         self.psw_confirm_id = "%s:id/confirm_pwd" % self.aimdm_package
 
-    # # aimdm_package = "com.tpos.aimdm"
-    # # msg_box related
-    # msg_header_id = "android.widget.TextView"
-    # msg_tips_id = "%s:id/tip" % aimdm_package
-    # msg_confirm_id = "%s:id/confirm" % aimdm_package
-    # msg_cancel_id = "%s:id/cancel" % aimdm_package
-    # msg_alert_id = "%s:id/root_view" % aimdm_package
-    # # 900P  confirm->download->confirm->upgrade
-    #
-    # # lock alert, input device psw relate
-    # lock_psw_id = "%s:id/et_pwd" % aimdm_package
-    # psw_confirm_id = "%s:id/confirm_pwd" % aimdm_package
+        # aimdm app info page
+        self.settings_title = "%s:id/entity_header_title" % self.android_settings_package
+        self.settings_summary = "%s:id/summary" % self.android_relatelayout_package
+
+        # clear recent app btn
+        self.clear_all = ":id/btn_remove_all"
+
+    def get_aimdm_mobile_data(self):
+        self.open_app_detail_info_page_USB(self.aimdm_package)
+        print(self.get_element_text(self.get_element_by_id_USB(self.settings_title)))
+        self.open_recent_page_USB()
+        self.click_cleat_recent_app_btn_USB(self.clear_all)
 
     def manual_unlock(self):
         ele_lock = self.get_element_by_id(self.msg_confirm_id)

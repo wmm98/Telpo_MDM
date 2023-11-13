@@ -9,14 +9,50 @@ class AndroidBasePageUSB(interface):
         self.USB_client = client
         self.times = times
         self.device_name = name
-    #
-    # def download_file_is_existed_USB(self, file_name):
-    #     res = self.u2_send_command_USB(
-    #         "ls /%s/aimdm/download/ |grep %s" % (self.get_internal_storage_directory_USB(), file_name))
-    #     if self.remove_space(file_name) in self.remove_space(res):
-    #         return True
-    #     else:
-    #         return False
+
+    def click_cleat_recent_app_btn_USB(self, id_no):
+        # self.click_element(self.get_current_app() + ele)
+        # self.u2_send_command(self.get_current_app() + )
+        recent_app = self.get_current_app_USB()
+        now_time = self.get_current_time()
+        while True:
+            if self.wait_ele_presence_by_id_USB(recent_app + id_no, 5):
+                self.click_element_USB(self.get_element_by_id_USB(recent_app + id_no))
+                self.time_sleep(3)
+                desktop_app = self.get_current_app_USB()
+                if recent_app != desktop_app:
+                    return True
+            if self.get_current_time() < self.return_end_time(now_time, 60):
+                assert False, "@@@@午饭清除最近应用， 请检查！！！！"
+            self.time_sleep(1)
+
+    def open_recent_page_USB(self):
+        self.back_to_home_USB()
+        first_app = self.get_current_app_USB()
+        now_time = self.get_current_time()
+        while True:
+            self.u2_send_command_USB("input keyevent KEYCODE_APP_SWITCH")
+            self.time_sleep(2)
+            next_app = self.get_current_app_USB()
+            if first_app != next_app:
+                break
+            if self.get_current_time() > self.return_end_time(now_time, 60):
+                assert False, "@@@无法打开最近应用页面， 请检查！！！！"
+
+    def open_app_detail_info_page_USB(self, package):
+        result = self.u2_send_command_USB("am start -n com.android.settings/.applications.InstalledAppDetails -d package:%s" % package)
+        exp = self.remove_space(self.upper_transfer("package:%s cmp=com.android.settings/.applications.InstalledAppDetails" % package))
+        now_time = self.get_current_time()
+        while True:
+            if exp in self.remove_space(self.upper_transfer(result)):
+                break
+            result = self.u2_send_command_USB("am start -n com.android.settings/.applications.InstalledAppDetails -d package:%s" % package)
+            if self.get_current_time() > self.return_end_time(now_time):
+                assert "@@@@无法打开%s的详细页面， 请检查！！！" % package
+            self.time_sleep(3)
+
+    def back_to_home_USB(self):
+        self.USB_client.press("home")
 
     def calculate_sha256_in_device_USB(self, file_name):
         # sha256sum sdcard/aimdm/data/2023-10-12.txt
@@ -186,6 +222,10 @@ class AndroidBasePageUSB(interface):
                 if exp in self.remove_space(self.send_shell_command_USB(cmd)):
                     assert False, "@@@@网络还没有关闭， 请检查！！！！"
             public_pack.t_time.sleep(2)
+
+    def screen_keep_on_USB(self):
+        self.u2_send_command_USB("settings put system screen_off_timeout 1800000")
+        self.device_unlock_USB()
 
     def device_unlock_USB(self):
         self.USB_client.screen_off()

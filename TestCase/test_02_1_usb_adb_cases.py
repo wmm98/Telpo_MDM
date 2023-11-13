@@ -19,23 +19,35 @@ class TestNetworkCases:
         self.system_page = case_pack.SystemPage(self.driver, 40)
         self.cat_log_page = case_pack.CatchLogPage(self.driver, 40)
         self.android_mdm_page = case_pack.AndroidAimdmPage(case_pack.device_data, 5)
-        self.page.delete_app_install_and_uninstall_logs()
-        self.ota_page.delete_all_ota_release_log()
-        self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
-        self.wifi_ip = case_pack.device_data["wifi_device_info"]["ip"]
-        self.android_mdm_page.del_all_downloaded_apk()
-        self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
-        self.android_mdm_page.del_updated_zip()
+        # self.page.delete_app_install_and_uninstall_logs()
+        # self.ota_page.delete_all_ota_release_log()
+        # self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
+        # self.wifi_ip = case_pack.device_data["wifi_device_info"]["ip"]
+        # self.android_mdm_page.del_all_downloaded_apk()
+        # self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
+        # self.android_mdm_page.del_updated_zip()
         self.device_sn = self.android_mdm_page.get_device_sn()
         self.android_mdm_page.device_unlock()
 
     def teardown_class(self):
-        self.android_mdm_page.confirm_wifi_adb_connected(self.wifi_ip)
-        self.page.delete_app_install_and_uninstall_logs()
-        self.android_mdm_page.del_all_downloaded_apk()
-        self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
-        self.android_mdm_page.del_updated_zip()
-        self.android_mdm_page.reboot_device(self.wifi_ip)
+        pass
+        # self.android_mdm_page.confirm_wifi_adb_connected(self.wifi_ip)
+        # self.page.delete_app_install_and_uninstall_logs()
+        # self.android_mdm_page.del_all_downloaded_apk()
+        # self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
+        # self.android_mdm_page.del_updated_zip()
+        # self.android_mdm_page.reboot_device(self.wifi_ip)
+
+    @allure.feature('MDM_usb-test11112222')
+    @allure.title("Apps- 断网重连获取aimdm消耗的流量")
+    def test_reconect_get_mobile_data(self):
+        self.android_mdm_page.confirm_wifi_btn_close()
+        self.android_mdm_page.disconnect_ip(self.device_sn)
+        opt_case.check_single_device(self.device_sn)
+        self.android_mdm_page.open_mobile_data()
+        self.android_mdm_page.screen_keep_on_USB()
+        self.android_mdm_page.get_aimdm_mobile_data()
+
 
     @allure.feature('MDM_usb-test')
     @allure.title("Apps-限定4G网络推送app")

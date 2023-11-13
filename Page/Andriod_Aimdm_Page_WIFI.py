@@ -35,7 +35,11 @@ class AndroidAimdmPageWiFi(AndroidBasePageWiFi):
         # clear recent app btn
         self.clear_all = ":id/btn_remove_all"
 
-    # def
+    def get_aimdm_mobile_data(self):
+        self.open_app_detail_info_page(self.aimdm_package)
+        print(self.get_element_by_id(self.settings_title).text)
+        self.open_recent_page()
+        self.click_cleat_recent_app_btn(self.clear_all)
 
     def confirm_system_app_uninstalled(self):
         apk_file = public_pack.yaml_data['app_info']['low_version_app']
