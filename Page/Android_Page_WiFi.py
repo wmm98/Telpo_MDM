@@ -11,6 +11,36 @@ class AndroidBasePageWiFi(interface):
         self.times = times
         self.device_ip = ip
 
+    def click_all_recent_app(self, id_no):
+        # self.click_element(self.get_current_app() + ele)
+        # self.u2_send_command(self.get_current_app() + )
+        recent_app = self.get_current_app()
+        if self.wait_ele_presence_by_id(recent_app + id_no, 5):
+            self.click_element(self.get_element_by_id(recent_app + id_no))
+        else:
+            return True
+        self.time_sleep(3)
+        desktop_app = self.get_current_app()
+        if recent_app != desktop_app:
+            return True
+        else:
+            return False
+
+    def open_recent_page(self):
+        self.u2_send_command("input keyevent KEYCODE_APP_SWITCH")
+
+    def open_app_detail_info_page(self, package):
+        result = self.u2_send_command("am start -n com.android.settings/.applications.InstalledAppDetails -d package:%s" % package)
+        exp = self.remove_space(self.upper_transfer("package:%s cmp=com.android.settings/.applications.InstalledAppDetails" % package))
+        now_time = self.get_current_time()
+        while True:
+            if exp in self.remove_space(self.upper_transfer(result)):
+                break
+            result = self.u2_send_command("am start -n com.android.settings/.applications.InstalledAppDetails -d package:%s" % package)
+            if self.get_current_time() > self.return_end_time(now_time):
+                assert "@@@@无法打开%s的详细页面， 请检查！！！" % package
+            self.time_sleep(3)
+
     def open_usb_debug_btn(self):
         self.u2_send_command("setprop persist.telpo.debug.mode 1")
 

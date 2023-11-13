@@ -11,6 +11,9 @@ class AndroidAimdmPageWiFi(AndroidBasePageWiFi):
         AndroidBasePageWiFi.__init__(self, self.wifi_client, times, self.device_ip)
         aimdm_apk = public_pack.yaml_data["work_app"]["aidmd_apk"]
         self.aimdm_package = self.get_apk_package_name(config.project_path + "\\Param\\Work_APP\\%s" % aimdm_apk)
+        self.android_settings_package = "com.android.settings"
+        self.android_relatelayout_package = "android"
+        # self.recent_package = self.get_current_app()
 
         # aimdm_package = "com.tpos.aimdm"
         # msg_box related
@@ -24,6 +27,15 @@ class AndroidAimdmPageWiFi(AndroidBasePageWiFi):
         # lock alert, input device psw relate
         self.lock_psw_id = "%s:id/et_pwd" % self.aimdm_package
         self.psw_confirm_id = "%s:id/confirm_pwd" % self.aimdm_package
+
+        # aimdm app info page
+        self.settings_title = "%s:id/entity_header_title" % self.android_settings_package
+        self.settings_summary = "%s:id/summary" % self.android_relatelayout_package
+
+        # clear recent app btn
+        self.clear_all = ":id/btn_remove_all"
+
+    # def
 
     def confirm_system_app_uninstalled(self):
         apk_file = public_pack.yaml_data['app_info']['low_version_app']

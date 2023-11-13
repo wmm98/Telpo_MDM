@@ -431,7 +431,7 @@ class TestPubilcPage:
             assert animation in self.android_mdm_page.u2_send_command(
                 grep_cmd), "@@@@文件没有释放到设备指定的路径%s, 请检查！！！" % release_to_path
 
-    @allure.feature('MDM_public11111')
+    @allure.feature('MDM_public')
     @allure.title("public case-多应用推送")
     def test_release_multi_apps(self, del_all_app_release_log, del_download_apk, uninstall_multi_apps):
         print("*******************多应用推送用例开始***************************")
