@@ -555,7 +555,7 @@ class TestNetworkCases:
         exp_success_text = "success"
         exp_existed_text = "ota release already existed"
         release_info = {"package_name": test_yml['ota_packages_info']['package_name'], "sn": self.device_sn,
-                        "silent": 0, "category": "NO Limit", "network": "NO Limit"}
+                        "category": "NO Limit", "network": "NO Limit"}
         times = 2
         self.android_mdm_page.screen_keep_on()
         self.android_mdm_page.back_to_home()

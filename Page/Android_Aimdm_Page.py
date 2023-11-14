@@ -225,7 +225,6 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
         with open(file_path, 'rb') as image_file:
             public_pack.allure.attach(image_file.read(), name=new_name, attachment_type=public_pack.allure.attachment_type.JPG)
 
-
     def lock_psw_box_presence(self, time_to_wait=3):
         self.wait_ele_presence_by_id(self.lock_psw_id, time_to_wait)
 

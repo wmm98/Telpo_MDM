@@ -28,6 +28,7 @@ class TestPubilcPage:
         self.driver = case_pack.test_driver
         self.device_page = case_pack.DevicesPage(self.driver, 40)
         self.app_page = case_pack.APPSPage(self.driver, 40)
+        self.ota_page = case_pack.OTAPage(self.driver, 40)
         self.system_page = case_pack.SystemPage(self.driver, 40)
         self.android_mdm_page = case_pack.AndroidAimdmPage(case_pack.device_data, 5)
         self.content_page = case_pack.ContentPage(self.driver, 40)
@@ -341,8 +342,6 @@ class TestPubilcPage:
             #         assert False, "@@@@没有相应的文件 release log， 请检查！！！"
             #     self.content_page.time_sleep(3)
             #     self.content_page.refresh_page()
-
-
 
             # check upgrade log
             # check if the upgrade log appeared, if appeared, break
@@ -755,6 +754,118 @@ class TestPubilcPage:
             print("app 推送选择了安装完成后自动运行app, app安装完后2分钟内还没自动运行")
         self.android_mdm_page.stop_app(release_info["package"])
         self.android_mdm_page.rm_file("system/app/%s" % test_yml['app_info']['low_version_app'])
+
+    @allure.feature('MDM_public1')
+    @allure.title("public case- 静默ota升级")
+    def test_silent_ota_upgrade(self, del_all_ota_release_log, go_to_ota_page, delete_ota_package_relate):
+        release_info = {"package_name": test_yml['ota_packages_info']['package_name'], "sn": self.device_sn,
+                        "silent": 0, "category": "NO Limit", "network": "NO Limit"}
+        download_tips = "Foundanewfirmware,whethertoupgrade?"
+        upgrade_tips = "whethertoupgradenow?"
+        self.android_mdm_page.del_updated_zip()
+        release_info["version"] = self.ota_page.get_ota_package_version(release_info["package_name"])
+        current_firmware_version = self.android_mdm_page.check_firmware_version()
+        # compare current version and exp version
+        assert self.ota_page.transfer_version_into_int(
+            current_firmware_version) < self.ota_page.transfer_version_into_int(
+            release_info["version"]), \
+            "@@@@释放的ota升级包比当前固件版本版本低， 请检查！！！"
+
+        # reboot
+        self.android_mdm_page.reboot_device(self.wifi_ip)
+        # search package
+
+        device_current_firmware_version = self.android_mdm_page.check_firmware_version()
+        print("设备当前固件版本：%s" % device_current_firmware_version)
+        log.info("设备当前固件版本：%s" % device_current_firmware_version)
+        print("ota after upgrade version:", release_info["version"])
+        ota_package_size = conf.project_path + "\\Param\\Package\\%s" % release_info["package_name"]
+        act_ota_package_hash_value = self.android_mdm_page.calculate_sha256_in_windows(release_info["package_name"])
+        act_ota_package_size = self.ota_page.get_zip_size(ota_package_size)
+        print("act_ota_package_size:", act_ota_package_size)
+        self.ota_page.search_device_by_pack_name(release_info["package_name"])
+        # ele = self.Page.get_package_ele(release_info["package_name"])
+        send_time = case_pack.time.strftime('%Y-%m-%d %H:%M',
+                                            case_pack.time.localtime(self.ota_page.get_current_time()))
+        print("send_time", send_time)
+        self.ota_page.time_sleep(10)
+        # if device is existed, click
+        self.ota_page.click_release_btn()
+        self.ota_page.input_release_OTA_package(release_info, is_silent=True)
+
+        # check download record in device
+        now_time = self.ota_page.get_current_time()
+        while True:
+            # check if app in download list
+            if self.android_mdm_page.download_file_is_existed(release_info["package_name"]):
+                break
+            if self.ota_page.get_current_time() > self.ota_page.return_end_time(now_time, 180):
+                assert False, "@@@@推送中超过3分钟还没有升级包: %s的下载记录" % release_info["package_name"]
+            self.ota_page.time_sleep(10)
+
+        upgrade_flag = 0
+        now_time = self.ota_page.get_current_time()
+        while True:
+            info = self.ota_page.get_ota_latest_upgrade_log(send_time, release_info)
+            if len(info) != 0:
+                action = info[0]["Action"]
+                print("action", action)
+                if self.ota_page.get_action_status(action) in [2, 3, 4]:
+                    if action == 4:
+                        upgrade_flag = 1
+                    break
+            # wait upgrade 3 mins at most
+            if self.ota_page.get_current_time() > self.ota_page.return_end_time(now_time, 300):
+                assert False, "@@@@30分钟还没有下载完相应的固件， 请检查！！！"
+            self.ota_page.time_sleep(30)
+            self.ota_page.refresh_page()
+        print("************************下载完成*************************************")
+        # now_time = self.ota_page.get_current_time()
+        # while True:
+        #     download_file_size = self.android_mdm_page.get_file_size_in_device(release_info["package_name"])
+        #     package_hash_value = self.android_mdm_page.calculate_sha256_in_device(release_info["package_name"])
+        #     if download_file_size == act_ota_package_size and package_hash_value == act_ota_package_hash_value:
+        #         print("原来升级包的 package_hash_value：", package_hash_value)
+        #         print("下载完成后的 package_hash_value：", act_ota_package_hash_value)
+        #         log.info("原来升级包的 package_hash_value：%s" % str(package_hash_value))
+        #         log.info("下载完成后的 package_hash_value：%s" % str(act_ota_package_hash_value))
+        #         break
+        #
+        #     if self.ota_page.get_current_time() > self.ota_page.return_end_time(now_time, 1200):
+        #         err_msg = "@@@@20分钟后还没有下载完相应的ota package， 请检查！！！"
+        #         log.error(err_msg)
+        #         print(err_msg)
+        #         assert False, err_msg
+        #     self.ota_page.time_sleep(10)
+
+        # check upgrade
+        if upgrade_flag == 0:
+            now_time = self.ota_page.get_current_time()
+            while True:
+                info = self.ota_page.get_ota_latest_upgrade_log(send_time, release_info)
+                if len(info) != 0:
+                    action = info[0]["Action"]
+                    print("action", action)
+                    if self.ota_page.get_action_status(action) == 4:
+                        break
+                # wait upgrade 3 mins at most
+                if self.ota_page.get_current_time() > self.ota_page.return_end_time(now_time, 180):
+                    assert False, "@@@@30分钟还没有升级相应的安卓版本， 请检查！！！"
+                self.ota_page.time_sleep(30)
+                self.ota_page.refresh_page()
+        print("************************平台显示升级完成完成*************************************")
+
+        self.android_mdm_page.device_boot(self.wifi_ip)
+        after_upgrade_version = self.android_mdm_page.check_firmware_version()
+        print("设备升级后的固件版本：%s" % after_upgrade_version)
+        log.info("设备升级后的固件版本：%s" % after_upgrade_version)
+        assert self.ota_page.transfer_version_into_int(
+            device_current_firmware_version) != self.ota_page.transfer_version_into_int(after_upgrade_version), \
+            "@@@@ota升级失败， 还是原来的版本%s！！" % device_current_firmware_version
+        assert self.ota_page.transfer_version_into_int(release_info["version"]) == \
+               self.ota_page.transfer_version_into_int(
+                   after_upgrade_version), "@@@@升级后的固件版本为%s, ota升级失败， 请检查！！！" % after_upgrade_version
+        print("************************静默ota升级完成升级完成完成*************************************")
 
     @allure.feature('MDM_public')
     @allure.title("public case-推送开机logo/动画")
@@ -1217,6 +1328,3 @@ class TestPubilcPage:
                     pass
             # online_flag += 1
             self.device_page.refresh_page()
-
-
-

@@ -329,12 +329,12 @@ class OTAPage(TelpoMDMPage):
         self.click(self.loc_release_btn)
         self.confirm_alert_existed(self.loc_release_btn)
 
-    def input_release_OTA_package(self, release_info):
+    def input_release_OTA_package(self, release_info, is_silent=False):
         # {"network": "NO Limit", "silent": 0, "category": "No Limit"}
         self.select_by_text(self.loc_download_network, release_info['network'])
         # self.select_by_value(self.loc_download_network, release_info['network'])
         silent_update = self.get_element(self.loc_silent_update)
-        if release_info["silent"] == 1:
+        if is_silent == 1:
             self.exc_js_click(silent_update)
         # self.select_by_text(self.loc_dev_cate, release_info["category"])
         # click show devices btn， check if device is show, if now, click it
