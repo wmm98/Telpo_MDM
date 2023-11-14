@@ -19,40 +19,120 @@ class TestNetworkCases:
         self.system_page = case_pack.SystemPage(self.driver, 40)
         self.cat_log_page = case_pack.CatchLogPage(self.driver, 40)
         self.android_mdm_page = case_pack.AndroidAimdmPage(case_pack.device_data, 5)
-        # self.page.delete_app_install_and_uninstall_logs()
-        # self.ota_page.delete_all_ota_release_log()
-        # self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
-        # self.wifi_ip = case_pack.device_data["wifi_device_info"]["ip"]
-        # self.android_mdm_page.del_all_downloaded_apk()
-        # self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
-        # self.android_mdm_page.del_updated_zip()
+        self.page.delete_app_install_and_uninstall_logs()
+        self.ota_page.delete_all_ota_release_log()
+        self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
+        self.wifi_ip = case_pack.device_data["wifi_device_info"]["ip"]
+        self.android_mdm_page.del_all_downloaded_apk()
+        self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
+        self.android_mdm_page.del_updated_zip()
         self.device_sn = self.android_mdm_page.get_device_sn()
         self.android_mdm_page.device_unlock()
 
     def teardown_class(self):
-        pass
-        # self.android_mdm_page.confirm_wifi_adb_connected(self.wifi_ip)
-        # self.page.delete_app_install_and_uninstall_logs()
-        # self.android_mdm_page.del_all_downloaded_apk()
-        # self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
-        # self.android_mdm_page.del_updated_zip()
-        # self.android_mdm_page.reboot_device(self.wifi_ip)
+        # pass
+        self.android_mdm_page.confirm_wifi_adb_connected(self.wifi_ip)
+        self.page.delete_app_install_and_uninstall_logs()
+        self.android_mdm_page.del_all_downloaded_apk()
+        self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
+        self.android_mdm_page.del_updated_zip()
+        self.android_mdm_page.reboot_device(self.wifi_ip)
 
-    @allure.feature('MDM_usb-test11112222')
+    @allure.feature('MDM_usb-test')
     @allure.title("Apps- 断网重连获取aimdm消耗的流量")
-    def test_reconect_get_mobile_data(self):
+    def test_reconnect_get_mobile_data(self, connect_wifi_adb_USB):
+        length = 2
         self.android_mdm_page.confirm_wifi_btn_close()
         self.android_mdm_page.disconnect_ip(self.device_sn)
-        opt_case.check_single_device(self.device_sn)
         self.android_mdm_page.open_mobile_data()
-        self.android_mdm_page.screen_keep_on_USB()
-        self.android_mdm_page.get_aimdm_mobile_data()
+        now_time = self.android_mdm_page.get_current_time()
+        while True:
+            try:
+                if self.android_mdm_page.ping_network():
+                    break
+            except AssertionError:
+                pass
+            self.android_mdm_page.open_mobile_data()
+            if now_time > self.device_page.return_end_time(now_time, 90):
+                assert False, "@@@@@无法开启移动网络， 请检查！！！！"
+            self.device_page.time_sleep(1)
+        opt_case.check_single_device(self.device_sn)
+        base_directory = "Mobile_Data_Used"
+        first_data_used = 0
+        last_data_used = 0
+        for i in range(length):
+            # self.android_mdm_page.open_mobile_data()
+            self.android_mdm_page.screen_keep_on_USB()
+            # clear all app data before testing
+            self.android_mdm_page.clear_recent_app_USB()
+            data_used = self.android_mdm_page.get_aimdm_mobile_data()
+            if i == 0:
+                first_data_used = data_used
+            image_before_disconnect = "%s\\data_used_disconnect_network_%d.jpg" % (base_directory, i)
+            self.android_mdm_page.save_screenshot_to_USB(image_before_disconnect)
+            self.android_mdm_page.upload_image_JPG(conf.project_path + "\\ScreenShot\\%s" % image_before_disconnect,
+                                                   "data_used_disconnect_network_%d" % i)
+            print("第%d次断网前的使用数据详情： %s" % (i, data_used))
+            log.info("第%d次断网前前的使用数据详情： %s" % (i, data_used))
+            self.android_mdm_page.clear_recent_app_USB()
+            self.android_mdm_page.time_sleep(2)
+            self.android_mdm_page.close_mobile_data()
 
+            now_time = self.android_mdm_page.get_current_time()
+            while True:
+                try:
+                    if self.android_mdm_page.no_network():
+                        break
+                except AssertionError:
+                    pass
+                self.android_mdm_page.close_mobile_data()
+                if now_time > self.device_page.return_end_time(now_time, 90):
+                    assert False, "@@@@@无法关闭移动网络， 请检查！！！！"
+                self.device_page.time_sleep(1)
+            # not stable
+            # status = opt_case.get_single_device_list(self.device_sn)[0]
+            self.android_mdm_page.time_sleep(10)
+            self.android_mdm_page.open_mobile_data()
+            self.android_mdm_page.screen_keep_on_USB()
+            now_time = self.android_mdm_page.get_current_time()
+            while True:
+                try:
+                    if self.android_mdm_page.ping_network():
+                        break
+                except AssertionError:
+                    pass
+                self.android_mdm_page.open_mobile_data()
+                if now_time > self.device_page.return_end_time(now_time, 90):
+                    assert False, "@@@@@无法开启移动网络， 请检查！！！！"
+                self.device_page.time_sleep(1)
+            # not stable
+            # opt_case.check_single_device(self.device_sn)
+            # status = opt_case.get_single_device_list(self.device_sn)[0]
+            self.android_mdm_page.clear_recent_app_USB()
+            data_used_reconnect = self.android_mdm_page.get_aimdm_mobile_data()
+            if i == length - 1:
+                last_data_used = data_used_reconnect
+            image_after_connect = "%s\\data_used_reconnect_network_%d.jpg" % (base_directory, i)
+            self.android_mdm_page.save_screenshot_to_USB(image_after_connect)
+            self.android_mdm_page.upload_image_JPG(conf.project_path + "\\ScreenShot\\%s" % image_after_connect,
+                                                   "data_used_reconnect_network_%d" % i)
+            print("第%d次重连后的使用数据详情： %s" % (i, data_used_reconnect))
+            log.info("第%d次重连后的使用数据详情： %s" % (i, data_used_reconnect))
+        first_data_float = self.device_page.remove_space(self.device_page.extract_integers(first_data_used)[0])
+        last_data_float = self.device_page.remove_space(self.device_page.extract_integers(last_data_used)[0])
+        total_data_used = float(last_data_float) - float(first_data_float)
+
+        print("总共使用了流量数据： %s MB" % str(round(total_data_used, 2)))
+        log.info("总共使用了流量数据： %s MB" % str(round(total_data_used, 2)))
+        self.android_mdm_page.clear_recent_app_USB()
+        self.android_mdm_page.open_wifi_btn()
+        self.android_mdm_page.confirm_wifi_status_open()
 
     @allure.feature('MDM_usb-test')
     @allure.title("Apps-限定4G网络推送app")
     # @pytest.mark.flaky(reruns=1, reruns_delay=3)
-    def test_release_app_limit_4G(self, connect_wifi_adb_USB, del_all_app_release_log, del_all_app_uninstall_release_log,
+    def test_release_app_limit_4G(self, connect_wifi_adb_USB, del_all_app_release_log,
+                                  del_all_app_uninstall_release_log,
                                   uninstall_multi_apps, go_to_app_page):
         release_info = {"package_name": test_yml['app_info']['other_app_limit_network_A'], "sn": self.device_sn,
                         "silent": "Yes", "download_network": "Sim Card"}
@@ -253,7 +333,8 @@ class TestNetworkCases:
     @allure.feature('MDM_usb-test')
     @allure.title("Apps-限定WIFI网络推送app")
     # @pytest.mark.flaky(reruns=1, reruns_delay=3)
-    def test_release_app_limit_wifi(self, connect_wifi_adb_USB, del_all_app_release_log, del_all_app_uninstall_release_log,
+    def test_release_app_limit_wifi(self, connect_wifi_adb_USB, del_all_app_release_log,
+                                    del_all_app_uninstall_release_log,
                                     go_to_app_page):
         # release_info = {"package_name": test_yml['app_info']['other_app_limit_network_B'], "sn": self.device_sn,
         #                 "silent": "Yes", "download_network": "Sim Card"}
@@ -464,7 +545,8 @@ class TestNetworkCases:
 
     @allure.feature('MDM_usb-test')
     @allure.title("OTA-OTA断网重连5次断点续传")
-    def test_upgrade_OTA_package_reconnect_network_5times(self, connect_wifi_adb_USB, del_all_ota_release_log, go_to_ota_page,
+    def test_upgrade_OTA_package_reconnect_network_5times(self, connect_wifi_adb_USB, del_all_ota_release_log,
+                                                          go_to_ota_page,
                                                           delete_ota_package_relate):
         print("*******************OTA断网重连断点续传用例开始***************************")
         log.info("*******************OTA断网重连断点续传用例开始***************************")

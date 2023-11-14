@@ -2,6 +2,7 @@ import Page as public_pack
 from Page.Interface_Page import interface
 
 sub_shell = public_pack.Shell.Shell()
+conf = public_pack.Config()
 
 
 class AndroidBasePageUSB(interface):
@@ -16,14 +17,17 @@ class AndroidBasePageUSB(interface):
         recent_app = self.get_current_app_USB()
         now_time = self.get_current_time()
         while True:
-            if self.wait_ele_presence_by_id_USB(recent_app + id_no, 5):
-                self.click_element_USB(self.get_element_by_id_USB(recent_app + id_no))
-                self.time_sleep(3)
-                desktop_app = self.get_current_app_USB()
-                if recent_app != desktop_app:
-                    return True
+            try:
+                if self.wait_ele_presence_by_id_USB(recent_app + id_no, 5):
+                    self.click_element_USB(self.get_element_by_id_USB(recent_app + id_no))
+                    self.time_sleep(3)
+                    desktop_app = self.get_current_app_USB()
+                    if recent_app != desktop_app:
+                        return True
+            except AssertionError:
+                break
             if self.get_current_time() < self.return_end_time(now_time, 60):
-                assert False, "@@@@午饭清除最近应用， 请检查！！！！"
+                assert False, "@@@@无法清除最近应用， 请检查！！！！"
             self.time_sleep(1)
 
     def open_recent_page_USB(self):
@@ -47,9 +51,17 @@ class AndroidBasePageUSB(interface):
             if exp in self.remove_space(self.upper_transfer(result)):
                 break
             result = self.u2_send_command_USB("am start -n com.android.settings/.applications.InstalledAppDetails -d package:%s" % package)
-            if self.get_current_time() > self.return_end_time(now_time):
-                assert "@@@@无法打开%s的详细页面， 请检查！！！" % package
+            if self.get_current_time() > self.return_end_time(now_time, 60):
+                assert False, "@@@@无法打开%s的详细页面， 请检查！！！" % package
             self.time_sleep(3)
+
+    def save_screenshot_to_USB(self, file_path):
+        base_path = conf.project_path + "\\ScreenShot\\%s" % file_path
+        try:
+            self.USB_client.screenshot(base_path)
+        except Exception as e:
+            self.USB_client.screenshot(base_path)
+            print(e)
 
     def back_to_home_USB(self):
         self.USB_client.press("home")
@@ -200,7 +212,7 @@ class AndroidBasePageUSB(interface):
             res = self.remove_space(self.u2_send_command_USB(cmd))
             print(res)
             if exp not in res:
-                break
+                return True
             if self.get_current_time() > self.return_end_time(now_time, timeout):
                 if exp in self.remove_space(self.send_shell_command_USB(cmd)):
                     assert False, "@@@@超过2分钟无法上网,请检查网络"
@@ -217,7 +229,7 @@ class AndroidBasePageUSB(interface):
             res = self.remove_space(self.u2_send_command_USB(cmd))
             print(res)
             if exp in res:
-                break
+                return True
             if self.get_current_time() > self.return_end_time(now_time, timeout):
                 if exp in self.remove_space(self.send_shell_command_USB(cmd)):
                     assert False, "@@@@网络还没有关闭， 请检查！！！！"
@@ -321,6 +333,20 @@ class AndroidBasePageUSB(interface):
             return True
         else:
             assert False, "@@@@查找元素超时！！！"
+
+    def ele_id_is_existed_USB(self, loc, timeout=5):
+        return self.USB_client(resourceId=loc).exists(timeout=timeout)
+
+    def confirm_ele_is_existed_USB(self, pre_ele, loc):
+        now_time = self.get_current_time()
+        while True:
+            if self.ele_id_is_existed_USB(loc):
+                break
+            pre_ele.click()
+            self.time_sleep(1)
+            if self.get_current_time() > self.return_end_time(now_time, 120):
+                btn_text = self.get_element_text_USB(pre_ele)
+                assert False, "@@@@点击按钮%s不生效, 请检查！！！" % btn_text
 
     def wait_ele_presence_by_class_name_USB(self, class_name, time_to_wait):
         flag = self.USB_client(className=class_name).exists(timeout=time_to_wait)

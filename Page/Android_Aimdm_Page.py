@@ -37,13 +37,36 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
         # aimdm app info page
         self.settings_title = "%s:id/entity_header_title" % self.android_settings_package
         self.settings_summary = "%s:id/summary" % self.android_relatelayout_package
+        self.container = "%s:id/container_material" % self.android_settings_package
+        self.layout = "android.widget.LinearLayout"
+
+        # aimdm more detail info
+        self.spinner = "%s:id/cycles_spinner" % self.android_settings_package
+        self.total_data_summary = "%s:id/summary" % self.android_relatelayout_package
 
         # clear recent app btn
         self.clear_all = ":id/btn_remove_all"
 
     def get_aimdm_mobile_data(self):
-        self.open_app_detail_info_page_USB(self.aimdm_package)
-        print(self.get_element_text(self.get_element_by_id_USB(self.settings_title)))
+        try:
+            self.open_app_detail_info_page_USB(self.aimdm_package)
+        except AssertionError:
+            if self.ele_id_is_existed_USB(self.settings_title):
+                title_text = self.get_element_text_USB(self.get_element_by_id_USB(self.settings_title))
+                if self.remove_space_and_upper(title_text) == "AIMDM":
+                    pass
+                else:
+                    assert False, "@@@@无法打开aimdm的app info 页面， 请检查！！！！"
+        print(self.get_element_text_USB(self.get_element_by_id_USB(self.settings_title)))
+        pre_mobile_wifi_data_btn = self.get_element_by_id_USB(self.container).child(className=self.layout)[5]
+        pre_mobile_wifi_data_btn.click()
+        self.confirm_ele_is_existed_USB(pre_mobile_wifi_data_btn, self.spinner)
+        self.time_sleep(6)
+        mobile_data_used = self.get_element_text_USB(self.get_element_by_id_USB(self.total_data_summary))
+        # print(mobile_data_used)
+        return mobile_data_used
+
+    def clear_recent_app_USB(self):
         self.open_recent_page_USB()
         self.click_cleat_recent_app_btn_USB(self.clear_all)
 
