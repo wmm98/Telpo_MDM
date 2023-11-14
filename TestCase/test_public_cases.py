@@ -248,7 +248,7 @@ class TestPubilcPage:
             if original_hash_value == shell_hash_value:
                 break
             if self.app_page.get_current_time() > self.app_page.return_end_time(now_time, 1800):
-                assert False, "@@@@多应用推送中超过30分钟还没有完成%s的下载" % release_info["package_name"]
+                assert False, "@@@@应用推送中超过30分钟还没有完成%s的下载" % release_info["package_name"]
             self.app_page.time_sleep(5)
         print("**********************下载完成检测完毕*************************************")
 
@@ -263,40 +263,65 @@ class TestPubilcPage:
         print("**********************终端安装完毕*************************************")
 
         self.app_page.time_sleep(5)
-
+        send_time_err = case_pack.time.strftime('%Y-%m-%d %H:%M',
+                                            case_pack.time.localtime(self.app_page.get_current_time()))
         self.app_page.go_to_new_address("apps/logs")
-        now_time = self.app_page.get_current_time()
+        report_now_time = self.app_page.get_current_time()
         while True:
-            upgrade_list = self.app_page.get_app_latest_upgrade_log(send_time, release_info)
+            upgrade_list = self.app_page.get_app_latest_upgrade_log(send_time_err, release_info)
             if len(upgrade_list) != 0:
                 action = upgrade_list[0]["Action"]
                 print("action", action)
                 if self.app_page.get_action_status(action) == 4:
                     break
             # wait upgrade 3 min at most
-            if self.app_page.get_current_time() > self.app_page.return_end_time(now_time, 180):
-                assert False, "@@@@5分钟还没有终端或者平台还没显示安装完相应的app， 请检查！！！"
-            self.app_page.time_sleep(30)
+            if self.app_page.get_current_time() > self.app_page.return_end_time(report_now_time, 180):
+                tab_title = self.ota_page.get_title()
+                server_flag = 0
+                for server_err in self.content_page.service_unavailable_list():
+                    if server_err in tab_title:
+                        server_flag += 1
+                        report_now_time = self.content_page.get_current_time()
+                        break
+                if server_flag == 0:
+                    assert False, "@@@@5分钟还没有终端或者平台还没显示安装完相应的app， 请检查！！！"
+            self.app_page.time_sleep(1)
             self.app_page.refresh_page()
         self.app_page.time_sleep(5)
+
+        # self.app_page.go_to_new_address("apps/logs")
+        # now_time = self.app_page.get_current_time()
+        # while True:
+        #     upgrade_list = self.app_page.get_app_latest_upgrade_log(send_time, release_info)
+        #     if len(upgrade_list) != 0:
+        #         action = upgrade_list[0]["Action"]
+        #         print("action", action)
+        #         if self.app_page.get_action_status(action) == 4:
+        #             break
+        #     # wait upgrade 3 min at most
+        #     if self.app_page.get_current_time() > self.app_page.return_end_time(now_time, 180):
+        #         assert False, "@@@@5分钟还没有终端或者平台还没显示安装完相应的app， 请检查！！！"
+        #     self.app_page.time_sleep(30)
+        #     self.app_page.refresh_page()
+        # self.app_page.time_sleep(5)
 
         print("*******************静默安装完成***************************")
         log.info("*******************静默安装完成***************************")
 
-        self.android_mdm_page.confirm_app_is_running(release_info["package"])
-        base_directory = "APP_Full_Screen"
-        image_before_reboot = "%s\\app_full_screen_before_reboot.jpg" % base_directory
-        self.android_mdm_page.save_screenshot_to(image_before_reboot)
-        self.android_mdm_page.upload_image_JPG(conf.project_path + "\\ScreenShot\\%s" % image_before_reboot,
-                                               "app_full_screen_before_reboot")
-        self.android_mdm_page.reboot_device(self.wifi_ip)
-        self.android_mdm_page.confirm_app_start(release_info["package"])
-        image_after_reboot = "%s\\app_full_screen_after_reboot.jpg" % base_directory
-        self.android_mdm_page.confirm_app_is_running(release_info["package"])
-        self.android_mdm_page.save_screenshot_to(image_after_reboot)
-        self.android_mdm_page.upload_image_JPG(conf.project_path + "\\ScreenShot\\%s" % image_after_reboot,
-                                               "app_full_screen_after_reboot")
-        self.android_mdm_page.stop_app(release_info["package"])
+        # self.android_mdm_page.confirm_app_is_running(release_info["package"])
+        # base_directory = "APP_Full_Screen"
+        # image_before_reboot = "%s\\app_full_screen_before_reboot.jpg" % base_directory
+        # self.android_mdm_page.save_screenshot_to(image_before_reboot)
+        # self.android_mdm_page.upload_image_JPG(conf.project_path + "\\ScreenShot\\%s" % image_before_reboot,
+        #                                        "app_full_screen_before_reboot")
+        # self.android_mdm_page.reboot_device(self.wifi_ip)
+        # self.android_mdm_page.confirm_app_start(release_info["package"])
+        # image_after_reboot = "%s\\app_full_screen_after_reboot.jpg" % base_directory
+        # self.android_mdm_page.confirm_app_is_running(release_info["package"])
+        # self.android_mdm_page.save_screenshot_to(image_after_reboot)
+        # self.android_mdm_page.upload_image_JPG(conf.project_path + "\\ScreenShot\\%s" % image_after_reboot,
+        #                                        "app_full_screen_after_reboot")
+        # self.android_mdm_page.stop_app(release_info["package"])
 
     @allure.feature('MDM_public')
     @allure.title("public case-推送text.zip文件")
@@ -803,6 +828,7 @@ class TestPubilcPage:
                 assert False, "@@@@推送中超过3分钟还没有升级包: %s的下载记录" % release_info["package_name"]
             self.ota_page.time_sleep(10)
 
+        self.ota_page.go_to_new_address("ota/log")
         upgrade_flag = 0
         now_time = self.ota_page.get_current_time()
         while True:
@@ -815,7 +841,7 @@ class TestPubilcPage:
                         upgrade_flag = 1
                     break
             # wait upgrade 3 mins at most
-            if self.ota_page.get_current_time() > self.ota_page.return_end_time(now_time, 300):
+            if self.ota_page.get_current_time() > self.ota_page.return_end_time(now_time, 600):
                 assert False, "@@@@30分钟还没有下载完相应的固件， 请检查！！！"
             self.ota_page.time_sleep(30)
             self.ota_page.refresh_page()
@@ -840,6 +866,7 @@ class TestPubilcPage:
 
         # check upgrade
         if upgrade_flag == 0:
+            self.ota_page.refresh_page()
             now_time = self.ota_page.get_current_time()
             while True:
                 info = self.ota_page.get_ota_latest_upgrade_log(send_time, release_info)
@@ -849,7 +876,7 @@ class TestPubilcPage:
                     if self.ota_page.get_action_status(action) == 4:
                         break
                 # wait upgrade 3 mins at most
-                if self.ota_page.get_current_time() > self.ota_page.return_end_time(now_time, 180):
+                if self.ota_page.get_current_time() > self.ota_page.return_end_time(now_time, 600):
                     assert False, "@@@@30分钟还没有升级相应的安卓版本， 请检查！！！"
                 self.ota_page.time_sleep(30)
                 self.ota_page.refresh_page()

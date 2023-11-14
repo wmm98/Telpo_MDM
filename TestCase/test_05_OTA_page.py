@@ -387,6 +387,7 @@ class TestOTAPage:
         self.android_mdm_page.confirm_received_alert(upgrade_tips)
 
         # check upgrade
+        self.page.go_to_new_address("ota/log")
         now_time = self.page.get_current_time()
         while True:
             info = self.page.get_ota_latest_upgrade_log(send_time, release_info)

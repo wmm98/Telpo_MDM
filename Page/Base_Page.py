@@ -10,6 +10,9 @@ class BasePage(interface):
 
     loc_tips = (public_pack.By.ID, "swal2-title")
 
+    def recovery_after_service_unavailable(self, address):
+        pass
+
     def quit_browser(self):
         self.driver.quit()
 
@@ -209,6 +212,9 @@ class BasePage(interface):
 
     def get_title(self):
         return self.driver.title
+
+    def service_unavailable_list(self):
+        return ["503", "302"]
 
     def web_driver_wait_until(self, condition, wait_times=0):
         if wait_times == 0:

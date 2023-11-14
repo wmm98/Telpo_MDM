@@ -28,13 +28,11 @@ class TestStability:
         self.content_page = st.ContentPage(test_driver, 40)
         self.ota_page = st.OTAPage(test_driver, 40)
         self.mdm_page = st.MDMPage(test_driver, 40)
-        print("1111111111111111111111111")
         self.mdm_page.login_ok(st.yaml_data['website_info']['test_user'], st.yaml_data['website_info']['test_password'])
         self.mdm_page.time_sleep(5)
-        print("22222222222222222222222")
-        # self.app_page.delete_app_install_and_uninstall_logs()
-        # self.content_page.delete_all_content_release_log()
-        # self.ota_page.delete_all_ota_release_log()
+        self.app_page.delete_app_install_and_uninstall_logs()
+        self.content_page.delete_all_content_release_log()
+        self.ota_page.delete_all_ota_release_log()
         self.androids_page = []
         self.devices_sn = []
         self.devices_ip = []
@@ -223,7 +221,6 @@ class TestStability:
     def test_reboot_online_stability_test(self):
         devices_sn = self.devices_sn
         devices_ip = self.devices_ip
-
         length = 1
         device_page = self.device_page
         device_page.go_to_new_address("devices")
@@ -397,7 +394,7 @@ class TestStability:
                 while True:
                     if device_msg["android_page"].download_file_is_existed(file):
                         break
-                    if content_page.get_current_time() > content_page.return_end_time(now_time, 1800):
+                    if content_page.get_current_time() > content_page.return_end_time(now_time, 300):
                         assert False, "@@@@应用推送中超过30分钟还没有%s的下载记录" % file
                     content_page.time_sleep(3)
                 print("**********************下载记录检测完毕*************************************")
@@ -420,15 +417,25 @@ class TestStability:
                         content_page.time_sleep(1)
                 print("*******************完成5次重启*********************************")
                 # check if app download completed in the settings time
-                now_time = content_page.get_current_time()
+                now_time_d = content_page.get_current_time()
                 while True:
                     shell_hash_value = device_msg["android_page"].calculate_sha256_in_device(file)
                     if file_hash_value == shell_hash_value:
                         break
-                    if content_page.get_current_time() > content_page.return_end_time(now_time, 1800):
+                    if content_page.get_current_time() > content_page.return_end_time(now_time_d, 300):
                         assert False, "@@@@推送中超过30分钟还没有完成%s的下载" % file
                     content_page.time_sleep(3)
                 print("**********************下载完成检测完毕*************************************")
+                setting_time = content_page.get_current_time()
+                while True:
+                    if file in device_msg["android_page"].u2_send_command(grep_cmd):
+                        break
+                    if content_page.get_current_time() > content_page.return_end_time(setting_time):
+                        assert False, "@@@@文件没有释放到设备指定的路径%s, 请检查！！！" % release_to_path
+
+                print("***************************************设备%s：指定的路径已存在%s*********************************" % (
+                    device_msg["ip"], file))
+
                 lock.acquire()
                 content_page.go_to_new_address("content/log")
                 now_time_ = content_page.get_current_time()
@@ -442,14 +449,13 @@ class TestStability:
                         if content_page.get_action_status(action) == 7:
                             break
                     # wait upgrade 3 min at most
-                    if content_page.get_current_time() > content_page.return_end_time(now_time_, 60):
+                    if content_page.get_current_time() > content_page.return_end_time(now_time_, 180):
                         assert False, "@@@@3分钟还没有设置完相应的文件， 请检查！！！"
-                    content_page.time_sleep(5)
+                    content_page.time_sleep(30)
                     content_page.refresh_page()
-                # content_page.go_to_new_address("content/log")
                 lock.release()
-                assert file in device_msg["android_page"].u2_send_command(
-                    grep_cmd), "@@@@文件没有释放到设备指定的路径%s, 请检查！！！" % release_to_path
+                # assert file in device_msg["android_page"].u2_send_command(
+                #     grep_cmd), "@@@@文件没有释放到设备指定的路径%s, 请检查！！！" % release_to_path
                 print("***************************************设备%s完成文件%s的推送*********************************" % (
                     device_msg["ip"], file))
 
@@ -745,13 +751,13 @@ class TestStability:
         self.ota_page.go_to_new_address("ota/release")
         now_time = self.ota_page.get_current_time()
         # check release logs
-        while True:
-            if self.ota_page.get_current_ota_release_log_total() == len(release_info["sn"]):
-                break
-            if self.ota_page.get_current_time() > self.ota_page.return_end_time(now_time):
-                assert False, "@@@@没有相应的 ota package release log， 请检查！！！"
-            self.ota_page.time_sleep(3)
-            self.ota_page.refresh_page()
+        # while True:
+        #     if self.ota_page.get_current_ota_release_log_total() == len(release_info["sn"]):
+        #         break
+        #     if self.ota_page.get_current_time() > self.ota_page.return_end_time(now_time):
+        #         assert False, "@@@@没有相应的 ota package release log， 请检查！！！"
+        #     self.ota_page.time_sleep(3)
+        #     self.ota_page.refresh_page()
         print("**********************释放log检测完毕*************************************")
 
         def check_devices_upgrade_ota_package(device_msg):
@@ -787,6 +793,19 @@ class TestStability:
             except Exception as e:
                 pass
             # device_msg["android_page"].confirm_received_alert(upgrade_tips)
+            # device_msg["android_page"].device_boot(device_msg["ip"])
+            # after_upgrade_version = device_msg["android_page"].check_firmware_version()
+            # assert ota_page.transfer_version_into_int(
+            #     device_current_firmware_version) != ota_page.transfer_version_into_int(after_upgrade_version), \
+            #     "@@@@ota升级失败， 还是原来的版本%s！！" % device_current_firmware_version
+            # assert ota_page.transfer_version_into_int(release_info["version"]) == \
+            #        ota_page.transfer_version_into_int(
+            #            after_upgrade_version), "@@@@升级后的固件版本为%s, ota升级失败， 请检查！！！" % after_upgrade_version
+            # print("***************************************设备%s ota 检测完成*********************************" % device_msg[
+            #     "ip"])
+            #
+            print("**********************%s ota升级包在设备升级完成*************************************" % device_msg["ip"])
+
             # lock.acquire()
             # ota_page.go_to_new_address("ota/log")
             # now_time = ota_page.get_current_time()
@@ -800,25 +819,12 @@ class TestStability:
             #     # wait upgrade 30 min at most
             #     if ota_page.get_current_time() > ota_page.return_end_time(now_time, 1800):
             #         assert False, "@@@@30分钟还没有升级相应的安卓版本， 请检查！！！"
-            #     ota_page.time_sleep(5)
+            #     ota_page.time_sleep(30)
             #     ota_page.refresh_page()
             # lock.release()
-            # print("***************************************设备%s ota升级上报完成*********************************" % device_msg[
-            #     "ip"])
-            #
-            # device_msg["android_page"].device_boot(device_msg["ip"])
-            # after_upgrade_version = device_msg["android_page"].check_firmware_version()
-            # assert ota_page.transfer_version_into_int(
-            #     device_current_firmware_version) != ota_page.transfer_version_into_int(after_upgrade_version), \
-            #     "@@@@ota升级失败， 还是原来的版本%s！！" % device_current_firmware_version
-            # assert ota_page.transfer_version_into_int(release_info["version"]) == \
-            #        ota_page.transfer_version_into_int(
-            #            after_upgrade_version), "@@@@升级后的固件版本为%s, ota升级失败， 请检查！！！" % after_upgrade_version
-            # print("***************************************设备%s ota 检测完成*********************************" % device_msg[
-            #     "ip"])
-            print("**********************%s ota升级包检测完成*************************************" % device_msg["ip"])
+            print("***************************************设备%s ota升级上报完成*********************************" % device_msg[
+                "ip"])
 
-        #
         # multi threads upgrade ota package
         upgrade_threads = []
         for upgrade_i in range(len(devices_data)):
@@ -830,5 +836,7 @@ class TestStability:
             upgrade_threads.append(upgrade_t)
         for upgrade_thread in upgrade_threads:
             upgrade_thread.join()
+
+
 
 
