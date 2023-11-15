@@ -51,6 +51,18 @@ class MDMPage(BasePage):
         self.input_pwd_value(password)
         self.choose_agree_btn()
         self.click_login_btn()
+        now_time = self.get_current_time()
+        while True:
+            try:
+                if self.web_driver_wait_until(public_pack.EC.url_contains("device"), 10):
+                    break
+            except Exception:
+                if "device" in self.get_current_url():
+                    break
+            if self.get_current_time() > self.return_end_time(now_time):
+                assert False, "无法登录，请检查！！！"
+            self.refresh_page()
+            self.login_ok(name, password)
 
 # if __name__ == '__main__':
 #     from selenium import webdriver

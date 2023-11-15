@@ -94,9 +94,7 @@ class TelpoMDMPage(MDMPage):
             self.time_sleep(1)
 
     def recovery_after_service_unavailable(self, address, user_info):
-        cur_tab_title = self.get_title()
-        print("当前tab title: %s" % cur_tab_title)
-        server_status = self.extract_integers(cur_tab_title)
+        server_status = self.extract_integers(self.get_service_status())
         if len(server_status) != 0:
             while True:
                 if server_status[0] not in self.service_unavailable_list():
@@ -118,6 +116,16 @@ class TelpoMDMPage(MDMPage):
 
             return 0
 
+    def get_service_status(self):
+        cur_tab_title = self.get_title()
+        print("当前tab title: %s" % cur_tab_title)
+        return cur_tab_title
+
+    def service_is_normal(self):
+        if len(self.extract_integers(self.get_service_status())) == 0:
+            return True
+        else:
+            return False
 
 
 

@@ -198,130 +198,135 @@ class TestPubilcPage:
                                      uninstall_multi_apps):
         release_info = {"package_name": test_yml['app_info']['other_app'], "sn": self.device_sn,
                         "silent": "Yes", "download_network": "NO Limit"}
-        print("*******************应用满屏推送用例开始***************************")
-        log.info("*******************应用满屏推送用例开始***************************")
-        file_path = self.app_page.get_apk_path(release_info["package_name"])
-        package = self.app_page.get_apk_package_name(file_path)
-        release_info["package"] = package
-        print("包名：", package)
-        version = self.app_page.get_apk_package_version(file_path)
-        release_info["version"] = version
-
-        self.android_mdm_page.uninstall_app(release_info["package"])
-        self.android_mdm_page.reboot_device(self.wifi_ip)
-        # check if device is online
-        self.app_page.go_to_new_address("devices")
-        opt_case.check_single_device(release_info["sn"])
-
-        app_size = self.app_page.get_file_size_in_windows(file_path)
-        print("获取到的app 的size(bytes): ", app_size)
-        # check file hash value in directory Param/package
-        act_apk_package_hash_value = self.android_mdm_page.calculate_sha256_in_windows(release_info["package_name"])
-        print("act_ota_package_hash_value:", act_apk_package_hash_value)
-        # go to app page
-        self.app_page.go_to_new_address("apps")
-        send_time = case_pack.time.strftime('%Y-%m-%d %H:%M',
-                                            case_pack.time.localtime(self.app_page.get_current_time()))
-        self.app_page.time_sleep(4)
-        self.app_page.search_app_by_name(release_info["package_name"])
-        app_list = self.app_page.get_apps_text_list()
-        if len(app_list) == 0:
-            assert False, "@@@@没有 %s, 请检查！！！" % release_info["package_name"]
-        self.app_page.click_release_app_btn()
-        self.app_page.input_release_app_info(release_info, kiosk_mode=True)
-
-        now_time = self.app_page.get_current_time()
-        shell_app_apk_name = release_info["package"] + "_%s.apk" % release_info["version"]
         while True:
-            # check if app in download list
-            if self.android_mdm_page.download_file_is_existed(shell_app_apk_name):
-                break
-            if self.app_page.get_current_time() > self.app_page.return_end_time(now_time, 180):
-                assert False, "@@@@多应用推送中超过3分钟还没有app: %s的下载记录" % release_info["package_name"]
-        print("**********************下载记录检测完毕*************************************")
-        # check if download completed
-        now_time = self.app_page.get_current_time()
-        original_hash_value = self.android_mdm_page.calculate_sha256_in_windows("%s" % release_info["package_name"])
-        print("original hash value: %s" % original_hash_value)
-        while True:
-            shell_hash_value = self.android_mdm_page.calculate_sha256_in_device(shell_app_apk_name)
-            print("shell_hash_value: %s" % original_hash_value)
-            if original_hash_value == shell_hash_value:
-                break
-            if self.app_page.get_current_time() > self.app_page.return_end_time(now_time, 1800):
-                assert False, "@@@@应用推送中超过30分钟还没有完成%s的下载" % release_info["package_name"]
-            self.app_page.time_sleep(5)
-        print("**********************下载完成检测完毕*************************************")
+            try:
+                print("*******************应用满屏推送用例开始***************************")
+                log.info("*******************应用满屏推送用例开始***************************")
+                file_path = self.app_page.get_apk_path(release_info["package_name"])
+                package = self.app_page.get_apk_package_name(file_path)
+                release_info["package"] = package
+                print("包名：", package)
+                version = self.app_page.get_apk_package_version(file_path)
+                release_info["version"] = version
 
-        now_time = self.app_page.get_current_time()
-        while True:
-            if self.android_mdm_page.app_is_installed(release_info["package"]):
-                break
-            # wait upgrade 3 min at most
-            if self.app_page.get_current_time() > self.app_page.return_end_time(now_time, 180):
-                assert False, "@@@@3分钟还没有终端或者平台还没显示安装完相应的app， 请检查！！！"
-            self.app_page.time_sleep(1)
-        print("**********************终端安装完毕*************************************")
+                self.android_mdm_page.uninstall_app(release_info["package"])
+                self.android_mdm_page.reboot_device(self.wifi_ip)
+                # check if device is online
+                self.app_page.go_to_new_address("devices")
+                opt_case.check_single_device(release_info["sn"])
 
-        self.app_page.time_sleep(5)
-        send_time_err = case_pack.time.strftime('%Y-%m-%d %H:%M',
-                                            case_pack.time.localtime(self.app_page.get_current_time()))
-        self.app_page.go_to_new_address("apps/logs")
-        report_now_time = self.app_page.get_current_time()
-        while True:
-            print("333333333333333333333333333333333333333333")
-            upgrade_list = self.app_page.get_app_latest_upgrade_log(send_time_err, release_info)
-            if len(upgrade_list) != 0:
-                action = upgrade_list[0]["Action"]
-                print("action", action)
-                if self.app_page.get_action_status(action) == 10:
-                    break
-            # wait upgrade 3 min at most
-            if self.app_page.get_current_time() > self.app_page.return_end_time(report_now_time, 120):
+                app_size = self.app_page.get_file_size_in_windows(file_path)
+                print("获取到的app 的size(bytes): ", app_size)
+                # check file hash value in directory Param/package
+                act_apk_package_hash_value = self.android_mdm_page.calculate_sha256_in_windows(release_info["package_name"])
+                print("act_ota_package_hash_value:", act_apk_package_hash_value)
+                # go to app page
+                self.app_page.go_to_new_address("apps")
+                send_time = case_pack.time.strftime('%Y-%m-%d %H:%M',
+                                                    case_pack.time.localtime(self.app_page.get_current_time()))
+                self.app_page.time_sleep(4)
+                self.app_page.search_app_by_name(release_info["package_name"])
+                app_list = self.app_page.get_apps_text_list()
+                if len(app_list) == 0:
+                    assert False, "@@@@没有 %s, 请检查！！！" % release_info["package_name"]
+                self.app_page.click_release_app_btn()
+                self.app_page.input_release_app_info(release_info, kiosk_mode=True)
 
-                if self.app_page.recovery_after_service_unavailable("apps/logs", user_info) == 0:
-                    assert False, "@@@@5分钟还没有终端或者平台还没显示安装完相应的app， 请检查！！！"
-                else:
-                    report_now_time = self.app_page.get_current_time()
-                    print("===================服务器崩==================================")
+                now_time = self.app_page.get_current_time()
+                shell_app_apk_name = release_info["package"] + "_%s.apk" % release_info["version"]
+                while True:
+                    # check if app in download list
+                    if self.android_mdm_page.download_file_is_existed(shell_app_apk_name):
+                        break
+                    if self.app_page.get_current_time() > self.app_page.return_end_time(now_time, 180):
+                        assert False, "@@@@多应用推送中超过3分钟还没有app: %s的下载记录" % release_info["package_name"]
+                print("**********************下载记录检测完毕*************************************")
+                # check if download completed
+                now_time = self.app_page.get_current_time()
+                original_hash_value = self.android_mdm_page.calculate_sha256_in_windows("%s" % release_info["package_name"])
+                print("original hash value: %s" % original_hash_value)
+                while True:
+                    shell_hash_value = self.android_mdm_page.calculate_sha256_in_device(shell_app_apk_name)
+                    print("shell_hash_value: %s" % original_hash_value)
+                    if original_hash_value == shell_hash_value:
+                        break
+                    if self.app_page.get_current_time() > self.app_page.return_end_time(now_time, 1800):
+                        assert False, "@@@@应用推送中超过30分钟还没有完成%s的下载" % release_info["package_name"]
+                    self.app_page.time_sleep(5)
+                print("**********************下载完成检测完毕*************************************")
 
-            # self.app_page.time_sleep(1)
-            self.app_page.refresh_page()
-        self.app_page.time_sleep(5)
+                now_time = self.app_page.get_current_time()
+                while True:
+                    if self.android_mdm_page.app_is_installed(release_info["package"]):
+                        break
+                    # wait upgrade 3 min at most
+                    if self.app_page.get_current_time() > self.app_page.return_end_time(now_time, 180):
+                        assert False, "@@@@3分钟还没有终端或者平台还没显示安装完相应的app， 请检查！！！"
+                    self.app_page.time_sleep(1)
+                print("**********************终端安装完毕*************************************")
 
-        # self.app_page.go_to_new_address("apps/logs")
-        # now_time = self.app_page.get_current_time()
-        # while True:
-        #     upgrade_list = self.app_page.get_app_latest_upgrade_log(send_time, release_info)
-        #     if len(upgrade_list) != 0:
-        #         action = upgrade_list[0]["Action"]
-        #         print("action", action)
-        #         if self.app_page.get_action_status(action) == 4:
-        #             break
-        #     # wait upgrade 3 min at most
-        #     if self.app_page.get_current_time() > self.app_page.return_end_time(now_time, 180):
-        #         assert False, "@@@@5分钟还没有终端或者平台还没显示安装完相应的app， 请检查！！！"
-        #     self.app_page.time_sleep(30)
-        #     self.app_page.refresh_page()
-        # self.app_page.time_sleep(5)
+                self.app_page.time_sleep(5)
+                send_time_err = case_pack.time.strftime('%Y-%m-%d %H:%M',
+                                                        case_pack.time.localtime(self.app_page.get_current_time()))
+                self.app_page.go_to_new_address("apps/logs")
+                report_now_time = self.app_page.get_current_time()
+                while True:
+                    print("333333333333333333333333333333333333333333")
+                    upgrade_list = self.app_page.get_app_latest_upgrade_log(send_time_err, release_info)
+                    if len(upgrade_list) != 0:
+                        action = upgrade_list[0]["Action"]
+                        print("action", action)
+                        if self.app_page.get_action_status(action) == 10:
+                            break
+                    # wait upgrade 3 min at most
+                    if self.app_page.get_current_time() > self.app_page.return_end_time(report_now_time, 120):
 
-        print("*******************静默安装完成***************************")
-        log.info("*******************静默安装完成***************************")
+                        if self.app_page.recovery_after_service_unavailable("apps/logs", user_info) == 0:
+                            assert False, "@@@@5分钟还没有终端或者平台还没显示安装完相应的app， 请检查！！！"
+                        else:
+                            report_now_time = self.app_page.get_current_time()
+                            print("===================服务器崩==================================")
 
-        # self.android_mdm_page.confirm_app_is_running(release_info["package"])
-        # base_directory = "APP_Full_Screen"
-        # image_before_reboot = "%s\\app_full_screen_before_reboot.jpg" % base_directory
-        # self.android_mdm_page.save_screenshot_to(image_before_reboot)
-        # self.android_mdm_page.upload_image_JPG(conf.project_path + "\\ScreenShot\\%s" % image_before_reboot,
-        #                                        "app_full_screen_before_reboot")
-        # self.android_mdm_page.reboot_device(self.wifi_ip)
-        # self.android_mdm_page.confirm_app_start(release_info["package"])
-        # image_after_reboot = "%s\\app_full_screen_after_reboot.jpg" % base_directory
-        # self.android_mdm_page.confirm_app_is_running(release_info["package"])
-        # self.android_mdm_page.save_screenshot_to(image_after_reboot)
-        # self.android_mdm_page.upload_image_JPG(conf.project_path + "\\ScreenShot\\%s" % image_after_reboot,
-        #                                        "app_full_screen_after_reboot")
-        # self.android_mdm_page.stop_app(release_info["package"])
+                    # self.app_page.time_sleep(1)
+                    self.app_page.refresh_page()
+                self.app_page.time_sleep(5)
+
+                # self.app_page.go_to_new_address("apps/logs")
+                # now_time = self.app_page.get_current_time()
+                # while True:
+                #     upgrade_list = self.app_page.get_app_latest_upgrade_log(send_time, release_info)
+                #     if len(upgrade_list) != 0:
+                #         action = upgrade_list[0]["Action"]
+                #         print("action", action)
+                #         if self.app_page.get_action_status(action) == 4:
+                #             break
+                #     # wait upgrade 3 min at most
+                #     if self.app_page.get_current_time() > self.app_page.return_end_time(now_time, 180):
+                #         assert False, "@@@@5分钟还没有终端或者平台还没显示安装完相应的app， 请检查！！！"
+                #     self.app_page.time_sleep(30)
+                #     self.app_page.refresh_page()
+                # self.app_page.time_sleep(5)
+
+                print("*******************静默安装完成***************************")
+                log.info("*******************静默安装完成***************************")
+
+                # self.android_mdm_page.confirm_app_is_running(release_info["package"])
+                # base_directory = "APP_Full_Screen"
+                # image_before_reboot = "%s\\app_full_screen_before_reboot.jpg" % base_directory
+                # self.android_mdm_page.save_screenshot_to(image_before_reboot)
+                # self.android_mdm_page.upload_image_JPG(conf.project_path + "\\ScreenShot\\%s" % image_before_reboot,
+                #                                        "app_full_screen_before_reboot")
+                # self.android_mdm_page.reboot_device(self.wifi_ip)
+                # self.android_mdm_page.confirm_app_start(release_info["package"])
+                # image_after_reboot = "%s\\app_full_screen_after_reboot.jpg" % base_directory
+                # self.android_mdm_page.confirm_app_is_running(release_info["package"])
+                # self.android_mdm_page.save_screenshot_to(image_after_reboot)
+                # self.android_mdm_page.upload_image_JPG(conf.project_path + "\\ScreenShot\\%s" % image_after_reboot,
+                #                                        "app_full_screen_after_reboot")
+                # self.android_mdm_page.stop_app(release_info["package"])
+            except Exception as e:
+                if self.app_page.service_is_normal():
+                    assert False, e
 
     @allure.feature('MDM_public')
     @allure.title("public case-推送text.zip文件")
