@@ -53,7 +53,8 @@ class TestLogin:
                 if self.mdm_page.web_driver_wait_until(TestCase.EC.url_contains("device"), 10):
                     break
             except Exception:
-                pass
+                if "device" in self.mdm_page.get_current_url():
+                    break
             if self.mdm_page.get_current_time() > self.mdm_page.return_end_time(now_time):
                 assert False, "无法登录，请检查！！！"
             self.mdm_page.refresh_page()

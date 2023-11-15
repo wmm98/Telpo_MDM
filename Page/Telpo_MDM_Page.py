@@ -91,17 +91,6 @@ class TelpoMDMPage(BasePage):
                 assert False, "@@@@加载页面失败！！！"
             self.time_sleep(1)
 
-    def go_to_new_address(self, url):
-        address = "%s/%s" % (test_yml["website_info"]["test_base_url"], url)
-        self.driver.get(address)
-        now_time = self.get_current_time()
-        if self.driver.current_url != address:
-            while True:
-                if self.driver.current_url == address:
-                    break
-                else:
-                    self.driver.get(address)
-                if self.get_current_time() > self.return_end_time(now_time):
-                    assert False, "@@@打开 %s 失败， 请检查！！！" % address
-                self.time_sleep(1)
-        self.page_load_complete()
+
+
+

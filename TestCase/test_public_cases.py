@@ -806,6 +806,7 @@ class TestPubilcPage:
         print("ota after upgrade version:", release_info["version"])
         ota_package_size = conf.project_path + "\\Param\\Package\\%s" % release_info["package_name"]
         act_ota_package_hash_value = self.android_mdm_page.calculate_sha256_in_windows(release_info["package_name"])
+        print("act_ota_package_hash_value: ", act_ota_package_hash_value)
         act_ota_package_size = self.ota_page.get_zip_size(ota_package_size)
         print("act_ota_package_size:", act_ota_package_size)
         self.ota_page.search_device_by_pack_name(release_info["package_name"])

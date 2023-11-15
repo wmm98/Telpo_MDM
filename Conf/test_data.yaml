@@ -53,7 +53,7 @@ MDMTestData:
     # TPS900_msm8937_sv10_fv1.1.16_pv1.1.16-1.1.18.zip
     # TPS900_msm8937_sv10_fv1.1.19_pv1.1.19-1.2.20.zip
     # TPS900_msm8937_sv10_fv1.1.19_pv1.1.19-1.2.22.zip
-    package_name: TPS900_msm8937_sv10_fv1.1.19_pv1.1.19-1.2.20.zip
+    package_name: TPS900_msm8937_sv10_fv1.1.19_pv1.1.19-1.2.22.zip
     # 有分android和linux两种系统  Android Linux
     platform: Android
 

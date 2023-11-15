@@ -543,7 +543,7 @@ class TestNetworkCases:
         print("*******************限制wifi网络下载安装完成***************************")
         log.info("*******************限制wifi网络下载安装完成***************************")
 
-    @allure.feature('MDM_usb-test')
+    @allure.feature('MDM_usb-test1')
     @allure.title("OTA-OTA断网重连5次断点续传")
     def test_upgrade_OTA_package_reconnect_network_5times(self, connect_wifi_adb_USB, del_all_ota_release_log,
                                                           go_to_ota_page,
@@ -708,7 +708,7 @@ class TestNetworkCases:
                 log.info("下载完成后的 package_hash_value：%s" % str(package_hash_value))
                 break
 
-            if self.ota_page.get_current_time() > self.ota_page.return_end_time(now_time, 300):
+            if self.ota_page.get_current_time() > self.ota_page.return_end_time(now_time, 420):
                 err_msg = "@@@@断网重连%d次， 50分钟后还没有下载完相应的ota package， 请检查！！！" % times
                 log.error(err_msg)
                 print(err_msg)

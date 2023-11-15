@@ -1,6 +1,8 @@
 import Page as public_pack
 from Page.Interface_Page import interface
 
+test_yml = public_pack.yaml_data
+
 
 class BasePage(interface):
 
@@ -10,8 +12,23 @@ class BasePage(interface):
 
     loc_tips = (public_pack.By.ID, "swal2-title")
 
-    def recovery_after_service_unavailable(self, address):
-        pass
+    def go_to_new_address(self, url):
+        address = "%s/%s" % (test_yml["website_info"]["test_base_url"], url)
+        self.driver.get(address)
+        now_time = self.get_current_time()
+        if self.driver.current_url != address:
+            while True:
+                if self.driver.current_url == address:
+                    break
+                else:
+                    self.driver.get(address)
+                if self.get_current_time() > self.return_end_time(now_time):
+                    assert False, "@@@打开 %s 失败， 请检查！！！" % address
+                self.time_sleep(1)
+        self.page_load_complete()
+
+    def get_current_url(self):
+        return self.driver.current_url
 
     def quit_browser(self):
         self.driver.quit()
@@ -293,6 +310,3 @@ class BasePage(interface):
             return 6
         if self.upper_transfer(self.remove_space("Process completed")) in action:
             return 7
-
-
-

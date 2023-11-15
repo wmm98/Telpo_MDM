@@ -52,6 +52,23 @@ class MDMPage(BasePage):
         self.choose_agree_btn()
         self.click_login_btn()
 
+    # def recovery_after_service_unavailable(self, address):
+    #     cur_tab_title = self.get_title()
+    #     print("当前tab title: %s" % cur_tab_title)
+    #     server_status = self.extract_integers(cur_tab_title)
+    #     if len(server_status) != 0:
+    #         while True:
+    #             if server_status[0] not in self.service_unavailable_list():
+    #                 if self.remove_space(address) in self.remove_space(self.get_current_url()):
+    #                     return 1
+    #                 elif "login" in self.get_current_url():
+    #                     self.login_ok()
+    #             self.time_sleep(5)
+    #             self.refresh_page()
+    #
+    #     else:
+    #         return 0
+
 # if __name__ == '__main__':
 #     from selenium import webdriver
 #     driver = webdriver.Chrome()
