@@ -12,6 +12,17 @@ class BasePage(interface):
 
     loc_tips = (public_pack.By.ID, "swal2-title")
 
+    def get_html_text(self):
+        # 获取页面的 HTML 代码
+        html = self.driver.page_source
+
+        # 使用 BeautifulSoup 解析 HTML 代码
+        soup = public_pack.BeautifulSoup(html, 'html.parser')
+
+        # 查找页面中的文本
+        text = soup.get_text()
+        return text
+
     def go_to_new_address(self, url):
         address = "%s/%s" % (test_yml["website_info"]["test_base_url"], url)
         self.driver.get(address)

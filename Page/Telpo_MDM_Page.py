@@ -1,5 +1,6 @@
 import Page as public_pack
-from Page.Base_Page import BasePage
+# from Page.Base_Page import BasePage
+from Page.MDM_Page import MDMPage
 
 By = public_pack.By
 EC = public_pack.EC
@@ -7,9 +8,10 @@ t_time = public_pack.t_time
 test_yml = public_pack.yaml_data
 
 
-class TelpoMDMPage(BasePage):
+class TelpoMDMPage(MDMPage):
     def __init__(self, driver, times):
-        BasePage.__init__(self, driver, times)
+        # BasePage.__init__(self, driver, times)
+        MDMPage.__init__(self, driver, times)
 
     # loc_devices_map_btn =
     # loc_apps_btn =
@@ -90,6 +92,31 @@ class TelpoMDMPage(BasePage):
             if self.get_current_time() > self.return_end_time(now_time):
                 assert False, "@@@@加载页面失败！！！"
             self.time_sleep(1)
+
+    def recovery_after_service_unavailable(self, address, user_info):
+        cur_tab_title = self.get_title()
+        print("当前tab title: %s" % cur_tab_title)
+        server_status = self.extract_integers(cur_tab_title)
+        if len(server_status) != 0:
+            while True:
+                if server_status[0] not in self.service_unavailable_list():
+                    if self.remove_space(address) in self.remove_space(self.get_current_url()):
+                        return 1
+                    elif "login" in self.get_current_url():
+                        self.login_ok(user_info["username"], user_info["password"])
+                        self.go_to_new_address(address)
+                        return 1
+                    else:
+                        self.go_to_new_address(address)
+                        return 1
+                self.time_sleep(5)
+                self.refresh_page()
+
+        else:
+            # for status in self.service_unavailable_list():
+            #     if status in self.get_html_text():
+
+            return 0
 
 
 

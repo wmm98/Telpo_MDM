@@ -581,7 +581,7 @@ class TestNetworkCases:
         # check file hash value in directory Param/package
         act_ota_package_hash_value = self.android_mdm_page.calculate_sha256_in_windows(release_info["package_name"])
         print("act_ota_package_hash_value:", act_ota_package_hash_value)
-        log.info("ota升级包的hash值: %s" % str(act_ota_package_size))
+        log.info("ota升级包的hash值: %s" % str(act_ota_package_hash_value))
         # search package
         self.ota_page.search_device_by_pack_name(release_info["package_name"])
         # ele = self.Page.get_package_ele(release_info["package_name"])

@@ -7,8 +7,10 @@ test_yml = case_pack.yaml_data
 excel = case_pack.ExcelData()
 opt_case = case_pack.Optimize_Case()
 alert = case_pack.AlertData()
-
 log = case_pack.MyLog()
+
+user_info = {"username": case_pack.yaml_data['website_info']['test_user'],
+             "password": case_pack.yaml_data['website_info']['test_password']}
 
 package_infos = [{"package_name": test_yml['app_info']['low_version_app'], "file_category": "test",
                   "developer": "engineer", "description": "test"},
@@ -33,22 +35,21 @@ class TestPubilcPage:
         self.android_mdm_page = case_pack.AndroidAimdmPage(case_pack.device_data, 5)
         self.content_page = case_pack.ContentPage(self.driver, 40)
         self.wifi_ip = case_pack.device_data["wifi_device_info"]["ip"]
-        self.android_mdm_page.reboot_device(self.wifi_ip)
         self.android_mdm_page.del_all_content_file()
         self.device_sn = self.android_mdm_page.get_device_sn()
         self.app_page.delete_app_install_and_uninstall_logs()
         self.android_mdm_page.del_all_downloaded_apk()
         self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
-        self.android_mdm_page.reboot_device(self.wifi_ip)
+        # self.android_mdm_page.reboot_device(self.wifi_ip)
 
     def teardown_class(self):
-        # pass
-        self.app_page.delete_app_install_and_uninstall_logs()
-        self.android_mdm_page.del_all_downloaded_apk()
-        self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
-        self.android_mdm_page.del_all_content_file()
-        self.app_page.refresh_page()
-        self.android_mdm_page.reboot_device(self.wifi_ip)
+        pass
+        # self.app_page.delete_app_install_and_uninstall_logs()
+        # self.android_mdm_page.del_all_downloaded_apk()
+        # self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
+        # self.android_mdm_page.del_all_content_file()
+        # self.app_page.refresh_page()
+        # self.android_mdm_page.reboot_device(self.wifi_ip)
 
     @allure.feature('MDM_public')
     @allure.title("public case-添加 content 种类")
@@ -190,7 +191,7 @@ class TestPubilcPage:
             else:
                 assert False, "@@@@平台上没有该壁纸： %s, 请检查" % paper
 
-    @allure.feature('MDM_public')
+    @allure.feature('MDM_public1111111')
     @allure.title("public case-应用满屏推送--请在附件查看满屏截图效果")
     # @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_release_app_full_screen(self, del_all_app_release_log, del_all_app_uninstall_release_log, go_to_app_page,
@@ -268,24 +269,23 @@ class TestPubilcPage:
         self.app_page.go_to_new_address("apps/logs")
         report_now_time = self.app_page.get_current_time()
         while True:
+            print("333333333333333333333333333333333333333333")
             upgrade_list = self.app_page.get_app_latest_upgrade_log(send_time_err, release_info)
             if len(upgrade_list) != 0:
                 action = upgrade_list[0]["Action"]
                 print("action", action)
-                if self.app_page.get_action_status(action) == 4:
+                if self.app_page.get_action_status(action) == 10:
                     break
             # wait upgrade 3 min at most
-            if self.app_page.get_current_time() > self.app_page.return_end_time(report_now_time, 180):
-                tab_title = self.ota_page.get_title()
-                server_flag = 0
-                for server_err in self.content_page.service_unavailable_list():
-                    if server_err in tab_title:
-                        server_flag += 1
-                        report_now_time = self.content_page.get_current_time()
-                        break
-                if server_flag == 0:
+            if self.app_page.get_current_time() > self.app_page.return_end_time(report_now_time, 120):
+
+                if self.app_page.recovery_after_service_unavailable("apps/logs", user_info) == 0:
                     assert False, "@@@@5分钟还没有终端或者平台还没显示安装完相应的app， 请检查！！！"
-            self.app_page.time_sleep(1)
+                else:
+                    report_now_time = self.app_page.get_current_time()
+                    print("===================服务器崩==================================")
+
+            # self.app_page.time_sleep(1)
             self.app_page.refresh_page()
         self.app_page.time_sleep(5)
 
@@ -1287,6 +1287,23 @@ class TestPubilcPage:
         self.device_page.refresh_page()
         assert "Off" in opt_case.get_single_device_list(sn)[0]["Status"], "@@@@已发送关机命令， 设备还显示在线状态"
         # check device
+
+    @allure.feature('MDM_public-debug')
+    @allure.title("Devices- -- test in the last")
+    def test_debug_service(self):
+        self.app_page.go_to_new_address("apps/logs")
+        report_now_time = self.app_page.get_current_time()
+        while True:
+            print("1111111111111111111111")
+            self.app_page.refresh_page()
+
+            if self.app_page.get_current_time() > self.app_page.return_end_time(report_now_time, 120):
+
+                if self.app_page.recovery_after_service_unavailable("apps/logs", user_info) == 0:
+                    assert False, "@@@@5分钟还没有终端或者平台还没显示安装完相应的app， 请检查！！！"
+                else:
+                    report_now_time = self.app_page.get_current_time()
+                    print("===================服务器崩==================================")
 
     @allure.feature('MDM_public1111_test_test111')
     @allure.title("public case- 长时间检测设备在线情况")

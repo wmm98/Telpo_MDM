@@ -23,6 +23,7 @@ from Common.DealAlert import AlertData
 import socket
 from ping3 import ping
 import threading
+from bs4 import BeautifulSoup
 
 yaml_data = Config().get_yaml_data()['MDMTestData']
 
