@@ -34,6 +34,9 @@ wifi_ip = connect.get_wifi_ip()
 wifi_device_info = {"device": wifi_client, "ip": wifi_ip}
 device_data = {"usb_device_info": usb_device_info, "wifi_device_info": wifi_device_info}
 
+user_info = {"username": yaml_data['website_info']['test_user'],
+             "password": yaml_data['website_info']['test_password']}
+
 
 
 #

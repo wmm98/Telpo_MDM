@@ -79,6 +79,7 @@ def connected_wifi_adb():
 def connect_wifi_adb_USB():
     yield
     android_page.open_wifi_btn()
+    android_page.confirm_wifi_btn_open()
     android_page.confirm_wifi_adb_connected(TestCase.wifi_ip)
 
 

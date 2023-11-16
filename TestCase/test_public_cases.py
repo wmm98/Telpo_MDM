@@ -9,8 +9,6 @@ opt_case = case_pack.Optimize_Case()
 alert = case_pack.AlertData()
 log = case_pack.MyLog()
 
-user_info = {"username": case_pack.yaml_data['website_info']['test_user'],
-             "password": case_pack.yaml_data['website_info']['test_password']}
 
 package_infos = [{"package_name": test_yml['app_info']['low_version_app'], "file_category": "test",
                   "developer": "engineer", "description": "test"},
@@ -211,7 +209,7 @@ class TestPubilcPage:
                 release_info["version"] = version
 
                 # self.android_mdm_page.uninstall_app(release_info["package"])
-                # self.android_mdm_page.reboot_device(self.wifi_ip)
+                self.android_mdm_page.reboot_device(self.wifi_ip)
                 # check if device is online
                 self.app_page.go_to_new_address("devices")
                 opt_case.check_single_device(release_info["sn"])
@@ -225,7 +223,7 @@ class TestPubilcPage:
                 self.app_page.go_to_new_address("apps")
                 send_time = case_pack.time.strftime('%Y-%m-%d %H:%M',
                                                     case_pack.time.localtime(self.app_page.get_current_time()))
-                self.app_page.time_sleep(4)
+                self.app_page.time_sleep(10)
                 self.app_page.search_app_by_name(release_info["package_name"])
                 app_list = self.app_page.get_apps_text_list()
                 if len(app_list) == 0:
@@ -267,13 +265,11 @@ class TestPubilcPage:
                 print("**********************终端安装完毕*************************************")
 
                 self.app_page.time_sleep(5)
-                send_time_err = case_pack.time.strftime('%Y-%m-%d %H:%M',
-                                                        case_pack.time.localtime(self.app_page.get_current_time()))
                 self.app_page.go_to_new_address("apps/logs")
                 report_now_time = self.app_page.get_current_time()
                 while True:
                     print("333333333333333333333333333333333333333333")
-                    upgrade_list = self.app_page.get_app_latest_upgrade_log(send_time_err, release_info)
+                    upgrade_list = self.app_page.get_app_latest_upgrade_log(send_time, release_info)
                     if len(upgrade_list) != 0:
                         action = upgrade_list[0]["Action"]
                         print("action", action)
@@ -285,7 +281,7 @@ class TestPubilcPage:
                             assert False, "@@@@5分钟还没有终端或者平台还没显示安装完相应的app， 请检查！！！"
                         else:
                             print("===================服务崩溃了==================================")
-                            self.app_page.recovery_after_service_unavailable("apps/logs", user_info)
+                            self.app_page.recovery_after_service_unavailable("apps/logs", case_pack.user_info)
                             print("===================服务器恢复了==================================")
                             report_now_time = self.app_page.get_current_time()
 
@@ -311,30 +307,31 @@ class TestPubilcPage:
 
                 print("*******************静默安装完成***************************")
                 log.info("*******************静默安装完成***************************")
-                # break
-                # self.android_mdm_page.confirm_app_is_running(release_info["package"])
-                # base_directory = "APP_Full_Screen"
-                # image_before_reboot = "%s\\app_full_screen_before_reboot.jpg" % base_directory
-                # self.android_mdm_page.save_screenshot_to(image_before_reboot)
-                # self.android_mdm_page.upload_image_JPG(conf.project_path + "\\ScreenShot\\%s" % image_before_reboot,
-                #                                        "app_full_screen_before_reboot")
-                # self.android_mdm_page.reboot_device(self.wifi_ip)
-                # self.android_mdm_page.confirm_app_start(release_info["package"])
-                # image_after_reboot = "%s\\app_full_screen_after_reboot.jpg" % base_directory
-                # self.android_mdm_page.confirm_app_is_running(release_info["package"])
-                # self.android_mdm_page.save_screenshot_to(image_after_reboot)
-                # self.android_mdm_page.upload_image_JPG(conf.project_path + "\\ScreenShot\\%s" % image_after_reboot,
-                #                                        "app_full_screen_after_reboot")
-                # self.android_mdm_page.stop_app(release_info["package"])
+
+                self.android_mdm_page.confirm_app_is_running(release_info["package"])
+                base_directory = "APP_Full_Screen"
+                image_before_reboot = "%s\\app_full_screen_before_reboot.jpg" % base_directory
+                self.android_mdm_page.save_screenshot_to(image_before_reboot)
+                self.android_mdm_page.upload_image_JPG(conf.project_path + "\\ScreenShot\\%s" % image_before_reboot,
+                                                       "app_full_screen_before_reboot")
+                self.android_mdm_page.reboot_device(self.wifi_ip)
+                self.android_mdm_page.confirm_app_start(release_info["package"])
+                image_after_reboot = "%s\\app_full_screen_after_reboot.jpg" % base_directory
+                self.android_mdm_page.confirm_app_is_running(release_info["package"])
+                self.android_mdm_page.save_screenshot_to(image_after_reboot)
+                self.android_mdm_page.upload_image_JPG(conf.project_path + "\\ScreenShot\\%s" % image_after_reboot,
+                                                       "app_full_screen_after_reboot")
+                self.android_mdm_page.stop_app(release_info["package"])
+                break
             except Exception as e:
                 if self.app_page.service_is_normal():
                     assert False, e
                 else:
-                    self.app_page.recovery_after_service_unavailable("apps/logs", user_info)
+                    self.app_page.recovery_after_service_unavailable("apps/logs", case_pack.user_info)
                     self.app_page.delete_app_install_and_uninstall_logs()
                     self.android_mdm_page.del_all_downloaded_apk()
                     self.android_mdm_page.uninstall_multi_apps(test_yml["app_info"])
-                    self.android_mdm_page.return_end_time(self.wifi_ip)
+                    self.android_mdm_page.reboot_device(self.wifi_ip)
                     self.app_page.go_to_new_address("apps")
 
     @allure.feature('MDM_public')
@@ -1323,14 +1320,14 @@ class TestPubilcPage:
                             assert False, "@@@@5分钟还没有终端或者平台还没显示安装完相应的app， 请检查！！！"
                         else:
                             print("===================服务器崩了==================================")
-                            self.app_page.recovery_after_service_unavailable("apps/logs", user_info)
+                            self.app_page.recovery_after_service_unavailable("apps/logs", case_pack.user_info)
                             print("===================服务器恢复了==================================")
                             report_now_time = self.app_page.get_current_time()
             except Exception as e:
                 if self.app_page.service_is_normal():
                     assert False, e
                 else:
-                    self.app_page.recovery_after_service_unavailable("apps/logs", user_info)
+                    self.app_page.recovery_after_service_unavailable("apps/logs", case_pack.user_info)
                     flag = 1
                     # self.app_page.go_to_new_address("apps")
                     print("**************************崩了恢复重新开始用例**********************************")
