@@ -94,27 +94,26 @@ class TelpoMDMPage(MDMPage):
             self.time_sleep(1)
 
     def recovery_after_service_unavailable(self, address, user_info):
-        server_status = self.extract_integers(self.get_service_status())
-        if len(server_status) != 0:
-            while True:
-                if server_status[0] not in self.service_unavailable_list():
+        print("222222222222222222222222222222222222222")
+        while True:
+            server_status = self.extract_integers(self.get_service_status())
+            print(server_status)
+            if len(server_status) != 0:
+                print("00000000000000000000000000000000000000")
+                if self.remove_space(server_status[0]) not in self.service_unavailable_list():
                     if self.remove_space(address) in self.remove_space(self.get_current_url()):
-                        return 1
+                        break
                     elif "login" in self.get_current_url():
                         self.login_ok(user_info["username"], user_info["password"])
                         self.go_to_new_address(address)
-                        return 1
+                        break
                     else:
                         self.go_to_new_address(address)
-                        return 1
-                self.time_sleep(5)
-                self.refresh_page()
-
-        else:
-            # for status in self.service_unavailable_list():
-            #     if status in self.get_html_text():
-
-            return 0
+                        break
+            else:
+                break
+            self.time_sleep(3)
+            self.refresh_page()
 
     def get_service_status(self):
         cur_tab_title = self.get_title()

@@ -37,9 +37,9 @@ class TestPubilcPage:
         self.wifi_ip = case_pack.device_data["wifi_device_info"]["ip"]
         self.android_mdm_page.del_all_content_file()
         self.device_sn = self.android_mdm_page.get_device_sn()
-        self.app_page.delete_app_install_and_uninstall_logs()
-        self.android_mdm_page.del_all_downloaded_apk()
-        self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
+        # self.app_page.delete_app_install_and_uninstall_logs()
+        # self.android_mdm_page.del_all_downloaded_apk()
+        # self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
         # self.android_mdm_page.reboot_device(self.wifi_ip)
 
     def teardown_class(self):
@@ -280,12 +280,12 @@ class TestPubilcPage:
                             break
                     # wait upgrade 3 min at most
                     if self.app_page.get_current_time() > self.app_page.return_end_time(report_now_time, 120):
-
-                        if self.app_page.recovery_after_service_unavailable("apps/logs", user_info) == 0:
+                        if self.app_page.service_is_normal():
                             assert False, "@@@@5分钟还没有终端或者平台还没显示安装完相应的app， 请检查！！！"
                         else:
-                            report_now_time = self.app_page.get_current_time()
-                            print("===================服务器崩==================================")
+                            if self.app_page.recovery_after_service_unavailable("apps/logs", user_info) == 0:
+                                report_now_time = self.app_page.get_current_time()
+                                print("===================服务器崩==================================")
 
                     # self.app_page.time_sleep(1)
                     self.app_page.refresh_page()
@@ -327,6 +327,11 @@ class TestPubilcPage:
             except Exception as e:
                 if self.app_page.service_is_normal():
                     assert False, e
+                else:
+                    self.app_page.recovery_after_service_unavailable("apps/logs", user_info)
+                    self.app_page.delete_app_install_and_uninstall_logs()
+                    self.android_mdm_page.uninstall_multi_apps(test_yml["app_info"])
+                    self.app_page.go_to_new_address("apps")
 
     @allure.feature('MDM_public')
     @allure.title("public case-推送text.zip文件")
@@ -1296,19 +1301,33 @@ class TestPubilcPage:
     @allure.feature('MDM_public-debug')
     @allure.title("Devices- -- test in the last")
     def test_debug_service(self):
-        self.app_page.go_to_new_address("apps/logs")
-        report_now_time = self.app_page.get_current_time()
         while True:
-            print("1111111111111111111111")
-            self.app_page.refresh_page()
+            try:
+                self.app_page.go_to_new_address("apps/logs")
+                print(self.app_page.get_service_status())
+                print(self.app_page.extract_integers(self.app_page.get_service_status()))
+                report_now_time = self.app_page.get_current_time()
+                while True:
+                    print("1111111111111111111111")
+                    self.app_page.refresh_page()
 
-            if self.app_page.get_current_time() > self.app_page.return_end_time(report_now_time, 120):
+                    if self.app_page.get_current_time() > self.app_page.return_end_time(report_now_time, 30):
 
-                if self.app_page.recovery_after_service_unavailable("apps/logs", user_info) == 0:
-                    assert False, "@@@@5分钟还没有终端或者平台还没显示安装完相应的app， 请检查！！！"
+                        if self.app_page.service_is_normal():
+                            assert False, "@@@@5分钟还没有终端或者平台还没显示安装完相应的app， 请检查！！！"
+                        else:
+                            print("===================服务器崩了==================================")
+                            self.app_page.recovery_after_service_unavailable("apps/logs", user_info)
+                            print("===================服务器恢复了==================================")
+                            report_now_time = self.app_page.get_current_time()
+
+            except Exception as e:
+                if self.app_page.service_is_normal():
+                    assert False, e
                 else:
-                    report_now_time = self.app_page.get_current_time()
-                    print("===================服务器崩==================================")
+                    self.app_page.recovery_after_service_unavailable("apps/logs", user_info)
+                    # self.app_page.go_to_new_address("apps")
+                    print("**************************崩了恢复重新开始用例**********************************")
 
     @allure.feature('MDM_public1111_test_test111')
     @allure.title("public case- 长时间检测设备在线情况")
