@@ -47,22 +47,26 @@ class MDMPage(BasePage):
         # self.
 
     def login_ok(self, name, password):
-        self.input_user_name(name)
-        self.input_pwd_value(password)
-        self.choose_agree_btn()
-        self.click_login_btn()
+        # self.input_user_name(name)
+        # self.input_pwd_value(password)
+        # self.choose_agree_btn()
+        # self.click_login_btn()
         now_time = self.get_current_time()
         while True:
+            self.input_user_name(name)
+            self.input_pwd_value(password)
+            self.choose_agree_btn()
+            self.click_login_btn()
             try:
                 if self.web_driver_wait_until(public_pack.EC.url_contains("device"), 10):
                     break
             except Exception:
-                if "device" in self.get_current_url():
+                if "device" in self.get_current_window_url():
                     break
-            if self.get_current_time() > self.return_end_time(now_time):
+            if self.get_current_time() > self.return_end_time(now_time, 300):
                 assert False, "无法登录，请检查！！！"
             self.refresh_page()
-            self.login_ok(name, password)
+
 
 # if __name__ == '__main__':
 #     from selenium import webdriver

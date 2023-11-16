@@ -38,7 +38,7 @@ class TestPubilcPage:
         self.android_mdm_page.del_all_content_file()
         self.device_sn = self.android_mdm_page.get_device_sn()
         # self.app_page.delete_app_install_and_uninstall_logs()
-        # self.android_mdm_page.del_all_downloaded_apk()
+        self.android_mdm_page.del_all_downloaded_apk()
         # self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
         # self.android_mdm_page.reboot_device(self.wifi_ip)
 
@@ -202,6 +202,7 @@ class TestPubilcPage:
             try:
                 print("*******************应用满屏推送用例开始***************************")
                 log.info("*******************应用满屏推送用例开始***************************")
+                self.android_mdm_page.screen_keep_on()
                 file_path = self.app_page.get_apk_path(release_info["package_name"])
                 package = self.app_page.get_apk_package_name(file_path)
                 release_info["package"] = package
@@ -209,8 +210,8 @@ class TestPubilcPage:
                 version = self.app_page.get_apk_package_version(file_path)
                 release_info["version"] = version
 
-                self.android_mdm_page.uninstall_app(release_info["package"])
-                self.android_mdm_page.reboot_device(self.wifi_ip)
+                # self.android_mdm_page.uninstall_app(release_info["package"])
+                # self.android_mdm_page.reboot_device(self.wifi_ip)
                 # check if device is online
                 self.app_page.go_to_new_address("devices")
                 opt_case.check_single_device(release_info["sn"])
@@ -276,18 +277,19 @@ class TestPubilcPage:
                     if len(upgrade_list) != 0:
                         action = upgrade_list[0]["Action"]
                         print("action", action)
-                        if self.app_page.get_action_status(action) == 10:
+                        if self.app_page.get_action_status(action) == 4:
                             break
                     # wait upgrade 3 min at most
                     if self.app_page.get_current_time() > self.app_page.return_end_time(report_now_time, 120):
                         if self.app_page.service_is_normal():
                             assert False, "@@@@5分钟还没有终端或者平台还没显示安装完相应的app， 请检查！！！"
                         else:
-                            if self.app_page.recovery_after_service_unavailable("apps/logs", user_info) == 0:
-                                report_now_time = self.app_page.get_current_time()
-                                print("===================服务器崩==================================")
+                            print("===================服务崩溃了==================================")
+                            self.app_page.recovery_after_service_unavailable("apps/logs", user_info)
+                            print("===================服务器恢复了==================================")
+                            report_now_time = self.app_page.get_current_time()
 
-                    # self.app_page.time_sleep(1)
+                    self.app_page.time_sleep(10)
                     self.app_page.refresh_page()
                 self.app_page.time_sleep(5)
 
@@ -309,7 +311,7 @@ class TestPubilcPage:
 
                 print("*******************静默安装完成***************************")
                 log.info("*******************静默安装完成***************************")
-
+                # break
                 # self.android_mdm_page.confirm_app_is_running(release_info["package"])
                 # base_directory = "APP_Full_Screen"
                 # image_before_reboot = "%s\\app_full_screen_before_reboot.jpg" % base_directory
@@ -330,7 +332,9 @@ class TestPubilcPage:
                 else:
                     self.app_page.recovery_after_service_unavailable("apps/logs", user_info)
                     self.app_page.delete_app_install_and_uninstall_logs()
+                    self.android_mdm_page.del_all_downloaded_apk()
                     self.android_mdm_page.uninstall_multi_apps(test_yml["app_info"])
+                    self.android_mdm_page.return_end_time(self.wifi_ip)
                     self.app_page.go_to_new_address("apps")
 
     @allure.feature('MDM_public')
@@ -1306,12 +1310,14 @@ class TestPubilcPage:
                 self.app_page.go_to_new_address("apps/logs")
                 print(self.app_page.get_service_status())
                 print(self.app_page.extract_integers(self.app_page.get_service_status()))
+                pass_flag = 1
                 report_now_time = self.app_page.get_current_time()
                 while True:
                     print("1111111111111111111111")
+                    self.app_page.time_sleep(2)
                     self.app_page.refresh_page()
-
-                    if self.app_page.get_current_time() > self.app_page.return_end_time(report_now_time, 30):
+                    pass_flag += 1
+                    if self.app_page.get_current_time() > self.app_page.return_end_time(report_now_time, 120):
 
                         if self.app_page.service_is_normal():
                             assert False, "@@@@5分钟还没有终端或者平台还没显示安装完相应的app， 请检查！！！"
@@ -1320,14 +1326,17 @@ class TestPubilcPage:
                             self.app_page.recovery_after_service_unavailable("apps/logs", user_info)
                             print("===================服务器恢复了==================================")
                             report_now_time = self.app_page.get_current_time()
-
             except Exception as e:
                 if self.app_page.service_is_normal():
                     assert False, e
                 else:
                     self.app_page.recovery_after_service_unavailable("apps/logs", user_info)
+                    flag = 1
                     # self.app_page.go_to_new_address("apps")
                     print("**************************崩了恢复重新开始用例**********************************")
+            if flag == 1:
+                print("##########################################")
+                break
 
     @allure.feature('MDM_public1111_test_test111')
     @allure.title("public case- 长时间检测设备在线情况")

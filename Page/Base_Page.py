@@ -38,7 +38,7 @@ class BasePage(interface):
                 self.time_sleep(1)
         self.page_load_complete()
 
-    def get_current_url(self):
+    def get_current_window_url(self):
         return self.driver.current_url
 
     def quit_browser(self):
