@@ -116,105 +116,94 @@ class TestStability:
 
         self.app_page.refresh_page()
 
-    @allure.feature('MDM_stability—login11111')
-    @allure.title("stability case- 登录--辅助测试用例")
-    def test_stability_login(self):
-        username = st.yaml_data['website_info']['test_user']
-        password = st.yaml_data['website_info']['test_password']
-
-        self.mdm_page.login_ok(username, password)
-        now_time = self.app_page.get_current_time()
-        while True:
-            try:
-                if self.mdm_page.web_driver_wait_until(st.EC.url_contains("device"), 10):
-                    break
-            except Exception:
-                pass
-            if self.mdm_page.get_current_time() > self.mdm_page.return_end_time(now_time):
-                assert False, "无法登录，请检查！！！"
-            self.mdm_page.refresh_page()
-            self.mdm_page.login_ok(username, password)
-
     @allure.feature('MDM_stability')
     @allure.title("stability case- 多设备添加--辅助测试用例")
     # @pytest.mark.flaky(reruns=3, reruns_delay=3)
     def test_add_multi_devices(self):
-        self.device_page.go_to_new_address("devices")
-        try:
-            # check if device is existed before test, if not, skip
-            platform_sn = [self.device_page.remove_space(device["SN"]) for device in
-                           self.device_page.get_dev_info_list()]
-            print(platform_sn)
-            for sn in self.devices_sn:
-                devices_list = {"SN": sn, "name": "aut" + sn}
-                if sn not in platform_sn:
-                    # check if device model is existed, if not, add model
-                    info_len_pre = self.device_page.get_dev_info_length()
-                    print(info_len_pre)
-                    self.device_page.click_new_btn()
-                    self.device_page.add_devices_info(devices_list, cate_model=False)
-                    self.device_page.get_add_dev_warning_alert()
-                    # refresh current Page and clear warning war
-                    self.device_page.refresh_page()
-                    info_len_pos = self.device_page.get_dev_info_length()
-                    print(info_len_pos)
-                    assert info_len_pre == info_len_pos - 1
-                    # print all devices info
-                    print(self.device_page.get_dev_info_list())
-        except Exception as e:
-            print("发生的异常是", e)
-            platform_sn = [self.device_page.remove_space(device["SN"]) for device in
-                           self.device_page.get_dev_info_list()]
-            print(platform_sn)
-            for sn in self.devices_sn:
-                devices_list = {"SN": sn, "name": "aut" + sn}
-                if sn not in platform_sn:
-                    # check if device model is existed, if not, add model
-                    info_len_pre = self.device_page.get_dev_info_length()
-                    print(info_len_pre)
-                    self.device_page.click_new_btn()
-                    self.device_page.add_devices_info(devices_list, cate_model=False)
-                    # text = self.Page.get_alert_text()
-                    # print(text)
-                    self.device_page.get_add_dev_warning_alert()
-                    # refresh current Page and clear warning war
-                    self.device_page.refresh_page()
-                    info_len_pos = self.device_page.get_dev_info_length()
-                    print(info_len_pos)
-                    assert info_len_pre == info_len_pos - 1
-                    # print all devices info
-                    print(self.device_page.get_dev_info_list())
+        while True:
+            try:
+                self.device_page.go_to_new_address("devices")
+                try:
+                    # check if device is existed before test, if not, skip
+                    platform_sn = [self.device_page.remove_space(device["SN"]) for device in
+                                   self.device_page.get_dev_info_list()]
+                    print(platform_sn)
+                    for sn in self.devices_sn:
+                        devices_list = {"SN": sn, "name": "aut" + sn}
+                        if sn not in platform_sn:
+                            # check if device model is existed, if not, add model
+                            info_len_pre = self.device_page.get_dev_info_length()
+                            print(info_len_pre)
+                            self.device_page.click_new_btn()
+                            self.device_page.add_devices_info(devices_list, cate_model=False)
+                            self.device_page.get_add_dev_warning_alert()
+                            # refresh current Page and clear warning war
+                            self.device_page.refresh_page()
+                            info_len_pos = self.device_page.get_dev_info_length()
+                            print(info_len_pos)
+                            assert info_len_pre == info_len_pos - 1
+                            # print all devices info
+                            print(self.device_page.get_dev_info_list())
+                except Exception as e:
+                    print("发生的异常是", e)
+                    platform_sn = [self.device_page.remove_space(device["SN"]) for device in
+                                   self.device_page.get_dev_info_list()]
+                    print(platform_sn)
+                    for sn in self.devices_sn:
+                        devices_list = {"SN": sn, "name": "aut" + sn}
+                        if sn not in platform_sn:
+                            # check if device model is existed, if not, add model
+                            info_len_pre = self.device_page.get_dev_info_length()
+                            print(info_len_pre)
+                            self.device_page.click_new_btn()
+                            self.device_page.add_devices_info(devices_list, cate_model=False)
+                            # text = self.Page.get_alert_text()
+                            # print(text)
+                            self.device_page.get_add_dev_warning_alert()
+                            # refresh current Page and clear warning war
+                            self.device_page.refresh_page()
+                            info_len_pos = self.device_page.get_dev_info_length()
+                            print(info_len_pos)
+                            assert info_len_pre == info_len_pos - 1
+                            # print all devices info
+                            print(self.device_page.get_dev_info_list())
 
-        # install aimdm apk
-        # for android in devices_data
-        mdm_app_threads = []
-        mdm_app_installed_threads = []
-        mdm_reboot_threads = []
-        mdm_app_path = conf.project_path + "\\Param\\Work_APP\\%s" % test_yml["work_app"]["aidmd_apk"]
-        for t_device in devices_data:
-            # install mdm app
-            func = st.AndroidAimdmPageWiFi(t_device, 5)
+                # install aimdm apk
+                # for android in devices_data
+                mdm_app_threads = []
+                mdm_app_installed_threads = []
+                mdm_reboot_threads = []
+                mdm_app_path = conf.project_path + "\\Param\\Work_APP\\%s" % test_yml["work_app"]["aidmd_apk"]
+                for t_device in devices_data:
+                    # install mdm app
+                    func = st.AndroidAimdmPageWiFi(t_device, 5)
 
-            app_t = st.threading.Thread(target=func.confirm_app_installed, args=(mdm_app_path,))
-            app_t.start()
-            mdm_app_threads.append(app_t)
+                    app_t = st.threading.Thread(target=func.confirm_app_installed, args=(mdm_app_path,))
+                    app_t.start()
+                    mdm_app_threads.append(app_t)
 
-            app_t = st.threading.Thread(target=func.confirm_app_installed, args=(mdm_app_path,))
-            app_t.start()
-            mdm_app_installed_threads.append(app_t)
+                    app_t = st.threading.Thread(target=func.confirm_app_installed, args=(mdm_app_path,))
+                    app_t.start()
+                    mdm_app_installed_threads.append(app_t)
 
-            reboot_t = st.threading.Thread(target=func.reboot_device, args=(t_device["ip"],))
-            reboot_t.start()
-            mdm_app_threads.append(reboot_t)
+                    reboot_t = st.threading.Thread(target=func.reboot_device, args=(t_device["ip"],))
+                    reboot_t.start()
+                    mdm_app_threads.append(reboot_t)
 
-        for app_thread in mdm_app_threads:
-            app_thread.join()
-        for inst_thread in mdm_app_installed_threads:
-            inst_thread.join()
-        for r_thread in mdm_reboot_threads:
-            r_thread.join()
-        self.device_page.time_sleep(3)
-        self.device_page.refresh_page()
+                for app_thread in mdm_app_threads:
+                    app_thread.join()
+                for inst_thread in mdm_app_installed_threads:
+                    inst_thread.join()
+                for r_thread in mdm_reboot_threads:
+                    r_thread.join()
+                self.device_page.time_sleep(3)
+                self.device_page.refresh_page()
+                break
+            except Exception as e:
+                if self.device_page.service_is_normal():
+                    assert False, e
+                else:
+                    self.device_page.go_to_new_address("devices")
 
     @allure.feature('MDM_stability_test')
     @allure.title("stability case- 重启在线成功率--请在报告右侧log文件查看在线率")

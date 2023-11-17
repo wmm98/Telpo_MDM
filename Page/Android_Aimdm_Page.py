@@ -59,12 +59,24 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
                     assert False, "@@@@无法打开aimdm的app info 页面， 请检查！！！！"
         print(self.get_element_text_USB(self.get_element_by_id_USB(self.settings_title)))
         pre_mobile_wifi_data_btn = self.get_element_by_id_USB(self.container).child(className=self.layout)[5]
+        # go to mobile data used detail page
         pre_mobile_wifi_data_btn.click()
         self.confirm_ele_is_existed_USB(pre_mobile_wifi_data_btn, self.spinner)
         self.time_sleep(6)
+        # get total used detail and return
+        return self.get_total_data_text()
+
+    def get_total_data_text(self):
+        # get total used detail
         mobile_data_used = self.get_element_text_USB(self.get_element_by_id_USB(self.total_data_summary))
-        # print(mobile_data_used)
         return mobile_data_used
+
+    def get_mobile_data_size(self):
+        data_used_info = self.remove_space_and_upper(self.get_total_data_text())
+        if "KB" in data_used_info:
+            return "kB"
+        elif "MB" in data_used_info:
+            return "MB"
 
     def clear_recent_app_USB(self):
         self.open_recent_page_USB()

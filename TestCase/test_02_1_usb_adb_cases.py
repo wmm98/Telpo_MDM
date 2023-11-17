@@ -124,9 +124,9 @@ class TestNetworkCases:
                 first_data_float = self.device_page.remove_space(self.device_page.extract_integers(first_data_used)[0])
                 last_data_float = self.device_page.remove_space(self.device_page.extract_integers(last_data_used)[0])
                 total_data_used = float(last_data_float) - float(first_data_float)
-
-                print("总共使用了流量数据： %s MB" % str(round(total_data_used, 2)))
-                log.info("总共使用了流量数据： %s MB" % str(round(total_data_used, 2)))
+                data_size = self.android_mdm_page.get_mobile_data_size()
+                print("总共使用了流量数据： %s %s" % (str(round(total_data_used, 2)), data_size))
+                log.info("总共使用了流量数据： %s %s" % (str(round(total_data_used, 2)), data_size))
                 self.android_mdm_page.clear_recent_app_USB()
                 self.android_mdm_page.open_wifi_btn()
                 self.android_mdm_page.confirm_wifi_status_open()
@@ -144,8 +144,7 @@ class TestNetworkCases:
     @allure.title("Apps-限定4G网络推送app")
     # @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_release_app_limit_4G(self, connect_wifi_adb_USB, del_all_app_release_log,
-                                  del_all_app_uninstall_release_log,
-                                  uninstall_multi_apps, go_to_app_page):
+                                  del_all_app_uninstall_release_log, uninstall_multi_apps, go_to_app_page):
         release_info = {"package_name": test_yml['app_info']['other_app_limit_network_A'], "sn": self.device_sn,
                         "silent": "Yes", "download_network": "Sim Card"}
         # release_info = {"package_name": test_yml['app_info']['other_app_limit_network_A'], "sn": self.device_sn,
@@ -175,7 +174,7 @@ class TestNetworkCases:
                 log.info("获取到 app的size: %s" % app_size)
                 send_time = case_pack.time.strftime('%Y-%m-%d %H:%M',
                                                     case_pack.time.localtime(self.page.get_current_time()))
-                self.page.time_sleep(8)
+                self.page.time_sleep(10)
                 # go to app page
                 self.page.go_to_new_address("apps")
 
@@ -268,6 +267,7 @@ class TestNetworkCases:
                 # check download record in device
                 now_time = self.page.get_current_time()
                 shell_app_apk_name = release_info["package"] + "_%s.apk" % release_info["version"]
+                print(shell_app_apk_name)
                 while True:
                     # check if app in download list
                     if self.android_mdm_page.download_file_is_existed_USB(shell_app_apk_name):
@@ -576,10 +576,11 @@ class TestNetworkCases:
                     if self.page.get_current_time() > self.page.return_end_time(report_now_time, 300):
                         if self.page.service_is_normal():
                             assert False, "@@@@5分钟还没有终端或者平台还没显示安装完相应的app， 请检查！！！"
-                        print("===================服务崩溃了==================================")
-                        self.page.recovery_after_service_unavailable("apps/logs", case_pack.user_info)
-                        print("===================服务器恢复了==================================")
-                        report_now_time = self.page.get_current_time()
+                        else:
+                            print("===================服务崩溃了==================================")
+                            self.page.recovery_after_service_unavailable("apps/logs", case_pack.user_info)
+                            print("===================服务器恢复了==================================")
+                            report_now_time = self.page.get_current_time()
                     self.page.time_sleep(5)
                     self.ota_page.refresh_page()
 
@@ -599,7 +600,7 @@ class TestNetworkCases:
                     self.android_mdm_page.uninstall_multi_apps(test_yml["app_info"])
                     self.page.go_to_new_address("apps")
 
-    @allure.feature('MDM_usb-test1')
+    @allure.feature('MDM_usb-test')
     @allure.title("OTA-OTA断网重连5次断点续传")
     def test_upgrade_OTA_package_reconnect_network_5times(self, connect_wifi_adb_USB, del_all_ota_release_log,
                                                           go_to_ota_page,
@@ -817,7 +818,7 @@ class TestNetworkCases:
                     self.android_mdm_page.confirm_wifi_adb_connected(self.wifi_ip)
                     self.ota_page.recovery_after_service_unavailable("ota", case_pack.user_info)
                     self.ota_page.delete_all_ota_release_log()
-                    self.android_mdm_page.del_all_downloaded_apk()
+                    self.android_mdm_page.del_all_downloaded_zip()
                     self.android_mdm_page.del_updated_zip()
                     self.ota_page.go_to_new_address("ota")
 
@@ -1477,11 +1478,6 @@ class TestNetworkCases:
                     self.page.time_sleep(5)
                     self.page.refresh_page()
 
-                """
-                Upgrade action (1: downloading, 2: downloading complete, 3: upgrading,
-                 4: upgrading complete, 5: downloading failed, 6: upgrading failed)
-                 0: Uninstall completed
-                """
                 # check the app action in app upgrade logs, if download complete or upgrade complete, break
                 download_time = self.page.get_current_time()
                 while True:

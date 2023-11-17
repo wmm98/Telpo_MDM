@@ -38,7 +38,7 @@ MDMTestData:
     high_version_app: Bus_Recharge_System_1.0.1_20220615.apk
     other_app: ComAssistant.apk
     #    A： sim card 测试， B： wifi 测试
-    other_app_limit_network_A: diancilu.apk
+    other_app_limit_network_A: wifi_analyze.apk
     other_app_limit_network_B: perfmon.apk
 
   #  系统app一般不需要修改

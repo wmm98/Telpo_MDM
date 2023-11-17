@@ -31,6 +31,13 @@ def uninstall_system_app():
 
 
 @pytest.fixture()
+def del_all_content_file():
+    android_page.del_all_content_file()
+    yield
+    android_page.del_all_content_file()
+
+
+@pytest.fixture()
 def push_test_api_to_device():
     yield
     api_path = TestCase.Config().project_path + "\\Param\\Work_APP\\%s" % TestCase.yaml_data["work_app"]["api_txt"]

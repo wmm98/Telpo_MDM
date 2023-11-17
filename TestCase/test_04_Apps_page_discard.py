@@ -95,7 +95,7 @@ class TestAppPage:
     @allure.title("Apps-推送低版本的APP")
     @pytest.mark.dependency(name="test_release_app_ok", scope='package')
     # @pytest.mark.flaky(reruns=1, reruns_delay=3)
-    def test_release_low_version_app1(self, del_all_app_release_log, del_all_app_uninstall_release_log, go_to_app_page):
+    def test_release_low_version_app_cover_in_usb_case(self, del_all_app_release_log, del_all_app_uninstall_release_log, go_to_app_page):
         release_info = {"package_name": test_yml['app_info']['low_version_app'], "sn": self.device_sn,
                         "silent": "Yes", "download_network": "NO Limit"}
         # apk_info = {"package_name": "ComAssistant.apk", "sn": "A250900P03100019",
@@ -324,7 +324,7 @@ class TestAppPage:
     @allure.title("Apps-推送高版本APP覆盖安装/卸载后检测重新下载/卸载重启检查安装")
     @pytest.mark.dependency(depends=["test_release_app_ok"], scope='package')
     # @pytest.mark.flaky(reruns=1, reruns_delay=3)
-    def test_high_version_app_cover_low_version_app(self, del_all_app_release_log, del_all_app_uninstall_release_log,
+    def test_high_version_app_cover_low_version_app_cover_in_usb_case(self, del_all_app_release_log, del_all_app_uninstall_release_log,
                                                     go_to_app_page):
         release_info = {"package_name": test_yml['app_info']['high_version_app'], "sn": self.device_sn,
                         "silent": "Yes", "download_network": "NO Limit"}
@@ -485,60 +485,80 @@ class TestAppPage:
 
     @allure.feature('MDM_APP-test')
     @allure.title("Apps- 卸载正在运行的APP")
-    # @pytest.mark.dependency(depends=["test_release_app_ok"], scope='package')
     @pytest.mark.flaky(reruns=1, reruns_delay=3)
-    def test_uninstall_app(self, del_all_app_release_log, del_all_app_uninstall_release_log):
+    def test_uninstall_app_discard(self, del_all_app_release_log, del_all_app_uninstall_release_log, uninstall_multi_apps, go_to_app_page):
         release_info = {"package_name": test_yml['app_info']['high_version_app'], "sn": self.device_sn,
                         "silent": "Yes"}
-        file_path = conf.project_path + "\\Param\\Package\\%s" % release_info["package_name"]
-        package = self.page.get_apk_package_name(file_path)
-        release_info["package"] = package
-
-        # check if device is online
-        self.page.go_to_new_address("devices")
-        opt_case.check_single_device(release_info["sn"])
-        # go to app release page
-        self.page.go_to_new_address("apps")
-        self.page.search_app_by_name(release_info["package_name"])
-
-        app_list = self.page.get_apps_text_list()
-        if len(app_list) == 0:
-            assert False, "@@@@没有 %s, 请检查！！！" % release_info["package_name"]
-
-        # start app and then uninstall it， added recently
-        self.android_mdm_page.start_app(release_info["package"])
-        # self.android_mdm_page
-        self.page.click_uninstall_app_btn()
-        self.page.input_uninstall_app_info(release_info)
-        self.page.time_sleep(3)
-        send_time = case_pack.time.strftime('%Y-%m-%d %H:%M', case_pack.time.localtime(self.page.get_current_time()))
-        # go to app uninstall log
-        self.page.go_to_new_address("apps/appUninstall")
-        now_time = self.page.get_current_time()
         while True:
-            release_len = len(self.page.get_app_latest_release_log_list(send_time, release_info, uninstall=True))
-            if release_len == 1:
-                break
-            elif release_len > 1:
-                assert False, "@@@@释放一次uninstall app，有多条释放记录，请检查！！！"
-            else:
-                self.page.refresh_page()
-            if self.page.get_current_time() > self.page.return_end_time(now_time):
-                assert False, "@@@@没有相应的 app uninstall release log， 请检查！！！"
+            try:
+                file_path = conf.project_path + "\\Param\\Package\\%s" % release_info["package_name"]
+                package = self.page.get_apk_package_name(file_path)
+                release_info["package"] = package
+                # install app for uninstall
+                self.android_mdm_page.confirm_app_installed(file_path)
 
-        self.page.go_to_new_address("apps/uninstalllogs")
-        now_time = self.page.get_current_time()
-        while True:
-            action = self.page.get_app_latest_uninstall_log(send_time, release_info)[0]["Action"]
-            print("action", action)
-            if self.page.get_action_status(action) == 0:
-                break
-            else:
-                self.page.refresh_page()
-            # wait upgrade 3 mins at most
-            if self.page.get_current_time() > self.page.return_end_time(now_time, 180):
-                assert False, "@@@@3分钟还没有卸载完相应的app， 请检查！！！"
-            self.page.time_sleep(3)
+                # check if device is online
+                self.page.go_to_new_address("devices")
+                opt_case.check_single_device(release_info["sn"])
+                # go to app release page
+                self.page.go_to_new_address("apps")
+                self.page.search_app_by_name(release_info["package_name"])
+
+                app_list = self.page.get_apps_text_list()
+                if len(app_list) == 0:
+                    assert False, "@@@@没有 %s, 请检查！！！" % release_info["package_name"]
+
+                # start app and then uninstall it， added recently
+                self.android_mdm_page.start_app(release_info["package"])
+                # self.android_mdm_page
+                self.page.click_uninstall_app_btn()
+                self.page.input_uninstall_app_info(release_info)
+                self.page.time_sleep(10)
+                send_time = case_pack.time.strftime('%Y-%m-%d %H:%M', case_pack.time.localtime(self.page.get_current_time()))
+                # go to app uninstall log
+                self.page.go_to_new_address("apps/appUninstall")
+                now_time = self.page.get_current_time()
+                while True:
+                    release_len = len(self.page.get_app_latest_release_log_list(send_time, release_info, uninstall=True))
+                    if release_len == 1:
+                        break
+                    elif release_len > 1:
+                        assert False, "@@@@释放一次uninstall app，有多条释放记录，请检查！！！"
+                    else:
+                        self.page.refresh_page()
+                    if self.page.get_current_time() > self.page.return_end_time(now_time):
+                        assert False, "@@@@没有相应的 app uninstall release log， 请检查！！！"
+
+                print("*********************************已经检测到释放记录*****************************************")
+
+                self.page.go_to_new_address("apps/uninstalllogs")
+                uninstall_time = self.page.get_current_time()
+                while True:
+                    action = self.page.get_app_latest_uninstall_log(send_time, release_info)[0]["Action"]
+                    print("action", action)
+                    if self.page.get_action_status(action) == 0:
+                        assert self.android_mdm_page.app_is_installed(release_info["package"]), "@@@@平台显示已经卸载app：%s, 检测到设备还没卸载， 请检查！！！" % release_info["package_name"]
+                        break
+                    # wait upgrade 3 min at most
+                    if self.page.get_current_time() > self.page.return_end_time(uninstall_time, 180):
+                        if self.page.service_is_normal():
+                            assert False, "@@@@3分钟还没有卸载完相应的app， 请检查！！！"
+                        else:
+                            self.page.recovery_after_service_unavailable("apps/uninstalllogs", case_pack.user_info)
+                            uninstall_time = self.page.get_current_time()
+                    self.page.time_sleep(3)
+                    self.page.refresh_page()
+                    print("****************************************静默卸载完成**********************************")
+                    break
+            except Exception as e:
+                if self.page.service_is_normal():
+                    assert False, e
+                else:
+                    self.page.recovery_after_service_unavailable("apps/logs", case_pack.user_info)
+                    self.page.delete_app_install_and_uninstall_logs()
+                    self.android_mdm_page.del_all_downloaded_apk()
+                    self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
+                    self.page.go_to_new_address("apps")
 
     @allure.feature('MDM_APP-test')
     @allure.title("Apps- release app again")

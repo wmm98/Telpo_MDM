@@ -80,7 +80,7 @@ class TestOTAPage:
 
     @allure.feature('MDM_APP-test-test111')
     @allure.title("OTA-OTA重启5次断点续传")
-    def test_upgrade_OTA_package_reboot_5times(self, del_all_ota_release_log, go_to_ota_page, delete_ota_package_relate):
+    def test_upgrade_OTA_package_reboot_5times_discard(self, del_all_ota_release_log, go_to_ota_page, delete_ota_package_relate):
         download_tips = "Foundanewfirmware,whethertoupgrade?"
         upgrade_tips = "whethertoupgradenow?"
         release_info = {"package_name": test_yml['ota_packages_info']['package_name'], "sn": self.device_sn,
