@@ -377,7 +377,7 @@ class TestStability:
                     file_hash_value = self.android_mdm_page.calculate_sha256_in_windows(file, directory="Content")
                     print("file_hash_value:", file_hash_value)
                     send_time = st.time.strftime('%Y-%m-%d %H:%M', st.time.localtime(self.content_page.get_current_time()))
-                    self.content_page.time_sleep(4)
+                    self.content_page.time_sleep(10)
                     self.content_page.search_content('Normal Files', file)
                     release_info = {"sn": self.devices_sn, "content_name": file}
                     self.content_page.time_sleep(4)
@@ -393,7 +393,11 @@ class TestStability:
                         if release_len == len(release_info["sn"]) + release_flag:
                             break
                         if self.content_page.get_current_time() > self.content_page.return_end_time(now_time):
-                            assert False, "@@@@没有相应的文件 release log， 请检查！！！"
+                            if content_page.service_unavailable_list():
+                                assert False, "@@@@没有相应的文件 release log， 请检查！！！"
+                            else:
+                                self.content_page.recovery_after_service_unavailable("content/release", st.user_info)
+                                now_time = self.content_page.get_current_time()
                         self.content_page.time_sleep(3)
                         self.content_page.refresh_page()
 
@@ -685,7 +689,11 @@ class TestStability:
                     if self.app_page.get_current_app_release_log_total() == len(release_info["sn"]):
                         break
                     if self.app_page.get_current_time() > self.app_page.return_end_time(now_time):
-                        assert False, "@@@@超过3分钟没有相应的 app release log， 请检查！！！"
+                        if app_page.service_is_normal():
+                            assert False, "@@@@超过3分钟没有相应的 app release log， 请检查！！！"
+                        else:
+                            self.app_page.recovery_after_service_unavailable("apps/releases", st.user_info)
+                            now_time = self.content_page.get_current_time()
                     self.app_page.time_sleep(3)
 
                 # silent install app
