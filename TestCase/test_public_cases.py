@@ -49,9 +49,9 @@ class TestPubilcPage:
         self.android_mdm_page.reboot_device(self.wifi_ip)
 
     @allure.feature('MDM_public')
-    @allure.title("public case-添加 content 种类")
+    @allure.title("public case-添加 content 种类--辅助测试用例")
     @pytest.mark.flaky(reruns=1, reruns_delay=3)
-    def test_add_content_relate(self, go_to_content_page):
+    def test_add_content_category(self, go_to_content_page):
         while True:
             try:
                 if len(self.content_page.get_content_categories_list()) == 0:
@@ -64,7 +64,7 @@ class TestPubilcPage:
                     self.content_page.go_to_new_address("content")
 
     @allure.feature('MDM_public')
-    @allure.title("public case-添加 content 文件")
+    @allure.title("public case-添加 content 文件--辅助测试用例")
     @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_add_content_file(self, go_to_content_page):
         while True:
@@ -249,7 +249,7 @@ class TestPubilcPage:
                 now_time = self.ota_page.get_current_time()
                 while True:
                     # check if app in download list
-                    if self.android_mdm_page.download_file_is_existed_USB(release_info["package_name"]):
+                    if self.android_mdm_page.download_file_is_existed(release_info["package_name"]):
                         break
                     if self.ota_page.get_current_time() > self.ota_page.return_end_time(now_time, 180):
                         assert False, "@@@@推送中超过3分钟还没有升级包: %s的下载记录" % release_info["package_name"]
@@ -790,8 +790,8 @@ class TestPubilcPage:
                     self.android_mdm_page.uninstall_multi_apps(test_yml["app_info"])
                     self.app_page.go_to_new_address("apps")
 
-    @allure.feature('MDM_public-test1111')
-    @allure.title("public case-静默卸载")
+    @allure.feature('MDM_public')
+    @allure.title("public case-静默卸载正在运行中的app")
     @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_silent_uninstall_app(self, del_all_app_release_log, del_all_app_uninstall_release_log, uninstall_multi_apps,
                            go_to_app_page):
@@ -817,11 +817,12 @@ class TestPubilcPage:
                     assert False, "@@@@没有 %s, 请检查！！！" % release_info["package_name"]
 
                 # start app and then uninstall it， added recently
-                self.android_mdm_page.start_app(release_info["package"])
+                # self.android_mdm_page.start_app(release_info["package"])
+                self.android_mdm_page.confirm_app_is_running(release_info["package"])
                 # self.android_mdm_page
                 self.app_page.click_uninstall_app_btn()
                 self.app_page.input_uninstall_app_info(release_info)
-                self.app_page.time_sleep(10)
+                self.app_page.time_sleep(5)
                 send_time = case_pack.time.strftime('%Y-%m-%d %H:%M',
                                                     case_pack.time.localtime(self.app_page.get_current_time()))
                 # go to app uninstall log
@@ -847,7 +848,7 @@ class TestPubilcPage:
                     action = self.app_page.get_app_latest_uninstall_log(send_time, release_info)[0]["Action"]
                     print("action", action)
                     if self.app_page.get_action_status(action) == 0:
-                        assert self.android_mdm_page.app_is_installed(
+                        assert not self.android_mdm_page.app_is_installed(
                             release_info["package"]), "@@@@平台显示已经卸载app：%s, 检测到设备还没卸载， 请检查！！！" % release_info[
                             "package_name"]
                         break
@@ -861,7 +862,7 @@ class TestPubilcPage:
                     self.app_page.time_sleep(3)
                     self.app_page.refresh_page()
                     print("****************************************静默卸载完成**********************************")
-                    break
+                break
             except Exception as e:
                 if self.app_page.service_is_normal():
                     assert False, e
@@ -1071,7 +1072,7 @@ class TestPubilcPage:
                     self.android_mdm_page.confirm_system_app_uninstalled()
                     self.app_page.go_to_new_address("apps")
 
-    @allure.feature('MDM_public')
+    @allure.feature('MDM_public-test1111')
     @allure.title("public case- 静默ota升级")
     def test_silent_ota_upgrade(self, del_all_ota_release_log, go_to_ota_page, delete_ota_package_relate):
         while True:

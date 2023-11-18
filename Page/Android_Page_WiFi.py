@@ -115,13 +115,16 @@ class AndroidBasePageWiFi(interface):
         self.time_sleep(2)
 
     def confirm_app_is_running(self, package_name):
+        self.start_app(package_name)
+        self.time_sleep(2)
         now_time = self.get_current_time()
         while True:
             if self.remove_space(package_name) in self.remove_space(self.get_current_app()):
                 break
-        if self.get_current_time() > self.return_end_time(now_time, 60):
-            assert False, "@@@@app没在运行， 请检查！！！！"
-        self.time_sleep(2)
+            self.start_app(package_name)
+            if self.get_current_time() > self.return_end_time(now_time, 60):
+                assert False, "@@@@app没在运行， 请检查！！！！"
+            self.time_sleep(2)
 
     def reboot_device(self, wlan0_ip):
         self.send_adb_command("reboot")
@@ -253,6 +256,16 @@ class AndroidBasePageWiFi(interface):
                 for file in self.get_download_list():
                     if content in file:
                         self.rm_file("/%s/aimdm/download/%s" % (self.get_internal_storage_directory(), file))
+
+    def del_file_in_setting_path(self, release_path):
+        result = self.u2_send_command("ls /%s/%s" % (self.get_internal_storage_directory(), release_path))
+        file_list = result.split("\n")[:-1]
+        mage_list = [".txt", ".zip"]
+        if len(file_list) != 0:
+            for content in mage_list:
+                for file in file_list:
+                    if content in file:
+                        self.rm_file("/%s/%s" % (release_path, file))
 
     def del_updated_zip(self):
         if "update.zip" in self.u2_send_command("ls /sdcard"):

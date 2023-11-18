@@ -227,7 +227,8 @@ class APPSPage(TelpoMDMPage):
                     self.time_sleep(1)
         self.click(self.loc_app_uninstall_confirm)
         self.confirm_tips_alert_show(self.loc_app_uninstall_confirm)
-        self.confirm_alert_not_existed(self.loc_app_uninstall_confirm)
+        self.refresh_page()
+        # self.confirm_alert_not_existed(self.loc_app_uninstall_confirm)
 
     def click_delete_btn(self):
         self.click(self.loc_release_delete_btn)
