@@ -869,7 +869,7 @@ class TestNetworkCases:
                     self.ota_page.go_to_new_address("devices")
 
     @allure.feature('MDM_usb-test')
-    @allure.title("Apps-推送低版本的APP")
+    @allure.title("Apps-推送低版本的APP/卸载后重新安装")
     @pytest.mark.dependency(name="test_release_app_ok", scope='package')
     # @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_release_low_version_app(self, del_all_app_release_log, del_all_app_uninstall_release_log, go_to_app_page):
@@ -1123,7 +1123,7 @@ class TestNetworkCases:
                     self.page.go_to_new_address("apps")
 
     @allure.feature('MDM_usb-test')
-    @allure.title("Apps-推送高版本APP覆盖安装/卸载后检测重新下载/卸载重启检查安装")
+    @allure.title("Apps-推送高版本APP覆盖安装/卸载后检测重新下载/卸载重启检查安装/同版本覆盖安装/低版本覆盖安装")
     @pytest.mark.dependency(depends=["test_release_app_ok"], scope='package')
     # @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_high_version_app_cover_low_version_app(self, del_all_app_release_log, del_all_app_uninstall_release_log,
@@ -1155,27 +1155,6 @@ class TestNetworkCases:
                 self.page.time_sleep(8)
                 self.page.click_release_app_btn()
                 self.page.input_release_app_info(release_info)
-                # go to app release log
-                # self.page.go_to_new_address("apps/releases")
-                # self.page.check_release_log_info(send_time, release_info["sn"])
-
-                # now_time = self.page.get_current_time()
-                # print(self.page.get_app_current_release_log_list(send_time, release_info["sn"]))
-                # while True:
-                #     release_len = len(self.page.get_app_latest_release_log_list(send_time, release_info))
-                #     print("release_len", release_len)
-                #     if release_len == 1:
-                #         break
-                #     elif release_len > 1:
-                #         assert False, "@@@@释放一次app，有多条释放记录，请检查！！！"
-                #     if self.page.get_current_time() > self.page.return_end_time(now_time):
-                #         assert False, "@@@@没有相应的 app release log， 请检查！！！"
-                #     self.page.time_sleep(1)
-                #     self.page.refresh_page()
-
-                # check if the upgrade log appeared, if appeared, break
-
-                # check release record in device
 
                 now_time = self.page.get_current_time()
                 shell_app_apk_name = release_info["package"] + "_%s.apk" % release_info["version"]
@@ -1231,62 +1210,6 @@ class TestNetworkCases:
                     self.page.refresh_page()
                 self.page.time_sleep(5)
 
-                # self.page.go_to_new_address("apps/logs")
-                # now_time = self.page.get_current_time()
-                # while True:
-                #     release_len = len(self.page.get_app_latest_upgrade_log(send_time, release_info))
-                #     if release_len == 1:
-                #         break
-                #     if self.page.get_current_time() > self.page.return_end_time(now_time):
-                #         assert False, "@@@@没有相应的 app upgrade log， 请检查！！！"
-                #     self.page.time_sleep(3)
-                #     self.page.refresh_page()
-
-                # check the app action in app upgrade logs, if download complete or upgrade complete, break
-                # now_time = self.page.get_current_time()
-                # while True:
-                #     upgrade_list = self.page.get_app_latest_upgrade_log(send_time, release_info)
-                #     if len(upgrade_list) != 0:
-                #         action = upgrade_list[0]["Action"]
-                #         if self.page.get_action_status(action) == 2 or self.page.get_action_status(action) == 4 \
-                #                 or self.page.get_action_status(action) == 3:
-                #             # check the app size in device, check if app download fully
-                #             shell_app_apk_name = release_info["package"] + "_%s.apk" % release_info["version"]
-                #             if not self.android_mdm_page.download_file_is_existed(shell_app_apk_name):
-                #                 assert False, "@@@@平台显示下载完apk包， 终端查询不存在此包， 请检查！！！！"
-                #
-                #             size = self.android_mdm_page.get_file_size_in_device(shell_app_apk_name)
-                #             print("终端下载后的的size大小：", size)
-                #             if app_size != size:
-                #                 assert False, "@@@@平台显示下载完成， 终端的包下载不完整，请检查！！！"
-                #             break
-                #         # wait 20 mins
-                #     if self.page.get_current_time() > self.page.return_end_time(now_time, 1200):
-                #         assert False, "@@@@20分钟还没有下载完相应的app， 请检查！！！"
-                #     self.page.refresh_page()
-                #     self.page.time_sleep(5)
-
-                # check upgrade
-                # now_time = self.page.get_current_time()
-                # while True:
-                #     upgrade_list = self.page.get_app_latest_upgrade_log(send_time, release_info)
-                #     if len(upgrade_list) != 0:
-                #         action = upgrade_list[0]["Action"]
-                #         print("action", action)
-                #         if self.page.get_action_status(action) == 4:
-                #             if self.android_mdm_page.app_is_installed(release_info["package"]):
-                #                 version_installed = self.page.transfer_version_into_int(
-                #                     self.android_mdm_page.get_app_info(release_info["package"])['versionName'])
-                #                 if version_installed == self.page.transfer_version_into_int(release_info["version"]):
-                #                     break
-                #                 else:
-                #                     assert False, "@@@@平台显示已经完成覆盖安装了app, 终端发现没有安装高版本的app，还是原来的版本， 请检查！！！！"
-                #     # wait upgrade 3 mins at most
-                #     if self.page.get_current_time() > self.page.return_end_time(now_time, 180):
-                #         assert False, "@@@@3分钟还没有静默安装完相应的app， 请检查！！！"
-                #     self.page.time_sleep(5)
-                #     self.page.refresh_page()
-                # self.page.time_sleep(5)
                 print("*******************静默覆盖安装完成***************************")
                 log.info("*******************静默覆盖安装完成***************************")
                 # uninstall app and reboot, check if app would be reinstalled again
@@ -1297,27 +1220,6 @@ class TestNetworkCases:
                 self.android_mdm_page.confirm_app_is_uninstalled(release_info["package"])
                 self.android_mdm_page.reboot_device(self.wifi_ip)
 
-                # check upgrade
-                # while True:
-                #     upgrade_list = self.page.get_app_latest_upgrade_log(send_time_again, release_info)
-                #     if len(upgrade_list) != 0:
-                #         action = upgrade_list[0]["Action"]
-                #         print("action", action)
-                #         if self.page.get_action_status(action) == 4:
-                #             if self.android_mdm_page.app_is_installed(release_info["package"]):
-                #                 version_installed_again = self.page.transfer_version_into_int(
-                #                     self.android_mdm_page.get_app_info(release_info["package"])['versionName'])
-                #                 if version_installed_again == self.page.transfer_version_into_int(release_info["version"]):
-                #                     break
-                #                 else:
-                #                     assert False, "@@@@再一次安装后版本不一致， 请检查！！！！"
-                #     # wait upgrade 3 mins at most
-                #     if self.page.get_current_time() > self.page.return_end_time(now_time, 610):
-                #         log.error("@@@@卸载后超过10分钟还没有安装完相应的app， 请检查！！！")
-                #         assert False, "@@@@卸载后超过10分钟还没有安装完相应的app， 请检查！！！"
-                #     self.page.time_sleep(5)
-                #     self.page.refresh_page()
-                # self.page.time_sleep(5)
                 while True:
                     if self.android_mdm_page.app_is_installed(release_info["package"]):
                         version_installed = self.page.transfer_version_into_int(
@@ -1352,6 +1254,58 @@ class TestNetworkCases:
                 self.page.time_sleep(5)
                 log.info("*******************卸载并重启后重新安装成功***************************")
                 print("*******************卸载并重启后重新安装成功***************************")
+                log.info("*******************同版本覆盖安装开始***************************")
+                print("*******************同版本覆盖安装开始***************************")
+                # keep test environment clean
+                self.page.delete_app_install_and_uninstall_logs()
+                self.android_mdm_page.del_all_downloaded_apk()
+                self.android_mdm_page.reboot_device(self.wifi_ip)
+                print("**************推送同版本app************************")
+                log.info("**************推送同版本app************************")
+                self.page.go_to_new_address("apps")
+                self.page.search_app_by_name(release_info["package_name"])
+                self.page.click_release_app_btn()
+                self.page.input_release_app_info(release_info)
+
+                now_time = self.page.get_current_time()
+                shell_app_apk_name = release_info["package"] + "_%s.apk" % release_info["version"]
+                while True:
+                    # check if app in download list
+                    if self.android_mdm_page.download_file_is_existed(shell_app_apk_name):
+                        assert False, "@@@@有检测到同版本app: %s的下载记录, 请检查！！！！" % release_info["package_name"]
+                    if self.page.get_current_time() > self.page.return_end_time(now_time, 180):
+                        break
+                    self.page.time_sleep(3)
+                print("**********************没有检测到同版本app的下载记录***************************")
+                log.info("*******************没有检测到同版本app的下载记录***************************")
+                log.info("*******************同版本覆盖安装成功***************************")
+                print("*******************同版本覆盖安装成功***************************")
+                log.info("*******************低版本覆盖安装开始***************************")
+                print("*******************低版本覆盖安装开始***************************")
+                # keep test environment clean
+                self.page.delete_app_install_and_uninstall_logs()
+                self.android_mdm_page.del_all_downloaded_apk()
+                self.android_mdm_page.reboot_device(self.wifi_ip)
+                print("**************推送同版本app************************")
+                log.info("**************推送同版本app************************")
+                self.page.go_to_new_address("apps")
+                self.page.search_app_by_name(test_yml['app_info']['low_version_app'])
+                self.page.click_release_app_btn()
+                self.page.input_release_app_info(release_info)
+
+                now_time = self.page.get_current_time()
+                shell_app_apk_name = release_info["package"] + "_%s.apk" % test_yml['app_info']['low_version_app']
+                while True:
+                    # check if app in download list
+                    if self.android_mdm_page.download_file_is_existed(shell_app_apk_name):
+                        assert False, "@@@@有检测到同版本app: %s的下载记录, 请检查！！！！" % release_info["package_name"]
+                    if self.page.get_current_time() > self.page.return_end_time(now_time, 180):
+                        break
+                    self.page.time_sleep(3)
+                print("**********************没有检测到低版本app的下载记录***************************")
+                log.info("*******************没有检测到低版本app的下载记录***************************")
+                log.info("*******************低版本覆盖安装成功***************************")
+                print("*******************低版本覆盖安装成功***************************")
                 break
             except Exception as e:
                 if self.page.service_is_normal():

@@ -81,7 +81,7 @@ MDMTestData:
     stability_test_file:
 #      - test_txt_file.txt
       - test_stability_file_1.txt
-      - test_stability_file_2.txt
+#      - test_stability_file_2.txt
 #      - test_stability_file_3.txt
 
   # 设备信息，需要修改

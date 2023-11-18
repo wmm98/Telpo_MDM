@@ -78,43 +78,43 @@ class TestStability:
             pre_reboot_thread[i].join()
 
     def teardown_class(self):
-        # pass
-        self.app_page.delete_app_install_and_uninstall_logs()
-        self.ota_page.delete_all_ota_release_log()
-        pos_del_apk_thread = []
-        uninstall_apps_thread = []
-        pos_del_content_thread = []
-        pos_reboot_thread = []
-        for device_data in devices_data:
-            self.android_mdm_page = st.AndroidAimdmPageWiFi(device_data, 5)
-            pos_d_apk_t = st.threading.Thread(target=self.android_mdm_page.del_all_downloaded_apk(), args=())
-            pos_d_apk_t.start()
-            pos_del_apk_thread.append(pos_d_apk_t)
-
-            pos_uninstall_t = st.threading.Thread(target=self.android_mdm_page.uninstall_multi_apps,
-                                                  args=(test_yml['app_info'],))
-            pos_uninstall_t.start()
-            uninstall_apps_thread.append(pos_uninstall_t)
-
-            pos_del_content_t = st.threading.Thread(target=self.android_mdm_page.del_all_content_file, args=())
-            pos_del_content_t.start()
-            pos_del_content_thread.append(pos_del_content_t)
-
-            self.android_mdm_page.del_all_downloaded_apk()
-            self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
-            self.android_mdm_page.del_all_content_file()
-            self.android_mdm_page.reboot_device(device_data["ip"])
-            r_t = st.threading.Thread(target=self.android_mdm_page.reboot_device, args=(device_data["ip"],))
-            r_t.start()
-            pos_reboot_thread.append(r_t)
-
-        for j in range(len(pos_del_apk_thread)):
-            pos_del_apk_thread[j].join()
-            uninstall_apps_thread[j].join()
-            pos_del_content_thread[j].join()
-            pos_reboot_thread[j].join()
-
-        self.app_page.refresh_page()
+        pass
+        # self.app_page.delete_app_install_and_uninstall_logs()
+        # self.ota_page.delete_all_ota_release_log()
+        # pos_del_apk_thread = []
+        # uninstall_apps_thread = []
+        # pos_del_content_thread = []
+        # pos_reboot_thread = []
+        # for device_data in devices_data:
+        #     self.android_mdm_page = st.AndroidAimdmPageWiFi(device_data, 5)
+        #     pos_d_apk_t = st.threading.Thread(target=self.android_mdm_page.del_all_downloaded_apk(), args=())
+        #     pos_d_apk_t.start()
+        #     pos_del_apk_thread.append(pos_d_apk_t)
+        #
+        #     pos_uninstall_t = st.threading.Thread(target=self.android_mdm_page.uninstall_multi_apps,
+        #                                           args=(test_yml['app_info'],))
+        #     pos_uninstall_t.start()
+        #     uninstall_apps_thread.append(pos_uninstall_t)
+        #
+        #     pos_del_content_t = st.threading.Thread(target=self.android_mdm_page.del_all_content_file, args=())
+        #     pos_del_content_t.start()
+        #     pos_del_content_thread.append(pos_del_content_t)
+        #
+        #     self.android_mdm_page.del_all_downloaded_apk()
+        #     self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
+        #     self.android_mdm_page.del_all_content_file()
+        #     self.android_mdm_page.reboot_device(device_data["ip"])
+        #     r_t = st.threading.Thread(target=self.android_mdm_page.reboot_device, args=(device_data["ip"],))
+        #     r_t.start()
+        #     pos_reboot_thread.append(r_t)
+        #
+        # for j in range(len(pos_del_apk_thread)):
+        #     pos_del_apk_thread[j].join()
+        #     uninstall_apps_thread[j].join()
+        #     pos_del_content_thread[j].join()
+        #     pos_reboot_thread[j].join()
+        #
+        # self.app_page.refresh_page()
 
     @allure.feature('MDM_stability')
     @allure.title("stability case- 多设备添加--辅助测试用例")
@@ -205,7 +205,7 @@ class TestStability:
                 else:
                     self.device_page.go_to_new_address("devices")
 
-    @allure.feature('MDM_stability_test')
+    @allure.feature('MDM_stability')
     @allure.title("stability case- 重启在线成功率--请在报告右侧log文件查看在线率")
     def test_reboot_online_stability_test(self):
         while True:
@@ -330,6 +330,8 @@ class TestStability:
             except Exception as e:
                 if self.app_page.service_is_normal():
                     assert False, e
+                else:
+                    self.app_page.recovery_after_service_unavailable("devices", st.user_info)
 
     @allure.feature('MDM_stability_test')
     @allure.title("stability case-文件文件推送成功率-请在报告右侧log文件查看文件文件推送成功率")
@@ -407,7 +409,8 @@ class TestStability:
                             if content_page.get_current_time() > content_page.return_end_time(now_time, 300):
                                 assert False, "@@@@应用推送中超过30分钟还没有%s的下载记录" % file
                             content_page.time_sleep(3)
-                        print("**********************下载记录检测完毕*************************************")
+                        print("**********************%s : %s下载记录检测完毕*************************************" % (device_msg["ip"], file))
+                        log.info("**********************%s : %s下载记录检测完毕*************************************" % (device_msg["ip"], file))
 
                         before_reboot_file_size = device_msg["android_page"].get_file_size_in_device(file)
                         print("第一次下载的的file size: ", before_reboot_file_size)
@@ -425,7 +428,8 @@ class TestStability:
                                 if content_page.get_current_time() > content_page.return_end_time(now_time, 120):
                                     assert False, "@@@@确认下载提示后， 2分钟内ota升级包没有大小没变， 没在下载"
                                 content_page.time_sleep(1)
-                        print("*******************完成5次重启*********************************")
+                        print("*******************%s : %s完成5次重启断点续传*********************************" % (device_msg["ip"], file))
+                        log.info("*******************%s : %s完成5次重启断点续传*********************************" % (device_msg["ip"], file))
                         # check if app download completed in the settings time
                         now_time_d = content_page.get_current_time()
                         while True:
@@ -435,7 +439,7 @@ class TestStability:
                             if content_page.get_current_time() > content_page.return_end_time(now_time_d, 300):
                                 assert False, "@@@@推送中超过30分钟还没有完成%s的下载" % file
                             content_page.time_sleep(3)
-                        print("**********************下载完成检测完毕*************************************")
+                        print("**********************%s : %s下载完成检测完毕*************************************" % (device_msg["ip"], file))
                         setting_time = content_page.get_current_time()
                         while True:
                             if file in device_msg["android_page"].u2_send_command(grep_cmd):
@@ -445,10 +449,12 @@ class TestStability:
 
                         print("***************************************设备%s：指定的路径已存在%s*********************************" % (
                             device_msg["ip"], file))
+                        log.info("***************************************设备%s：指定的路径已存在%s*********************************" % (
+                            device_msg["ip"], file))
 
                         lock.acquire()
                         content_page.go_to_new_address("content/log")
-                        now_time_ = content_page.get_current_time()
+                        report_now_time = content_page.get_current_time()
                         while True:
                             content_page.search_upgrade_log_by_sn(device_msg["sn"])
                             upgrade_list = content_page.get_content_latest_upgrade_log(send_time, device_msg)
@@ -459,14 +465,20 @@ class TestStability:
                                 if content_page.get_action_status(action) == 7:
                                     break
                             # wait upgrade 3 min at most
-                            if content_page.get_current_time() > content_page.return_end_time(now_time_, 180):
-                                assert False, "@@@@3分钟还没有上报设置完相应的文件， 请检查！！！"
-                            content_page.time_sleep(30)
+                            if content_page.get_current_time() > content_page.return_end_time(report_now_time, 180):
+                                if self.content_page.service_is_normal():
+                                    assert False, "@@@@3分钟还没有上报设置完相应的文件， 请检查！！！"
+                                else:
+                                    self.content_page.recovery_after_service_unavailable("content/log", st.user_info)
+                                    report_now_time = self.content_page.get_current_time()
+                            content_page.time_sleep(10)
                             content_page.refresh_page()
                         lock.release()
                         # assert file in device_msg["android_page"].u2_send_command(
                         #     grep_cmd), "@@@@文件没有释放到设备指定的路径%s, 请检查！！！" % release_to_path
                         print("***************************************设备%s完成文件%s的推送*********************************" % (
+                            device_msg["ip"], file))
+                        log.info("***************************************设备%s完成文件%s的推送*********************************" % (
                             device_msg["ip"], file))
 
                     # release file to multi devices
@@ -479,7 +491,7 @@ class TestStability:
                         contents_threads.append(content_t)
                     for thread in contents_threads:
                         thread.join()
-                    break
+                break
 
                     # check_message_reboot_threads = []
                     # for c_d in range(len(devices_data)):
@@ -493,94 +505,82 @@ class TestStability:
             except Exception as e:
                 if self.app_page.service_is_normal():
                     assert False, e
+                else:
+                    self.app_page.recovery_after_service_unavailable("content", st.user_info)
 
     @allure.feature('MDM_stability_test1111')
     @allure.title("stability case- 长时间连接测试--长时间连接测试，并且静默升级OTA升级")
     def test_online_long_test(self):
         release_info = {"package_name": test_yml['app_info']['other_app'], "sn": self.devices_sn,
                         "silent": "Yes", "download_network": "NO Limit"}
-        file_path = self.app_page.get_apk_path(release_info["package_name"])
-        package = self.app_page.get_apk_package_name(file_path)
-        release_info["package"] = package
-        print("包名：", package)
-        version = self.app_page.get_apk_package_version(file_path)
-        release_info["version"] = version
-        devices_sn = self.devices_sn
-        devices_ip = self.devices_ip
-        length = 2
-        lock = st.threading.Lock()
-        app_page = self.app_page
-        device_page = self.device_page
-
-        reboot_threads = []
-        for android in self.androids_page:
-            r_t = st.threading.Thread(target=android.reboot_device, args=(android.device_ip,))
-            r_t.start()
-            reboot_threads.append(r_t)
-        for r_thread in reboot_threads:
-            r_thread.join()
-
-        device_page.go_to_new_address("devices")
-        # confirm if device is online and execute next step, if not, end the case execution
-        for sn in self.devices_sn:
-            device_info = opt_case.check_single_device(sn)[0]
-            if device_page.upper_transfer("Locked") in device_page.remove_space_and_upper(
-                    device_info["Lock Status"]):
-                device_page.select_device(sn)
-                device_page.click_unlock()
-                device_page.refresh_page()
-
-        def pre_test_clear(td_info):
-            if td_info["android_page"].public_alert_show(timeout=5):
-                td_info["android_page"].clear_download_and_upgrade_alert()
-
-        # clear alert in device
-        now = st.time.strftime('%Y-%m-%d %H:%M', st.time.localtime(st.time.time()))
-        msg = "%s:test" % now
-        pre_threads = []
-        for p_d in range(len(devices_data)):
-            p_msg = {"android_page": st.AndroidAimdmPageWiFi(devices_data[p_d], 5), "sn": devices_sn[p_d],
-                     "ip": devices_ip[p_d], "message": msg}
-            pre_t = st.threading.Thread(target=pre_test_clear, args=(p_msg,))
-            pre_t.start()
-            pre_threads.append(pre_t)
-        for thread in pre_threads:
-            thread.join()
-
-        def send_devices_message(sns, message):
-            for sn_ in sns:
-                res = opt_case.get_single_device_list(sn_)[0]
-                if not device_page.upper_transfer("On") in device_page.remove_space_and_upper(
-                        res["Status"]):
-                    assert AttributeError
-                device_page.refresh_page()
-            for sno in sns:
-                device_page.select_device(sno)
-            device_page.time_sleep(5)
-            device_page.click_send_btn()
-            device_page.msg_input_and_send(message)
-
-        def check_message_in_device(td_info):
-            # check message in device
-            td_info["android_page"].screen_keep_on()
-            if not td_info["android_page"].public_alert_show(60):
-                assert AttributeError
+        while True:
             try:
-                td_info["android_page"].confirm_received_text(td_info["message"], timeout=5)
-            except AttributeError:
-                assert AttributeError
-            try:
-                td_info["android_page"].click_msg_confirm_btn()
-                td_info["android_page"].confirm_msg_alert_fade(td_info["message"])
-            except Exception:
-                pass
+                # keep test environment clean
+                self.app_page.delete_app_install_and_uninstall_logs()
+                self.ota_page.delete_all_ota_release_log()
+                del_apk_threads = []
+                del_update_threads = []
+                del_app_threads = []
+                del_zip_threads = []
+                for android in self.androids_page:
+                    apk_t = st.threading.Thread(target=android.del_all_downloaded_apk, args=())
+                    app_t = st.threading.Thread(target=android.uninstall_multi_apps, args=(test_yml["app_info"]))
+                    zip_t = st.threading.Thread(target=android.del_all_downloaded_zip, args=())
+                    update_t = st.threading.Thread(target=android.del_updated_zip(), args=())
+                    apk_t.start()
+                    app_t.start()
+                    zip_t.start()
+                    update_t.start()
+                    del_apk_threads.append(apk_t)
+                    del_app_threads.append(app_t)
+                    del_zip_threads.append(zip_t)
+                    del_update_threads.append(update_t)
 
-        online_flag = 0
-        times = 0
-        for i in range(length):
-            try:
+                for j_thread in range(len(del_zip_threads)):
+                    del_apk_threads[j_thread].join()
+                    del_update_threads[j_thread].join()
+                    del_app_threads[j_thread].join()
+                    del_zip_threads[j_thread].join()
+
+                # begin testing
+                file_path = self.app_page.get_apk_path(release_info["package_name"])
+                package = self.app_page.get_apk_package_name(file_path)
+                release_info["package"] = package
+                print("包名：", package)
+                version = self.app_page.get_apk_package_version(file_path)
+                release_info["version"] = version
+                devices_sn = self.devices_sn
+                devices_ip = self.devices_ip
+                length = 2
+                lock = st.threading.Lock()
+                app_page = self.app_page
+                device_page = self.device_page
+
+                reboot_threads = []
+                for android in self.androids_page:
+                    r_t = st.threading.Thread(target=android.reboot_device_no_root, args=(android.device_ip,))
+                    r_t.start()
+                    reboot_threads.append(r_t)
+                for r_thread in reboot_threads:
+                    r_thread.join()
+
+                device_page.go_to_new_address("devices")
+                # confirm if device is online and execute next step, if not, end the case execution
+                for sn in self.devices_sn:
+                    device_info = opt_case.check_single_device(sn)[0]
+                    if device_page.upper_transfer("Locked") in device_page.remove_space_and_upper(
+                            device_info["Lock Status"]):
+                        device_page.select_device(sn)
+                        device_page.click_unlock()
+                        device_page.refresh_page()
+
+                def pre_test_clear(td_info):
+                    if td_info["android_page"].public_alert_show(timeout=5):
+                        td_info["android_page"].clear_download_and_upgrade_alert()
+
+                # clear alert in device
                 now = st.time.strftime('%Y-%m-%d %H:%M', st.time.localtime(st.time.time()))
-                msg = "%s:test%d" % (now, times)
+                msg = "%s:test" % now
                 pre_threads = []
                 for p_d in range(len(devices_data)):
                     p_msg = {"android_page": st.AndroidAimdmPageWiFi(devices_data[p_d], 5), "sn": devices_sn[p_d],
@@ -591,265 +591,328 @@ class TestStability:
                 for thread in pre_threads:
                     thread.join()
 
-                # send message
-                device_page.refresh_page()
-                send_devices_message(devices_sn, msg)
+                def send_devices_message(sns, message):
+                    for sn_ in sns:
+                        res = opt_case.get_single_device_list(sn_)[0]
+                        if not device_page.upper_transfer("On") in device_page.remove_space_and_upper(
+                                res["Status"]):
+                            assert AttributeError
+                        device_page.refresh_page()
+                    for sno in sns:
+                        device_page.select_device(sno)
+                    device_page.time_sleep(5)
+                    device_page.click_send_btn()
+                    device_page.msg_input_and_send(message)
 
-                times += 1
-                check_message_threads = []
-                for c_d in range(len(devices_data)):
-                    p_msg = {"android_page": st.AndroidAimdmPageWiFi(devices_data[c_d], 5), "sn": devices_sn[c_d],
-                             "ip": devices_ip[c_d], "message": msg}
-                    check_t = st.threading.Thread(target=check_message_in_device, args=(p_msg,))
-                    check_t.start()
-                    check_message_threads.append(check_t)
-                for thread in check_message_threads:
-                    thread.join()
+                def check_message_in_device(td_info):
+                    # check message in device
+                    td_info["android_page"].screen_keep_on()
+                    if not td_info["android_page"].public_alert_show(60):
+                        assert AttributeError
+                    try:
+                        td_info["android_page"].confirm_received_text(td_info["message"], timeout=5)
+                    except AttributeError:
+                        assert AttributeError
+                    try:
+                        td_info["android_page"].click_msg_confirm_btn()
+                        td_info["android_page"].confirm_msg_alert_fade(td_info["message"])
+                    except Exception:
+                        pass
 
-                online_flag += 1
-            except Exception as e:
-                print(e)
-                log.error(str(e))
-                continue
-            device_page.time_sleep(10)
+                online_flag = 0
+                times = 0
+                for i in range(length):
+                    try:
+                        now = st.time.strftime('%Y-%m-%d %H:%M', st.time.localtime(st.time.time()))
+                        msg = "%s:test%d" % (now, times)
+                        pre_threads = []
+                        for p_d in range(len(devices_data)):
+                            p_msg = {"android_page": st.AndroidAimdmPageWiFi(devices_data[p_d], 5), "sn": devices_sn[p_d],
+                                     "ip": devices_ip[p_d], "message": msg}
+                            pre_t = st.threading.Thread(target=pre_test_clear, args=(p_msg,))
+                            pre_t.start()
+                            pre_threads.append(pre_t)
+                        for thread in pre_threads:
+                            thread.join()
 
-        print(online_flag)
-        msg = "%ds内在线成功率为%s" % (length * 60, str(online_flag / length))
-        log.info(msg)
-        print(msg)
+                        # send message
+                        device_page.refresh_page()
+                        send_devices_message(devices_sn, msg)
 
-        print("================================在线状态测完===================================")
-        log.info("================================在线状态测完===================================")
-        print("****************************长时间挂机后静默安装测试*******************************")
-        log.info("****************************长时间挂机后静默安装测试*******************************")
+                        times += 1
+                        check_message_threads = []
+                        for c_d in range(len(devices_data)):
+                            p_msg = {"android_page": st.AndroidAimdmPageWiFi(devices_data[c_d], 5), "sn": devices_sn[c_d],
+                                     "ip": devices_ip[c_d], "message": msg}
+                            check_t = st.threading.Thread(target=check_message_in_device, args=(p_msg,))
+                            check_t.start()
+                            check_message_threads.append(check_t)
+                        for thread in check_message_threads:
+                            thread.join()
 
-        # release_app
-        send_time = st.time.strftime('%Y-%m-%d %H:%M', st.time.localtime(self.app_page.get_current_time()))
-        self.app_page.time_sleep(5)
-        self.app_page.go_to_new_address("apps")
-        self.app_page.search_app_by_name(release_info["package_name"])
-        app_list = self.app_page.get_apps_text_list()
-        if len(app_list) == 0:
-            assert False, "@@@@没有 %s, 请检查！！！" % release_info["package_name"]
-        self.app_page.click_release_app_btn()
-        self.app_page.input_release_app_info(release_info)
+                        online_flag += 1
+                    except Exception as e:
+                        print(e)
+                        log.error(str(e))
+                        continue
+                    device_page.time_sleep(10)
 
-        # go to app release log
-        self.app_page.go_to_new_address("apps/releases")
-        now_time = self.app_page.get_current_time()
-        while True:
-            if self.app_page.get_current_app_release_log_total() == len(release_info["sn"]):
-                break
-            if self.app_page.get_current_time() > self.app_page.return_end_time(now_time):
-                assert False, "@@@@超过3分钟没有相应的 app release log， 请检查！！！"
-            self.app_page.time_sleep(3)
+                print(online_flag)
+                msg = "%ds内在线成功率为%s" % (length * 60, str(online_flag / length))
+                log.info(msg)
+                print(msg)
 
-        # silent install app
-        def check_devices_install_app(device_msg):
-            # self.android_mdm_page.reboot_device(device_msg["ip"])
-            # self.app_page.refresh_page()
+                print("================================在线状态测完===================================")
+                log.info("================================在线状态测完===================================")
+                print("****************************长时间挂机后静默安装测试*******************************")
+                log.info("****************************长时间挂机后静默安装测试*******************************")
 
-            print("**********************%s 释放log检测完毕*************************************" % device_msg["ip"])
-            # check the app download record in device
-            original_hash_value = device_msg["android_page"].calculate_sha256_in_windows(release_info["package_name"])
-            shell_app_apk_name = release_info["package"] + "_%s.apk" % release_info["version"]
-            now_time = app_page.get_current_time()
-            while True:
-                if device_msg["android_page"].download_file_is_existed(shell_app_apk_name):
-                    break
-                if app_page.get_current_time() > app_page.return_end_time(now_time, 1800):
-                    assert False, "@@@@应用推送中超过30分钟还没有%s的下载记录" % release_info["package_name"]
-                app_page.time_sleep(3)
-            print("**********************%s: 下载记录检测完毕*************************************" % device_msg["ip"])
+                # release_app
+                send_time = st.time.strftime('%Y-%m-%d %H:%M', st.time.localtime(self.app_page.get_current_time()))
+                self.app_page.time_sleep(5)
+                self.app_page.go_to_new_address("apps")
+                self.app_page.search_app_by_name(release_info["package_name"])
+                app_list = self.app_page.get_apps_text_list()
+                if len(app_list) == 0:
+                    assert False, "@@@@没有 %s, 请检查！！！" % release_info["package_name"]
+                self.app_page.click_release_app_btn()
+                self.app_page.input_release_app_info(release_info)
 
-            # check if app download completed in the settings time
-            # file_path = conf.project_path + "\\Param\\Package\\"
-            now_time = app_page.get_current_time()
-            while True:
-                shell_hash_value = device_msg["android_page"].calculate_sha256_in_device(shell_app_apk_name)
-                if original_hash_value == shell_hash_value:
-                    break
-                if app_page.get_current_time() > app_page.return_end_time(now_time, 1800):
-                    assert False, "@@@@多应用推送中超过30分钟还没有完成%s的下载" % release_info["package_name"]
-                app_page.time_sleep(3)
-            print("**********************%s: 下载完成检测完毕*************************************" % device_msg["ip"])
-
-            # check if app installed in settings time
-            now_time = app_page.get_current_time()
-            while True:
-                if device_msg["android_page"].app_is_installed(release_info["package"]):
-                    break
-                if app_page.get_current_time() > app_page.return_end_time(now_time, 180):
-                    assert False, "@@@@多应用推送中超过3分钟还没有%s的安装记录" % release_info["package_name"]
-            print("******************************%s: 安装app记录检测完毕****************************************" % device_msg["ip"])
-            lock.acquire()
-            # check if all installed success logs in app upgrade logs
-            app_page.go_to_new_address("apps/logs")
-            now_time = app_page.get_current_time()
-            while True:
-                app_page.search_upgrade_logs(device_msg["package"], device_msg["sn"])
-                upgrade_list = app_page.get_app_latest_upgrade_log(send_time, device_msg)
-                if len(upgrade_list) != 0:
-                    action = upgrade_list[0]["Action"]
-                    print(action)
-                    if app_page.get_action_status(action) == 4:
+                # go to app release log
+                self.app_page.go_to_new_address("apps/releases")
+                now_time = self.app_page.get_current_time()
+                while True:
+                    if self.app_page.get_current_app_release_log_total() == len(release_info["sn"]):
                         break
-                if app_page.get_current_time() > app_page.return_end_time(now_time, 300):
-                    assert False, "@@@@多应用推送中设备已经安装完毕app, 平台超过5分钟还上报%s的安装记录" % release_info["package_name"]
-                app_page.time_sleep(5)
-                app_page.refresh_page()
-            print(
-                "***************************************设备%s安装上报完成*********************************" % device_msg["ip"])
-            lock.release()
+                    if self.app_page.get_current_time() > self.app_page.return_end_time(now_time):
+                        assert False, "@@@@超过3分钟没有相应的 app release log， 请检查！！！"
+                    self.app_page.time_sleep(3)
 
-        # multi threads install app
-        install_threads = []
-        for p_d in range(len(devices_data)):
-            inst_msg = {"android_page": st.AndroidAimdmPageWiFi(devices_data[p_d], 5), "sn": devices_sn[p_d],
-                        "ip": devices_ip[p_d], "package": release_info["package"], "version": release_info["version"]}
-            inst_t = st.threading.Thread(target=check_devices_install_app, args=(inst_msg,))
-            inst_t.start()
-            install_threads.append(inst_t)
-        for i_thread in install_threads:
-            i_thread.join()
-        print("*****************************静默安装完成*****************************")
-        log.info("*****************************静默安装完成*****************************")
-        # multi threads upgrade ota package
-        download_tips = "Foundanewfirmware,whethertoupgrade?"
-        upgrade_tips = "whethertoupgradenow?"
-        release_info = {"package_name": test_yml['ota_packages_info']['package_name'], "sn": devices_sn,
-                        "silent": 0, "category": "NO Limit", "network": "NO Limit"}
-        # get release ota package version
-        ota_page = self.ota_page
-        release_info["version"] = self.ota_page.get_ota_package_version(release_info["package_name"])
+                # silent install app
+                def check_devices_install_app(device_msg):
+                    # self.android_mdm_page.reboot_device(device_msg["ip"])
+                    # self.app_page.refresh_page()
 
-        def check_current_upgrade_firmware(and_device):
-            current_firmware_version = and_device.check_firmware_version()
-            # compare current version and exp version
-            assert ota_page.transfer_version_into_int(current_firmware_version) < ota_page.transfer_version_into_int(
-                release_info["version"]), \
-                "@@@@%s释放的ota升级包比当前固件版本版本低， 请检查！！！" % and_device.device_ip
+                    print("**********************%s: 释放log检测完毕*************************************" % device_msg["ip"])
+                    log.info("**********************%s: 释放log检测完毕*************************************" % device_msg["ip"])
+                    # check the app download record in device
+                    original_hash_value = device_msg["android_page"].calculate_sha256_in_windows(release_info["package_name"])
+                    shell_app_apk_name = release_info["package"] + "_%s.apk" % release_info["version"]
+                    now_time = app_page.get_current_time()
+                    while True:
+                        if device_msg["android_page"].download_file_is_existed(shell_app_apk_name):
+                            break
+                        if app_page.get_current_time() > app_page.return_end_time(now_time, 1800):
+                            assert False, "@@@@应用推送中超过30分钟还没有%s的下载记录" % release_info["package_name"]
+                        app_page.time_sleep(3)
+                    print("**********************%s: 下载记录检测完毕*************************************" % device_msg["ip"])
+                    log.info("**********************%s: 下载记录检测完毕*************************************" % device_msg["ip"])
+                    # check if app download completed in the settings time
+                    # file_path = conf.project_path + "\\Param\\Package\\"
+                    now_time = app_page.get_current_time()
+                    while True:
+                        shell_hash_value = device_msg["android_page"].calculate_sha256_in_device(shell_app_apk_name)
+                        if original_hash_value == shell_hash_value:
+                            break
+                        if app_page.get_current_time() > app_page.return_end_time(now_time, 1800):
+                            assert False, "@@@@多应用推送中超过30分钟还没有完成%s的下载" % release_info["package_name"]
+                        app_page.time_sleep(3)
+                    print("**********************%s: 下载完成检测完毕*************************************" % device_msg["ip"])
+                    log.info("**********************%s: 下载完成检测完毕*************************************" % device_msg["ip"])
+                    # check if app installed in settings time
+                    now_time = app_page.get_current_time()
+                    while True:
+                        if device_msg["android_page"].app_is_installed(release_info["package"]):
+                            break
+                        if app_page.get_current_time() > app_page.return_end_time(now_time, 180):
+                            assert False, "@@@@多应用推送中超过3分钟还没有%s的安装记录" % release_info["package_name"]
+                    print("******************************%s: 安装app记录检测完毕****************************************" % device_msg["ip"])
+                    log.info("******************************%s: 安装app记录检测完毕****************************************" % device_msg["ip"])
+                    lock.acquire()
+                    # check if all installed success logs in app upgrade logs
+                    app_page.go_to_new_address("apps/logs")
+                    report_now_time = app_page.get_current_time()
+                    while True:
+                        app_page.search_upgrade_logs(device_msg["package"], device_msg["sn"])
+                        upgrade_list = app_page.get_app_latest_upgrade_log(send_time, device_msg)
+                        if len(upgrade_list) != 0:
+                            action = upgrade_list[0]["Action"]
+                            print(action)
+                            if app_page.get_action_status(action) == 4:
+                                break
+                        if app_page.get_current_time() > app_page.return_end_time(report_now_time, 300):
+                            if self.app_page.service_is_normal():
+                                assert False, "@@@@多应用推送中设备已经安装完毕app, 平台超过5分钟还上报%s的安装记录" % release_info["package_name"]
+                            else:
+                                self.app_page.recovery_after_service_unavailable("apps/logs", st.user_info)
+                                report_now_time = self.app_page.get_current_time()
+                        app_page.time_sleep(5)
+                        app_page.refresh_page()
+                    print("***************************************设备%s安装上报完成*********************************" % device_msg["ip"])
+                    log.info("***************************************设备%s安装上报完成*********************************" % device_msg["ip"])
+                    lock.release()
 
-        check_firmware_thread = []
-        for android_p in self.androids_page:
-            firm_t = st.threading.Thread(target=check_current_upgrade_firmware, args=(android_p,))
-            firm_t.start()
-            check_firmware_thread.append(firm_t)
-        for f_thread in check_firmware_thread:
-            f_thread.join()
+                # multi threads install app
+                install_threads = []
+                for p_d in range(len(devices_data)):
+                    inst_msg = {"android_page": st.AndroidAimdmPageWiFi(devices_data[p_d], 5), "sn": devices_sn[p_d],
+                                "ip": devices_ip[p_d], "package": release_info["package"], "version": release_info["version"]}
+                    inst_t = st.threading.Thread(target=check_devices_install_app, args=(inst_msg,))
+                    inst_t.start()
+                    install_threads.append(inst_t)
+                for i_thread in install_threads:
+                    i_thread.join()
+                print("*****************************所有设备的静默安装完成*****************************")
+                log.info("**************************所有设备的静默安装完成************************")
+                # multi threads upgrade ota package
+                download_tips = "Foundanewfirmware,whethertoupgrade?"
+                upgrade_tips = "whethertoupgradenow?"
+                release_info = {"package_name": test_yml['ota_packages_info']['package_name'], "sn": devices_sn,
+                                "silent": 0, "category": "NO Limit", "network": "NO Limit"}
+                # get release ota package version
+                ota_page = self.ota_page
+                release_info["version"] = self.ota_page.get_ota_package_version(release_info["package_name"])
 
-        # get ota size in windows and device
-        print("ota after upgrade version:", release_info["version"])
-        # check file size and hash value in directory Param/package
-        ota_package_path = self.ota_page.get_apk_path(release_info["package_name"])
-        act_ota_package_size = self.ota_page.get_zip_size(ota_package_path)
-        print("act_ota_package_size:", act_ota_package_size)
-        # check file hash value in directory Param/package
-        act_ota_package_hash_value = self.ota_page.calculate_sha256_in_windows(release_info["package_name"])
-        print("act_ota_package_hash_value:", act_ota_package_hash_value)
+                def check_current_upgrade_firmware(and_device):
+                    current_firmware_version = and_device.check_firmware_version()
+                    # compare current version and exp version
+                    assert ota_page.transfer_version_into_int(current_firmware_version) < ota_page.transfer_version_into_int(
+                        release_info["version"]), \
+                        "@@@@%s释放的ota升级包比当前固件版本版本低， 请检查！！！" % and_device.device_ip
 
-        # release ota package
-        self.ota_page.go_to_new_address("ota")
-        self.ota_page.search_device_by_pack_name(release_info["package_name"])
-        # ele = self.Page.get_package_ele(release_info["package_name"])
-        send_time = st.time.strftime('%Y-%m-%d %H:%M', st.time.localtime(self.ota_page.get_current_time()))
-        print("send_time", send_time)
-        self.ota_page.time_sleep(5)
+                check_firmware_thread = []
+                for android_p in self.androids_page:
+                    firm_t = st.threading.Thread(target=check_current_upgrade_firmware, args=(android_p,))
+                    firm_t.start()
+                    check_firmware_thread.append(firm_t)
+                for f_thread in check_firmware_thread:
+                    f_thread.join()
 
-        # if device is existed, click
-        self.ota_page.click_release_btn()
-        try:
-            self.ota_page.input_release_OTA_package(release_info)
-        except Exception as e:
-            print(e)
-        self.ota_page.go_to_new_address("ota/release")
-        now_time = self.ota_page.get_current_time()
-        # check release logs
-        # while True:
-        #     if self.ota_page.get_current_ota_release_log_total() == len(release_info["sn"]):
-        #         break
-        #     if self.ota_page.get_current_time() > self.ota_page.return_end_time(now_time):
-        #         assert False, "@@@@没有相应的 ota package release log， 请检查！！！"
-        #     self.ota_page.time_sleep(3)
-        #     self.ota_page.refresh_page()
-        print("**********************释放log检测完毕*************************************")
+                # get ota size in windows and device
+                print("ota after upgrade version:", release_info["version"])
+                # check file size and hash value in directory Param/package
+                ota_package_path = self.ota_page.get_apk_path(release_info["package_name"])
+                act_ota_package_size = self.ota_page.get_zip_size(ota_package_path)
+                print("act_ota_package_size:", act_ota_package_size)
+                # check file hash value in directory Param/package
+                act_ota_package_hash_value = self.ota_page.calculate_sha256_in_windows(release_info["package_name"])
+                print("act_ota_package_hash_value:", act_ota_package_hash_value)
 
-        def check_devices_upgrade_ota_package(device_msg):
-            device_msg["android_page"].screen_keep_on()
-            device_msg["android_page"].confirm_received_alert(download_tips)
-            device_current_firmware_version = device_msg["android_page"].check_firmware_version()
-            # check the app download record in device
-            now_time = ota_page.get_current_time()
-            while True:
-                if device_msg["android_page"].download_file_is_existed(device_msg["package_name"]):
-                    break
-                if ota_page.get_current_time() > ota_page.return_end_time(now_time, 1800):
-                    assert False, "@@@@应用推送中超过30分钟还没有%s的下载记录" % device_msg["package_name"]
-                ota_page.time_sleep(3)
-            print("**********************%s: 下载记录检测完毕*************************************" % device_msg["ip"])
+                # release ota package
+                self.ota_page.go_to_new_address("ota")
+                self.ota_page.search_device_by_pack_name(release_info["package_name"])
+                # ele = self.Page.get_package_ele(release_info["package_name"])
+                send_time = st.time.strftime('%Y-%m-%d %H:%M', st.time.localtime(self.ota_page.get_current_time()))
+                print("send_time", send_time)
+                self.ota_page.time_sleep(5)
 
-            # check if app download completed in the settings time
-            # file_path = conf.project_path + "\\Param\\Package\\"
-            now_time = ota_page.get_current_time()
-            while True:
-                shell_hash_value = device_msg["android_page"].calculate_sha256_in_device(device_msg["package_name"])
-                if act_ota_package_hash_value == shell_hash_value:
-                    break
-                if ota_page.get_current_time() > ota_page.return_end_time(now_time, 1800):
-                    assert False, "@@@@多应用推送中超过30分钟还没有完成%s的下载" % release_info["package_name"]
-                ota_page.time_sleep(3)
-            print("**********************%s: ota下载完成检测完毕*************************************" % device_msg["ip"])
-            device_msg["android_page"].screen_keep_on()
-            device_msg["android_page"].confirm_alert_show()
-            log.info("检测到有升级提示框")
-            try:
-                device_msg["android_page"].click_cancel_btn()
+                # if device is existed, click
+                self.ota_page.click_release_btn()
+                try:
+                    self.ota_page.input_release_OTA_package(release_info)
+                except Exception as e:
+                    print(e)
+                self.ota_page.go_to_new_address("ota/release")
+                now_time = self.ota_page.get_current_time()
+                # check release logs
+                # while True:
+                #     if self.ota_page.get_current_ota_release_log_total() == len(release_info["sn"]):
+                #         break
+                #     if self.ota_page.get_current_time() > self.ota_page.return_end_time(now_time):
+                #         assert False, "@@@@没有相应的 ota package release log， 请检查！！！"
+                #     self.ota_page.time_sleep(3)
+                #     self.ota_page.refresh_page()
+                print("*********************推送ota 安装包*************************************")
+
+                def check_devices_upgrade_ota_package(device_msg):
+                    device_msg["android_page"].screen_keep_on()
+                    device_msg["android_page"].confirm_received_alert(download_tips)
+                    device_current_firmware_version = device_msg["android_page"].check_firmware_version()
+                    # check the app download record in device
+                    now_time = ota_page.get_current_time()
+                    while True:
+                        if device_msg["android_page"].download_file_is_existed(device_msg["package_name"]):
+                            break
+                        if ota_page.get_current_time() > ota_page.return_end_time(now_time, 1800):
+                            assert False, "@@@@应用推送中超过30分钟还没有%s的下载记录" % device_msg["package_name"]
+                        ota_page.time_sleep(3)
+                    print("**********************%s: ota下载记录检测完毕*************************************" % device_msg["ip"])
+                    log.info("**********************%s: ota下载记录检测完毕*************************************" % device_msg["ip"])
+                    # check if app download completed in the settings time
+                    # file_path = conf.project_path + "\\Param\\Package\\"
+                    now_time = ota_page.get_current_time()
+                    while True:
+                        shell_hash_value = device_msg["android_page"].calculate_sha256_in_device(device_msg["package_name"])
+                        if act_ota_package_hash_value == shell_hash_value:
+                            break
+                        if ota_page.get_current_time() > ota_page.return_end_time(now_time, 1800):
+                            assert False, "@@@@多应用推送中超过30分钟还没有完成%s的下载" % release_info["package_name"]
+                        ota_page.time_sleep(3)
+                    print("**********************%s: ota下载完成检测完毕*************************************" % device_msg["ip"])
+                    log.info("**********************%s: ota下载完成检测完毕*************************************" % device_msg["ip"])
+                    device_msg["android_page"].screen_keep_on()
+                    device_msg["android_page"].confirm_alert_show()
+                    log.info("检测到有升级提示框")
+                    try:
+                        device_msg["android_page"].click_cancel_btn()
+                    except Exception as e:
+                        pass
+                    # device_msg["android_page"].confirm_received_alert(upgrade_tips)
+                    # device_msg["android_page"].device_boot(device_msg["ip"])
+                    # after_upgrade_version = device_msg["android_page"].check_firmware_version()
+                    # assert ota_page.transfer_version_into_int(
+                    #     device_current_firmware_version) != ota_page.transfer_version_into_int(after_upgrade_version), \
+                    #     "@@@@ota升级失败， 还是原来的版本%s！！" % device_current_firmware_version
+                    # assert ota_page.transfer_version_into_int(release_info["version"]) == \
+                    #        ota_page.transfer_version_into_int(
+                    #            after_upgrade_version), "@@@@升级后的固件版本为%s, ota升级失败， 请检查！！！" % after_upgrade_version
+                    # print("***************************************设备%s ota 检测完成*********************************" % device_msg[
+                    #     "ip"])
+                    #
+                    print("**********************%s ota升级包在设备升级完成*************************************" % device_msg["ip"])
+                    log.info("**********************%s ota升级包在设备升级完成*************************************" % device_msg["ip"])
+                    lock.acquire()
+                    ota_page.go_to_new_address("ota/log")
+                    report_now_time_ = ota_page.get_current_time()
+                    while True:
+                        info = ota_page.get_ota_latest_upgrade_log(send_time, release_info)
+                        if len(info) != 0:
+                            action = info[0]["Action"]
+                            print("action", action)
+                            if ota_page.get_action_status(action) == 4:
+                                break
+                        # wait upgrade 30 min at most
+                        if ota_page.get_current_time() > ota_page.return_end_time(report_now_time_, 1800):
+                            if self.ota_page.service_is_normal():
+                                assert False, "@@@@30分钟还没有升级相应的ota包， 请检查！！！"
+                            else:
+                                self.ota_page.recovery_after_service_unavailable("ota/log", st.user_info)
+                                report_now_time_ = self.ota_page.get_current_time()
+                        ota_page.time_sleep(30)
+                        ota_page.refresh_page()
+                    lock.release()
+                    print("***************************************设备%s ota升级上报完成*********************************" % device_msg["ip"])
+                    log.info("***************************************设备%s ota升级上报完成*********************************" % device_msg["ip"])
+
+                # multi threads upgrade ota package
+                upgrade_threads = []
+                for upgrade_i in range(len(devices_data)):
+                    ota_msg = {"android_page": st.AndroidAimdmPageWiFi(devices_data[upgrade_i], 5), "sn": devices_sn[upgrade_i],
+                               "ip": devices_ip[upgrade_i], "package_name": release_info["package_name"],
+                               "version": release_info["version"]}
+                    upgrade_t = st.threading.Thread(target=check_devices_upgrade_ota_package, args=(ota_msg,))
+                    upgrade_t.start()
+                    upgrade_threads.append(upgrade_t)
+                for upgrade_thread in upgrade_threads:
+                    upgrade_thread.join()
+                break
             except Exception as e:
-                pass
-            # device_msg["android_page"].confirm_received_alert(upgrade_tips)
-            # device_msg["android_page"].device_boot(device_msg["ip"])
-            # after_upgrade_version = device_msg["android_page"].check_firmware_version()
-            # assert ota_page.transfer_version_into_int(
-            #     device_current_firmware_version) != ota_page.transfer_version_into_int(after_upgrade_version), \
-            #     "@@@@ota升级失败， 还是原来的版本%s！！" % device_current_firmware_version
-            # assert ota_page.transfer_version_into_int(release_info["version"]) == \
-            #        ota_page.transfer_version_into_int(
-            #            after_upgrade_version), "@@@@升级后的固件版本为%s, ota升级失败， 请检查！！！" % after_upgrade_version
-            # print("***************************************设备%s ota 检测完成*********************************" % device_msg[
-            #     "ip"])
-            #
-            print("**********************%s ota升级包在设备升级完成*************************************" % device_msg["ip"])
+                if self.app_page.service_is_normal():
+                    assert False, e
+                else:
+                    self.app_page.recovery_after_service_unavailable("apps", st.user_info)
 
-            # lock.acquire()
-            # ota_page.go_to_new_address("ota/log")
-            # now_time = ota_page.get_current_time()
-            # while True:
-            #     info = ota_page.get_ota_latest_upgrade_log(send_time, release_info)
-            #     if len(info) != 0:
-            #         action = info[0]["Action"]
-            #         print("action", action)
-            #         if ota_page.get_action_status(action) == 4:
-            #             break
-            #     # wait upgrade 30 min at most
-            #     if ota_page.get_current_time() > ota_page.return_end_time(now_time, 1800):
-            #         assert False, "@@@@30分钟还没有升级相应的安卓版本， 请检查！！！"
-            #     ota_page.time_sleep(30)
-            #     ota_page.refresh_page()
-            # lock.release()
-            print("***************************************设备%s ota升级上报完成*********************************" % device_msg[
-                "ip"])
 
-        # multi threads upgrade ota package
-        upgrade_threads = []
-        for upgrade_i in range(len(devices_data)):
-            ota_msg = {"android_page": st.AndroidAimdmPageWiFi(devices_data[upgrade_i], 5), "sn": devices_sn[upgrade_i],
-                       "ip": devices_ip[upgrade_i], "package_name": release_info["package_name"],
-                       "version": release_info["version"]}
-            upgrade_t = st.threading.Thread(target=check_devices_upgrade_ota_package, args=(ota_msg,))
-            upgrade_t.start()
-            upgrade_threads.append(upgrade_t)
-        for upgrade_thread in upgrade_threads:
-            upgrade_thread.join()
 
 
 

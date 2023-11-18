@@ -1178,7 +1178,7 @@ class TestPubilcPage:
                         # wait upgrade 3 min at most
                         if self.ota_page.get_current_time() > self.ota_page.return_end_time(report_time, 600):
                             if self.ota_page.service_is_normal():
-                                assert False, "@@@@30分钟还没有升级相应的安卓版本， 请检查！！！"
+                                assert False, "@@@@30分钟还没有升级相应的ota包， 请检查！！！"
                             else:
                                 self.ota_page.recovery_after_service_unavailable("ota/log", case_pack.user_info)
                                 report_time = self.ota_page.get_current_time()
