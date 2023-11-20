@@ -22,7 +22,7 @@ package_infos = [{"package_name": test_yml['app_info']['low_version_app'], "file
                  ]
 
 
-class TestPubilcPage:
+class TestPublicPage:
     def setup_class(self):
         self.driver = case_pack.test_driver
         self.device_page = case_pack.DevicesPage(self.driver, 40)
@@ -38,6 +38,7 @@ class TestPubilcPage:
         self.android_mdm_page.del_all_downloaded_apk()
         self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
         self.android_mdm_page.reboot_device(self.wifi_ip)
+        self.content_page.refresh_page()
 
     def teardown_class(self):
         # pass
@@ -50,25 +51,34 @@ class TestPubilcPage:
 
     @allure.feature('MDM_public')
     @allure.title("public case-添加 content 种类--辅助测试用例")
-    @pytest.mark.flaky(reruns=1, reruns_delay=3)
+    # @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_add_content_category(self, go_to_content_page):
         while True:
             try:
+                print("===================添加 content 种类--辅助测试用例开始==================")
+                log.info("===================添加 content 种类--辅助测试用例开始==================")
+                self.content_page.refresh_page()
                 if len(self.content_page.get_content_categories_list()) == 0:
                     self.content_page.new_content_category("test-debug")
+                print("===================添加 content 种类--辅助测试用例结束==================")
+                log.info("===================添加 content 种类--辅助测试用例结束==================")
                 break
             except Exception as e:
                 if self.device_page.service_is_normal():
                     assert False, e
                 else:
+                    self.content_page.recovery_after_service_unavailable("content", case_pack.user_info)
                     self.content_page.go_to_new_address("content")
 
     @allure.feature('MDM_public')
     @allure.title("public case-添加 content 文件--辅助测试用例")
-    @pytest.mark.flaky(reruns=1, reruns_delay=3)
+    # @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_add_content_file(self, go_to_content_page):
         while True:
             try:
+                print("public case-添加 content 文件--辅助测试用例开始")
+                log.info("public case-添加 content 文件--辅助测试用例开始")
+                self.content_page.refresh_page()
                 file_path = conf.project_path + "\\Param\\Content\\"
                 content_name_list = self.content_page.get_content_list()
                 for test_file in test_yml["Content_info"].values():
@@ -83,14 +93,18 @@ class TestPubilcPage:
                                 self.content_page.add_content_file("wallpaper", file_path + file_name)
                             elif "logo" in file_name:
                                 self.content_page.add_content_file("logo", file_path + file_name)
-                    break
+                print("public case-添加 content 文件--辅助测试用例结束")
+                log.info("public case-添加 content 文件--辅助测试用例开始结束")
+                break
             except Exception as e:
                 if self.device_page.service_is_normal():
                     assert False, e
                 else:
+                    self.content_page.recovery_after_service_unavailable("content", case_pack.user_info)
                     self.content_page.go_to_new_address("content")
 
     @allure.feature('MDM_public')
+    @allure.story('MDM-Show')
     @allure.title("public case-推送壁纸--请在附件查看壁纸截图效果")
     def test_release_wallpaper(self, unlock_screen, del_all_content_release_logs):
         while True:
@@ -194,17 +208,21 @@ class TestPubilcPage:
                             "wallpaper_after_reboot-%s" % str(i))
                     else:
                         assert False, "@@@@平台上没有该壁纸： %s, 请检查" % paper
-                    break
+                print("*******************推送壁纸用例结束***************************")
+                log.info("*******************推送壁纸用例结束***************************")
+                break
             except Exception as e:
                 if self.device_page.service_is_normal():
                     assert False, e
                 else:
+                    self.content_page.recovery_after_service_unavailable("content", case_pack.user_info)
                     self.content_page.go_to_new_address("content")
                     self.content_page.delete_all_content_release_log()
                     self.android_mdm_page.del_all_content_file()
                     self.android_mdm_page.screen_keep_on()
 
     @allure.feature('MDM_public')
+    @allure.story('MDM-Show')
     @allure.title("OTA-OTA重启5次断点续传")
     def test_upgrade_OTA_package_reboot_5times(self, del_all_ota_release_log, go_to_ota_page,
                                                delete_ota_package_relate):
@@ -214,8 +232,10 @@ class TestPubilcPage:
                         "silent": 0, "category": "NO Limit", "network": "NO Limit"}
         while True:
             try:
+                print("*******************OTA重启5次断点续传用例开始***************************")
+                log.info("*******************OTA重启5次断点续传用例开始***************************")
                 # get release ota package version
-                times = 5
+                times = 3
                 release_info["version"] = self.ota_page.get_ota_package_version(release_info["package_name"])
                 current_firmware_version = self.android_mdm_page.check_firmware_version()
                 # compare current version and exp version
@@ -308,7 +328,7 @@ class TestPubilcPage:
                         if self.ota_page.get_action_status(action) == 2 or self.ota_page.get_action_status(action) == 4 \
                                 or self.ota_page.get_action_status(action) == 3:
                             break
-                    if self.ota_page.get_current_time() > self.ota_page.return_end_time(report_now_time, 180):
+                    if self.ota_page.get_current_time() > self.ota_page.return_end_time(report_now_time, 120):
                         if self.ota_page.service_is_normal():
                             err_msg = "@@@@终端下载完升级包后， 平台3分钟还没有下载完相应的ota package， 请检查！！！"
                             log.error(err_msg)
@@ -317,7 +337,7 @@ class TestPubilcPage:
                         else:
                             self.ota_page.recovery_after_service_unavailable("ota/log", case_pack.user_info)
                             report_now_time = self.ota_page.get_current_time()
-                    self.ota_page.time_sleep(20)
+                    self.ota_page.time_sleep(5)
                     self.ota_page.refresh_page()
 
                 self.android_mdm_page.screen_keep_on()
@@ -327,6 +347,8 @@ class TestPubilcPage:
                     self.android_mdm_page.click_cancel_btn()
                 except Exception as e:
                     pass
+                print("*******************OTA重启5次断点续传用例结束***************************")
+                log.info("*******************OTA重启5次断点续传用例结束***************************")
                 break
             except Exception as e:
                 if self.ota_page.service_is_normal():
@@ -339,6 +361,7 @@ class TestPubilcPage:
                     self.ota_page.go_to_new_address("ota")
 
     @allure.feature('MDM_public')
+    @allure.story('MDM-Show')
     @allure.title("public case-应用满屏推送--请在附件查看满屏截图效果")
     # @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_release_app_full_screen(self, del_all_app_release_log, del_all_app_uninstall_release_log, go_to_app_page,
@@ -419,7 +442,6 @@ class TestPubilcPage:
                 self.app_page.go_to_new_address("apps/logs")
                 report_now_time = self.app_page.get_current_time()
                 while True:
-                    print("333333333333333333333333333333333333333333")
                     upgrade_list = self.app_page.get_app_latest_upgrade_log(send_time, release_info)
                     if len(upgrade_list) != 0:
                         action = upgrade_list[0]["Action"]
@@ -440,22 +462,6 @@ class TestPubilcPage:
                     self.app_page.refresh_page()
                 self.app_page.time_sleep(5)
 
-                # self.app_page.go_to_new_address("apps/logs")
-                # now_time = self.app_page.get_current_time()
-                # while True:
-                #     upgrade_list = self.app_page.get_app_latest_upgrade_log(send_time, release_info)
-                #     if len(upgrade_list) != 0:
-                #         action = upgrade_list[0]["Action"]
-                #         print("action", action)
-                #         if self.app_page.get_action_status(action) == 4:
-                #             break
-                #     # wait upgrade 3 min at most
-                #     if self.app_page.get_current_time() > self.app_page.return_end_time(now_time, 180):
-                #         assert False, "@@@@5分钟还没有终端或者平台还没显示安装完相应的app， 请检查！！！"
-                #     self.app_page.time_sleep(30)
-                #     self.app_page.refresh_page()
-                # self.app_page.time_sleep(5)
-
                 print("*******************静默安装完成***************************")
                 log.info("*******************静默安装完成***************************")
 
@@ -473,6 +479,8 @@ class TestPubilcPage:
                 self.android_mdm_page.upload_image_JPG(conf.project_path + "\\ScreenShot\\%s" % image_after_reboot,
                                                        "app_full_screen_after_reboot")
                 self.android_mdm_page.stop_app(release_info["package"])
+                print("*******************应用满屏推送用例结束***************************")
+                log.info("*******************应用满屏推送用例结束***************************")
                 break
             except Exception as e:
                 if self.app_page.service_is_normal():
@@ -491,12 +499,12 @@ class TestPubilcPage:
         # "All Files" "Normal Files" "Boot Animations" "Wallpaper" "LOGO"
         while True:
             try:
+                print("*******************推送文件用例开始***************************")
+                log.info("*******************推送文件用例开始***************************")
                 self.android_mdm_page.screen_keep_on()
                 animations = test_yml["Content_info"]["normal_file"]
                 release_to_path = "%s/aimdm" % self.android_mdm_page.get_internal_storage_directory()
                 grep_cmd = "ls %s" % release_to_path
-                print("*******************推送文件用例开始***************************")
-                log.info("*******************推送文件用例开始***************************")
                 # if the file is existed, delete it
                 for animation in animations:
                     if animation in self.android_mdm_page.u2_send_command(grep_cmd):
@@ -516,74 +524,6 @@ class TestPubilcPage:
                     self.content_page.time_sleep(3)
                     assert len(self.content_page.get_content_list()) == 1, "@@@@平台上没有相关文件： %s, 请检查" % animation
                     self.content_page.release_content_file(self.device_sn, file_path=release_to_path)
-
-                    # check release log
-                    # self.content_page.go_to_new_address("content/release")
-                    # self.content_page.time_sleep(3)
-                    # now_time = self.content_page.get_current_time()
-                    # while True:
-                    #     release_len = len(self.content_page.get_content_latest_release_log_list(send_time, release_info))
-                    #     print("release_len", release_len)
-                    #     if release_len == 1:
-                    #         break
-                    #     elif release_len > 1:
-                    #         assert False, "@@@@推送一次文件，有多条释放记录，请检查！！！"
-                    #     if self.content_page.get_current_time() > self.content_page.return_end_time(now_time):
-                    #         assert False, "@@@@没有相应的文件 release log， 请检查！！！"
-                    #     self.content_page.time_sleep(3)
-                    #     self.content_page.refresh_page()
-
-                    # check upgrade log
-                    # check if the upgrade log appeared, if appeared, break
-                    # self.content_page.go_to_new_address("content/log")
-                    # now_time = self.content_page.get_current_time()
-                    # while True:
-                    #     release_len = len(self.content_page.get_content_latest_upgrade_log(send_time, release_info))
-                    #     if release_len == 1:
-                    #         break
-                    #     if self.content_page.get_current_time() > self.content_page.return_end_time(now_time):
-                    #         assert False, "@@@@没有相应文件的 upgrade log， 请检查！！！"
-                    #     self.content_page.time_sleep(5)
-                    #     self.content_page.refresh_page()
-
-                    # check the app action in app upgrade logs, if download complete or upgrade complete, break
-                    # now_time = self.content_page.get_current_time()
-                    # while True:
-                    #     upgrade_list = self.content_page.get_content_latest_upgrade_log(send_time, release_info)
-                    #     if len(upgrade_list) != 0:
-                    #         action = upgrade_list[0]["Action"]
-                    #         print(action)
-                    #         if self.content_page.get_action_status(action) == 2 or self.content_page.get_action_status(
-                    #                 action) == 7:
-                    #             # check the app size in device, check if app download fully
-                    #             if not self.android_mdm_page.download_file_is_existed(animation):
-                    #                 assert False, "@@@@平台显示下载完整， 终端查询不存在此文件， 请检查！！！！"
-                    #             size = self.android_mdm_page.get_file_size_in_device(animation)
-                    #             print("终端下载后的的size大小：", size)
-                    #             assert file_size == size, "@@@@平台显示下载完成， 终端的包下载不完整，请检查！！！"
-                    #             hash_value = self.android_mdm_page.calculate_sha256_in_device(animation)
-                    #             assert hash_value == file_hash_value, "@@@@平台显示下载完成， 终端的包下载不完整，请检查！！！"
-                    #             break
-                    #     # wait 20 min
-                    #     if self.content_page.get_current_time() > self.content_page.return_end_time(now_time, 1800):
-                    #         assert False, "@@@@20分钟还没有下载完相应的文件， 请检查！！！"
-                    #     self.content_page.time_sleep(5)
-                    #     self.content_page.refresh_page()
-
-                    # check upgrade
-                    # now_time = self.content_page.get_current_time()
-                    # while True:
-                    #     upgrade_list = self.content_page.get_content_latest_upgrade_log(send_time, release_info)
-                    #     if len(upgrade_list) != 0:
-                    #         action = upgrade_list[0]["Action"]
-                    #         print("action", action)
-                    #         if self.content_page.get_action_status(action) == 7:
-                    #             break
-                    #     # wait upgrade 3 min at most
-                    #     if self.content_page.get_current_time() > self.content_page.return_end_time(now_time, 180):
-                    #         assert False, "@@@@3分钟还没有设置完相应的文件， 请检查！！！"
-                    #     self.content_page.time_sleep(5)
-                    #     self.content_page.refresh_page()
 
                     now_time = self.content_page.get_current_time()
                     while True:
@@ -623,7 +563,9 @@ class TestPubilcPage:
                     self.content_page.time_sleep(5)
                     assert animation in self.android_mdm_page.u2_send_command(
                         grep_cmd), "@@@@文件没有释放到设备指定的路径%s, 请检查！！！" % release_to_path
-                    break
+                print("*******************推送文件用例结束***************************")
+                log.info("*******************推送文件用例结束***************************")
+                break
             except Exception as e:
                 if self.content_page.service_is_normal():
                     assert False, e
@@ -673,18 +615,6 @@ class TestPubilcPage:
                         assert False, "@@@@没有 %s, 请检查！！！" % release_app
                     self.app_page.click_release_app_btn()
                     self.app_page.input_release_app_info(release_info)
-
-                # go to app release log
-                # self.app_page.go_to_new_address("apps/releases")
-                # now_time = self.app_page.get_current_time()
-                # while True:
-                #     if self.app_page.get_current_app_release_log_total() == len(apks_packages):
-                #         break
-                #     if self.app_page.get_current_time() > self.app_page.return_end_time(now_time):
-                #         assert False, "@@@@超过3分钟没有相应的 app release log， 请检查！！！"
-                #     self.app_page.time_sleep(3)
-                #
-                # print("**********************释放log检测完毕*************************************")
 
                 # check the app download record in device
                 downloading_apks = []
@@ -779,6 +709,8 @@ class TestPubilcPage:
                         else:
                             self.app_page.recovery_after_service_unavailable("apps/logs", case_pack.user_info)
                             report_time = self.app_page.get_current_time()
+                print("*******************多应用推送用例结束***************************")
+                log.info("*******************多应用推送用例结束***************************")
                 break
             except Exception as e:
                 if self.app_page.service_is_normal():
@@ -791,14 +723,17 @@ class TestPubilcPage:
                     self.app_page.go_to_new_address("apps")
 
     @allure.feature('MDM_public')
-    @allure.title("public case-静默卸载正在运行中的app")
-    @pytest.mark.flaky(reruns=1, reruns_delay=3)
+    @allure.story('MDM-Show')
+    @allure.title("public case-静默卸载正在运行中的app： 静默卸载/卸载正在运行的app")
+    # @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_silent_uninstall_app(self, del_all_app_release_log, del_all_app_uninstall_release_log, uninstall_multi_apps,
                            go_to_app_page):
         release_info = {"package_name": test_yml['app_info']['high_version_app'], "sn": self.device_sn,
                         "silent": "Yes"}
         while True:
             try:
+                print("*******************静默卸载正在运行中的app 用例开始***************************")
+                log.info("*******************静默卸载正在运行中的app 用例开始***************************")
                 file_path = conf.project_path + "\\Param\\Package\\%s" % release_info["package_name"]
                 package = self.app_page.get_apk_package_name(file_path)
                 release_info["package"] = package
@@ -825,20 +760,6 @@ class TestPubilcPage:
                 self.app_page.time_sleep(5)
                 send_time = case_pack.time.strftime('%Y-%m-%d %H:%M',
                                                     case_pack.time.localtime(self.app_page.get_current_time()))
-                # go to app uninstall log
-                # self.app_page.go_to_new_address("apps/appUninstall")
-                # now_time = self.app_page.get_current_time()
-                # while True:
-                #     release_len = len(
-                #         self.app_page.get_app_latest_release_log_list(send_time, release_info, uninstall=True))
-                #     if release_len == 1:
-                #         break
-                #     elif release_len > 1:
-                #         assert False, "@@@@释放一次uninstall app，有多条释放记录，请检查！！！"
-                #     else:
-                #         self.app_page.refresh_page()
-                #     if self.app_page.get_current_time() > self.app_page.return_end_time(now_time):
-                #         assert False, "@@@@没有相应的 app uninstall release log， 请检查！！！"
 
                 print("*********************************已经检测到释放记录*****************************************")
 
@@ -874,7 +795,7 @@ class TestPubilcPage:
                     self.app_page.go_to_new_address("apps")
 
     @allure.feature('MDM_public')
-    @allure.title("public case- 静默升级系统app")
+    @allure.title("public case- 静默升级系统app/推送安装成功后自动运行app")
     def test_upgrade_system_app(self, del_all_app_release_log, del_download_apk, uninstall_system_app):
         while True:
             try:
@@ -922,80 +843,6 @@ class TestPubilcPage:
                 self.app_page.time_sleep(10)
                 self.app_page.click_release_app_btn()
                 self.app_page.input_release_app_info(release_info)
-                # go to app release log
-                # self.app_page.go_to_new_address("apps/releases")
-                # # self.page.check_release_log_info(send_time, release_info["sn"])
-                #
-                # now_time = self.app_page.get_current_time()
-                # # print(self.page.get_app_current_release_log_list(send_time, release_info["sn"]))
-                # while True:
-                #     release_len = len(self.app_page.get_app_latest_release_log_list(send_time, release_info))
-                #     print("release_len", release_len)
-                #     if release_len == 1:
-                #         break
-                #     elif release_len > 1:
-                #         assert False, "@@@@释放一次app，有多条释放记录，请检查！！！"
-                #     if self.app_page.get_current_time() > self.app_page.return_end_time(now_time):
-                #         assert False, "@@@@没有相应的 app release log， 请检查！！！"
-                #     self.app_page.time_sleep(1)
-                #     self.app_page.refresh_page()
-                #
-                # # check if the upgrade log appeared, if appeared, break
-                # self.app_page.go_to_new_address("apps/logs")
-                # now_time = self.app_page.get_current_time()
-                # while True:
-                #     release_len = len(self.app_page.get_app_latest_upgrade_log(send_time, release_info))
-                #     if release_len == 1:
-                #         break
-                #     if self.app_page.get_current_time() > self.app_page.return_end_time(now_time):
-                #         assert False, "@@@@没有相应的 app upgrade log， 请检查！！！"
-                #     self.app_page.time_sleep(3)
-                #     self.app_page.refresh_page()
-                #
-                # # check the app action in app upgrade logs, if download complete or upgrade complete, break
-                # now_time = self.app_page.get_current_time()
-                # while True:
-                #     upgrade_list = self.app_page.get_app_latest_upgrade_log(send_time, release_info)
-                #     if len(upgrade_list) != 0:
-                #         action = upgrade_list[0]["Action"]
-                #         if self.app_page.get_action_status(action) == 2 or self.app_page.get_action_status(action) == 4 \
-                #                 or self.app_page.get_action_status(action) == 3:
-                #             # check the app size in device, check if app download fully
-                #             shell_app_apk_name = release_info["package"] + "_%s.apk" % release_info["version"]
-                #             if not self.android_mdm_page.download_file_is_existed(shell_app_apk_name):
-                #                 assert False, "@@@@平台显示下载完apk包， 终端查询不存在此包， 请检查！！！！"
-                #
-                #             size = self.android_mdm_page.get_file_size_in_device(shell_app_apk_name)
-                #             print("终端下载后的的size大小：", size)
-                #             if app_size != size:
-                #                 assert False, "@@@@平台显示下载完成， 终端的包下载不完整，请检查！！！"
-                #             break
-                #         # wait 20 mins
-                #     if self.app_page.get_current_time() > self.app_page.return_end_time(now_time, 640):
-                #         assert False, "@@@@20分钟还没有下载完相应的app， 请检查！！！"
-                #     self.app_page.refresh_page()
-                #     self.app_page.time_sleep(5)
-                #
-                # # check upgrade
-                # now_time = self.app_page.get_current_time()
-                # while True:
-                #     upgrade_list = self.app_page.get_app_latest_upgrade_log(send_time, release_info)
-                #     if len(upgrade_list) != 0:
-                #         action = upgrade_list[0]["Action"]
-                #         print("action", action)
-                #         if self.app_page.get_action_status(action) == 4:
-                #             if self.android_mdm_page.app_is_installed(release_info["package"]):
-                #                 version_installed = self.app_page.transfer_version_into_int(
-                #                     self.android_mdm_page.get_app_info(release_info["package"])['versionName'])
-                #                 if version_installed == self.app_page.transfer_version_into_int(release_info["version"]):
-                #                     break
-                #                 else:
-                #                     assert False, "@@@@平台显示已经完成覆盖安装了app, 终端发现没有安装高版本的app，还是原来的版本， 请检查！！！！"
-                #     # wait upgrade 3 mins at most
-                #     if self.app_page.get_current_time() > self.app_page.return_end_time(now_time, 180):
-                #         assert False, "@@@@3分钟还没有静默安装完相应的app， 请检查！！！"
-                #     self.app_page.refresh_page()
-                #     self.app_page.time_sleep(5)
 
                 now_time = self.app_page.get_current_time()
                 shell_app_apk_name = release_info["package"] + "_%s.apk" % release_info["version"]
@@ -1061,6 +908,8 @@ class TestPubilcPage:
                     print("app 推送选择了安装完成后自动运行app, app安装完后2分钟内还没自动运行")
                 self.android_mdm_page.stop_app(release_info["package"])
                 self.android_mdm_page.rm_file("system/app/%s" % test_yml['app_info']['low_version_app'])
+                print("*******************静默升级系统app用例结束***************************")
+                log.info("*******************静默升级系统app用例结束***************************")
                 break
             except Exception as e:
                 if self.app_page.service_is_normal():
@@ -1072,12 +921,13 @@ class TestPubilcPage:
                     self.android_mdm_page.confirm_system_app_uninstalled()
                     self.app_page.go_to_new_address("apps")
 
-    @allure.feature('MDM_public-test1111')
+    @allure.feature('MDM_public')
     @allure.title("public case- 静默ota升级")
     def test_silent_ota_upgrade(self, del_all_ota_release_log, go_to_ota_page, delete_ota_package_relate):
         while True:
             try:
-
+                print("*******************静默ota升级用例开始***************************")
+                log.info("*******************静默ota升级用例开始***************************")
                 release_info = {"package_name": test_yml['ota_packages_info']['package_name'], "sn": self.device_sn,
                                 "silent": 0, "category": "NO Limit", "network": "NO Limit"}
                 download_tips = "Foundanewfirmware,whethertoupgrade?"
@@ -1092,7 +942,7 @@ class TestPubilcPage:
                     "@@@@释放的ota升级包比当前固件版本版本低， 请检查！！！"
 
                 # reboot
-                self.android_mdm_page.reboot_device(self.wifi_ip)
+                self.android_mdm_page.reboot_device_no_root(self.wifi_ip)
                 # search package
 
                 device_current_firmware_version = self.android_mdm_page.check_firmware_version()
@@ -1146,25 +996,6 @@ class TestPubilcPage:
                     self.ota_page.time_sleep(30)
                     self.ota_page.refresh_page()
                 print("************************下载完成*************************************")
-                # now_time = self.ota_page.get_current_time()
-                # while True:
-                #     download_file_size = self.android_mdm_page.get_file_size_in_device(release_info["package_name"])
-                #     package_hash_value = self.android_mdm_page.calculate_sha256_in_device(release_info["package_name"])
-                #     if download_file_size == act_ota_package_size and package_hash_value == act_ota_package_hash_value:
-                #         print("原来升级包的 package_hash_value：", package_hash_value)
-                #         print("下载完成后的 package_hash_value：", act_ota_package_hash_value)
-                #         log.info("原来升级包的 package_hash_value：%s" % str(package_hash_value))
-                #         log.info("下载完成后的 package_hash_value：%s" % str(act_ota_package_hash_value))
-                #         break
-                #
-                #     if self.ota_page.get_current_time() > self.ota_page.return_end_time(now_time, 1200):
-                #         err_msg = "@@@@20分钟后还没有下载完相应的ota package， 请检查！！！"
-                #         log.error(err_msg)
-                #         print(err_msg)
-                #         assert False, err_msg
-                #     self.ota_page.time_sleep(10)
-
-                # check upgrade
                 if upgrade_flag == 0:
                     self.ota_page.refresh_page()
                     report_time = self.ota_page.get_current_time()
@@ -1197,11 +1028,14 @@ class TestPubilcPage:
                        self.ota_page.transfer_version_into_int(
                            after_upgrade_version), "@@@@升级后的固件版本为%s, ota升级失败， 请检查！！！" % after_upgrade_version
                 print("************************静默ota升级完成升级完成完成*************************************")
+                print("*******************静默ota升级用例结束***************************")
+                log.info("*******************静默ota升级用例结束***************************")
                 break
             except Exception as e:
                 if self.ota_page.service_is_normal():
                     assert False, e
                 else:
+                    self.content_page.recovery_after_service_unavailable("ota", case_pack.user_info)
                     self.ota_page.delete_all_ota_release_log()
                     self.ota_page.go_to_new_address("ota")
                     self.android_mdm_page.del_all_downloaded_zip()
@@ -1209,6 +1043,7 @@ class TestPubilcPage:
 
     @allure.feature('MDM_public')
     @allure.title("public case-推送开机logo/动画")
+    @allure.story('MDM-Show')
     def test_release_boot_logo_and_animation(self, del_all_content_release_logs, del_all_content_file):
         # "All Files" "Normal Files" "Boot Animations" "Wallpaper" "LOGO"
         while True:
@@ -1234,24 +1069,6 @@ class TestPubilcPage:
                 self.content_page.time_sleep(3)
                 assert len(self.content_page.get_content_list()) == 1, "@@@@平台上没有机动画： %s, 请检查" % animation
                 self.content_page.release_content_file(self.device_sn)
-                # check release log
-                # self.content_page.go_to_new_address("content/release")
-                # self.content_page.time_sleep(3)
-                # now_time = self.content_page.get_current_time()
-                # while True:
-                #     release_len = len(self.content_page.get_content_latest_release_log_list(send_time, release_info))
-                #     print("release_len", release_len)
-                #     if release_len == 1:
-                #         break
-                #     elif release_len > 1:
-                #         assert False, "@@@@推送一次机动画，有多条释放记录，请检查！！！"
-                #     if self.content_page.get_current_time() > self.content_page.return_end_time(now_time):
-                #         assert False, "@@@@没有相应的机动画 release log， 请检查！！！"
-                #     self.content_page.time_sleep(3)
-                #     self.content_page.refresh_page()
-
-                # check upgrade log
-                # check if the upgrade log appeared, if appeared, break
 
                 now_time = self.content_page.get_current_time()
                 while True:
@@ -1261,6 +1078,7 @@ class TestPubilcPage:
                         assert False, "@@@@没有相应的下载记录， 请检查！！！"
                     self.content_page.time_sleep(5)
                 print("*************************************文件下载记录检测完毕**************************************")
+                log.info("*************************************文件下载记录检测完毕**************************************")
                 now_time = self.content_page.get_current_time()
                 while True:
                     if file_hash_value == self.android_mdm_page.calculate_sha256_in_device(animation):
@@ -1270,42 +1088,7 @@ class TestPubilcPage:
                     self.content_page.time_sleep(5)
 
                 print("*************************************设备检测到文件下载完毕**************************************")
-
-                # self.content_page.go_to_new_address("content/log")
-                # now_time = self.content_page.get_current_time()
-                # while True:
-                #     release_len = len(self.content_page.get_content_latest_upgrade_log(send_time, release_info))
-                #     if release_len == 1:
-                #         break
-                #     if self.content_page.get_current_time() > self.content_page.return_end_time(now_time):
-                #         assert False, "@@@@没有相应的 upgrade log， 请检查！！！"
-                #     self.content_page.time_sleep(5)
-                #     self.content_page.refresh_page()
-
-                # check the app action in app upgrade logs, if download complete or upgrade complete, break
-                # now_time = self.content_page.get_current_time()
-                # while True:
-                #     upgrade_list = self.content_page.get_content_latest_upgrade_log(send_time, release_info)
-                #     if len(upgrade_list) != 0:
-                #         action = upgrade_list[0]["Action"]
-                #         print(action)
-                #         if self.content_page.get_action_status(action) == 2 or self.content_page.get_action_status(
-                #                 action) == 7:
-                #             # check the app size in device, check if app download fully
-                #             if not self.android_mdm_page.download_file_is_existed(animation):
-                #                 assert False, "@@@@平台显示下载完整， 终端查询不存在此文件， 请检查！！！！"
-                #             size = self.android_mdm_page.get_file_size_in_device(animation)
-                #             print("终端下载后的的size大小：", size)
-                #             assert file_size == size, "@@@@平台显示下载完成， 终端的包下载不完整，请检查！！！"
-                #             assert file_hash_value == self.android_mdm_page.calculate_sha256_in_device(
-                #                 animation), "@@@@平台显示下载完成， 终端的包下载不完整，请检查！！！"
-                #             break
-                #     # wait 20 min
-                #     if self.content_page.get_current_time() > self.content_page.return_end_time(now_time, 1800):
-                #         assert False, "@@@@20分钟还没有下载完相应的文件， 请检查！！！"
-                #     self.content_page.time_sleep(5)
-                #     self.content_page.refresh_page()
-
+                log.info("**********************************设备检测到文件下载完毕**************************************")
                 # check upgrade
                 self.content_page.go_to_new_address("content/log")
                 report_now_time = self.content_page.get_current_time()
@@ -1325,8 +1108,8 @@ class TestPubilcPage:
                             report_now_time = self.content_page.get_current_time()
                     self.content_page.time_sleep(5)
                     self.content_page.refresh_page()
-                print(
-                    "*****************************************动画推送完成*********************************************************")
+                print("*****************************************动画推送完成*********************************************************")
+                log.info("*****************************************动画推送完成*********************************************************")
                 # release logo
                 i = 0
                 for logo in logos:
@@ -1344,59 +1127,8 @@ class TestPubilcPage:
                     self.content_page.time_sleep(3)
                     assert len(self.content_page.get_content_list()) == 1, "@@@@平台上没有该logo图片： %s, 请检查" % logo
                     self.content_page.release_content_file(self.device_sn)
-                    # check release log
-                    # self.content_page.go_to_new_address("content/release")
-                    # self.content_page.time_sleep(3)
-                    # now_time = self.content_page.get_current_time()
-                    # while True:
-                    #     release_len = len(self.content_page.get_content_latest_release_log_list(send_time, release_info))
-                    #     print("release_len", release_len)
-                    #     if release_len == 1:
-                    #         break
-                    #     elif release_len > 1:
-                    #         assert False, "@@@@推送一次开机logo，有多条释放记录，请检查！！！"
-                    #     if self.content_page.get_current_time() > self.content_page.return_end_time(now_time):
-                    #         assert False, "@@@@没有相应的开机logo release log， 请检查！！！"
-                    #     self.content_page.time_sleep(3)
-                    #     self.content_page.refresh_page()
-                    #
-                    # # check upgrade log
-                    # # check if the upgrade log appeared, if appeared, break
-                    # self.content_page.go_to_new_address("content/log")
-                    # now_time = self.content_page.get_current_time()
-                    # while True:
-                    #     release_len = len(self.content_page.get_content_latest_upgrade_log(send_time, release_info))
-                    #     if release_len == 1:
-                    #         break
-                    #     if self.content_page.get_current_time() > self.content_page.return_end_time(now_time):
-                    #         assert False, "@@@@没有相应的 upgrade log， 请检查！！！"
-                    #     self.content_page.time_sleep(5)
-                    #     self.content_page.refresh_page()
-                    #
-                    # # check the app action in app upgrade logs, if download complete or upgrade complete, break
-                    # now_time = self.content_page.get_current_time()
-                    # while True:
-                    #     upgrade_list = self.content_page.get_content_latest_upgrade_log(send_time, release_info)
-                    #     if len(upgrade_list) != 0:
-                    #         action = upgrade_list[0]["Action"]
-                    #         print(action)
-                    #         if self.content_page.get_action_status(action) == 2 or self.content_page.get_action_status(
-                    #                 action) == 7:
-                    #             # check the app size in device, check if app download fully
-                    #             if not self.android_mdm_page.download_file_is_existed(logo):
-                    #                 assert False, "@@@@平台显示下载完整， 终端查询不存在此文件， 请检查！！！！"
-                    #             size = self.android_mdm_page.get_file_size_in_device(logo)
-                    #             print("终端下载后的的size大小：", size)
-                    #             assert file_size == size, "@@@@平台显示下载完成， 终端的包下载不完整，请检查！！！"
-                    #             break
-                    #     # wait 20 min
-                    #     if self.content_page.get_current_time() > self.content_page.return_end_time(now_time, 1800):
-                    #         assert False, "@@@@20分钟还没有下载完相应的文件， 请检查！！！"
-                    #     self.content_page.time_sleep(5)
-                    #     self.content_page.refresh_page()
 
                     # check upgrade
-
                     now_time = self.content_page.get_current_time()
                     while True:
                         if self.android_mdm_page.download_file_is_existed(logo):
@@ -1405,6 +1137,7 @@ class TestPubilcPage:
                             assert False, "@@@@没有相应的下载记录， 请检查！！！"
                         self.content_page.time_sleep(5)
                     print("*************************************文件下载记录检测完毕**************************************")
+                    log.info("*************************************文件下载记录检测完毕**************************************")
                     now_time = self.content_page.get_current_time()
                     while True:
                         if file_hash_value == self.android_mdm_page.calculate_sha256_in_device(animation):
@@ -1413,6 +1146,7 @@ class TestPubilcPage:
                             assert False, "@@@@超过15分钟还没有下载完毕，请检查！！！"
                         self.content_page.time_sleep(5)
                     print("*************************************文件下载完毕**************************************")
+                    log.info("*************************************文件下载完毕**************************************")
                     self.content_page.go_to_new_address("content/log")
                     report_time = self.content_page.get_current_time()
                     while True:
@@ -1420,11 +1154,13 @@ class TestPubilcPage:
                         if len(upgrade_list) != 0:
                             action = upgrade_list[0]["Action"]
                             print("action", action)
+                            log.info("action: %s" % action)
                             if self.content_page.get_action_status(action) == 7:
                                 break
                         # wait upgrade 3 min at most
                         if self.content_page.get_current_time() > self.content_page.return_end_time(report_time, 180):
                             if self.content_page.service_is_normal():
+                                log.error("@@@@3分钟还没有设置完相应的开机logo， 请检查！！！")
                                 assert False, "@@@@3分钟还没有设置完相应的开机logo， 请检查！！！"
                             else:
                                 self.content_page.recovery_after_service_unavailable("content/log", case_pack.user_info)
@@ -1432,10 +1168,13 @@ class TestPubilcPage:
                         self.content_page.time_sleep(5)
                         self.content_page.refresh_page()
 
-                    # case_pack.AlertData().getAlert("请关掉提示框并且查看启动logo和动画")
+                    case_pack.AlertData().getAlert("请关掉提示框并且查看启动logo和动画")
                     self.android_mdm_page.reboot_device(self.wifi_ip)
                     self.content_page.time_sleep(5)
-                    break
+
+                print("*******************推送开机logo/动画结束***************************")
+                log.info("*******************推送开机logo/动画结束***************************")
+                break
             except Exception as e:
                 if self.device_page.service_is_normal():
                     assert False, e
@@ -1630,108 +1369,3 @@ class TestPubilcPage:
         self.device_page.refresh_page()
         assert "Off" in opt_case.get_single_device_list(sn)[0]["Status"], "@@@@已发送关机命令， 设备还显示在线状态"
         # check device
-
-    @allure.feature('MDM_public-debug')
-    @allure.title("Devices- -- test in the last")
-    def test_debug_service(self):
-        while True:
-            try:
-                self.app_page.go_to_new_address("apps/logs")
-                print(self.app_page.get_service_status())
-                print(self.app_page.extract_integers(self.app_page.get_service_status()))
-                pass_flag = 1
-                report_now_time = self.app_page.get_current_time()
-                while True:
-                    print("1111111111111111111111")
-                    self.app_page.time_sleep(2)
-                    self.app_page.refresh_page()
-                    pass_flag += 1
-                    if self.app_page.get_current_time() > self.app_page.return_end_time(report_now_time, 120):
-
-                        if self.app_page.service_is_normal():
-                            assert False, "@@@@5分钟还没有终端或者平台还没显示安装完相应的app， 请检查！！！"
-                        else:
-                            print("===================服务器崩了==================================")
-                            self.app_page.recovery_after_service_unavailable("apps/logs", case_pack.user_info)
-                            print("===================服务器恢复了==================================")
-                            report_now_time = self.app_page.get_current_time()
-            except Exception as e:
-                if self.app_page.service_is_normal():
-                    assert False, e
-                else:
-                    self.app_page.recovery_after_service_unavailable("apps/logs", case_pack.user_info)
-                    flag = 1
-                    # self.app_page.go_to_new_address("apps")
-                    print("**************************崩了恢复重新开始用例**********************************")
-            if flag == 1:
-                print("##########################################")
-                break
-
-    @allure.feature('MDM_public1111_test_test111')
-    @allure.title("public case- 长时间检测设备在线情况")
-    def test_test(self):
-        # param = {"android_page": td, "sn": sn, "ip": ip}
-        data = opt_case.check_single_device(self.device_sn)
-        length = 1
-        now = case_pack.time.strftime('%Y-%m-%d %H:%M', case_pack.time.localtime(case_pack.time.time()))
-        for i in range(length):
-            if self.android_mdm_page.public_alert_show(3):
-                self.android_mdm_page.clear_download_and_upgrade_alert()
-            msg = "%s:test%d" % (now, i)
-            # get thread lock
-            # lock.acquire()
-            self.device_page.refresh_page()
-            device_info = opt_case.get_single_device_list(self.device_sn)[0]
-            if self.device_page.upper_transfer("on") in self.device_page.remove_space_and_upper(
-                    device_info["Status"]):
-                if self.device_page.upper_transfer("Locked") in self.device_page.remove_space_and_upper(
-                        device_info["Lock Status"]):
-                    self.device_page.select_device(self.device_sn)
-                    self.device_page.click_unlock()
-                    self.device_page.refresh_page()
-                self.device_page.select_device(self.device_sn)
-                self.device_page.click_send_btn()
-                self.device_page.msg_input_and_send(msg)
-                # unlock thread
-                # lock.release()
-                # check message in device
-                # self.android_mdm_page.screen_keep_on()
-                if not self.android_mdm_page.public_alert_show(60):
-                    continue
-                # try:
-                self.android_mdm_page.confirm_received_text(msg, timeout=5)
-                # except AttributeError:
-                #     continue
-                # try:
-                self.android_mdm_page.click_msg_confirm_btn()
-                self.android_mdm_page.confirm_msg_alert_fade(msg)
-                # except Exception:
-                #     pass
-            self.android_mdm_page.reboot_device(self.device_sn)
-            if self.android_mdm_page.public_alert_show(timeout=5):
-                self.android_mdm_page.clear_download_and_upgrade_alert()
-            self.device_page.refresh_page()
-            # get lock
-            # lock.acquire()
-            device_info_after_reboot = opt_case.get_single_device_list(self.device_sn)[0]
-            if self.device_page.upper_transfer("on") in self.device_page.remove_space_and_upper(
-                    device_info_after_reboot["Status"]):
-                self.device_page.select_device(self.device_sn)
-                self.device_page.click_send_btn()
-                self.device_page.msg_input_and_send(msg)
-                # lock.release()
-                # check message in device
-                # self.android_mdm_page.screen_keep_on()
-                if not self.android_mdm_page.public_alert_show(60):
-                    continue
-                try:
-                    self.android_mdm_page.confirm_received_text(msg, timeout=5)
-                except AttributeError:
-                    continue
-                try:
-                    self.android_mdm_page.click_msg_confirm_btn()
-                    self.android_mdm_page.confirm_msg_alert_fade(msg)
-                except Exception:
-                    pass
-            # online_flag += 1
-            self.device_page.refresh_page()

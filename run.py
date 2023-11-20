@@ -56,8 +56,8 @@ if __name__ == '__main__':
     shutil.copy(env_path, xml_report_path)
 
     # # 定义测试集
-    allure_list = '--allure-features=MDM_test02_login,MDM_public-test1111'
-    # allure_story = '--allure-stories=pytest_debug_story'
+    allure_list = '--allure-features=MDM_test02_login,MDM_usb-test,MDM_public'
+    # allure_list = '--allure-stories=MDM_test02_login,MDM-Show'
     # pytest -s --allure-features pytest_debug
     # pytest -s --allure-features pytest_debug --allure-stories pytest_debug_story
 
