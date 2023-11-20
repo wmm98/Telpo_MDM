@@ -169,7 +169,7 @@ class TestDevicesPage:
     @allure.feature('MDM_device_test')
     @allure.story('MDM-Show')
     @allure.title("Devices- 锁机和解锁")
-    @pytest.mark.flaky(reruns=1, reruns_delay=3)
+    # @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_lock_and_unlock_single_device(self, go_to_and_return_device_page):
         while True:
             try:
@@ -315,7 +315,7 @@ class TestDevicesPage:
 
     @allure.feature('MDM_device_test')
     @allure.title("Devices- 重置设备TPUI密码")
-    @pytest.mark.flaky(reruns=1, reruns_delay=3)
+    # @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_reset_TPUI_password(self, unlock_screen, go_to_and_return_device_page):
         while True:
             try:
@@ -390,7 +390,7 @@ class TestDevicesPage:
 
     @allure.feature('MDM_device_test--covered in below test case')
     @allure.title("Devices- AIMDM发送包含特殊字符串信息")
-    @pytest.mark.flaky(reruns=1, reruns_delay=3)
+    # @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_send_message_to_single_device(self, go_to_and_return_device_page):
         exp_success_send_text = "Message Sent"
         # sn would change after debug with devices
@@ -498,7 +498,7 @@ class TestDevicesPage:
 
     @allure.feature('MDM_device_test02222')
     @allure.title("Devices- 恢复出厂设置压测10次， 计算准备率")
-    @pytest.mark.flaky(reruns=1, reruns_delay=1)
+    # @pytest.mark.flaky(reruns=1, reruns_delay=1)
     def test_factory_recovery_pressure_testing(self, go_to_and_return_device_page):
         self.page.factory_reset()
         now_time = self.page.get_current_time()
@@ -544,16 +544,21 @@ class TestDevicesPage:
                 self.page.select_device(sn)
                 self.page.click_server_btn()
                 self.page.api_transfer(release_version_api)
+                self.page.time_sleep(5)
                 self.android_mdm_page.reboot_device(self.wifi_ip)
                 # check if the api had changed in device
                 now_time = self.page.get_current_time()
                 while True:
-                    if release_version_api in self.android_mdm_page.u2_send_command("cat /%s/%s" % (root_dir, test_yml["work_app"]["api_txt"])):
-                        log.info("终端根目录下的aip 已经改变")
-                        print("终端根目录下的aip 已经改变")
+                    api_text = self.android_mdm_page.u2_send_command("cat /%s/%s" % (root_dir, test_yml["work_app"]["api_txt"]))
+                    print(api_text)
+                    log.info("根目录下的api: %s" % api_text)
+                    if release_version_api in api_text:
+                        log.info("终端根目录下的api 已经改变")
+                        print("终端根目录下的api 已经改变")
                         break
                     if self.page.get_current_time() > self.page.return_end_time(now_time):
                         assert False, "完全启动超过3分钟api还没有改变， 请检查！！！"
+                    self.page.time_sleep(3)
                 # check if device is offline in test version
                 self.page.refresh_page()
                 test_device_info = opt_case.get_single_device_list(sn)

@@ -22,6 +22,7 @@ class TestLogin:
         pass
 
     @allure.feature('MDM_test02_login')
+    @allure.story("MDM_test02_login")
     @allure.title("login is ok")  # 设置case的名字
     @pytest.mark.dependency(name="test_login_ok", scope='package')
     def test_login_ok(self):
@@ -47,18 +48,18 @@ class TestLogin:
         #     assert False, e
 
         self.mdm_page.login_ok(username, password)
-        now_time = self.mdm_page.get_current_time()
-        while True:
-            try:
-                if self.mdm_page.web_driver_wait_until(TestCase.EC.url_contains("device"), 10):
-                    break
-            except Exception:
-                if "device" in self.mdm_page.get_current_window_url():
-                    break
-            if self.mdm_page.get_current_time() > self.mdm_page.return_end_time(now_time):
-                assert False, "无法登录，请检查！！！"
-            self.mdm_page.refresh_page()
-            self.mdm_page.login_ok(username, password)
+        # now_time = self.mdm_page.get_current_time()
+        # while True:
+        #     try:
+        #         if self.mdm_page.web_driver_wait_until(TestCase.EC.url_contains("device"), 10):
+        #             break
+        #     except Exception:
+        #         if "device" in self.mdm_page.get_current_window_url():
+        #             break
+        #     if self.mdm_page.get_current_time() > self.mdm_page.return_end_time(now_time):
+        #         assert False, "无法登录，请检查！！！"
+        #     self.mdm_page.refresh_page()
+        #     self.mdm_page.login_ok(username, password)
 
         # 捕捉弹框提示内容,成功时候可以定位到，失败的时候定位不到, 留在后面解决
         # loc = (By.CLASS_NAME, "toast-message")

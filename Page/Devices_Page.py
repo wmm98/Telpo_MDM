@@ -266,6 +266,7 @@ class DevicesPage(TelpoMDMPage):
 
     def api_transfer(self, api_url):
         self.input_text(self.loc_api_box, api_url)
+        self.time_sleep(5)
         self.click(self.loc_api_send_btn)
         self.confirm_tips_alert_show(self.loc_api_send_btn)
         self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_api_send_btn)
