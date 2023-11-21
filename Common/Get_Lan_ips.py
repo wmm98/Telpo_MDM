@@ -1,6 +1,9 @@
 import threading
 from ping3 import ping
 import socket
+from Common import DealAlert
+
+alert = DealAlert.AlertData()
 
 
 class GetLanIps:
@@ -17,6 +20,7 @@ class GetLanIps:
                 self.lock.acquire()
                 # except local host
                 if not self.get_local_ip() == ip_:
+                    # print(ip_)
                     self.ips_list.append(ip_)
                 # print(result1)
                 # unlock
@@ -25,6 +29,7 @@ class GetLanIps:
             print(e)
 
     def start_thread(self):
+        self.ips_list = []
         threads = []
         if self.get_local_ip() != 0:
             base = ".".join((self.get_local_ip().split(".")[:3])) + "."
@@ -49,3 +54,10 @@ class GetLanIps:
 
     def get_ips_list(self):
         return self.ips_list
+
+    def scan_devices(self):
+        while True:
+            ips = self.get_ips_list()
+            if "是" in alert.get_yes_or_no("有 %d 台设备在线，数目正确吗， 正确请按下”是“， 否则按下“否”重新进行扫描设备" % len(ips)):
+                break
+            self.start_thread()

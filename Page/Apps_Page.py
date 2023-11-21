@@ -391,6 +391,7 @@ class APPSPage(TelpoMDMPage):
 
     def search_app_by_name(self, app_name):
         try:
+            self.time_sleep(5)
             self.click(self.loc_search_btn)
             self.confirm_alert_existed(self.loc_search_btn)
             self.input_text(self.loc_search_app_name, app_name)

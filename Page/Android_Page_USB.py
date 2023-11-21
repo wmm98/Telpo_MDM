@@ -3,6 +3,7 @@ from Page.Interface_Page import interface
 
 sub_shell = public_pack.Shell.Shell()
 conf = public_pack.Config()
+log = public_pack.MyLog()
 
 
 class AndroidBasePageUSB(interface):

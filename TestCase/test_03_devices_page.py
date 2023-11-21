@@ -517,7 +517,7 @@ class TestDevicesPage:
     @allure.feature('MDM_device_test')
     @allure.story('MDM-Show')
     @allure.title("Devices- AIMDM 切换正式测试服服务api ")
-    # @pytest.mark.flaky(reruns=5, reruns_delay=3)
+    @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_transfer_api_server(self, push_test_api_to_device):
         while True:
             try:

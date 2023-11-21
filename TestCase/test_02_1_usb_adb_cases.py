@@ -1,4 +1,5 @@
 import allure
+import warnings
 import pytest
 import TestCase as case_pack
 
@@ -30,37 +31,42 @@ class TestNetworkCases:
         self.android_mdm_page.device_unlock()
 
     def teardown_class(self):
-        # pass
-        self.android_mdm_page.confirm_wifi_adb_connected(self.wifi_ip)
-        self.page.delete_app_install_and_uninstall_logs()
-        self.android_mdm_page.del_all_downloaded_apk()
-        self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
-        self.android_mdm_page.del_updated_zip()
-        self.android_mdm_page.reboot_device(self.wifi_ip)
+        pass
+        # self.android_mdm_page.confirm_wifi_adb_connected(self.wifi_ip)
+        # self.page.delete_app_install_and_uninstall_logs()
+        # self.android_mdm_page.del_all_downloaded_apk()
+        # self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
+        # self.android_mdm_page.del_updated_zip()
+        # self.android_mdm_page.reboot_device(self.wifi_ip)
 
-    @allure.feature('MDM_usb-test')
+    @allure.feature('MDM_usb-test11112222')
     @allure.story('MDM-Show')
     @allure.title("Apps- 断网重连获取aimdm消耗的流量")
+    # @pytest.mark.filterwarnings("ignore::DeprecationWarning")
+    @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_reconnect_get_mobile_data(self, connect_wifi_adb_USB):
         while True:
+            warnings.filterwarnings("ignore", category=Warning, message="androguard.core.api_specific_resources")
             try:
                 print("***************************断网重连获取aimdm消耗的流量用例开始*********************")
                 log.info("***************************断网重连获取aimdm消耗的流量用例开始*********************")
                 length = 2
                 self.android_mdm_page.confirm_wifi_btn_close()
                 self.android_mdm_page.disconnect_ip(self.device_sn)
+                log.info("确认关闭wifi")
                 self.android_mdm_page.open_mobile_data()
                 now_time = self.android_mdm_page.get_current_time()
                 while True:
                     try:
-                        if self.android_mdm_page.ping_network():
+                        if self.android_mdm_page.ping_network(timeout=300):
                             break
                     except AssertionError:
                         pass
                     self.android_mdm_page.open_mobile_data()
                     if now_time > self.device_page.return_end_time(now_time, 90):
                         assert False, "@@@@@无法开启移动网络， 请检查！！！！"
-                    self.device_page.time_sleep(1)
+                    self.device_page.time_sleep(2)
+                log.info("确认打开流量卡， 并且可以上网")
                 opt_case.check_single_device(self.device_sn)
                 base_directory = "Mobile_Data_Used"
                 first_data_used = 0
@@ -146,9 +152,9 @@ class TestNetworkCases:
                     self.page.go_to_new_address("devices")
 
     @allure.feature('MDM_usb-test')
-    @allure.story('MDM-Show')
+    @allure.story('MDM-Show111')
     @allure.title("Apps-限定4G网络推送app")
-    # @pytest.mark.flaky(reruns=1, reruns_delay=3)
+    @pytest.mark.flaky(reruns=1, reruns_delay=2)
     def test_release_app_limit_4G(self, connect_wifi_adb_USB, del_all_app_release_log,
                                   del_all_app_uninstall_release_log, uninstall_multi_apps, go_to_app_page):
         release_info = {"package_name": test_yml['app_info']['other_app_limit_network_A'], "sn": self.device_sn,
@@ -216,6 +222,15 @@ class TestNetworkCases:
                 self.page.time_sleep(3)
                 log.info("打开流量数据")
                 self.android_mdm_page.open_mobile_data()
+                while True:
+                    try:
+                        if self.android_mdm_page.ping_network(timeout=300):
+                            break
+                    except AssertionError:
+                        pass
+                    self.android_mdm_page.open_mobile_data()
+                    if now_time > self.device_page.return_end_time(now_time, 90):
+                        assert False, "@@@@@无法开启移动网络， 请检查！！！！"
                 log.info("成功过打开流量数据")
                 # check if app download in 4G environment
                 # check the app action in app upgrade logs, if download complete or upgrade complete, break
@@ -342,7 +357,7 @@ class TestNetworkCases:
 
     @allure.feature('MDM_usb-test')
     @allure.title("Apps-限定WIFI网络推送app")
-    # @pytest.mark.flaky(reruns=1, reruns_delay=3)
+    @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_release_app_limit_wifi(self, connect_wifi_adb_USB, del_all_app_release_log,
                                     del_all_app_uninstall_release_log,
                                     go_to_app_page):
@@ -496,6 +511,7 @@ class TestNetworkCases:
 
     @allure.feature('MDM_usb-test')
     @allure.title("OTA-OTA断网重连5次断点续传")
+    @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_upgrade_OTA_package_reconnect_network_5times(self, connect_wifi_adb_USB, del_all_ota_release_log,
                                                           go_to_ota_page,
                                                           delete_ota_package_relate):
@@ -676,6 +692,7 @@ class TestNetworkCases:
 
     @allure.feature('MDM_usb-test')
     @allure.title("public case- 设备下线无法发送捕捉日志命令")
+    @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_fail_to_catch_log_when_offline(self, go_to_device_page, connect_wifi_adb_USB):
         while True:
             try:
@@ -725,7 +742,7 @@ class TestNetworkCases:
     @allure.feature('MDM_usb-test')
     @allure.title("Apps-推送低版本的APP/卸载后重新安装")
     @pytest.mark.dependency(name="test_release_app_ok", scope='package')
-    # @pytest.mark.flaky(reruns=1, reruns_delay=3)
+    @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_release_low_version_app(self, del_all_app_release_log, del_all_app_uninstall_release_log, go_to_app_page):
         release_info = {"package_name": test_yml['app_info']['low_version_app'], "sn": self.device_sn,
                         "silent": "Yes", "download_network": "NO Limit"}
