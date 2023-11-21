@@ -31,22 +31,24 @@ class TestNetworkCases:
         self.android_mdm_page.device_unlock()
 
     def teardown_class(self):
-        pass
-        # self.android_mdm_page.confirm_wifi_adb_connected(self.wifi_ip)
-        # self.page.delete_app_install_and_uninstall_logs()
-        # self.android_mdm_page.del_all_downloaded_apk()
-        # self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
-        # self.android_mdm_page.del_updated_zip()
-        # self.android_mdm_page.reboot_device(self.wifi_ip)
+        # pass
+        self.android_mdm_page.confirm_wifi_adb_connected(self.wifi_ip)
+        self.page.delete_app_install_and_uninstall_logs()
+        self.android_mdm_page.del_all_downloaded_apk()
+        self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
+        self.android_mdm_page.del_updated_zip()
+        self.android_mdm_page.reboot_device(self.wifi_ip)
 
-    @allure.feature('MDM_usb-test11112222')
+    @allure.feature('MDM_usb-test')
     @allure.story('MDM-Show')
     @allure.title("Apps- 断网重连获取aimdm消耗的流量")
-    # @pytest.mark.filterwarnings("ignore::DeprecationWarning")
+    @pytest.mark.filterwarnings("ignore")
     @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_reconnect_get_mobile_data(self, connect_wifi_adb_USB):
+        # warnings.filterwarnings("ignore", category=Warning, message="androguard.core.api_specific_resources",
+        #                         append=True)
         while True:
-            warnings.filterwarnings("ignore", category=Warning, message="androguard.core.api_specific_resources")
+            # warnings.filterwarnings("ignore", category=Warning, message="androguard.core.api_specific_resources", append=True)
             try:
                 print("***************************断网重连获取aimdm消耗的流量用例开始*********************")
                 log.info("***************************断网重连获取aimdm消耗的流量用例开始*********************")
@@ -154,6 +156,7 @@ class TestNetworkCases:
     @allure.feature('MDM_usb-test')
     @allure.story('MDM-Show111')
     @allure.title("Apps-限定4G网络推送app")
+    @pytest.mark.filterwarnings("ignore")
     @pytest.mark.flaky(reruns=1, reruns_delay=2)
     def test_release_app_limit_4G(self, connect_wifi_adb_USB, del_all_app_release_log,
                                   del_all_app_uninstall_release_log, uninstall_multi_apps, go_to_app_page):
@@ -357,6 +360,7 @@ class TestNetworkCases:
 
     @allure.feature('MDM_usb-test')
     @allure.title("Apps-限定WIFI网络推送app")
+    @pytest.mark.filterwarnings("ignore")
     @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_release_app_limit_wifi(self, connect_wifi_adb_USB, del_all_app_release_log,
                                     del_all_app_uninstall_release_log,
@@ -511,6 +515,7 @@ class TestNetworkCases:
 
     @allure.feature('MDM_usb-test')
     @allure.title("OTA-OTA断网重连5次断点续传")
+    @pytest.mark.filterwarnings("ignore")
     @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_upgrade_OTA_package_reconnect_network_5times(self, connect_wifi_adb_USB, del_all_ota_release_log,
                                                           go_to_ota_page,
@@ -692,6 +697,7 @@ class TestNetworkCases:
 
     @allure.feature('MDM_usb-test')
     @allure.title("public case- 设备下线无法发送捕捉日志命令")
+    @pytest.mark.filterwarnings("ignore")
     @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_fail_to_catch_log_when_offline(self, go_to_device_page, connect_wifi_adb_USB):
         while True:
@@ -742,6 +748,7 @@ class TestNetworkCases:
     @allure.feature('MDM_usb-test')
     @allure.title("Apps-推送低版本的APP/卸载后重新安装")
     @pytest.mark.dependency(name="test_release_app_ok", scope='package')
+    @pytest.mark.filterwarnings("ignore")
     @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_release_low_version_app(self, del_all_app_release_log, del_all_app_uninstall_release_log, go_to_app_page):
         release_info = {"package_name": test_yml['app_info']['low_version_app'], "sn": self.device_sn,
@@ -903,6 +910,7 @@ class TestNetworkCases:
 
     @allure.feature('MDM_usb-test')
     @allure.title("Apps-推送高版本APP覆盖安装/卸载后检测重新下载/卸载重启检查安装/同版本覆盖安装/低版本覆盖安装")
+    @pytest.mark.filterwarnings("ignore")
     @pytest.mark.dependency(depends=["test_release_app_ok"], scope='package')
     # @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_high_version_app_cover_low_version_app(self, del_all_app_release_log, del_all_app_uninstall_release_log,

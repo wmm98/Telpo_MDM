@@ -169,7 +169,8 @@ class TestDevicesPage:
     @allure.feature('MDM_device_test')
     @allure.story('MDM-Show')
     @allure.title("Devices- 锁机和解锁")
-    # @pytest.mark.flaky(reruns=1, reruns_delay=3)
+    @pytest.mark.filterwarnings("ignore")
+    @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_lock_and_unlock_single_device(self, go_to_and_return_device_page):
         while True:
             try:
@@ -236,7 +237,8 @@ class TestDevicesPage:
 
     @allure.feature('MDM_device_test')
     @allure.title("Devices- 发送设备重启指令：设备重启5次")
-    # @pytest.mark.flaky(reruns=1, reruns_delay=3)
+    @pytest.mark.filterwarnings("ignore")
+    @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_reboot_single_device_pressure_testing(self, connected_wifi_adb, go_to_and_return_device_page):
         while True:
             try:
@@ -288,7 +290,8 @@ class TestDevicesPage:
 
     @allure.feature('MDM_device_test')
     @allure.title("Devices- 日志的抓取")
-    # @pytest.mark.flaky(reruns=1, reruns_delay=3)
+    @pytest.mark.filterwarnings("ignore")
+    @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_cat_logs(self, go_to_and_return_device_page):
         while True:
             try:
@@ -315,7 +318,8 @@ class TestDevicesPage:
 
     @allure.feature('MDM_device_test')
     @allure.title("Devices- 重置设备TPUI密码")
-    # @pytest.mark.flaky(reruns=1, reruns_delay=3)
+    @pytest.mark.filterwarnings("ignore")
+    @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_reset_TPUI_password(self, unlock_screen, go_to_and_return_device_page):
         while True:
             try:
@@ -343,7 +347,8 @@ class TestDevicesPage:
 
     @allure.feature('MDM_device_test')
     @allure.title("Devices- 重置设备密码")
-    # @pytest.mark.flaky(reruns=1, reruns_delay=3)
+    @pytest.mark.filterwarnings("ignore")
+    @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_reset_device_password(self, unlock_screen, go_to_and_return_device_page):
         while True:
             try:
@@ -419,7 +424,8 @@ class TestDevicesPage:
 
     @allure.feature('MDM_device_test')
     @allure.title("Devices- AIMDM发消息压力测试")
-    # @pytest.mark.flaky(reruns=1, reruns_delay=1)
+    @pytest.mark.filterwarnings("ignore")
+    @pytest.mark.flaky(reruns=1, reruns_delay=1)
     def test_pressure_send_message_to_single_device(self, unlock_screen, go_to_and_return_device_page):
         while True:
             try:
@@ -498,7 +504,8 @@ class TestDevicesPage:
 
     @allure.feature('MDM_device_test02222')
     @allure.title("Devices- 恢复出厂设置压测10次， 计算准备率")
-    # @pytest.mark.flaky(reruns=1, reruns_delay=1)
+    @pytest.mark.filterwarnings("ignore")
+    @pytest.mark.flaky(reruns=1, reruns_delay=1)
     def test_factory_recovery_pressure_testing(self, go_to_and_return_device_page):
         self.page.factory_reset()
         now_time = self.page.get_current_time()
@@ -517,6 +524,7 @@ class TestDevicesPage:
     @allure.feature('MDM_device_test')
     @allure.story('MDM-Show')
     @allure.title("Devices- AIMDM 切换正式测试服服务api ")
+    @pytest.mark.filterwarnings("ignore")
     @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_transfer_api_server(self, push_test_api_to_device):
         while True:

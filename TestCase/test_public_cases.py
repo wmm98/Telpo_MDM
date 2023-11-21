@@ -52,6 +52,7 @@ class TestPublicPage:
 
     @allure.feature('MDM_public')
     @allure.title("public case-添加 content 种类--辅助测试用例")
+    @pytest.mark.filterwarnings("ignore")
     @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_add_content_category(self, go_to_content_page):
         while True:
@@ -73,6 +74,7 @@ class TestPublicPage:
 
     @allure.feature('MDM_public')
     @allure.title("public case-添加 content 文件--辅助测试用例")
+    @pytest.mark.filterwarnings("ignore")
     @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_add_content_file(self, go_to_content_page):
         while True:
@@ -107,6 +109,7 @@ class TestPublicPage:
     @allure.feature('MDM_public')
     @allure.story('MDM-Show')
     @allure.title("public case-推送壁纸--请在附件查看壁纸截图效果")
+    @pytest.mark.filterwarnings("ignore")
     @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_release_wallpaper(self, unlock_screen, del_all_content_release_logs):
         while True:
@@ -227,6 +230,7 @@ class TestPublicPage:
     @allure.feature('MDM_public')
     @allure.story('MDM-Show')
     @allure.title("OTA-OTA重启5次断点续传")
+    @pytest.mark.filterwarnings("ignore")
     @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_upgrade_OTA_package_reboot_5times(self, del_all_ota_release_log, go_to_ota_page,
                                                delete_ota_package_relate):
@@ -368,6 +372,7 @@ class TestPublicPage:
     @allure.feature('MDM_public')
     @allure.story('MDM-Show')
     @allure.title("public case-应用满屏推送--请在附件查看满屏截图效果")
+    @pytest.mark.filterwarnings("ignore")
     @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_release_app_full_screen(self, del_all_app_release_log, del_all_app_uninstall_release_log, go_to_app_page,
                                      uninstall_multi_apps):
@@ -500,6 +505,7 @@ class TestPublicPage:
 
     @allure.feature('MDM_public')
     @allure.title("public case-推送text.zip文件")
+    @pytest.mark.filterwarnings("ignore")
     @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_release_normal_files(self, del_all_content_release_logs):
         # "All Files" "Normal Files" "Boot Animations" "Wallpaper" "LOGO"
@@ -582,6 +588,7 @@ class TestPublicPage:
 
     @allure.feature('MDM_public')
     @allure.title("public case-多应用推送")
+    @pytest.mark.filterwarnings("ignore")
     @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_release_multi_apps(self, del_all_app_release_log, del_download_apk, uninstall_multi_apps):
         while True:
@@ -732,6 +739,7 @@ class TestPublicPage:
     @allure.feature('MDM_public')
     @allure.story('MDM-Show')
     @allure.title("public case-静默卸载正在运行中的app： 静默卸载/卸载正在运行的app")
+    @pytest.mark.filterwarnings("ignore")
     @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_silent_uninstall_app(self, del_all_app_release_log, del_all_app_uninstall_release_log, uninstall_multi_apps,
                            go_to_app_page):
@@ -807,6 +815,7 @@ class TestPublicPage:
 
     @allure.feature('MDM_public')
     @allure.title("public case- 静默升级系统app/推送安装成功后自动运行app")
+    @pytest.mark.filterwarnings("ignore")
     @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_upgrade_system_app(self, del_all_app_release_log, del_download_apk, uninstall_system_app):
         while True:
@@ -935,6 +944,7 @@ class TestPublicPage:
 
     @allure.feature('MDM_public')
     @allure.title("public case- 静默ota升级")
+    @pytest.mark.filterwarnings("ignore")
     def test_silent_ota_upgrade(self, del_all_ota_release_log, go_to_ota_page, delete_ota_package_relate):
         while True:
             try:
@@ -1056,6 +1066,7 @@ class TestPublicPage:
     @allure.feature('MDM_public')
     @allure.title("public case-推送开机logo/动画")
     @allure.story('MDM-Show')
+    @pytest.mark.filterwarnings("ignore")
     @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_release_boot_logo_and_animation(self, del_all_content_release_logs, del_all_content_file):
         # "All Files" "Normal Files" "Boot Animations" "Wallpaper" "LOGO"
