@@ -109,7 +109,7 @@ class TestPublicPage:
     @allure.feature('MDM_public')
     @allure.story('MDM-Show')
     @allure.title("public case-推送壁纸--请在附件查看壁纸截图效果")
-    @pytest.mark.filterwarnings("ignore")
+    # @pytest.mark.filterwarnings("ignore")
     @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_release_wallpaper(self, unlock_screen, del_all_content_release_logs):
         while True:
@@ -200,18 +200,18 @@ class TestPublicPage:
                             self.content_page.time_sleep(5)
                             self.content_page.refresh_page()
                         print("*************************壁纸：%s 平台显示已经设置完成*****************************" % paper)
-                        wallpaper_before_reboot = "%s\\wallpaper.jpg" % base_directory
-                        self.android_mdm_page.save_screenshot_to(wallpaper_before_reboot)
-                        self.android_mdm_page.upload_image_JPG(
-                            conf.project_path + "\\ScreenShot\\%s" % wallpaper_before_reboot,
-                            "wallpaper_before_reboot-%s" % str(i))
-                        # no test tomorrow to save time
-                        self.android_mdm_page.reboot_device(self.wifi_ip)
-                        wallpaper_after_reboot = "%s\\wallpaper_after_reboot.jpg" % base_directory
-                        self.android_mdm_page.save_screenshot_to(wallpaper_after_reboot)
-                        self.android_mdm_page.upload_image_JPG(
-                            conf.project_path + "\\ScreenShot\\%s" % wallpaper_after_reboot,
-                            "wallpaper_after_reboot-%s" % str(i))
+                        # wallpaper_before_reboot = "%s\\wallpaper.jpg" % base_directory
+                        # self.android_mdm_page.save_screenshot_to(wallpaper_before_reboot)
+                        # self.android_mdm_page.upload_image_JPG(
+                        #     conf.project_path + "\\ScreenShot\\%s" % wallpaper_before_reboot,
+                        #     "wallpaper_before_reboot-%s" % str(i))
+                        # # no test tomorrow to save time
+                        # self.android_mdm_page.reboot_device(self.wifi_ip)
+                        # wallpaper_after_reboot = "%s\\wallpaper_after_reboot.jpg" % base_directory
+                        # self.android_mdm_page.save_screenshot_to(wallpaper_after_reboot)
+                        # self.android_mdm_page.upload_image_JPG(
+                        #     conf.project_path + "\\ScreenShot\\%s" % wallpaper_after_reboot,
+                        #     "wallpaper_after_reboot-%s" % str(i))
                     else:
                         assert False, "@@@@平台上没有该壁纸： %s, 请检查" % paper
                 print("*******************推送壁纸用例结束***************************")
@@ -1200,7 +1200,7 @@ class TestPublicPage:
                         self.content_page.time_sleep(5)
                         self.content_page.refresh_page()
 
-                    case_pack.AlertData().getAlert("请关掉提示框并且查看启动logo和动画")
+                    # case_pack.AlertData().getAlert("请关掉提示框并且查看启动logo和动画")
                     self.android_mdm_page.reboot_device(self.wifi_ip)
                     self.content_page.time_sleep(5)
 

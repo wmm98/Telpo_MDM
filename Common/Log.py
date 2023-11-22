@@ -3,7 +3,6 @@
 
 """
 
-
 import logging
 import os
 import time
@@ -25,6 +24,12 @@ import time
 
 log_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+#
+# class WarningFilter(logging.Filter):
+#     def filter(self, record):
+#         return record.levelno != logging.WARNING
+
+
 LEVELS = {
     'debug': logging.DEBUG,
     'info': logging.INFO,
@@ -36,6 +41,9 @@ LEVELS = {
 logger = logging.getLogger()
 # level = 'default'
 level = 'info'
+
+# warning_filter = WarningFilter()
+# logger.addFilter(warning_filter)
 
 
 # r ：只读
@@ -95,6 +103,8 @@ class MyLog():
     err_file = log_path + '/Log/err.log'
     # ?
     logger.setLevel(LEVELS.get(level, logging.NOTSET))
+    # 将自定义的过滤器添加到日志记录器中
+
     create_file(log_file)
     create_file(err_file)
     date = '%Y-%m-%d %H:%M:%S'

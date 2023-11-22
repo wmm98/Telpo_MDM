@@ -125,7 +125,7 @@ class TestStability:
 
         self.app_page.refresh_page()
 
-    @allure.feature('MDM_stability111')
+    @allure.feature('MDM_stability2222')
     @allure.title("stability case- 多设备添加--辅助测试用例")
     # @pytest.mark.flaky(reruns=3, reruns_delay=3)
     def test_add_multi_devices(self):
@@ -216,7 +216,7 @@ class TestStability:
 
     @allure.feature('MDM_stability')
     @allure.title("stability case- 重启在线成功率--请在报告右侧log文件查看在线率")
-    def test_reboot_online_stability_test(self):
+    def test_reboot_online_stability_test(self, disable_android_warning):
         while True:
             try:
                 devices_sn = self.devices_sn
@@ -346,7 +346,7 @@ class TestStability:
                 else:
                     self.app_page.recovery_after_service_unavailable("devices", st.user_info)
 
-    @allure.feature('MDM_stability')
+    @allure.feature('MDM_stability1')
     @allure.title("stability case-文件文件推送成功率-请在报告右侧log文件查看文件文件推送成功率")
     def test_multi_release_content(self):
         while True:

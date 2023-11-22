@@ -24,7 +24,9 @@ import socket
 from ping3 import ping
 import threading
 from bs4 import BeautifulSoup
+# import warnings
 
 yaml_data = Config().get_yaml_data()['MDMTestData']
+# warnings.simplefilter('ignore', category=DeprecationWarning)
 
 

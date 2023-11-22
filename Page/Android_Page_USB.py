@@ -403,7 +403,7 @@ class AndroidBasePageUSB(interface):
         print(cmd)
         result = self.u2_send_command_USB(cmd)
         print(result)
-        # self.u2_send_command_USB(cmd)
+        self.u2_send_command_USB(cmd)
         self.time_sleep(3)
 
     def close_mobile_data(self):

@@ -45,13 +45,13 @@ if __name__ == '__main__':
     shutil.copy(env_path, xml_report_path)
 
     # # 定义测试集
-    allure_list = '--allure-features=MDM_stability111'
+    allure_list = '--allure-features=MDM_stability1'
     # allure_story = '--allure-stories=pytest_debug_story'
     # pytest -s --allure-features pytest_debug
     # pytest -s --allure-features pytest_debug --allure-stories pytest_debug_story
 
     # 运行选中的case
-    args = ['-s', '-q', '--alluredir', xml_report_path, allure_list]
+    args = ['-s', '-q', '-W', 'ignore:Module already imported:pytest.PytestWarning', '--alluredir', xml_report_path, allure_list]
     # args = ['-s', '-q', '--alluredir', xml_report_path, allure_list, allure_story]
 
     # 如下参数不添加allure_list，会自动运行项目里面带有feature监听器器的的所有case

@@ -14,6 +14,7 @@
 import pytest
 import TestCase
 import logging
+import warnings
 
 driver = TestCase.test_driver
 device_page = TestCase.DevicesPage(driver, 40)
@@ -24,8 +25,26 @@ android_page = TestCase.AndroidAimdmPage(TestCase.device_data, 30)
 wifi_ip = TestCase.device_data["wifi_device_info"]["ip"]
 
 
-def pytest_configure():
-    logging.captureWarnings(True)
+# def filter_warning_records(report):
+#     # 过滤掉warning信息
+#     report.records = [record for record in report.records if record["status"] != "WARNING"]
+#
+#
+# # 注册hook函数
+# @pytest.hookimpl(tryfirst=True)
+# def allure_report_with_filtered_warnings(report):
+#     if report.category in ("step", "attachment", "test", "fixture"):
+#         filter_warning_records(report)
+
+
+@pytest.fixture()
+def disable_android_warning():
+    # 禁用警告信息输出
+    warnings.simplefilter('ignore', append=True)
+    # 在测试用例执行前的操作
+    yield
+    # 恢复警告信息输出
+    warnings.resetwarnings()
 
 
 @pytest.fixture()

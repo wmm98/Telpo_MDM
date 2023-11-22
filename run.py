@@ -7,6 +7,7 @@
 # '--allure_features=测试features'
 
 """
+
 import sys
 import pytest
 from Common import Log
@@ -32,7 +33,7 @@ if __name__ == '__main__':
     test_info = conf.get_yaml_data()['MDMTestData']
     log = Log.MyLog()
 
-    # 先连接adb
+    # connect adb first
     device = ClientConnect()
     device.connect_device(test_info['android_device_info']['device_name'])
     # device.screen_keep_alive(test_info['android_device_info']['never_sleep_command'])
@@ -56,7 +57,7 @@ if __name__ == '__main__':
     shutil.copy(env_path, xml_report_path)
 
     # # 定义测试集
-    allure_list = '--allure-features=MDM_test02_login,MDM_public,MDM_public'
+    allure_list = '--allure-features=MDM_test02_login,MDM_usb-test,MDM_device_test,MDM_public'
     # allure_list = '--allure-stories=MDM_test02_login,MDM-Show'
     # pytest -s --allure-features pytest_debug
     # pytest -s --allure-features pytest_debug --allure-stories pytest_debug_story

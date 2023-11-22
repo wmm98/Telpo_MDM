@@ -12,8 +12,16 @@
 
 """
 
-import logging
-
-
-def pytest_configure():
-    logging.captureWarnings(True)
+# import logging
+# import pytest
+# import warnings
+#
+#
+# @pytest.fixture()
+# def disable_android_warning():
+#     # 禁用警告信息输出
+#     warnings.simplefilter('ignore')
+#     # 在测试用例执行前的操作
+#     yield
+#     # 恢复警告信息输出
+#     warnings.resetwarnings()

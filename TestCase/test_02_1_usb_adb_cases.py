@@ -42,17 +42,16 @@ class TestNetworkCases:
     @allure.feature('MDM_usb-test')
     @allure.story('MDM-Show')
     @allure.title("Apps- 断网重连获取aimdm消耗的流量")
-    @pytest.mark.filterwarnings("ignore")
+    # @pytest.mark.filterwarnings("ignore::UserWarning:__init__")
     @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_reconnect_get_mobile_data(self, connect_wifi_adb_USB):
-        # warnings.filterwarnings("ignore", category=Warning, message="androguard.core.api_specific_resources",
-        #                         append=True)
+        # warnings.filterwarnings("ignore", category=Warning, message="androguard.core.api_specific_resources", append=True)
         while True:
-            # warnings.filterwarnings("ignore", category=Warning, message="androguard.core.api_specific_resources", append=True)
+            # warnings.filterwarnings("ignore", category=Warning, message="androguard.core.api_specific_resources")
             try:
                 print("***************************断网重连获取aimdm消耗的流量用例开始*********************")
                 log.info("***************************断网重连获取aimdm消耗的流量用例开始*********************")
-                length = 2
+                length = 1
                 self.android_mdm_page.confirm_wifi_btn_close()
                 self.android_mdm_page.disconnect_ip(self.device_sn)
                 log.info("确认关闭wifi")
@@ -64,7 +63,7 @@ class TestNetworkCases:
                             break
                     except AssertionError:
                         pass
-                    self.android_mdm_page.open_mobile_data()
+                    # self.android_mdm_page.open_mobile_data()
                     if now_time > self.device_page.return_end_time(now_time, 90):
                         assert False, "@@@@@无法开启移动网络， 请检查！！！！"
                     self.device_page.time_sleep(2)
@@ -152,6 +151,8 @@ class TestNetworkCases:
                     self.android_mdm_page.open_wifi_btn()
                     self.android_mdm_page.confirm_wifi_status_open()
                     self.page.go_to_new_address("devices")
+
+    # def test_conn_debug(self):
 
     @allure.feature('MDM_usb-test')
     @allure.story('MDM-Show111')
