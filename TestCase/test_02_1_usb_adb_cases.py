@@ -20,8 +20,8 @@ class TestNetworkCases:
         self.system_page = case_pack.SystemPage(self.driver, 40)
         self.cat_log_page = case_pack.CatchLogPage(self.driver, 40)
         self.android_mdm_page = case_pack.AndroidAimdmPage(case_pack.device_data, 5)
-        self.page.delete_app_install_and_uninstall_logs()
-        self.ota_page.delete_all_ota_release_log()
+        # self.page.delete_app_install_and_uninstall_logs()
+        # self.ota_page.delete_all_ota_release_log()
         self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
         self.wifi_ip = case_pack.device_data["wifi_device_info"]["ip"]
         self.android_mdm_page.del_all_downloaded_apk()
@@ -31,25 +31,26 @@ class TestNetworkCases:
         self.android_mdm_page.device_unlock()
 
     def teardown_class(self):
-        # pass
-        self.android_mdm_page.confirm_wifi_adb_connected(self.wifi_ip)
-        self.page.delete_app_install_and_uninstall_logs()
-        self.android_mdm_page.del_all_downloaded_apk()
-        self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
-        self.android_mdm_page.del_updated_zip()
-        self.android_mdm_page.reboot_device(self.wifi_ip)
+        pass
+        # self.android_mdm_page.confirm_wifi_adb_connected(self.wifi_ip)
+        # self.page.delete_app_install_and_uninstall_logs()
+        # self.android_mdm_page.del_all_downloaded_apk()
+        # self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
+        # self.android_mdm_page.del_updated_zip()
+        # self.android_mdm_page.reboot_device(self.wifi_ip)
 
-    @allure.feature('MDM_usb-test')
+    @allure.feature('MDM_usb-test111111')
     @allure.story('MDM-Show')
     @allure.title("Apps- 断网重连获取aimdm消耗的流量")
     # @pytest.mark.filterwarnings("ignore::UserWarning:__init__")
     @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_reconnect_get_mobile_data(self, connect_wifi_adb_USB):
         # warnings.filterwarnings("ignore", category=Warning, message="androguard.core.api_specific_resources", append=True)
+        warnings.filterwarnings("ignore", message="androguard.core.api_specific_resources")
+        warnings.filterwarnings("ignore", category=DeprecationWarning)
         while True:
             # warnings.filterwarnings("ignore", category=Warning, message="androguard.core.api_specific_resources")
             try:
-                print("***************************断网重连获取aimdm消耗的流量用例开始*********************")
                 log.info("***************************断网重连获取aimdm消耗的流量用例开始*********************")
                 length = 1
                 self.android_mdm_page.confirm_wifi_btn_close()
@@ -85,7 +86,6 @@ class TestNetworkCases:
                     self.android_mdm_page.upload_image_JPG(
                         conf.project_path + "\\ScreenShot\\%s" % image_before_disconnect,
                         "data_used_disconnect_network_%d" % i)
-                    print("第%d次断网前的使用数据详情： %s" % (i, data_used))
                     log.info("第%d次断网前前的使用数据详情： %s" % (i, data_used))
                     self.android_mdm_page.clear_recent_app_USB()
                     self.android_mdm_page.time_sleep(2)
@@ -104,7 +104,7 @@ class TestNetworkCases:
                         self.device_page.time_sleep(1)
                     # not stable
                     # status = opt_case.get_single_device_list(self.device_sn)[0]
-                    self.android_mdm_page.time_sleep(10)
+                    self.android_mdm_page.time_sleep(60)
                     self.android_mdm_page.open_mobile_data()
                     self.android_mdm_page.screen_keep_on_USB()
                     now_time = self.android_mdm_page.get_current_time()
@@ -129,21 +129,19 @@ class TestNetworkCases:
                     self.android_mdm_page.save_screenshot_to_USB(image_after_connect)
                     self.android_mdm_page.upload_image_JPG(conf.project_path + "\\ScreenShot\\%s" % image_after_connect,
                                                            "data_used_reconnect_network_%d" % i)
-                    print("第%d次重连后的使用数据详情： %s" % (i, data_used_reconnect))
                     log.info("第%d次重连后的使用数据详情： %s" % (i, data_used_reconnect))
                 first_data_float = self.device_page.remove_space(self.device_page.extract_integers(first_data_used)[0])
                 last_data_float = self.device_page.remove_space(self.device_page.extract_integers(last_data_used)[0])
                 total_data_used = float(last_data_float) - float(first_data_float)
                 data_size = self.android_mdm_page.get_mobile_data_size()
-                print("总共使用了流量数据： %s %s" % (str(round(total_data_used, 2)), data_size))
                 log.info("总共使用了流量数据： %s %s" % (str(round(total_data_used, 2)), data_size))
                 self.android_mdm_page.clear_recent_app_USB()
                 self.android_mdm_page.open_wifi_btn()
                 self.android_mdm_page.confirm_wifi_status_open()
-                print("***************************断网重连获取aimdm消耗的流量用例结束*********************")
                 log.info("***************************断网重连获取aimdm消耗的流量用例结束*********************")
                 break
             except Exception as e:
+                pass
                 if self.device_page.service_is_normal():
                     assert False, e
                 else:

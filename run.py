@@ -22,10 +22,10 @@ import datetime
 from utils.base_web_driver import BaseWebDriver
 from utils.client_connect import ClientConnect
 from Common.check_yaml_file import CheckYaml
-
+import warnings
+import allure
 
 if __name__ == '__main__':
-
     # init config file
     conf = Config.Config()
     conf.load_yaml_data()
@@ -57,13 +57,13 @@ if __name__ == '__main__':
     shutil.copy(env_path, xml_report_path)
 
     # # 定义测试集
-    allure_list = '--allure-features=MDM_test02_login,MDM_usb-test,MDM_device_test,MDM_public'
+    allure_list = '--allure-features=MDM_test02_login,MDM_usb-test111111,MDM_public444444'
     # allure_list = '--allure-stories=MDM_test02_login,MDM-Show'
     # pytest -s --allure-features pytest_debug
     # pytest -s --allure-features pytest_debug --allure-stories pytest_debug_story
 
     # 运行选中的case
-    args = ['-s', '-q', '--alluredir', xml_report_path, allure_list]
+    args = ['-s', '-q', '--ignore=system-warnings', '--alluredir', xml_report_path, allure_list]
     # args = ['-s', '-q', '--alluredir', xml_report_path, allure_list, allure_story]
 
     # 如下参数不添加allure_list，会自动运行项目里面带有feature监听器器的的所有case
@@ -81,15 +81,15 @@ if __name__ == '__main__':
     except Exception:
         log.error('@@@执行失败， 请检查环境配置！！！')
         raise
-
     # allure生成报表，并启动程序
     # subprocess.call(cmd, shell=True)
     # subprocess.call('allure open -h 127.0.0.1 -p 9999 ./report/html', shell=True)
 
     # 打开报告
     end_time = datetime.datetime.now()
-    print(end_time)
     testpreiod = end_time - curr_time
-    print(testpreiod)
     log.info('Execution Testcases End time: %s' % end_time)
     log.info('Execution Testcases total time: %s' % testpreiod)
+
+
+
