@@ -20,8 +20,8 @@ class TestNetworkCases:
         self.system_page = case_pack.SystemPage(self.driver, 40)
         self.cat_log_page = case_pack.CatchLogPage(self.driver, 40)
         self.android_mdm_page = case_pack.AndroidAimdmPage(case_pack.device_data, 5)
-        # self.page.delete_app_install_and_uninstall_logs()
-        # self.ota_page.delete_all_ota_release_log()
+        self.page.delete_app_install_and_uninstall_logs()
+        self.ota_page.delete_all_ota_release_log()
         self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
         self.wifi_ip = case_pack.device_data["wifi_device_info"]["ip"]
         self.android_mdm_page.del_all_downloaded_apk()
@@ -31,15 +31,15 @@ class TestNetworkCases:
         self.android_mdm_page.device_unlock()
 
     def teardown_class(self):
-        pass
-        # self.android_mdm_page.confirm_wifi_adb_connected(self.wifi_ip)
-        # self.page.delete_app_install_and_uninstall_logs()
-        # self.android_mdm_page.del_all_downloaded_apk()
-        # self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
-        # self.android_mdm_page.del_updated_zip()
-        # self.android_mdm_page.reboot_device(self.wifi_ip)
+        # pass
+        self.android_mdm_page.confirm_wifi_adb_connected(self.wifi_ip)
+        self.page.delete_app_install_and_uninstall_logs()
+        self.android_mdm_page.del_all_downloaded_apk()
+        self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
+        self.android_mdm_page.del_updated_zip()
+        self.android_mdm_page.reboot_device(self.wifi_ip)
 
-    @allure.feature('MDM_usb-test111111')
+    @allure.feature('MDM_usb-test')
     @allure.story('MDM-Show')
     @allure.title("Apps- 断网重连获取aimdm消耗的流量")
     # @pytest.mark.filterwarnings("ignore::UserWarning:__init__")
@@ -52,7 +52,7 @@ class TestNetworkCases:
             # warnings.filterwarnings("ignore", category=Warning, message="androguard.core.api_specific_resources")
             try:
                 log.info("***************************断网重连获取aimdm消耗的流量用例开始*********************")
-                length = 1
+                length = 2
                 self.android_mdm_page.confirm_wifi_btn_close()
                 self.android_mdm_page.disconnect_ip(self.device_sn)
                 log.info("确认关闭wifi")

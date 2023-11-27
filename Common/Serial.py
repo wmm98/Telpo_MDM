@@ -1,20 +1,43 @@
 import binascii
 import serial
 import time
+from Common.Log import MyLog
+import serial.tools.list_ports
+from Common import DealAlert
+
+alert = DealAlert.AlertData()
+
+log = MyLog()
 
 
 class Serial:
     def __init__(self):
-        self.COM = 'COM24'
+        self.COM = ''
+
+    def get_cur_COM(self):
+        serial_list = []
+        ports = list(serial.tools.list_ports.comports())
+        # print(ports)
+        if len(ports) != 0:
+            for port in ports:
+                if 'SERIAL' in port.description:
+                    print(port.device)
+                    COM_name = port.device.replace("\n", "").replace(" ", "").replace("\r", "")
+                    serial_list.append(COM_name)
+            if len(serial_list) == 1:
+                self.COM = serial_list[0]
+            else:
+                text = alert.get_alert_value("当前多个可用串口，请输入自动化用的端口号")
+                self.COM = text
+        else:
+            raise Exception("没有显示可用的串口端口， 请检查！！！！")
 
     def logoutSer(self):
-        if (ser.isOpen()):
+        if ser.isOpen():
             ser.close()
-            print("关闭成功")
-            print('The serial %s is closed!' % self.COM)
+            log.info("串口： %s 关闭！！！" % self.COM)
         else:
-            print("关闭失败")
-            print('The serial %s is not closed!' % self.COM)
+            log.info("串口： %s 关闭！！！" % self.COM)
 
     # 打开串口
     def loginSer(self):
@@ -29,61 +52,62 @@ class Serial:
             ser = serial.Serial(port, baudrate)
         except serial.SerialException as e:
             print(e)
-
         if (ser.isOpen()):  # 判断串口是否打开
-            print('串口打开成功')
-            # self.log.info('The serial %s is open!' % self.config.serialcom)
-            # print('The serial %s is open!' % self.COM)
+            log.info("串口：%s 已经打开！！！" % self.COM)
         else:
             ser.open()
-            print('串口打开成功!!')
-            # print('The serial %s is open!' % self.COM)
+            log.info("串口：%s 打开！！！" % self.COM)
 
-    def send_ser_cmd(self, conn=True):
+    def send_ser_connect_cmd(self, conn=True):
         if conn:
-            n = ser.write(bytes.fromhex("A0 01 01 A2"))
+            ser.write(bytes.fromhex("A0 01 01 A2"))
         else:
-            n = ser.write(bytes.fromhex("A0 01 00 A1"))
+            ser.write(bytes.fromhex("A0 01 00 A1"))
+        time.sleep(1)
 
-        print(n)
+    def send_status_cmd(self):
+        num = ser.write(bytes.fromhex("A0 01 05 A6"))
         time.sleep(2)  # sleep() 与 inWaiting() 最好配对使用
-        num = ser.inWaiting()
-        print("接受的数据：", num)
-        # 接受数据
-        # if num:
-        #     try:  # 如果读取的不是十六进制数据--
-        #         data = str(binascii.b2a_hex(ser.read(num)))[2:-1]  # 十六进制显示方法2
-        #     except:  # -则将其作为字符串读取
-        #         str = ser.read(num)
-        #         return self.hexShow(str)
+        ser.inWaiting()
+
+        data = str(binascii.b2a_hex(ser.read(num)))[2:-1]  # 十六进制显示方法2
+        print(data)
+        if "a00100a1" in data:
+            return False
+        elif "a00101a2" in data:
+            return True
+
+    def confirm_relay_opened(self, timeout=120):
+        now_time = time.time()
+        while True:
+            self.send_ser_connect_cmd(conn=True)
+            if self.send_status_cmd():
+                log.info("成功打开继电器")
+                break
+            time.sleep(1)
+            if time.time() > now_time + timeout:
+                log.error("@@@@无法打开继电器，请检查！！！！")
+                assert False, "@@@@无法打开继电器，请检查！！！！"
+
+    def confirm_relay_closed(self, timeout=120):
+        now_time = time.time()
+        while True:
+            self.send_ser_connect_cmd(conn=False)
+            if not self.send_status_cmd():
+                log.info("成功关闭继电器")
+                break
+            time.sleep(1)
+            if time.time() > now_time + timeout:
+                log.error("@@@@无法打开继电器，请检查！！！！")
+                assert False, "@@@@无法打开继电器，请检查！！！！"
 
 
 if __name__ == '__main__':
     s = Serial()
-    #
+    s.get_cur_COM()
     s.loginSer()
-    s.send_ser_cmd(conn=True)
+    s.confirm_relay_opened()
+    s.confirm_relay_closed()
     s.logoutSer()
 
-    # assert s.ast.assertSingleLEDStatus(result,3,checkdata)
-    # command = 'A0 01 01 A2'
-    # result = s.inputSerCommand(command)
-    # print(result)
 
-    # import serial
-    #
-    # # 串口的端口和波特率
-    # port = "COM24"
-    # baudrate = 9600
-    #
-    # # 建立串口连接
-    # ser = serial.Serial(port, baudrate)
-    # # A0 01 01 A2  打开  A0 01 00 A1  关闭
-    # # 待发送的指令
-    # command = bytes.fromhex("A0 01 00 A1")
-    #
-    # # 发送指令
-    # ser.write(command)
-    #
-    # # 关闭串口连接
-    # ser.close()

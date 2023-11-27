@@ -346,7 +346,7 @@ class TestStability:
                 else:
                     self.app_page.recovery_after_service_unavailable("devices", st.user_info)
 
-    @allure.feature('MDM_stability1')
+    @allure.feature('MDM_stability')
     @allure.title("stability case-文件文件推送成功率-请在报告右侧log文件查看文件文件推送成功率")
     def test_multi_release_content(self):
         while True:

@@ -11,6 +11,13 @@ class AlertData:
     def __init__(self):
         pass
 
+    def get_alert_value(self, text):
+        while True:
+            value = pyautogui.prompt(text=text, title="输入提示框", default="")
+            if value != None:
+                result = value.replace("\n", "").replace(" ", "").replace("\r", "")
+                return result
+
     def input_prompt(self):
         global serial
         """:消息输入框  返回值为用户输入的值 点击取消按钮 返回None  点击OK 返回 用户输入的值"""
