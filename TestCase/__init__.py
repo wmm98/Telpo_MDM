@@ -20,6 +20,7 @@ from Page.Andriod_Aimdm_Page_WIFI import AndroidAimdmPageWiFi
 from Page.Catch_Log_Page import CatchLogPage
 from Page.Content_Page import ContentPage
 from utils.client_connect import ClientConnect
+from Common.Serial import Serial
 
 yaml_data = Config().get_yaml_data()['MDMTestData']
 

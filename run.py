@@ -22,8 +22,8 @@ import datetime
 from utils.base_web_driver import BaseWebDriver
 from utils.client_connect import ClientConnect
 from Common.check_yaml_file import CheckYaml
-import warnings
-import allure
+from Common.Serial import Serial
+
 
 if __name__ == '__main__':
     # init config file
@@ -32,6 +32,12 @@ if __name__ == '__main__':
     CheckYaml().check_test_data()
     test_info = conf.get_yaml_data()['MDMTestData']
     log = Log.MyLog()
+
+    # get COM port related
+    usb_serial = Serial()
+    usb_serial.get_current_COM()
+    usb_serial.loginSer()
+    usb_serial.confirm_relay_opened()
 
     # connect adb first
     device = ClientConnect()
@@ -57,7 +63,7 @@ if __name__ == '__main__':
     shutil.copy(env_path, xml_report_path)
 
     # # 定义测试集
-    allure_list = '--allure-features=MDM_test02_login,MDM_usb-test,MDM_public,MDM_device_test'
+    allure_list = '--allure-features=MDM_test02_login,MDM_public--sleep'
     # allure_list = '--allure-stories=MDM_test02_login,MDM-Show'
     # pytest -s --allure-features pytest_debug
     # pytest -s --allure-features pytest_debug --allure-stories pytest_debug_story
@@ -88,6 +94,7 @@ if __name__ == '__main__':
     # 打开报告
     end_time = datetime.datetime.now()
     testpreiod = end_time - curr_time
+    usb_serial.logoutSer()
     log.info('Execution Testcases End time: %s' % end_time)
     log.info('Execution Testcases total time: %s' % testpreiod)
 

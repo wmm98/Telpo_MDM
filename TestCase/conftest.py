@@ -13,8 +13,6 @@
 """
 import pytest
 import TestCase
-import logging
-import warnings
 
 driver = TestCase.test_driver
 device_page = TestCase.DevicesPage(driver, 40)
@@ -23,28 +21,14 @@ app_page = TestCase.APPSPage(driver, 40)
 content_page = TestCase.ContentPage(driver, 40)
 android_page = TestCase.AndroidAimdmPage(TestCase.device_data, 30)
 wifi_ip = TestCase.device_data["wifi_device_info"]["ip"]
-
-
-# def filter_warning_records(report):
-#     # 过滤掉warning信息
-#     report.records = [record for record in report.records if record["status"] != "WARNING"]
-#
-#
-# # 注册hook函数
-# @pytest.hookimpl(tryfirst=True)
-# def allure_report_with_filtered_warnings(report):
-#     if report.category in ("step", "attachment", "test", "fixture"):
-#         filter_warning_records(report)
+serial = TestCase.Serial()
 
 
 @pytest.fixture()
-def disable_android_warning():
-    # 禁用警告信息输出
-    warnings.simplefilter('ignore', append=True)
-    # 在测试用例执行前的操作
+def login_and_logout_serial():
+    serial.loginSer()
     yield
-    # 恢复警告信息输出
-    warnings.resetwarnings()
+    serial.logoutSer()
 
 
 @pytest.fixture()
@@ -165,6 +149,15 @@ def del_all_app_release_log():
     app_page.go_to_new_address("apps/releases")
     app_page.delete_all_app_release_log()
     yield
+    app_page.go_to_new_address("apps/releases")
+    app_page.delete_all_app_release_log()
+
+
+@pytest.fixture()
+def del_app_install_uninstall_release_log():
+    app_page.delete_app_install_and_uninstall_logs()
+    yield
+    app_page.delete_app_install_and_uninstall_logs()
 
 
 @pytest.fixture()

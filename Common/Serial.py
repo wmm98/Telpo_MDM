@@ -14,7 +14,26 @@ class Serial:
     def __init__(self):
         self.COM = ''
 
-    def get_cur_COM(self):
+    # 打开串口
+    def loginSer(self):
+        global ser
+        port = self.COM  # 设置端口号
+        baudrate = 9600  # 设置波特率
+        bytesize = 8  # 设置数据位
+        stopbits = 1  # 设置停止位
+        parity = "N"  # 设置校验位
+
+        try:
+            ser = serial.Serial(port, baudrate)
+        except serial.SerialException as e:
+            print(e)
+        if (ser.isOpen()):  # 判断串口是否打开
+            log.info("串口：%s 已经打开！！！" % self.COM)
+        else:
+            ser.open()
+            log.info("串口：%s 打开！！！" % self.COM)
+
+    def get_current_COM(self):
         serial_list = []
         ports = list(serial.tools.list_ports.comports())
         # print(ports)
@@ -39,32 +58,6 @@ class Serial:
         else:
             log.info("串口： %s 关闭！！！" % self.COM)
 
-    # 打开串口
-    def loginSer(self):
-        global ser
-        port = self.COM  # 设置端口号
-        baudrate = 9600  # 设置波特率
-        bytesize = 8  # 设置数据位
-        stopbits = 1  # 设置停止位
-        parity = "N"  # 设置校验位
-
-        try:
-            ser = serial.Serial(port, baudrate)
-        except serial.SerialException as e:
-            print(e)
-        if (ser.isOpen()):  # 判断串口是否打开
-            log.info("串口：%s 已经打开！！！" % self.COM)
-        else:
-            ser.open()
-            log.info("串口：%s 打开！！！" % self.COM)
-
-    def send_ser_connect_cmd(self, conn=True):
-        if conn:
-            ser.write(bytes.fromhex("A0 01 01 A2"))
-        else:
-            ser.write(bytes.fromhex("A0 01 00 A1"))
-        time.sleep(1)
-
     def send_status_cmd(self):
         num = ser.write(bytes.fromhex("A0 01 05 A6"))
         time.sleep(2)  # sleep() 与 inWaiting() 最好配对使用
@@ -77,7 +70,15 @@ class Serial:
         elif "a00101a2" in data:
             return True
 
+    def send_ser_connect_cmd(self, conn=True):
+        if conn:
+            ser.write(bytes.fromhex("A0 01 01 A2"))
+        else:
+            ser.write(bytes.fromhex("A0 01 00 A1"))
+        time.sleep(1)
+
     def confirm_relay_opened(self, timeout=120):
+        self.confirm_relay_closed()
         now_time = time.time()
         while True:
             self.send_ser_connect_cmd(conn=True)
@@ -88,6 +89,7 @@ class Serial:
             if time.time() > now_time + timeout:
                 log.error("@@@@无法打开继电器，请检查！！！！")
                 assert False, "@@@@无法打开继电器，请检查！！！！"
+            time.sleep(1)
 
     def confirm_relay_closed(self, timeout=120):
         now_time = time.time()
@@ -100,11 +102,12 @@ class Serial:
             if time.time() > now_time + timeout:
                 log.error("@@@@无法打开继电器，请检查！！！！")
                 assert False, "@@@@无法打开继电器，请检查！！！！"
+            time.sleep(1)
 
 
 if __name__ == '__main__':
     s = Serial()
-    s.get_cur_COM()
+    s.get_current_COM()
     s.loginSer()
     s.confirm_relay_opened()
     s.confirm_relay_closed()

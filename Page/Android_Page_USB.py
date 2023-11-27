@@ -244,6 +244,18 @@ class AndroidBasePageUSB(interface):
         self.USB_client.screen_off()
         self.USB_client.unlock()
 
+    def confirm_screen_off_USB(self):
+        now_time = self.get_current_time()
+        while True:
+            result = self.USB_client.info.get("screenOn")
+            if not result:
+                break
+            else:
+                self.USB_client.screen_off()
+            if self.get_current_time() > self.return_end_time(now_time, 30):
+                assert False, "@@@@无法熄屏， 请检查！！！"
+            self.time_sleep(1)
+
     def u2_send_command_USB(self, cmd):
         try:
             print(cmd)
@@ -440,8 +452,6 @@ class AndroidBasePageUSB(interface):
         ret = self.open_remount_usb()
         if not ret:
             assert False, "@@@@无法remount, 请检查！！！"
-
-
 
 
 if __name__ == '__main__':

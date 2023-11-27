@@ -65,6 +65,14 @@ class interface:
                 assert False, "@@@@无法连接上wifi adb， 请检查！！！！"
             self.time_sleep(1)
 
+    def confirm_device_no_existed(self, address):
+        while True:
+            device_online = address + "device"
+            res = self.devices_list()
+            if device_online not in res.replace('\r', '').replace('\t', '').replace(' ', ''):
+                break
+            self.time_sleep(1)
+
     def device_not_existed(self, address):
         device_online = address + "device"
         res = self.devices_list()

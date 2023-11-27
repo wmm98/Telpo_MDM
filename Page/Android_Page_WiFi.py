@@ -336,6 +336,10 @@ class AndroidBasePageWiFi(interface):
         else:
             return True
 
+    def is_usb_power(self):
+        self.time_sleep(1)
+        return self.client.device_info["battery"]["usbPowered"]
+
     def screen_keep_on(self):
         self.u2_send_command("settings put system screen_off_timeout 1800000")
         self.device_unlock()
@@ -348,10 +352,6 @@ class AndroidBasePageWiFi(interface):
         self.client.screen_off()
         # self.time_sleep(3)
         self.confirm_screen_off()
-
-    def is_usb_power(self):
-        self.time_sleep(1)
-        return self.client.device_info["battery"]["usbPowered"]
 
     def confirm_screen_off(self):
         now_time = self.get_current_time()
