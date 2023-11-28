@@ -24,8 +24,8 @@ MDMTestData:
     release_api: https://www.telpopaas.com
 
   work_app:
-    #  适用 tpos 系统， 没特殊需求不用修改
-    root_apk_name: open_root_apk_v1.1.3.apk
+    #  根据需求置换
+    tpui_apk: TPUI_v1.1.9.apk
       #  新的版本需要修改
     aidmd_apk: app_aimdm_V2.0.1_osapi_202311141615.apk
     # 测试服的api

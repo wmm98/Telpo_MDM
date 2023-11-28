@@ -64,7 +64,7 @@ class Serial:
         ser.inWaiting()
 
         data = str(binascii.b2a_hex(ser.read(num)))[2:-1]  # 十六进制显示方法2
-        print(data)
+        log.info(data)
         if "a00100a1" in data:
             return False
         elif "a00101a2" in data:
@@ -110,7 +110,7 @@ if __name__ == '__main__':
     s.get_current_COM()
     s.loginSer()
     s.confirm_relay_opened()
-    s.confirm_relay_closed()
-    s.logoutSer()
+    # s.confirm_relay_closed()
+    # s.logoutSer()
 
 

@@ -316,29 +316,38 @@ class TestDevicesPage:
                     self.page.recovery_after_service_unavailable("devices", case_pack.user_info)
                     self.page.go_to_new_address("apps")
 
-    @allure.feature('MDM_device_test')
+    @allure.feature('MDM_device_test1111')
     @allure.title("Devices- 重置设备TPUI密码")
     @pytest.mark.filterwarnings("ignore")
-    @pytest.mark.flaky(reruns=1, reruns_delay=3)
-    def test_reset_TPUI_password(self, unlock_screen, go_to_and_return_device_page):
+    # @pytest.mark.flaky(reruns=1, reruns_delay=3)
+    def test_reset_TPUI_password(self, go_to_and_return_device_page):
         while True:
+            tpui_apk = case_pack.yaml_data["work_app"]["tpui_apk"]
+            tpui_path = conf.project_path + "\\Param\\Work_APP\\%s" % tpui_apk
+            tpui_package_name = self.page.get_apk_package_name(tpui_path)
             try:
-                print("==================重置设备TPUI密码用例开始=======================")
                 log.info("==================重置设备TPUI密码用例开始=======================")
                 exp_psw_text = "Password changed"
                 sn = self.device_sn
                 password = ["123456", "000000", "999999"]
+                self.android_mdm_page.screen_keep_on()
+                self.android_mdm_page.confirm_app_installed(tpui_path)
                 self.page.refresh_page()
                 for psw in password:
+                    self.android_mdm_page.confirm_app_is_running(tpui_package_name)
                     opt_case.check_single_device(sn)
                     self.page.select_device(sn)
                     self.page.click_psw_btn()
                     self.page.change_TPUI_password(psw)
+                    self.page.time_sleep(1)
+                    self.android_mdm_page.input_tpui_password(psw)
+                    self.android_mdm_page.stop_app(tpui_package_name)
                     self.page.refresh_page()
-                print("==================重置设备TPUI密码用例结束=======================")
+                self.android_mdm_page.confirm_app_is_uninstalled(tpui_package_name)
                 log.info("==================重置设备TPUI密码用例结束=======================")
                 break
             except Exception as e:
+                self.android_mdm_page.confirm_app_is_uninstalled(tpui_package_name)
                 if self.page.service_is_normal():
                     assert False, e
                 else:

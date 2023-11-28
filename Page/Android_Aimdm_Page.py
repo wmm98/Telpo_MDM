@@ -4,6 +4,8 @@ from Page.Android_Page_WiFi import AndroidBasePageWiFi
 import time
 
 config = public_pack.Config()
+
+
 # aimdm_package = public_pack.yaml_data["work_app"]["aidmd_apk"]
 
 
@@ -16,10 +18,12 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
         AndroidBasePageUSB.__init__(self, self.client, times, self.serial)
         AndroidBasePageWiFi.__init__(self, self.wifi_client, times, self.device_ip)
         aimdm_apk = public_pack.yaml_data["work_app"]["aidmd_apk"]
+        tpui_apk = public_pack.yaml_data["work_app"]["tpui_apk"]
         self.aimdm_package = self.get_apk_package_name(config.project_path + "\\Param\\Work_APP\\%s" % aimdm_apk)
+        self.tpui_pakcage = self.get_apk_package_name(config.project_path + "\\Param\\Work_APP\\%s" % tpui_apk)
         self.android_settings_package = "com.android.settings"
         self.android_relatelayout_package = "android"
-        # self.recent_package = self.get_current_app()
+        self.android_osrecent_package = "com.android.common.osrecent"
 
         # aimdm_package = "com.tpos.aimdm"
         # msg_box related
@@ -46,6 +50,42 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
 
         # clear recent app btn
         self.clear_all = ":id/btn_remove_all"
+
+        # tpui relate
+        self.tpui_main = "%s:id/layout_main" % self.tpui_pakcage
+        # ele[1]
+        self.more_btn = "android.widget.ImageView"
+        self.psw_box = "%s:id/edit_login_password" % self.tpui_pakcage
+        self.tpui_psw_confirm = "%s:id/text_confirm" % self.tpui_pakcage
+        self.tpui_pasw_cancel = "%s:id/text_cancel" % self.tpui_pakcage
+
+    def input_tpui_password(self, psw_text):
+        if self.wait_ele_presence_by_id(self.tpui_main, 10):
+            # click more btn
+            eles = self.get_element_by_id(self.tpui_main).child(className=self.more_btn)
+            eles[1].click()
+            now_time = self.get_current_time()
+            while True:
+                if self.wait_ele_presence_by_id(self.psw_box, 5):
+                    break
+                eles[1].click()
+                self.time_sleep(1)
+                if self.get_current_time() > self.return_end_time(now_time, 120):
+                    assert False, "@@@无法掉出密码窗口， 请检查！！！！"
+            psw_box_ele = self.get_element_by_id(self.psw_box)
+            self.input_element_text(psw_box_ele, psw_text)
+            confirm_btn = self.get_element_by_id(self.tpui_psw_confirm)
+            confirm_btn.click()
+            self.time_sleep(1)
+            while True:
+                if self.wait_ele_gone_by_id(self.psw_box, 5):
+                    break
+                confirm_btn.click()
+                self.time_sleep(1)
+                if self.get_current_time() > self.return_end_time(now_time, 60):
+                    assert False, "@@@无法确认提交密码， 请检查！！！！"
+        else:
+            assert False, "@@@@tpui主页无法打开，请检查！！！"
 
     def get_aimdm_mobile_data(self):
         try:
@@ -235,7 +275,8 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
         # print(file_path)
         # public_pack.allure.attach(file_path, name=new_name, attachment_type=public_pack.allure.attachment_type.JPG)
         with open(file_path, 'rb') as image_file:
-            public_pack.allure.attach(image_file.read(), name=new_name, attachment_type=public_pack.allure.attachment_type.JPG)
+            public_pack.allure.attach(image_file.read(), name=new_name,
+                                      attachment_type=public_pack.allure.attachment_type.JPG)
 
     def lock_psw_box_presence(self, time_to_wait=3):
         self.wait_ele_presence_by_id(self.lock_psw_id, time_to_wait)

@@ -63,7 +63,7 @@ if __name__ == '__main__':
     shutil.copy(env_path, xml_report_path)
 
     # # 定义测试集
-    allure_list = '--allure-features=MDM_test02_login,MDM_public--sleep'
+    allure_list = '--allure-features=MDM_test02_login,MDM_device_test1111'
     # allure_list = '--allure-stories=MDM_test02_login,MDM-Show'
     # pytest -s --allure-features pytest_debug
     # pytest -s --allure-features pytest_debug --allure-stories pytest_debug_story
@@ -94,6 +94,7 @@ if __name__ == '__main__':
     # 打开报告
     end_time = datetime.datetime.now()
     testpreiod = end_time - curr_time
+    usb_serial.confirm_relay_closed()
     usb_serial.logoutSer()
     log.info('Execution Testcases End time: %s' % end_time)
     log.info('Execution Testcases total time: %s' % testpreiod)
