@@ -847,7 +847,6 @@ class TestPublicPage:
 
     @allure.feature('MDM_public')
     @allure.title("public case- 静默升级系统app/推送安装成功后自动运行app")
-    @pytest.mark.filterwarnings("ignore")
     @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_upgrade_system_app(self, del_all_app_release_log, del_download_apk, uninstall_system_app):
         while True:
@@ -1002,7 +1001,6 @@ class TestPublicPage:
 
     @allure.feature('MDM_public')
     @allure.title("public case- 静默ota升级")
-    @pytest.mark.filterwarnings("ignore")
     def test_silent_ota_upgrade(self, del_all_ota_release_log, go_to_ota_page, delete_ota_package_relate):
         while True:
             try:
@@ -1134,7 +1132,6 @@ class TestPublicPage:
         # "All Files" "Normal Files" "Boot Animations" "Wallpaper" "LOGO"
         while True:
             try:
-                print("*******************推送开机logo/动画开始***************************")
                 log.info("*******************推送开机logo/动画开始***************************")
                 self.android_mdm_page.screen_keep_on()
                 logos = test_yml["Content_info"]["boot_logo"]
@@ -1144,9 +1141,9 @@ class TestPublicPage:
                 self.content_page.go_to_new_address("content")
                 file_path = conf.project_path + "\\Param\\Content\\%s" % animation
                 file_size = self.content_page.get_file_size_in_windows(file_path)
-                print("获取到的文件 的size(bytes): ", file_size)
+                log.info("获取到的文件 的size(bytes): %s" % str(file_size))
                 file_hash_value = self.android_mdm_page.calculate_sha256_in_windows("%s" % animation, directory="Content")
-                print("file_hash_value:", file_hash_value)
+                log.info("file_hash_value: %s" % str(file_hash_value))
                 send_time = case_pack.time.strftime('%Y-%m-%d %H:%M',
                                                     case_pack.time.localtime(self.content_page.get_current_time()))
                 self.content_page.time_sleep(15)
@@ -1155,26 +1152,26 @@ class TestPublicPage:
                 self.content_page.time_sleep(3)
                 assert len(self.content_page.get_content_list()) == 1, "@@@@平台上没有机动画： %s, 请检查" % animation
                 self.content_page.release_content_file(self.device_sn)
-
+                log.info("动画压缩包 ：%s 推送成功" % animation)
                 now_time = self.content_page.get_current_time()
                 while True:
                     if self.android_mdm_page.download_file_is_existed(animation):
                         break
                     if self.content_page.get_current_time() > self.content_page.return_end_time(now_time):
-                        assert False, "@@@@没有相应的下载记录， 请检查！！！"
+                        log.error("@@@@没有%s下载记录， 请检查！！！" % animation)
+                        assert False, "@@@@没有%s下载记录， 请检查！！！" % animation
                     self.content_page.time_sleep(5)
-                print("*************************************文件下载记录检测完毕**************************************")
-                log.info("*************************************文件下载记录检测完毕**************************************")
+                log.info("****************检测到终端有 %s 的下载记录********************" % animation)
                 now_time = self.content_page.get_current_time()
                 while True:
                     if file_hash_value == self.android_mdm_page.calculate_sha256_in_device(animation):
                         break
                     if self.content_page.get_current_time() > self.content_page.return_end_time(now_time, 900):
+                        log.error("@@@@超过15分钟还没有下载完毕，请检查！！！")
                         assert False, "@@@@超过15分钟还没有下载完毕，请检查！！！"
                     self.content_page.time_sleep(5)
 
-                print("*************************************设备检测到文件下载完毕**************************************")
-                log.info("**********************************设备检测到文件下载完毕**************************************")
+                log.info("********************设备检测到文件:%s下载完毕***********************" % animation)
                 # check upgrade
                 self.content_page.go_to_new_address("content/log")
                 report_now_time = self.content_page.get_current_time()
@@ -1182,19 +1179,19 @@ class TestPublicPage:
                     upgrade_list = self.content_page.get_content_latest_upgrade_log(send_time, release_info)
                     if len(upgrade_list) != 0:
                         action = upgrade_list[0]["Action"]
-                        print("action", action)
+                        log.info("平台upgrade action为： %s" % action)
                         if self.content_page.get_action_status(action) == 7:
                             break
                     # wait upgrade 3 min at most
                     if self.content_page.get_current_time() > self.content_page.return_end_time(report_now_time, 180):
                         if self.content_page.service_is_normal():
+                            log.info("@@@@3分钟还没有设置完相应的开机动画， 请检查！！！")
                             assert False, "@@@@3分钟还没有设置完相应的开机动画， 请检查！！！"
                         else:
                             self.content_page.recovery_after_service_unavailable("content/log", case_pack.user_info)
                             report_now_time = self.content_page.get_current_time()
                     self.content_page.time_sleep(5)
                     self.content_page.refresh_page()
-                print("**************************动画推送完成******************************")
                 log.info("***********************动画推送完成***************************")
                 # release logo
                 i = 0
@@ -1204,7 +1201,6 @@ class TestPublicPage:
                     self.content_page.go_to_new_address("content")
                     file_path = conf.project_path + "\\Param\\Content\\%s" % logo
                     file_size_logo = self.content_page.get_file_size_in_windows(file_path)
-                    print("获取到的文件 的size(bytes): ", file_size_logo)
                     log.info("获取到的文件 的size(bytes): %s" % str(file_size_logo))
                     file_hash_value_logo = self.content_page.calculate_sha256_in_windows(logo, directory="Content")
                     send_time = case_pack.time.strftime('%Y-%m-%d %H:%M',
@@ -1225,12 +1221,10 @@ class TestPublicPage:
                             log.error("@@@@没有相应的下载记录， 请检查！！！")
                             assert False, "@@@@没有相应的下载记录， 请检查！！！"
                         self.content_page.time_sleep(5)
-                    print("*************************************文件下载记录检测完毕**************************************")
                     log.info("*************************************文件下载记录检测完毕**************************************")
                     now_time = self.content_page.get_current_time()
                     while True:
                         if file_size_logo == self.android_mdm_page.get_file_size_in_device(logo):
-                            print("开机logo的大小为： %s" % str(file_size_logo))
                             log.info("开机logo的大小为： %s" % str(file_size_logo))
                             log.info("开机logo的hash值为： %s" % str(self.android_mdm_page.calculate_sha256_in_device(logo)))
                             assert file_hash_value_logo == self.android_mdm_page.calculate_sha256_in_device(logo), "@@@@文件大小一样， hash256值不一致请检查！！"
@@ -1239,7 +1233,6 @@ class TestPublicPage:
                             log.error("@@@@超过15分钟还没有下载完毕，请检查！！！")
                             assert False, "@@@@超过15分钟还没有下载完毕，请检查！！！"
                         self.content_page.time_sleep(5)
-                    print("*************************************文件下载完毕**************************************")
                     log.info("*************************************文件下载完毕**************************************")
                     self.content_page.go_to_new_address("content/log")
                     report_time = self.content_page.get_current_time()
@@ -1247,8 +1240,7 @@ class TestPublicPage:
                         upgrade_list = self.content_page.get_content_latest_upgrade_log(send_time, release_info)
                         if len(upgrade_list) != 0:
                             action = upgrade_list[0]["Action"]
-                            print("action", action)
-                            log.info("action: %s" % action)
+                            log.info("平台 upgrade action: %s" % action)
                             if self.content_page.get_action_status(action) == 7:
                                 break
                         # wait upgrade 3 min at most
