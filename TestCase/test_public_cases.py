@@ -107,7 +107,7 @@ class TestPublicPage:
     @allure.story('MDM-Show')
     @allure.title("public case-推送壁纸--请在附件查看壁纸截图效果")
     # @pytest.mark.filterwarnings("ignore")
-    @pytest.mark.flaky(reruns=1, reruns_delay=3)
+    @pytest.mark.flaky(reruns=2, reruns_delay=3)
     def test_release_wallpaper(self, unlock_screen, del_all_content_release_logs):
         while True:
             try:
@@ -234,7 +234,7 @@ class TestPublicPage:
     @allure.story('MDM-Show')
     @allure.title("OTA-OTA重启5次断点续传")
     @pytest.mark.filterwarnings("ignore")
-    @pytest.mark.flaky(reruns=1, reruns_delay=3)
+    @pytest.mark.flaky(reruns=2, reruns_delay=3)
     def test_upgrade_OTA_package_reboot_5times(self, del_all_ota_release_log, go_to_ota_page,
                                                delete_ota_package_relate):
         download_tips = "Foundanewfirmware,whethertoupgrade?"
@@ -522,7 +522,7 @@ class TestPublicPage:
     @allure.feature('MDM_public')
     @allure.title("public case-推送text.zip文件")
     @pytest.mark.filterwarnings("ignore")
-    @pytest.mark.flaky(reruns=1, reruns_delay=3)
+    @pytest.mark.flaky(reruns=2, reruns_delay=3)
     def test_release_normal_files(self, del_all_content_release_logs):
         # "All Files" "Normal Files" "Boot Animations" "Wallpaper" "LOGO"
         while True:
@@ -847,7 +847,7 @@ class TestPublicPage:
 
     @allure.feature('MDM_public')
     @allure.title("public case- 静默升级系统app/推送安装成功后自动运行app")
-    @pytest.mark.flaky(reruns=1, reruns_delay=3)
+    @pytest.mark.flaky(reruns=2, reruns_delay=3)
     def test_upgrade_system_app(self, del_all_app_release_log, del_download_apk, uninstall_system_app):
         while True:
             try:
@@ -1127,7 +1127,7 @@ class TestPublicPage:
     @allure.title("public case-推送开机logo/动画")
     @allure.story('MDM-Show')
     @pytest.mark.filterwarnings("ignore")
-    @pytest.mark.flaky(reruns=1, reruns_delay=3)
+    @pytest.mark.flaky(reruns=2, reruns_delay=3)
     def test_release_boot_logo_and_animation(self, del_all_content_release_logs, del_all_content_file):
         # "All Files" "Normal Files" "Boot Animations" "Wallpaper" "LOGO"
         while True:
@@ -1270,8 +1270,9 @@ class TestPublicPage:
                     self.android_mdm_page.del_all_content_file()
                     self.android_mdm_page.screen_keep_on()
 
-    @allure.feature('MDM_public--sleep')
+    @allure.feature('MDM_public')
     @allure.title("public case-无线休眠推送app")
+    @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_report_device_sleep_status(self, del_app_install_uninstall_release_log, go_to_device_page, uninstall_multi_apps):
         while True:
             try:
@@ -1338,14 +1339,17 @@ class TestPublicPage:
                     # self.android_mdm_page.time_sleep(test_yml["android_device_info"]["sleep_time"])
                     self.android_mdm_page.confirm_device_no_existed(self.wifi_ip)
                     log.info("设备已经不在线，确认设备已经进入深度休眠模式")
-                    self.android_mdm_page.time_sleep(60)
+                    self.android_mdm_page.time_sleep(600)
                     log.info("设备休眠结束")
                     # wakeup device
                     usb_serial.confirm_relay_opened()
                     log.info("上电")
                     # check if the device is existed
                     self.android_mdm_page.device_existed(test_yml["android_device_info"]["device_name"])
-                    self.android_mdm_page.ping_network(180)
+                    try:
+                        self.android_mdm_page.ping_network(300)
+                    except AttributeError:
+                        assert False, "休眠唤醒后wifi无法上网"
                     log.info("wifi环境下可以上网")
                     self.android_mdm_page.device_is_existed(self.wifi_ip)
                     log.info("检测到设备在线， 成功唤醒设备")

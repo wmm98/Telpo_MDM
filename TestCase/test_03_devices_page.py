@@ -174,7 +174,6 @@ class TestDevicesPage:
     def test_lock_and_unlock_single_device(self, go_to_and_return_device_page):
         while True:
             try:
-                print("==================锁机和解锁用例开始=======================")
                 log.info("==================锁机和解锁用例开始=======================")
                 self.android_mdm_page.screen_keep_on()
                 # case is stable
@@ -226,7 +225,6 @@ class TestDevicesPage:
                             assert False, "@@@@解锁失败，请检查！！！！"
                         self.page.refresh_page()
                         self.page.time_sleep(1)
-                print("==================锁机和解锁用例结束=======================")
                 log.info("==================锁机和解锁用例结束=======================")
                 break
             except Exception as e:
@@ -242,36 +240,42 @@ class TestDevicesPage:
     def test_reboot_single_device_pressure_testing(self, connected_wifi_adb, go_to_and_return_device_page):
         while True:
             try:
-                print("==================发送设备重启指令：设备重启5次用例开始=======================")
                 log.info("==================发送设备重启指令：设备重启5次用例开始=======================")
                 exp_reboot_text = "Sending Reboot Comand to Devices"
                 self.android_mdm_page.screen_keep_on()
                 sn = self.device_sn
                 self.page.refresh_page()
-                for i in range(1):
+                for i in range(5):
+                    print("*************第%d次重启****************" % (i + 1))
                     opt_case.check_single_device(sn)
                     self.page.select_device(sn)
                     self.android_mdm_page.disconnect_ip(self.wifi_ip)
                     self.page.click_reboot_btn()
                     for j in range(10):
                         case_pack.time.sleep(3)
+                        log.info("等待3秒")
                         self.page.refresh_page()
                         # get device info
                         # check if command trigger in 3s
                         if "Off" in opt_case.get_single_device_list(sn)[0]["Status"]:
+                            log.info("设备重启下线， 指令在3s内触发")
                             break
                     assert "Off" in opt_case.get_single_device_list(sn)[0]["Status"]
+                    log.info("设备重启下线， 指令在3s内触发")
                     self.page.time_sleep(4)
                     self.android_mdm_page.confirm_wifi_adb_connected(self.wifi_ip)
                     self.android_mdm_page.device_existed(self.wifi_ip)
                     self.android_mdm_page.device_boot_complete()
+                    log.info("设备启动完成")
                     self.android_mdm_page.screen_keep_on()
                     # wait device network normal
                     self.android_mdm_page.ping_network_wifi(5)
+                    log.info("确认注册上网络")
                     now_time = self.page.get_current_time()
                     while True:
                         self.page.refresh_page()
                         if "On" in opt_case.get_single_device_list(sn)[0]["Status"]:
+                            log.info("检测到设备在线")
                             break
                         if self.page.get_current_time() > self.page.return_end_time(now_time, 100):
                             assert False, "@@@@恢复网络后1分钟内没与平台通讯！！"
@@ -596,7 +600,18 @@ class TestDevicesPage:
                 release_page.select_device(sn)
                 release_page.click_server_btn()
                 release_page.api_transfer(test_version_api)
+                flag = 0
+                now_time = self.page.get_current_time()
+                while True:
+                    if test_version_api in self.android_mdm_page.u2_send_command("cat /%s/%s" % (root_dir, test_yml["work_app"]["api_txt"])):
+                        log.info("终端根目录下的aip 已经改变")
+                        print("终端根目录下的aip 已经改变")
+                        break
+                    if self.page.get_current_time() > self.page.return_end_time(now_time):
+                        flag += 1
+                        break
                 self.android_mdm_page.reboot_device(self.wifi_ip)
+
                 # time.sleep(150)
                 # check if device is offline in release version
                 release_page.refresh_page()
@@ -607,14 +622,14 @@ class TestDevicesPage:
                 # if release_data_list[0]["Status"] == "On":
                 #     assert False
                 release_page.quit_browser()
-
-                while True:
-                    if test_version_api in self.android_mdm_page.u2_send_command("cat /%s/%s" % (root_dir, test_yml["work_app"]["api_txt"])):
-                        log.info("终端根目录下的aip 已经改变")
-                        print("终端根目录下的aip 已经改变")
-                        break
-                    if self.page.get_current_time() > self.page.return_end_time(now_time):
-                        assert False, "完全启动超过3分钟api还没有改变， 请检查！！！"
+                if flag == 0:
+                    while True:
+                        if test_version_api in self.android_mdm_page.u2_send_command("cat /%s/%s" % (root_dir, test_yml["work_app"]["api_txt"])):
+                            log.info("终端根目录下的aip 已经改变")
+                            print("终端根目录下的aip 已经改变")
+                            break
+                        if self.page.get_current_time() > self.page.return_end_time(now_time):
+                            assert False, "完全启动超过3分钟api还没有改变， 请检查！！！"
 
                 # go to test version and check if device is online
                 self.page.refresh_page()

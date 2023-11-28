@@ -525,7 +525,7 @@ class TestNetworkCases:
                 exp_existed_text = "ota release already existed"
                 release_info = {"package_name": test_yml['ota_packages_info']['package_name'], "sn": self.device_sn,
                                 "category": "NO Limit", "network": "NO Limit"}
-                times = 2
+                times = 5
                 self.android_mdm_page.screen_keep_on()
                 self.android_mdm_page.back_to_home()
                 # close mobile data first
@@ -1100,7 +1100,7 @@ class TestNetworkCases:
                     self.android_mdm_page.confirm_app_installed(conf.project_path + "\\Param\\Package\\%s" % test_yml['app_info']['low_version_app'])
                     self.page.go_to_new_address("apps")
 
-    @allure.feature('MDM_usb-test')
+    @allure.feature('MDM_usb-test-no test now')
     @allure.title("public case-有线休眠推送app")
     def test_report_device_sleep_status_usb(self, del_app_install_uninstall_release_log, connected_wifi_adb,
                                             login_and_logout_serial, del_all_ota_release_log):
