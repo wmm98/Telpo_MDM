@@ -316,10 +316,10 @@ class TestDevicesPage:
                     self.page.recovery_after_service_unavailable("devices", case_pack.user_info)
                     self.page.go_to_new_address("apps")
 
-    @allure.feature('MDM_device_test1111')
+    @allure.feature('MDM_device_test')
     @allure.title("Devices- 重置设备TPUI密码")
     @pytest.mark.filterwarnings("ignore")
-    # @pytest.mark.flaky(reruns=1, reruns_delay=3)
+    @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_reset_TPUI_password(self, go_to_and_return_device_page):
         while True:
             tpui_apk = case_pack.yaml_data["work_app"]["tpui_apk"]

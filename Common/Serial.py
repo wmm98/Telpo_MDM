@@ -62,7 +62,6 @@ class Serial:
         num = ser.write(bytes.fromhex("A0 01 05 A6"))
         time.sleep(2)  # sleep() 与 inWaiting() 最好配对使用
         ser.inWaiting()
-
         data = str(binascii.b2a_hex(ser.read(num)))[2:-1]  # 十六进制显示方法2
         log.info(data)
         if "a00100a1" in data:
@@ -110,7 +109,7 @@ if __name__ == '__main__':
     s.get_current_COM()
     s.loginSer()
     s.confirm_relay_opened()
-    # s.confirm_relay_closed()
-    # s.logoutSer()
+    s.confirm_relay_closed()
+    s.logoutSer()
 
 
