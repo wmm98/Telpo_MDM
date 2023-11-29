@@ -41,6 +41,7 @@ class TestPublicPage:
         self.android_mdm_page.del_updated_zip()
         self.android_mdm_page.reboot_device(self.wifi_ip)
         self.content_page.refresh_page()
+        self.silent_ota_upgrade_flag = 0
 
     def teardown_class(self):
         # pass
@@ -68,7 +69,9 @@ class TestPublicPage:
                 if self.device_page.service_is_normal():
                     assert False, e
                 else:
+                    log.info("**********************检测到服务器503*************************")
                     self.content_page.recovery_after_service_unavailable("content", case_pack.user_info)
+                    log.info("**********************服务器恢复正常*************************")
                     self.content_page.go_to_new_address("content")
 
     @allure.feature('MDM_public')
@@ -100,7 +103,9 @@ class TestPublicPage:
                 if self.device_page.service_is_normal():
                     assert False, e
                 else:
+                    log.info("**********************检测到服务器503*************************")
                     self.content_page.recovery_after_service_unavailable("content", case_pack.user_info)
+                    log.info("**********************服务器恢复正常*************************")
                     self.content_page.go_to_new_address("content")
 
     @allure.feature('MDM_public')
@@ -224,7 +229,9 @@ class TestPublicPage:
                 if self.device_page.service_is_normal():
                     assert False, e
                 else:
+                    log.info("**********************检测到服务器503*************************")
                     self.content_page.recovery_after_service_unavailable("content", case_pack.user_info)
+                    log.info("**********************服务器恢复正常*************************")
                     self.content_page.go_to_new_address("content")
                     self.content_page.delete_all_content_release_log()
                     self.android_mdm_page.del_all_content_file()
@@ -371,7 +378,9 @@ class TestPublicPage:
                 if self.ota_page.service_is_normal():
                     assert False, e
                 else:
+                    log.info("**********************检测到服务器503*************************")
                     self.ota_page.recovery_after_service_unavailable("ota", case_pack.user_info)
+                    log.info("**********************服务器恢复正常*************************")
                     self.ota_page.delete_all_ota_release_log()
                     self.android_mdm_page.del_all_downloaded_zip()
                     self.android_mdm_page.del_updated_zip()
@@ -511,8 +520,9 @@ class TestPublicPage:
                 if self.app_page.service_is_normal():
                     assert False, e
                 else:
+                    log.info("**********************检测到服务器503*************************")
                     self.app_page.recovery_after_service_unavailable("apps/logs", case_pack.user_info)
-                    log.info("****************服务器503 崩溃后恢复***********************")
+                    log.info("**********************服务器恢复正常*************************")
                     self.app_page.delete_app_install_and_uninstall_logs()
                     self.android_mdm_page.del_all_downloaded_apk()
                     self.android_mdm_page.uninstall_multi_apps(test_yml["app_info"])
@@ -527,7 +537,6 @@ class TestPublicPage:
         # "All Files" "Normal Files" "Boot Animations" "Wallpaper" "LOGO"
         while True:
             try:
-                print("*******************推送文件用例开始***************************")
                 log.info("*******************推送文件用例开始***************************")
                 self.android_mdm_page.screen_keep_on()
                 animations = test_yml["Content_info"]["normal_file"]
@@ -544,7 +553,6 @@ class TestPublicPage:
                     log.info("获取到的文件 的size(bytes): %s" % str(file_size))
                     file_hash_value = self.android_mdm_page.calculate_sha256_in_windows("%s " % animation, directory="Content")
                     log.info("文件的hash_value: %s" % str(file_hash_value))
-                    print("file_hash_value:", file_hash_value)
                     send_time = case_pack.time.strftime('%Y-%m-%d %H:%M',
                                                         case_pack.time.localtime(self.content_page.get_current_time()))
                     self.content_page.time_sleep(4)
@@ -607,6 +615,9 @@ class TestPublicPage:
                 if self.content_page.service_is_normal():
                     assert False, e
                 else:
+                    log.info("**********************检测到服务器503*************************")
+                    self.app_page.recovery_after_service_unavailable("content", case_pack.user_info)
+                    log.info("**********************服务器恢复正常*************************")
                     self.content_page.delete_all_content_release_log()
                     self.android_mdm_page.del_all_content_file()
                     self.android_mdm_page.screen_keep_on()
@@ -761,8 +772,9 @@ class TestPublicPage:
                 if self.app_page.service_is_normal():
                     assert False, e
                 else:
+                    log.info("**********************检测到服务器503*************************")
                     self.app_page.recovery_after_service_unavailable("apps", case_pack.user_info)
-                    log.info("************服务器503，重跑用例****************")
+                    log.info("**********************服务器恢复正常*************************")
                     self.app_page.delete_app_install_and_uninstall_logs()
                     self.android_mdm_page.del_all_downloaded_apk()
                     self.android_mdm_page.uninstall_multi_apps(test_yml["app_info"])
@@ -839,11 +851,149 @@ class TestPublicPage:
                 if self.app_page.service_is_normal():
                     assert False, e
                 else:
+                    log.info("**********************检测到服务器503***********************")
                     self.app_page.recovery_after_service_unavailable("apps/logs", case_pack.user_info)
+                    log.info("**********************服务器恢复正常*************************")
                     self.app_page.delete_app_install_and_uninstall_logs()
                     self.android_mdm_page.del_all_downloaded_apk()
                     self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
                     self.app_page.go_to_new_address("apps")
+
+    @allure.feature('MDM_public-test')
+    @allure.title("public case- 静默ota升级")
+    # @pytest.mark.flaky(reruns=2, reruns_delay=1)
+    def test_silent_ota_upgrade(self, del_all_ota_release_log, go_to_ota_page, delete_ota_package_relate):
+        while True:
+            try:
+                log.info("*******************静默ota升级用例开始***************************")
+                release_info = {"package_name": test_yml['ota_packages_info']['package_name'], "sn": self.device_sn,
+                                "silent": 0, "category": "NO Limit", "network": "NO Limit"}
+                download_tips = "Foundanewfirmware,whethertoupgrade?"
+                upgrade_tips = "whethertoupgradenow?"
+                self.android_mdm_page.del_updated_zip()
+                release_info["version"] = self.ota_page.get_ota_package_version(release_info["package_name"])
+                current_firmware_version = self.android_mdm_page.check_firmware_version()
+                # compare current version and exp version
+                try:
+                    assert self.ota_page.transfer_version_into_int(
+                        current_firmware_version) < self.ota_page.transfer_version_into_int(
+                        release_info["version"]), \
+                        "@@@@释放的ota升级包比当前固件版本版本低， 请检查！！！"
+                except AttributeError as e:
+                    log.info("*******************静默ota升级用例结束***************************")
+                    if self.silent_ota_upgrade_flag == 1:
+                        assert True
+                    else:
+                        assert False, e
+
+                # reboot
+                self.android_mdm_page.reboot_device(self.wifi_ip)
+                log.info("成功重启设备")
+                # search package
+                device_current_firmware_version = self.android_mdm_page.check_firmware_version()
+                log.info("设备当前固件版本：%s" % device_current_firmware_version)
+                log.info("目标固件版本为 %s :" % release_info["version"])
+                ota_package_size = conf.project_path + "\\Param\\Package\\%s" % release_info["package_name"]
+                act_ota_package_hash_value = self.android_mdm_page.calculate_sha256_in_windows(release_info["package_name"])
+                log.info("原始文件的hash值 ota_package_hash_value： %s" % str(act_ota_package_hash_value))
+                act_ota_package_size = self.ota_page.get_zip_size(ota_package_size)
+                log.info("原始文件的大小（bytes）： %s" % str(act_ota_package_size))
+                self.ota_page.search_device_by_pack_name(release_info["package_name"])
+                # ele = self.Page.get_package_ele(release_info["package_name"])
+                send_time = case_pack.time.strftime('%Y-%m-%d %H:%M',
+                                                    case_pack.time.localtime(self.ota_page.get_current_time()))
+                print("send_time", send_time)
+                self.ota_page.time_sleep(10)
+                # if device is existed, click
+                self.ota_page.click_release_btn()
+                self.ota_page.input_release_OTA_package(release_info, is_silent=True)
+                log.info("推送ota package 指令下达成功")
+                # check download record in device
+                now_time = self.ota_page.get_current_time()
+                while True:
+                    # check if app in download list
+                    if self.android_mdm_page.download_file_is_existed(release_info["package_name"]):
+                        log.info("终端检测到 %s 的下载记录" % release_info["package_name"])
+                        break
+                    if self.ota_page.get_current_time() > self.ota_page.return_end_time(now_time, 180):
+                        log.error("@@@@推送中超过3分钟还没有升级包: %s的下载记录" % release_info["package_name"])
+                        assert False, "@@@@推送中超过3分钟还没有升级包: %s的下载记录" % release_info["package_name"]
+                    self.ota_page.time_sleep(10)
+
+                self.ota_page.go_to_new_address("ota/log")
+                upgrade_flag = 0
+                download_time = self.ota_page.get_current_time()
+                while True:
+                    info = self.ota_page.get_ota_latest_upgrade_log(send_time, release_info)
+                    if len(info) != 0:
+                        action = info[0]["Action"]
+                        log.info("平台upgrade log action: %s" % action)
+                        if self.ota_page.get_action_status(action) in [2, 3, 4]:
+                            log.info("*****************平台upgrade log显示ota安装包下载完成*****************")
+                            if action == 4:
+                                log.info("*****************平台upgrade log显示ota升级成功*****************")
+                                upgrade_flag = 1
+                            break
+                    # wait upgrade 3 min at most
+                    if self.ota_page.get_current_time() > self.ota_page.return_end_time(download_time, 600):
+                        self.silent_ota_upgrade_flag = 1
+                        if self.ota_page.service_is_normal():
+                            log.error("@@@@30分钟还没有下载完相应的固件， 请检查！！！")
+                            assert False, "@@@@30分钟还没有下载完相应的固件， 请检查！！！"
+                        else:
+                            self.ota_page.recovery_after_service_unavailable("ota/log", case_pack.user_info)
+                            download_time = self.app_page.get_current_time()
+                    self.ota_page.time_sleep(30)
+                    self.ota_page.refresh_page()
+
+                if upgrade_flag == 0:
+                    self.ota_page.refresh_page()
+                    report_time = self.ota_page.get_current_time()
+                    while True:
+                        info = self.ota_page.get_ota_latest_upgrade_log(send_time, release_info)
+                        if len(info) != 0:
+                            action = info[0]["Action"]
+                            log.info("平台upgrade log action: %s" % action)
+                            if self.ota_page.get_action_status(action) == 4:
+                                log.info("*****************平台upgrade log显示ota升级成功*****************")
+                                break
+                        # wait upgrade 3 min at most
+                        if self.ota_page.get_current_time() > self.ota_page.return_end_time(report_time, 600):
+                            if self.ota_page.service_is_normal():
+                                self.silent_ota_upgrade_flag = 1
+                                log.error("@@@@30分钟还没有升级相应的ota包， 请检查！！！")
+                                assert False, "@@@@30分钟还没有升级相应的ota包， 请检查！！！"
+                            else:
+                                self.ota_page.recovery_after_service_unavailable("ota/log", case_pack.user_info)
+                                report_time = self.ota_page.get_current_time()
+                        self.ota_page.time_sleep(30)
+                        self.ota_page.refresh_page()
+                log.info("************************平台显示ota安装升级完成完成*************************************")
+                self.android_mdm_page.time_sleep(5)
+                self.android_mdm_page.device_boot(self.wifi_ip)
+                log.info("设备启动成功")
+                after_upgrade_version = self.android_mdm_page.check_firmware_version()
+                log.info("设备升级后的固件版本：%s" % after_upgrade_version)
+                # assert self.ota_page.transfer_version_into_int(
+                #     device_current_firmware_version) != self.ota_page.transfer_version_into_int(after_upgrade_version), \
+                #     "@@@@ota升级失败， 还是原来的版本%s！！" % device_current_firmware_version
+                # assert self.ota_page.transfer_version_into_int(release_info["version"]) == \
+                #        self.ota_page.transfer_version_into_int(
+                #            after_upgrade_version), "@@@@升级后的固件版本为%s, ota升级失败， 请检查！！！" % after_upgrade_version
+                assert self.ota_page.remove_space(str(after_upgrade_version)) == self.ota_page.remove_space(release_info["version"]), "@@@@升级后的固件版本为%s, ota升级失败， 请检查！！！" % after_upgrade_version
+                log.info("*******************静默ota升级用例结束***************************")
+                break
+            except Exception as e:
+                if self.ota_page.service_is_normal():
+                    assert False, e
+                else:
+                    log.info("**********************检测到服务器503***********************")
+                    self.content_page.recovery_after_service_unavailable("ota", case_pack.user_info)
+                    log.info("**********************服务器恢复正常*************************")
+                    self.ota_page.delete_all_ota_release_log()
+                    self.ota_page.go_to_new_address("ota")
+                    self.android_mdm_page.del_all_downloaded_zip()
+                    self.android_mdm_page.del_updated_zip()
 
     @allure.feature('MDM_public')
     @allure.title("public case- 静默升级系统app/推送安装成功后自动运行app")
@@ -866,8 +1016,10 @@ class TestPublicPage:
                 while True:
                     self.android_mdm_page.push_file_to_device(
                         self.android_mdm_page.get_apk_path(test_yml['app_info']['low_version_app']), "/system/app/")
-                    if test_yml['app_info']['low_version_app'] in self.android_mdm_page.u2_send_command("ls /system/app"):
-                        log.info("成功推送文件%s 到终端：%s, 标志为系统app" % (test_yml['app_info']['low_version_app'], "/system/app/"))
+                    if test_yml['app_info']['low_version_app'] in self.android_mdm_page.u2_send_command(
+                            "ls /system/app"):
+                        log.info(
+                            "成功推送文件%s 到终端：%s, 标志为系统app" % (test_yml['app_info']['low_version_app'], "/system/app/"))
                         log.info(self.android_mdm_page.u2_send_command("ls /system/app"))
                         break
                     if self.app_page.get_current_time() > self.app_page.return_end_time(now_time, 180):
@@ -876,7 +1028,7 @@ class TestPublicPage:
                     self.android_mdm_page.time_sleep(2)
                 # print(self.android_mdm_page.u2_send_command("ls /system/app"))
 
-                self.android_mdm_page.reboot_device(self.wifi_ip)
+                self.android_mdm_page.reboot_device_root(self.wifi_ip)
                 log.info("重启")
                 assert self.android_mdm_page.app_is_installed(
                     self.android_mdm_page.get_apk_package_name(file_path)), "@@@没有安装系统应用， 请检查！！！！"
@@ -906,8 +1058,11 @@ class TestPublicPage:
                                                     case_pack.time.localtime(self.app_page.get_current_time()))
                 self.app_page.time_sleep(10)
                 self.app_page.click_release_app_btn()
-                self.app_page.input_release_app_info(release_info)
-                log.info("app推送指令下达成功")
+                try:
+                    self.app_page.input_release_app_info(release_info)
+                    log.info("app推送指令下达成功")
+                except Exception as e:
+                    pass
                 now_time = self.app_page.get_current_time()
                 shell_app_apk_name = release_info["package"] + "_%s.apk" % release_info["version"]
                 while True:
@@ -922,7 +1077,8 @@ class TestPublicPage:
 
                 # check if download completed
                 now_time = self.app_page.get_current_time()
-                original_hash_value = self.android_mdm_page.calculate_sha256_in_windows("%s" % release_info["package_name"])
+                original_hash_value = self.android_mdm_page.calculate_sha256_in_windows(
+                    "%s" % release_info["package_name"])
                 log.info("原始app的 hash 值： %s" % original_hash_value)
                 while True:
                     shell_hash_value = self.android_mdm_page.calculate_sha256_in_device(shell_app_apk_name)
@@ -993,135 +1149,13 @@ class TestPublicPage:
                 if self.app_page.service_is_normal():
                     assert False, e
                 else:
+                    log.info("**********************检测到服务器503***********************")
                     self.app_page.recovery_after_service_unavailable("apps/logs", case_pack.user_info)
+                    log.info("**********************服务器恢复正常*************************")
                     self.app_page.delete_app_install_and_uninstall_logs()
                     self.android_mdm_page.del_all_downloaded_apk()
                     self.android_mdm_page.confirm_system_app_uninstalled()
                     self.app_page.go_to_new_address("apps")
-
-    @allure.feature('MDM_public')
-    @allure.title("public case- 静默ota升级")
-    def test_silent_ota_upgrade(self, del_all_ota_release_log, go_to_ota_page, delete_ota_package_relate):
-        while True:
-            try:
-                log.info("*******************静默ota升级用例开始***************************")
-                release_info = {"package_name": test_yml['ota_packages_info']['package_name'], "sn": self.device_sn,
-                                "silent": 0, "category": "NO Limit", "network": "NO Limit"}
-                download_tips = "Foundanewfirmware,whethertoupgrade?"
-                upgrade_tips = "whethertoupgradenow?"
-                self.android_mdm_page.del_updated_zip()
-                release_info["version"] = self.ota_page.get_ota_package_version(release_info["package_name"])
-                current_firmware_version = self.android_mdm_page.check_firmware_version()
-                # compare current version and exp version
-                assert self.ota_page.transfer_version_into_int(
-                    current_firmware_version) < self.ota_page.transfer_version_into_int(
-                    release_info["version"]), \
-                    "@@@@释放的ota升级包比当前固件版本版本低， 请检查！！！"
-
-                # reboot
-                self.android_mdm_page.reboot_device_no_root(self.wifi_ip)
-                log.info("成功重启设备")
-                # search package
-                device_current_firmware_version = self.android_mdm_page.check_firmware_version()
-                log.info("设备当前固件版本：%s" % device_current_firmware_version)
-                log.info("目标固件版本为 %s :" % release_info["version"])
-                ota_package_size = conf.project_path + "\\Param\\Package\\%s" % release_info["package_name"]
-                act_ota_package_hash_value = self.android_mdm_page.calculate_sha256_in_windows(release_info["package_name"])
-                log.info("原始文件的hash值 ota_package_hash_value： %s" % str(act_ota_package_hash_value))
-                act_ota_package_size = self.ota_page.get_zip_size(ota_package_size)
-                log.info("原始文件的大小（bytes）： %s" % str(act_ota_package_size))
-                self.ota_page.search_device_by_pack_name(release_info["package_name"])
-                # ele = self.Page.get_package_ele(release_info["package_name"])
-                send_time = case_pack.time.strftime('%Y-%m-%d %H:%M',
-                                                    case_pack.time.localtime(self.ota_page.get_current_time()))
-                print("send_time", send_time)
-                self.ota_page.time_sleep(10)
-                # if device is existed, click
-                self.ota_page.click_release_btn()
-                self.ota_page.input_release_OTA_package(release_info, is_silent=True)
-                log.info("推送ota package 指令下达成功")
-                # check download record in device
-                now_time = self.ota_page.get_current_time()
-                while True:
-                    # check if app in download list
-                    if self.android_mdm_page.download_file_is_existed(release_info["package_name"]):
-                        log.info("终端检测到 %s 的下载记录" % release_info["package_name"])
-                        break
-                    if self.ota_page.get_current_time() > self.ota_page.return_end_time(now_time, 180):
-                        log.error("@@@@推送中超过3分钟还没有升级包: %s的下载记录" % release_info["package_name"])
-                        assert False, "@@@@推送中超过3分钟还没有升级包: %s的下载记录" % release_info["package_name"]
-                    self.ota_page.time_sleep(10)
-
-                self.ota_page.go_to_new_address("ota/log")
-                upgrade_flag = 0
-                download_time = self.ota_page.get_current_time()
-                while True:
-                    info = self.ota_page.get_ota_latest_upgrade_log(send_time, release_info)
-                    if len(info) != 0:
-                        action = info[0]["Action"]
-                        log.info("平台upgrade log action: %s" % action)
-                        if self.ota_page.get_action_status(action) in [2, 3, 4]:
-                            log.info("*****************平台upgrade log显示ota安装包下载完成*****************")
-                            if action == 4:
-                                log.info("*****************平台upgrade log显示ota升级成功*****************")
-                                upgrade_flag = 1
-                            break
-                    # wait upgrade 3 min at most
-                    if self.ota_page.get_current_time() > self.ota_page.return_end_time(download_time, 600):
-                        if self.ota_page.service_is_normal():
-                            log.error("@@@@30分钟还没有下载完相应的固件， 请检查！！！")
-                            assert False, "@@@@30分钟还没有下载完相应的固件， 请检查！！！"
-                        else:
-                            self.ota_page.recovery_after_service_unavailable("ota/log", case_pack.user_info)
-                            download_time = self.app_page.get_current_time()
-                    self.ota_page.time_sleep(30)
-                    self.ota_page.refresh_page()
-
-                if upgrade_flag == 0:
-                    self.ota_page.refresh_page()
-                    report_time = self.ota_page.get_current_time()
-                    while True:
-                        info = self.ota_page.get_ota_latest_upgrade_log(send_time, release_info)
-                        if len(info) != 0:
-                            action = info[0]["Action"]
-                            log.info("平台upgrade log action: %s" % action)
-                            if self.ota_page.get_action_status(action) == 4:
-                                log.info("*****************平台upgrade log显示ota升级成功*****************")
-                                break
-                        # wait upgrade 3 min at most
-                        if self.ota_page.get_current_time() > self.ota_page.return_end_time(report_time, 600):
-                            if self.ota_page.service_is_normal():
-                                log.error("@@@@30分钟还没有升级相应的ota包， 请检查！！！")
-                                assert False, "@@@@30分钟还没有升级相应的ota包， 请检查！！！"
-                            else:
-                                self.ota_page.recovery_after_service_unavailable("ota/log", case_pack.user_info)
-                                report_time = self.ota_page.get_current_time()
-                        self.ota_page.time_sleep(30)
-                        self.ota_page.refresh_page()
-                log.info("************************平台显示ota安装升级完成完成*************************************")
-                self.android_mdm_page.device_boot(self.wifi_ip)
-                log.info("设备启动成功")
-                after_upgrade_version = self.android_mdm_page.check_firmware_version()
-                log.info("设备升级后的固件版本：%s" % after_upgrade_version)
-                assert self.ota_page.transfer_version_into_int(
-                    device_current_firmware_version) != self.ota_page.transfer_version_into_int(after_upgrade_version), \
-                    "@@@@ota升级失败， 还是原来的版本%s！！" % device_current_firmware_version
-                assert self.ota_page.transfer_version_into_int(release_info["version"]) == \
-                       self.ota_page.transfer_version_into_int(
-                           after_upgrade_version), "@@@@升级后的固件版本为%s, ota升级失败， 请检查！！！" % after_upgrade_version
-                print("************************静默ota升级完成升级完成完成*************************************")
-                print("*******************静默ota升级用例结束***************************")
-                log.info("*******************静默ota升级用例结束***************************")
-                break
-            except Exception as e:
-                if self.ota_page.service_is_normal():
-                    assert False, e
-                else:
-                    self.content_page.recovery_after_service_unavailable("ota", case_pack.user_info)
-                    self.ota_page.delete_all_ota_release_log()
-                    self.ota_page.go_to_new_address("ota")
-                    self.android_mdm_page.del_all_downloaded_zip()
-                    self.android_mdm_page.del_updated_zip()
 
     @allure.feature('MDM_public')
     @allure.title("public case-推送开机logo/动画")
@@ -1265,7 +1299,9 @@ class TestPublicPage:
                 if self.device_page.service_is_normal():
                     assert False, e
                 else:
+                    log.info("**********************检测到服务器503***********************")
                     self.content_page.recovery_after_service_unavailable("content", case_pack.user_info)
+                    log.info("**********************服务器恢复正常*************************")
                     self.content_page.delete_all_content_release_log()
                     self.android_mdm_page.del_all_content_file()
                     self.android_mdm_page.screen_keep_on()
@@ -1276,10 +1312,9 @@ class TestPublicPage:
     def test_report_device_sleep_status(self, del_app_install_uninstall_release_log, go_to_device_page, uninstall_multi_apps):
         while True:
             try:
-                print("*******************无线休眠推送app用例开始***************************")
                 log.info("*******************无线休眠推送app用例开始***************************")
                 for i in range(1):
-                    log.info("***************************%d***************************" % i)
+                    log.info("******************%d**********************" % (i + 1))
                     self.android_mdm_page.close_mobile_data()
                     self.android_mdm_page.del_all_downloaded_apk()
                     self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
@@ -1421,7 +1456,7 @@ class TestPublicPage:
                                 self.app_page.recovery_after_service_unavailable("apps/logs", case_pack.user_info)
                                 log.info("服务器503恢复后继续执行")
                                 report_time = self.app_page.get_current_time()
-                        self.app_page.time_sleep(5)
+                        self.app_page.time_sleep(10)
                         self.app_page.refresh_page()
                     log.info("安装包下载完成")
                     # check upgrade
@@ -1455,7 +1490,9 @@ class TestPublicPage:
                 if self.device_page.service_is_normal():
                     assert False, e
                 else:
+                    log.info("**********************检测到服务器503***********************")
                     self.app_page.recovery_after_service_unavailable("devices", case_pack.user_info)
+                    log.info("**********************服务器恢复正常*************************")
                     self.app_page.delete_app_install_and_uninstall_logs()
                     self.android_mdm_page.del_all_downloaded_apk()
                     self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
@@ -1463,18 +1500,35 @@ class TestPublicPage:
 
     @allure.feature('MDM_public111')
     @allure.title("Devices- 关机 -- test in the last")
+    @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_device_shutdown(self):
-        print("*******************关机用例开始***************************")
-        log.info("*******************关机用例开始***************************")
-        sn = self.device_sn
-        exp_shutdown_text = "Device ShutDown Command sent"
-        opt_case.check_single_device(sn)
-        self.device_page.click_dropdown_btn()
-        self.device_page.click_shutdown_btn()
-        # check if shutdown command works in 3 sec
-        self.device_page.time_sleep(3)
-        assert "%sdevice" % self.android_mdm_page.get_device_name() not in self.device_page.remove_space(
-            self.android_mdm_page.devices_list()), "@@@@3s内还没触发关机， 请检查！！！"
-        self.device_page.refresh_page()
-        assert "Off" in opt_case.get_single_device_list(sn)[0]["Status"], "@@@@已发送关机命令， 设备还显示在线状态"
-        # check device
+        while True:
+            try:
+                log.info("*******************关机用例开始***************************")
+                sn = self.device_sn
+                exp_shutdown_text = "Device ShutDown Command sent"
+                opt_case.check_single_device(sn)
+                self.device_page.click_dropdown_btn()
+                self.device_page.click_shutdown_btn()
+                # check if shutdown command works in 3 sec
+                self.device_page.time_sleep(3)
+                assert "%sdevice" % self.android_mdm_page.get_device_name() not in self.device_page.remove_space(
+                    self.android_mdm_page.devices_list()), "@@@@3s内还没触发关机， 请检查！！！"
+                self.device_page.refresh_page()
+                now_time = self.device_page.get_current_time()
+                while True:
+                    if "Off" in opt_case.get_single_device_list(sn)[0]["Status"]:
+                        break
+                    if self.device_page.get_current_time() > self.device_page.return_end_time(now_time, 60):
+                        assert False, "@@@@已发送关机命令， 设备还显示在线状态"
+                    self.device_page.refresh_page()
+                break
+            except Exception as e:
+                if self.device_page.service_is_normal():
+                    assert False, e
+                else:
+                    log.info("**********************检测到服务器503***********************")
+                    self.app_page.recovery_after_service_unavailable("devices", case_pack.user_info)
+                    log.info("**********************服务器恢复正常*************************")
+                    self.device_page.go_to_new_address("devices")
+

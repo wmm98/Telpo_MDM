@@ -143,10 +143,10 @@ class AndroidBasePageWiFi(interface):
         self.confirm_wifi_adb_connected(wlan0_ip)
         self.device_existed(wlan0_ip)
         self.device_boot_complete()
-        self.wifi_adb_root(wlan0_ip)
+        # self.wifi_adb_root(wlan0_ip)
         self.screen_keep_on()
 
-    def reboot_device_no_root(self, wlan0_ip):
+    def reboot_device_root(self, wlan0_ip):
         self.send_adb_command("reboot")
         self.time_sleep(5)
         self.kill_server()
@@ -176,7 +176,14 @@ class AndroidBasePageWiFi(interface):
         self.confirm_wifi_adb_connected(wlan0_ip)
         self.device_existed(wlan0_ip)
         self.device_boot_complete()
-        self.wifi_adb_root(wlan0_ip)
+        # self.wifi_adb_root(wlan0_ip)
+        self.device_unlock()
+
+    def device_boot_root(self, wlan0_ip):
+        self.time_sleep(5)
+        self.confirm_wifi_adb_connected(wlan0_ip)
+        self.device_existed(wlan0_ip)
+        self.device_boot_complete()
         self.device_unlock()
 
     def get_app_info(self, package):

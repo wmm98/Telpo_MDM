@@ -32,9 +32,9 @@ class TestStability:
         self.mdm_page = st.MDMPage(test_driver, 40)
         self.mdm_page.login_ok(st.yaml_data['website_info']['test_user'], st.yaml_data['website_info']['test_password'])
         self.mdm_page.time_sleep(5)
-        self.app_page.delete_app_install_and_uninstall_logs()
-        self.content_page.delete_all_content_release_log()
-        self.ota_page.delete_all_ota_release_log()
+        # self.app_page.delete_app_install_and_uninstall_logs()
+        # self.content_page.delete_all_content_release_log()
+        # self.ota_page.delete_all_ota_release_log()
         self.androids_page = []
         self.devices_sn = []
         self.devices_ip = []
@@ -75,7 +75,7 @@ class TestStability:
             pre_del_update_t.start()
             pre_del_updated_file_thread.append(pre_del_update_t)
 
-            pre_r_t = st.threading.Thread(target=android_.reboot_device_no_root, args=(android_.device_ip,))
+            pre_r_t = st.threading.Thread(target=android_.reboot_device, args=(android_.device_ip,))
             pre_r_t.start()
             pre_reboot_thread.append(pre_r_t)
 
