@@ -135,14 +135,17 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
 
     def confirm_system_app_uninstalled(self):
         apk_file = public_pack.yaml_data['app_info']['low_version_app']
-        self.rm_file("system/app/%s" % apk_file)
-        self.reboot_device(self.device_ip)
+        # self.wifi_adb_root(self.device_ip)
+        # self.rm_file("system/app/%s" % apk_file)
+        # self.reboot_device_root(self.device_ip)
         now_time = self.get_current_time()
         while True:
+            self.wifi_adb_root(self.device_ip)
+            self.rm_file("system/app/%s" % apk_file)
             package_name = self.get_apk_package_name(self.get_apk_path(apk_file))
             if not self.app_is_installed(package_name):
                 break
-            self.reboot_device(self.device_ip)
+            self.reboot_device_root(self.device_ip)
             self.uninstall_app(package_name)
             if self.get_current_time() > self.return_end_time(now_time):
                 assert False, "@@@@system app--%s:%s仍然存在， 请检查！！！！" % (apk_file, package_name)

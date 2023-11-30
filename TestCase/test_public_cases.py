@@ -33,24 +33,24 @@ class TestPublicPage:
         self.android_mdm_page = case_pack.AndroidAimdmPage(case_pack.device_data, 5)
         self.content_page = case_pack.ContentPage(self.driver, 40)
         self.wifi_ip = case_pack.device_data["wifi_device_info"]["ip"]
-        self.android_mdm_page.del_all_content_file()
+        # self.android_mdm_page.del_all_content_file()
         self.device_sn = self.android_mdm_page.get_device_sn()
-        self.app_page.delete_app_install_and_uninstall_logs()
-        self.android_mdm_page.del_all_downloaded_apk()
-        self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
-        self.android_mdm_page.del_updated_zip()
-        self.android_mdm_page.reboot_device(self.wifi_ip)
-        self.content_page.refresh_page()
-        self.silent_ota_upgrade_flag = 0
+        # self.app_page.delete_app_install_and_uninstall_logs()
+        # self.android_mdm_page.del_all_downloaded_apk()
+        # self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
+        # self.android_mdm_page.del_updated_zip()
+        # self.android_mdm_page.reboot_device(self.wifi_ip)
+        # self.content_page.refresh_page()
+        # self.silent_ota_upgrade_flag = 0
 
     def teardown_class(self):
-        # pass
-        self.app_page.delete_app_install_and_uninstall_logs()
-        self.android_mdm_page.del_all_downloaded_apk()
-        self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
-        self.android_mdm_page.del_all_content_file()
-        self.app_page.refresh_page()
-        self.android_mdm_page.reboot_device(self.wifi_ip)
+        pass
+        # self.app_page.delete_app_install_and_uninstall_logs()
+        # self.android_mdm_page.del_all_downloaded_apk()
+        # self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
+        # self.android_mdm_page.del_all_content_file()
+        # self.app_page.refresh_page()
+        # self.android_mdm_page.reboot_device(self.wifi_ip)
 
     @allure.feature('MDM_public')
     @allure.title("public case-添加 content 种类--辅助测试用例")
@@ -859,7 +859,7 @@ class TestPublicPage:
                     self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
                     self.app_page.go_to_new_address("apps")
 
-    @allure.feature('MDM_public-test')
+    @allure.feature('MDM_public')
     @allure.title("public case- 静默ota升级")
     # @pytest.mark.flaky(reruns=2, reruns_delay=1)
     def test_silent_ota_upgrade(self, del_all_ota_release_log, go_to_ota_page, delete_ota_package_relate):
@@ -995,9 +995,9 @@ class TestPublicPage:
                     self.android_mdm_page.del_all_downloaded_zip()
                     self.android_mdm_page.del_updated_zip()
 
-    @allure.feature('MDM_public')
+    @allure.feature('MDM_public--test')
     @allure.title("public case- 静默升级系统app/推送安装成功后自动运行app")
-    @pytest.mark.flaky(reruns=2, reruns_delay=3)
+    # @pytest.mark.flaky(reruns=2, reruns_delay=3)
     def test_upgrade_system_app(self, del_all_app_release_log, del_download_apk, uninstall_system_app):
         while True:
             try:
@@ -1009,8 +1009,8 @@ class TestPublicPage:
                 # # install low version system application
                 # # set app as system app
                 self.android_mdm_page.wifi_adb_root(self.wifi_ip)
-                # assert not self.android_mdm_page.app_is_installed(
-                #     self.android_mdm_page.get_apk_package_name(file_path))
+                assert not self.android_mdm_page.app_is_installed(
+                    self.android_mdm_page.get_apk_package_name(file_path))
                 # push file to system/app
                 now_time = self.android_mdm_page.get_current_time()
                 while True:
@@ -1022,12 +1022,11 @@ class TestPublicPage:
                             "成功推送文件%s 到终端：%s, 标志为系统app" % (test_yml['app_info']['low_version_app'], "/system/app/"))
                         log.info(self.android_mdm_page.u2_send_command("ls /system/app"))
                         break
-                    if self.app_page.get_current_time() > self.app_page.return_end_time(now_time, 180):
+                    if self.app_page.get_current_time() > self.app_page.return_end_time(now_time, 60):
                         log.error("无法推送文件%s 到终端：%s" % (test_yml['app_info']['low_version_app'], "/system/app/"))
                         assert False, "无法推送文件%s 到终端：%s" % (test_yml['app_info']['low_version_app'], "/system/app/")
                     self.android_mdm_page.time_sleep(2)
-                # print(self.android_mdm_page.u2_send_command("ls /system/app"))
-
+                log.info(self.android_mdm_page.u2_send_command("ls /system/app"))
                 self.android_mdm_page.reboot_device_root(self.wifi_ip)
                 log.info("重启")
                 assert self.android_mdm_page.app_is_installed(
@@ -1073,7 +1072,7 @@ class TestPublicPage:
                     if self.app_page.get_current_time() > self.app_page.return_end_time(now_time, 180):
                         log.error("@@@@超过3分钟还没有app: %s的下载记录" % release_info["package_name"])
                         assert False, "@@@@超过3分钟还没有app: %s的下载记录" % release_info["package_name"]
-                log.info("**********************下载记录检测完毕*************************************")
+                log.info("**********************检测到终端有下载记录*************************************")
 
                 # check if download completed
                 now_time = self.app_page.get_current_time()
@@ -1090,7 +1089,7 @@ class TestPublicPage:
                         log.error("@@@@多应用推送中超过30分钟还没有完成%s的下载" % release_info["package_name"])
                         assert False, "@@@@多应用推送中超过30分钟还没有完成%s的下载" % release_info["package_name"]
                     self.app_page.time_sleep(60)
-                log.info("**********************下载完成检测完毕*************************************")
+                log.info("***********************检测到终端下载完毕******************************")
                 now_time = self.app_page.get_current_time()
                 while True:
                     if self.android_mdm_page.app_is_installed(release_info["package"]):
@@ -1100,7 +1099,7 @@ class TestPublicPage:
                         current_version = self.app_page.transfer_version_into_int(release_info["version"])
                         log.info("当前版本为： %s" % ".".join(str(current_version)))
                         if version_installed == current_version:
-                            log.info("系统app静默覆盖安装完成")
+                            log.info("设备检测到系统app静默覆盖安装完成")
                             break
                         else:
                             log.error("@@@@覆盖安装后版本与木目标版本不一致， 请检查！！！！")
@@ -1110,8 +1109,6 @@ class TestPublicPage:
                         assert False, "@@@@5分钟还没有终端或者平台还没显示安装完相应的app， 请检查！！！"
                     self.app_page.time_sleep(5)
                 self.app_page.time_sleep(5)
-                log.info("**********************终端成功静默安装系统app*************************************")
-
                 self.app_page.go_to_new_address("apps/logs")
                 self.app_page.refresh_page()
                 report_time = self.app_page.get_current_time()
@@ -1120,7 +1117,9 @@ class TestPublicPage:
                     if len(upgrade_list) != 0:
                         action = upgrade_list[0]["Action"]
                         log.info("平台显示的upgrade action为： %s" % action)
-                        break
+                        if self.app_page.get_action_status(action) == 4:
+                            log.info("平台上报升级完成")
+                            break
                     # wait upgrade 3 min at most
                     if self.app_page.get_current_time() > self.app_page.return_end_time(report_time, 300):
                         if self.app_page.service_is_normal():
@@ -1132,11 +1131,13 @@ class TestPublicPage:
                     self.app_page.time_sleep(5)
                     self.app_page.refresh_page()
                 self.app_page.time_sleep(5)
-                log.info("************************推送安装成功后自动运行app*****************************")
+                log.info("**********************终端成功静默安装系统app*************************************")
+                log.info("************************推送安装成功后自动运行app用例开始*****************************")
                 try:
                     self.android_mdm_page.confirm_app_auto_running(release_info["package"], 120)
                 except AttributeError:
                     log.error("app 推送选择了安装完成后自动运行app, app安装完后2分钟内还没自动运行")
+                    assert False, "app 推送选择了安装完成后自动运行app, app安装完后2分钟内还没自动运行"
                 try:
                     self.android_mdm_page.stop_app(release_info["package"])
                     self.android_mdm_page.rm_file("system/app/%s" % test_yml['app_info']['low_version_app'])
@@ -1376,6 +1377,9 @@ class TestPublicPage:
                     log.info("设备已经不在线，确认设备已经进入深度休眠模式")
                     self.android_mdm_page.time_sleep(600)
                     log.info("设备休眠结束")
+                    # restart adb server
+                    self.android_mdm_page.kill_server()
+                    self.android_mdm_page.start_server()
                     # wakeup device
                     usb_serial.confirm_relay_opened()
                     log.info("上电")

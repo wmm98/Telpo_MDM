@@ -687,8 +687,7 @@ class TestNetworkCases:
 
         while True:
             try:
-                print("=============================Apps-推送低版本的APP/卸载后重新安装 用例开始=================================")
-                log.info("=============================Apps-推送低版本的APP/卸载后重新安装 用例开始=================================")
+                log.info("*******************Apps-推送低版本的APP/卸载后重新安装用例开始*****************")
                 file_path = conf.project_path + "\\Param\\Package\\%s" % release_info["package_name"]
                 package = self.page.get_apk_package_name(file_path)
                 release_info["package"] = package
@@ -705,14 +704,13 @@ class TestNetworkCases:
                 # app_size_mdm = self.page.get_app_size()  for web
                 # check app size(bytes) in windows
                 app_size = self.page.get_file_size_in_windows(file_path)
-                print("获取到的app 的size(bytes): %s" % str(app_size))
                 log.info("获取到的app 的size(bytes): %s" % str(app_size))
                 # self.android_mdm_page.start_app()
                 # go to app page
                 self.page.go_to_new_address("apps")
                 send_time = case_pack.time.strftime('%Y-%m-%d %H:%M',
                                                     case_pack.time.localtime(self.page.get_current_time()))
-                self.page.time_sleep(4)
+                self.page.time_sleep(10)
                 self.page.search_app_by_name(release_info["package_name"])
                 app_list = self.page.get_apps_text_list()
                 if len(app_list) == 0:
@@ -746,7 +744,7 @@ class TestNetworkCases:
                         log.info("@@@@多应用推送中超过30分钟还没有完成%s的下载" % release_info["package_name"])
                         assert False, "@@@@多应用推送中超过30分钟还没有完成%s的下载" % release_info["package_name"]
                     self.page.time_sleep(10)
-                log.info("**********************下载完成检测完毕*************************************")
+                log.info("**********************检测到终端下载完毕*************************************")
 
                 # # check install
 
@@ -759,8 +757,7 @@ class TestNetworkCases:
                     if self.page.get_current_time() > self.page.return_end_time(now_time, 180):
                         assert False, "@@@@3分钟还没有终端或者平台还没显示安装完相应的app， 请检查！！！"
                     self.page.time_sleep(1)
-                print("**********************终端安装完毕*************************************")
-                log.info("**********************终端安装完毕*************************************")
+                log.info("***********************检测到终端安装完毕*****************************")
 
                 self.page.time_sleep(5)
 
@@ -770,22 +767,22 @@ class TestNetworkCases:
                     upgrade_list = self.page.get_app_latest_upgrade_log(send_time, release_info)
                     if len(upgrade_list) != 0:
                         action = upgrade_list[0]["Action"]
-                        print("action", action)
+                        log.info("平台upgrade action为： %s" % action)
                         if self.page.get_action_status(action) == 4:
                             break
                     # wait upgrade 3 min at most
-                    if self.page.get_current_time() > self.page.return_end_time(now_time, 180):
+                    if self.page.get_current_time() > self.page.return_end_time(now_time, 300):
+                        log.error( "@@@@5分钟还没有终端或者平台还没显示安装完相应的app， 请检查！！！")
                         assert False, "@@@@5分钟还没有终端或者平台还没显示安装完相应的app， 请检查！！！"
-                    self.page.time_sleep(30)
+                    self.page.time_sleep(20)
                     self.page.refresh_page()
                 self.page.time_sleep(5)
 
-                print("*******************静默安装完成***************************")
-                log.info("*******************静默安装完成***************************")
-
+                log.info("******************低版本静默安装用例结束*********************")
+                log.info("****************卸载后重新安装成功用例开始***********************")
                 send_time_final = case_pack.time.strftime('%Y-%m-%d %H:%M',
                                                           case_pack.time.localtime(self.page.get_current_time()))
-                self.page.time_sleep(4)
+                self.page.time_sleep(10)
                 # uninstall app and check if app would be installed again in 10min
                 self.android_mdm_page.confirm_app_is_uninstalled(release_info["package"])
                 # disconnect wifi
@@ -828,6 +825,7 @@ class TestNetworkCases:
                     self.page.time_sleep(5)
                     self.page.refresh_page()
                 log.info("****************卸载后重新安装成功用例结束***********************")
+                log.info("*******************Apps-推送低版本的APP/卸载后重新安装用例开始*****************")
                 break
             except Exception as e:
                 if self.page.service_is_normal():
@@ -852,6 +850,7 @@ class TestNetworkCases:
                         "silent": "Yes", "download_network": "NO Limit"}
         while True:
             try:
+                log.info("Apps-推送高版本APP覆盖安装/卸载后检测重新下载/卸载重启检查安装/同版本覆盖安装/低版本覆盖安装")
                 file_path = conf.project_path + "\\Param\\Package\\%s" % release_info["package_name"]
                 package = self.page.get_apk_package_name(file_path)
                 release_info["package"] = package
@@ -863,17 +862,17 @@ class TestNetworkCases:
                 # app_size_mdm = self.page.get_app_size()  for web
                 # check app size(bytes) in windows
                 app_size = self.page.get_file_size_in_windows(file_path)
-                print("获取到的app 的size(bytes): ", app_size)
-
+                log.info("获取到的app 的size(bytes): %s" % app_size)
                 # go to app page
                 self.page.go_to_new_address("apps")
                 self.page.search_app_by_name(release_info["package_name"])
                 app_list = self.page.get_apps_text_list()
                 if len(app_list) == 0:
+                    log.error("@@@@没有 %s, 请检查！！！" % release_info["package_name"])
                     assert False, "@@@@没有 %s, 请检查！！！" % release_info["package_name"]
                 send_time = case_pack.time.strftime('%Y-%m-%d %H:%M',
                                                     case_pack.time.localtime(self.page.get_current_time()))
-                self.page.time_sleep(8)
+                self.page.time_sleep(10)
                 self.page.click_release_app_btn()
                 self.page.input_release_app_info(release_info)
 
@@ -884,24 +883,24 @@ class TestNetworkCases:
                     if self.android_mdm_page.download_file_is_existed(shell_app_apk_name):
                         break
                     if self.page.get_current_time() > self.page.return_end_time(now_time, 180):
+                        log.error("@@@@超过3分钟还没有app: %s的下载记录" % release_info["package_name"])
                         assert False, "@@@@超过3分钟还没有app: %s的下载记录" % release_info["package_name"]
-                print("**********************下载记录检测完毕*************************************")
+                log.info("**********************终端检测到下载记录*************************************")
 
                 # check if download completed
                 now_time = self.page.get_current_time()
                 original_hash_value = self.android_mdm_page.calculate_sha256_in_windows(
                     "%s" % release_info["package_name"])
-                print("original hash value: %s" % original_hash_value)
+                log.info("原文件的hash value: %s" % original_hash_value)
                 while True:
                     shell_hash_value = self.android_mdm_page.calculate_sha256_in_device(shell_app_apk_name)
-                    print("shell_hash_value: %s" % original_hash_value)
+                    log.info("shell_hash_value: %s" % shell_hash_value)
                     if original_hash_value == shell_hash_value:
                         break
                     if self.page.get_current_time() > self.page.return_end_time(now_time, 1800):
                         assert False, "@@@@多应用推送中超过30分钟还没有完成%s的下载" % release_info["package_name"]
                     self.page.time_sleep(60)
-                print("**********************下载完成检测完毕*************************************")
-
+                log.info("**********************终端检测到下载完成*************************************")
                 while True:
                     if self.android_mdm_page.app_is_installed(release_info["package"]):
                         version_installed = self.page.transfer_version_into_int(
@@ -909,12 +908,14 @@ class TestNetworkCases:
                         if version_installed == self.page.transfer_version_into_int(release_info["version"]):
                             break
                         else:
+                            log.error("@@@@再一次安装后版本不一致， 请检查！！！！")
                             assert False, "@@@@再一次安装后版本不一致， 请检查！！！！"
                     if self.page.get_current_time() > self.page.return_end_time(now_time, 300):
+                        log.error("@@@@5分钟还没有终端或者平台还没显示安装完相应的app， 请检查！！！")
                         assert False, "@@@@5分钟还没有终端或者平台还没显示安装完相应的app， 请检查！！！"
                     self.page.time_sleep(1)
                 self.page.time_sleep(5)
-                print("**********************终端成功安装app*************************************")
+                log.info("**********************终端检测到成功安装app*************************************")
 
                 self.page.go_to_new_address("apps/logs")
                 self.page.refresh_page()
@@ -923,8 +924,9 @@ class TestNetworkCases:
                     upgrade_list = self.page.get_app_latest_upgrade_log(send_time, release_info)
                     if len(upgrade_list) != 0:
                         action = upgrade_list[0]["Action"]
-                        print("action", action)
-                        break
+                        log.info("平台显示 upgrade action 为：%s" % action)
+                        if self.page.get_action_status(action) == 4:
+                            break
                     # wait upgrade 3 min at most
                     if self.page.get_current_time() > self.page.return_end_time(now_time, 300):
                         assert False, "@@@@5分钟平台还没显示安装完相应的app， 请检查！！！"
@@ -932,8 +934,7 @@ class TestNetworkCases:
                     self.page.refresh_page()
                 self.page.time_sleep(5)
 
-                print("*******************静默覆盖安装完成***************************")
-                log.info("*******************静默覆盖安装完成***************************")
+                log.info("*******************静默高版本覆盖低版本安装完成***************************")
                 # uninstall app and reboot, check if app would be reinstalled again
                 now_time = self.page.get_current_time()
                 send_time_again = case_pack.time.strftime('%Y-%m-%d %H:%M',

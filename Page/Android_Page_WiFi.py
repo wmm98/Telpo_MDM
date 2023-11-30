@@ -3,7 +3,7 @@ from Page.Interface_Page import interface
 
 sub_shell = public_pack.Shell.Shell()
 conf = public_pack.Config()
-
+log = public_pack.MyLog()
 
 class AndroidBasePageWiFi(interface):
     def __init__(self, client, times, ip):
@@ -154,6 +154,7 @@ class AndroidBasePageWiFi(interface):
         self.confirm_wifi_adb_connected(wlan0_ip)
         self.device_existed(wlan0_ip)
         self.device_boot_complete()
+        self.wifi_adb_root(wlan0_ip)
         self.screen_keep_on()
 
     def kill_server(self, timeout=120):
@@ -403,9 +404,11 @@ class AndroidBasePageWiFi(interface):
 
     def open_root_auth(self):
         act = self.open_root()
+        log.info(str(act))
         if not act:
             assert False, "@@@@无法root, 请检查！！！"
         ret = self.open_remount()
+        log.info(str(ret))
         if not ret:
             assert False, "@@@@无法remount, 请检查！！！"
 
@@ -447,7 +450,9 @@ class AndroidBasePageWiFi(interface):
     def send_adb_command(self, cmd, timeout=30):
         try:
             command = "adb -s %s %s" % (self.device_ip, cmd)
+            log.info(command)
             res = sub_shell.invoke(command, runtime=timeout)
+            log.info(res)
             return res
         except Exception:
             print("@@@@发送指令超时， 请检查！！！")
