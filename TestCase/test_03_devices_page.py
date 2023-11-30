@@ -542,11 +542,13 @@ class TestDevicesPage:
     def test_transfer_api_server(self, push_test_api_to_device):
         while True:
             try:
-                print("==================AIMDM 切换正式测试服服务api 测试用例开始=======================")
-                log.info("==================AIMDM 切换正式测试服服务api 测试用例开始=======================")
+                log.info("*************AIMDM 切换正式测试服服务api 测试用例开始*************")
+                log.info("服务器A为当前的主测试服务, 服务器B为需要切换的服务， 平台A和平台B也如此")
                 exp_success_msg = "Updated Device Setting"
                 test_version_api = test_yml['website_info']['test_api']
+                log.info("服务器A 的api 接口： %s" % test_version_api)
                 release_version_api = test_yml['website_info']['release_api']
+                log.info("服务器B的api 接口： %s" % test_version_api)
                 release_version_url = test_yml['website_info']['release_url']
                 release_user_info = {"username": test_yml['website_info']['release_user'],
                                      "password": test_yml['website_info']['release_password']}
@@ -556,36 +558,50 @@ class TestDevicesPage:
                 root_dir = self.android_mdm_page.get_internal_storage_directory()
                 self.page.refresh_page()
                 self.page.page_load_complete()
-
+                log.info("准备登录平台B： %s" % release_version_url)
                 case_pack.BaseWebDriver().open_web_site(release_version_url)
                 release_driver = case_pack.BaseWebDriver().get_web_driver()
                 release_page = case_pack.ReleaseDevicePage(release_driver, 40)
-
+                log.info("成功登录平台B： %s" % release_version_url)
                 opt_case.check_single_device(sn)
+                log.info("当前平台A 显示设备%s在线在线" % sn)
                 self.page.select_device(sn)
                 self.page.click_server_btn()
                 self.page.api_transfer(release_version_api)
+                log.info("设备切换服务器B： %s指令下达" % release_version_api)
                 self.page.time_sleep(5)
                 self.android_mdm_page.reboot_device(self.wifi_ip)
+                log.info("成功重启设备")
                 # check if the api had changed in device
+                log.info("检测到终端api变化情况")
                 now_time = self.page.get_current_time()
                 while True:
                     api_text = self.android_mdm_page.u2_send_command("cat /%s/%s" % (root_dir, test_yml["work_app"]["api_txt"]))
-                    print(api_text)
                     log.info("根目录下的api: %s" % api_text)
                     if release_version_api in api_text:
-                        log.info("终端根目录下的api 已经改变")
-                        print("终端根目录下的api 已经改变")
+                        log.info("终端根目录下的api 已经变为服务器B的api：%s" % release_version_api)
                         break
                     if self.page.get_current_time() > self.page.return_end_time(now_time):
-                        assert False, "完全启动超过3分钟api还没有改变， 请检查！！！"
-                    self.page.time_sleep(3)
+                        log.error("3分钟内终端还没改为服务器B的api： %s" % release_version_api)
+                        assert False, "3分钟内终端还没改为服务器B的api： %s" % release_version_api
+                    self.page.time_sleep(20)
+                log.info("终端检测已经切换为服务器B的api%s" % release_version_api)
                 # check if device is offline in test version
-                self.page.refresh_page()
-                test_device_info = opt_case.get_single_device_list(sn)
-                print(test_device_info)
-                # assert "OFF" in self.page.remove_space(self.page.upper_transfer(test_device_info[0]["Status"]))
+                # self.page.refresh_page()
+                # test_device_info = opt_case.get_single_device_list(sn)
+                log.info("检测平台A设备的在线状态")
+                now_time = self.page.get_current_time()
+                while True:
+                    self.page.refresh_page()
+                    if "OFF" in self.page.remove_space(self.page.upper_transfer(opt_case.get_single_device_list(sn)[0]["Status"])):
+                        log.info("测试平台A已经显示设备下线")
+                        break
+                    if self.page.get_current_time() > self.page.return_end_time(now_time, 180):
+                        log.error("@@@@3分钟内当前平台A显示设备还在线， 请检查！！！")
+                        assert False, "@@@@3分钟内当前平台A显示设备还在线， 请检查！！！"
+                    self.page.time_sleep(2)
 
+                log.info("检测平台B设备的在线状态")
                 # go to release version and check if device is online
                 release_page.refresh_page()
                 release_page.login_release_version(release_user_info, release_login_ok_title)
@@ -593,51 +609,77 @@ class TestDevicesPage:
                 release_data_list = release_page.get_single_device_list_release(sn)
                 print(release_data_list)
                 # assert "ON" in self.page.remove_space(self.page.upper_transfer(test_device_info[0]["Status"]))
-
                 # if release_data_list[0]["Status"] == "Off":
                 #     assert False
+                while True:
+                    self.page.refresh_page()
+                    if "ON" in self.page.remove_space(self.page.upper_transfer(release_page.get_single_device_list_release(sn)[0]["Status"])):
+                        log.info("测试平台B已经显示设备在线")
+                        break
+                    if self.page.get_current_time() > self.page.return_end_time(now_time, 180):
+                        log.error("@@@@3分钟内当前平台B一直显示设备下线， 请检查！！！")
+                        assert False, "@@@@3分钟内当前平台B一直显示设备下线， 请检查！！！"
 
+                    self.page.time_sleep(2)
+                log.info("再次切换服务器api: %s, 切换回原来的服务器" % test_version_api)
                 release_page.select_device(sn)
                 release_page.click_server_btn()
                 release_page.api_transfer(test_version_api)
+                log.info("切换api : %s指令下达成功" % test_version_api)
                 flag = 0
                 now_time = self.page.get_current_time()
+                log.info("重启前检测终端api变化")
                 while True:
                     if test_version_api in self.android_mdm_page.u2_send_command("cat /%s/%s" % (root_dir, test_yml["work_app"]["api_txt"])):
-                        log.info("终端根目录下的aip 已经改变")
-                        print("终端根目录下的aip 已经改变")
+                        log.info("终端根目录下的aip 已经改变为 %s" % test_version_api)
                         break
-                    if self.page.get_current_time() > self.page.return_end_time(now_time):
+                    if self.page.get_current_time() > self.page.return_end_time(now_time, 120):
                         flag += 1
                         break
-                self.android_mdm_page.reboot_device(self.wifi_ip)
+                    self.page.time_sleep(10)
 
-                # time.sleep(150)
+                self.android_mdm_page.reboot_device(self.wifi_ip)
+                log.info("设备重启成功")
+                log.info("重启前检测终端api变化")
+                if flag == 0:
+                    while True:
+                        if test_version_api in self.android_mdm_page.u2_send_command("cat /%s/%s" % (root_dir, test_yml["work_app"]["api_txt"])):
+                            log.info("终端根目录下的aip 已经改变为： %s" % test_version_api)
+                            break
+                        if self.page.get_current_time() > self.page.return_end_time(now_time):
+                            log.error("设备启动后3分钟内终端api还没改变为： %s, 请检查！！！" % test_version_api)
+                            assert False, "设备启动后3分钟内终端api还没改变为： %s, 请检查！！！" % test_version_api
+
                 # check if device is offline in release version
                 release_page.refresh_page()
                 release_data_info_again = release_page.get_single_device_list_release(sn)
                 print(release_data_info_again)
-                # no fixed
-                # assert "OFF" in self.page.remove_space(self.page.upper_transfer(release_data_info_again[0]["Status"]))
-                # if release_data_list[0]["Status"] == "On":
-                #     assert False
-                release_page.quit_browser()
-                if flag == 0:
-                    while True:
-                        if test_version_api in self.android_mdm_page.u2_send_command("cat /%s/%s" % (root_dir, test_yml["work_app"]["api_txt"])):
-                            log.info("终端根目录下的aip 已经改变")
-                            print("终端根目录下的aip 已经改变")
-                            break
-                        if self.page.get_current_time() > self.page.return_end_time(now_time):
-                            assert False, "完全启动超过3分钟api还没有改变， 请检查！！！"
+
+                log.info("检测切换服务器成功的平台在线情况")
+                now_time = self.page.get_current_time()
+                while True:
+                    self.page.refresh_page()
+                    if "OFF" in self.page.remove_space(
+                            self.page.upper_transfer(release_page.get_single_device_list_release(sn)[0]["Status"])):
+                        break
+                    if self.page.get_current_time() > self.page.return_end_time(now_time, 180):
+                        assert False, "@@@@3分钟内已经切换的平台显示设备下线， 请检查！！！"
+                    self.page.time_sleep(2)
 
                 # go to test version and check if device is online
                 self.page.refresh_page()
                 test_data_info = opt_case.get_single_device_list(sn)
                 print(test_data_info)
-                # assert "ON" in self.page.remove_space(self.page.upper_transfer(test_device_info[0]["Status"]))
-                # if release_data_list[0]["Status"] == "Off":
-                #     assert False
+                now_time = self.page.get_current_time()
+                while True:
+                    self.page.refresh_page()
+                    if "OFF" in self.page.remove_space(
+                            self.page.upper_transfer(opt_case.get_single_device_list(sn)[0]["Status"])):
+                        break
+                    if self.page.get_current_time() > self.page.return_end_time(now_time, 180):
+                        assert False, "@@@@3分钟内当前测试的平台显示设备还在线， 请检查！！！1"
+                    self.page.time_sleep(2)
+                release_page.quit_browser()
                 print("==================AIMDM 切换正式测试服服务api 测试用例结束=======================")
                 log.info("==================AIMDM 切换正式测试服服务api 测试用例结束=======================")
                 break

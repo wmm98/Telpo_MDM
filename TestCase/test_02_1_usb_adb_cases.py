@@ -851,6 +851,7 @@ class TestNetworkCases:
         while True:
             try:
                 log.info("Apps-推送高版本APP覆盖安装/卸载后检测重新下载/卸载重启检查安装/同版本覆盖安装/低版本覆盖安装")
+                log.info("*******************推送高版本APP覆盖安装用例开始***************************")
                 file_path = conf.project_path + "\\Param\\Package\\%s" % release_info["package_name"]
                 package = self.page.get_apk_package_name(file_path)
                 release_info["package"] = package
@@ -926,36 +927,49 @@ class TestNetworkCases:
                         action = upgrade_list[0]["Action"]
                         log.info("平台显示 upgrade action 为：%s" % action)
                         if self.page.get_action_status(action) == 4:
+                            log.info("平台显示覆盖安装升级完成")
                             break
                     # wait upgrade 3 min at most
                     if self.page.get_current_time() > self.page.return_end_time(now_time, 300):
-                        assert False, "@@@@5分钟平台还没显示安装完相应的app， 请检查！！！"
-                    self.page.time_sleep(60)
+                        if self.page.service_is_normal():
+                            log.error("@@@@5分钟平台还没显示安装完相应的app， 请检查！！！")
+                            assert False, "@@@@5分钟平台还没显示安装完相应的app， 请检查！！！"
+                        else:
+                            log.info("**********************检测到服务器503***********************")
+                            self.page.recovery_after_service_unavailable("apps/logs", case_pack.user_info)
+                            log.info("**********************服务器恢复正常*************************")
+                            now_time = self.page.get_current_time()
+                    self.page.time_sleep(20)
                     self.page.refresh_page()
                 self.page.time_sleep(5)
 
                 log.info("*******************静默高版本覆盖低版本安装完成***************************")
+                log.info("*******************卸载并重启后重新安装用例开始***************************")
                 # uninstall app and reboot, check if app would be reinstalled again
                 now_time = self.page.get_current_time()
                 send_time_again = case_pack.time.strftime('%Y-%m-%d %H:%M',
                                                           case_pack.time.localtime(self.page.get_current_time()))
-                self.page.time_sleep(5)
+                self.page.time_sleep(10)
                 self.android_mdm_page.confirm_app_is_uninstalled(release_info["package"])
+                log.info("终端确认已经卸载app")
                 self.android_mdm_page.reboot_device(self.wifi_ip)
-
+                log.info("重启终端")
                 while True:
                     if self.android_mdm_page.app_is_installed(release_info["package"]):
                         version_installed = self.page.transfer_version_into_int(
                             self.android_mdm_page.get_app_info(release_info["package"])['versionName'])
                         if version_installed == self.page.transfer_version_into_int(release_info["version"]):
+                            log.info("再次安装后版本一致")
                             break
                         else:
+                            log.error("@@@@再一次安装后版本不一致， 请检查！！！！")
                             assert False, "@@@@再一次安装后版本不一致， 请检查！！！！"
                     if self.page.get_current_time() > self.page.return_end_time(now_time, 300):
+                        log.info("@@@@5分钟还没有终端或者平台还没显示安装完相应的app， 请检查！！！")
                         assert False, "@@@@5分钟还没有终端或者平台还没显示安装完相应的app， 请检查！！！"
                     self.page.time_sleep(1)
                 self.page.time_sleep(5)
-                print("**********************终端成功安装app*************************************")
+                log.info("**************卸载并重启后检测到终端再次安装了app*******************")
 
                 self.page.refresh_page()
                 report_now_time = self.page.get_current_time()
@@ -963,33 +977,36 @@ class TestNetworkCases:
                     upgrade_list = self.page.get_app_latest_upgrade_log(send_time_again, release_info)
                     if len(upgrade_list) != 0:
                         action = upgrade_list[0]["Action"]
-                        print("action", action)
-                        break
+                        log.info("平台显示的upgrade action为: %s" % action)
+                        if self.page.get_action_status(action) == 4:
+                            break
                     # wait upgrade 3 min at most
                     if self.page.get_current_time() > self.page.return_end_time(report_now_time, 180):
                         if self.page.service_is_normal():
                             assert False, "@@@@3分钟还没有终端或者平台还没显示安装完相应的app， 请检查！！！"
                         else:
+                            log.info("**********************检测到服务器503***********************")
                             self.page.recovery_after_service_unavailable("apps/logs", case_pack.user_info)
+                            log.info("**********************服务器恢复正常*************************")
                             report_now_time = self.page.get_current_time()
                     self.page.time_sleep(5)
                     self.page.refresh_page()
                 self.page.time_sleep(5)
-                log.info("*******************卸载并重启后重新安装成功***************************")
-                print("*******************卸载并重启后重新安装成功***************************")
-                log.info("*******************同版本覆盖安装开始***************************")
-                print("*******************同版本覆盖安装开始***************************")
+                log.info("*******************卸载并重启后重新安装用例结束*******************")
+                log.info("*******************同版本覆盖安装用例开始***************************")
+
                 # keep test environment clean
+                log.info("开始删除install and uninstall log, 删除相关的下载文件")
                 self.page.delete_app_install_and_uninstall_logs()
                 self.android_mdm_page.del_all_downloaded_apk()
+                log.info("成功删除install and uninstall log, 删除相关的下载文件")
                 self.android_mdm_page.reboot_device(self.wifi_ip)
-                print("**************推送同版本app************************")
-                log.info("**************推送同版本app************************")
+                log.info("重启终端")
                 self.page.go_to_new_address("apps")
                 self.page.search_app_by_name(release_info["package_name"])
                 self.page.click_release_app_btn()
                 self.page.input_release_app_info(release_info)
-
+                log.info("推送同版本app指令下达")
                 now_time = self.page.get_current_time()
                 shell_app_apk_name = release_info["package"] + "_%s.apk" % release_info["version"]
                 while True:
@@ -999,18 +1016,16 @@ class TestNetworkCases:
                     if self.page.get_current_time() > self.page.return_end_time(now_time, 180):
                         break
                     self.page.time_sleep(3)
-                print("**********************没有检测到同版本app的下载记录***************************")
-                log.info("*******************没有检测到同版本app的下载记录***************************")
-                log.info("*******************同版本覆盖安装成功***************************")
-                print("*******************同版本覆盖安装成功***************************")
-                log.info("*******************低版本覆盖安装开始***************************")
-                print("*******************低版本覆盖安装开始***************************")
+                log.info("**************没有检测到同版本app的下载记录******************")
+                log.info("*******************同版本覆盖安装用例结束**************************")
+                log.info("*******************低版本静默覆盖安装开始***************************")
                 # keep test environment clean
+                log.info("开始删除install and uninstall log, 删除相关的下载文件")
                 self.page.delete_app_install_and_uninstall_logs()
                 self.android_mdm_page.del_all_downloaded_apk()
+                log.info("成功删除install and uninstall log, 删除相关的下载文件")
                 self.android_mdm_page.reboot_device(self.wifi_ip)
-                print("**************推送低版本app************************")
-                log.info("**************推送低版本app************************")
+                log.info("重启终端")
                 self.page.go_to_new_address("apps")
                 self.page.search_app_by_name(test_yml['app_info']['low_version_app'])
                 self.page.click_release_app_btn()
@@ -1025,16 +1040,17 @@ class TestNetworkCases:
                     if self.page.get_current_time() > self.page.return_end_time(now_time, 180):
                         break
                     self.page.time_sleep(3)
-                print("**********************没有检测到低版本app的下载记录***************************")
-                log.info("*******************没有检测到低版本app的下载记录***************************")
-                log.info("*******************低版本覆盖安装成功***************************")
-                print("*******************低版本覆盖安装成功***************************")
+
+                log.info("***没有检测到低版本app的下载记录*****")
+                log.info("***********低版本覆盖安装用例结束**********************")
                 break
             except Exception as e:
                 if self.page.service_is_normal():
                     assert False, e
                 else:
+                    log.info("**********************检测到服务器503***********************")
                     self.page.recovery_after_service_unavailable("apps/logs", case_pack.user_info)
+                    log.info("**********************服务器恢复正常*************************")
                     self.page.delete_app_install_and_uninstall_logs()
                     self.android_mdm_page.del_all_downloaded_apk()
                     self.android_mdm_page.uninstall_multi_apps(test_yml["app_info"])
