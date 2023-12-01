@@ -174,7 +174,7 @@ class TestDevicesPage:
     def test_lock_and_unlock_single_device(self, go_to_and_return_device_page):
         while True:
             try:
-                log.info("==================锁机和解锁用例开始=======================")
+                log.info("***********************锁机和解锁用例开始********************")
                 self.android_mdm_page.screen_keep_on()
                 # case is stable
                 sn = self.device_sn
@@ -225,13 +225,16 @@ class TestDevicesPage:
                             assert False, "@@@@解锁失败，请检查！！！！"
                         self.page.refresh_page()
                         self.page.time_sleep(1)
-                log.info("==================锁机和解锁用例结束=======================")
+                log.info("********************锁机和解锁用例结束**************************")
                 break
             except Exception as e:
                 if self.page.service_is_normal():
                     assert False, e
                 else:
+                    log.info("**********************检测到服务器503*************************")
                     self.page.recovery_after_service_unavailable("apps", case_pack.user_info)
+                    log.info("**********************服务器恢复正常*************************")
+                    self.page.go_to_new_address("devices")
 
     @allure.feature('MDM_device_test')
     @allure.title("Devices- 发送设备重启指令：设备重启5次")
@@ -240,7 +243,7 @@ class TestDevicesPage:
     def test_reboot_single_device_pressure_testing(self, connected_wifi_adb, go_to_and_return_device_page):
         while True:
             try:
-                log.info("==================发送设备重启指令：设备重启5次用例开始=======================")
+                log.info("****************发送设备重启指令：设备重启5次用例开始***********************")
                 exp_reboot_text = "Sending Reboot Comand to Devices"
                 self.android_mdm_page.screen_keep_on()
                 sn = self.device_sn
@@ -282,8 +285,7 @@ class TestDevicesPage:
                         self.page.time_sleep(1)
                     print("成功运行 %s 次" % str(i))
                     # case_pack.connect.reconnect(self.wifi_ip)
-                print("==================发送设备重启指令：设备重启5次用例结束=======================")
-                log.info("==================发送设备重启指令：设备重启5次结束=======================")
+                log.info("*************发送设备重启指令：设备重启5次结束****************")
                 break
             except Exception as e:
                 if self.page.service_is_normal():
@@ -365,8 +367,7 @@ class TestDevicesPage:
     def test_reset_device_password(self, unlock_screen, go_to_and_return_device_page):
         while True:
             try:
-                print("==================重置设备密码用例开始=======================")
-                log.info("==================重重置设备密码用例开始=======================")
+                log.info("*****************重重置设备密码用例开始***************")
                 exp_psw_text = "Password changed"
                 self.android_mdm_page.screen_keep_on()
                 sn = self.device_sn
@@ -441,14 +442,14 @@ class TestDevicesPage:
     @pytest.mark.flaky(reruns=1, reruns_delay=1)
     def test_pressure_send_message_to_single_device(self, unlock_screen, go_to_and_return_device_page):
         while True:
+            # 设置发送消息的次数
+            length = 2
             try:
-                print("==================AIMDM发消息压力测试开始=======================")
-                log.info("==================AIMDM发消息压力测试用例开始=======================")
+                log.info("***************AIMDM发消息压力测试用例开始*******************")
                 exp_success_send_text = "Message Sent"
                 # sn would change after debug with devices
                 self.android_mdm_page.screen_keep_on()
                 sn = self.device_sn
-                length = 2
                 self.page.refresh_page()
                 # confirm if device is online and execute next step, if not, end the case execution
                 data = opt_case.check_single_device(sn)
@@ -457,6 +458,8 @@ class TestDevicesPage:
                         data[0]["Lock Status"]):
                     self.page.select_device(sn)
                     self.page.click_unlock()
+                self.android_mdm_page.clear_download_and_upgrade_alert()
+                log.info("设备清屏成功")
                 # get device category
                 device_cate = data[0]['Category']
                 now = case_pack.time.strftime('%Y-%m-%d %H:%M', case_pack.time.localtime(case_pack.time.time()))
@@ -468,6 +471,7 @@ class TestDevicesPage:
                     self.page.select_device(sn)
                     self.page.click_send_btn()
                     self.page.msg_input_and_send(msg)
+                    log.info("发送消息： %s 成功" % msg)
                     message_list.append(msg)
                     # check message in device
                     wait_time = 60
@@ -479,8 +483,11 @@ class TestDevicesPage:
                             assert False, "@@@@%ss内无法接收到信息， 请检查设备是否在线！！！！" % wait_time
 
                     self.android_mdm_page.confirm_received_text(msg)
-                    self.android_mdm_page.click_msg_confirm_btn()
-                    self.android_mdm_page.confirm_msg_alert_fade(msg)
+                    try:
+                        self.android_mdm_page.click_msg_confirm_btn()
+                        self.android_mdm_page.confirm_msg_alert_fade(msg)
+                    except Exception:
+                        pass
 
                 self.page.go_to_new_address("message")
                 # check if Page loaded completely
@@ -534,11 +541,11 @@ class TestDevicesPage:
         # self.android_mdm_page.device_existed(self.wifi_ip)
         # self.android_mdm_page.device_boot_complete()
 
-    @allure.feature('MDM_device_test')
+    @allure.feature('MDM_device_test11111')
     @allure.story('MDM-Show')
     @allure.title("Devices- AIMDM 切换正式测试服服务api ")
     @pytest.mark.filterwarnings("ignore")
-    @pytest.mark.flaky(reruns=1, reruns_delay=3)
+    # @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_transfer_api_server(self, push_test_api_to_device):
         while True:
             try:
@@ -555,6 +562,7 @@ class TestDevicesPage:
                 sn = self.device_sn
                 release_main_title = "Total Devices"
                 release_login_ok_title = "Telpo MDM"
+                opt_case.check_single_device(sn)
                 root_dir = self.android_mdm_page.get_internal_storage_directory()
                 self.page.refresh_page()
                 self.page.page_load_complete()

@@ -113,7 +113,7 @@ class TestStability:
             self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
             self.android_mdm_page.del_all_content_file()
             self.android_mdm_page.reboot_device(device_data["ip"])
-            r_t = st.threading.Thread(target=self.android_mdm_page.reboot_device_no_root, args=(device_data["ip"],))
+            r_t = st.threading.Thread(target=self.android_mdm_page.reboot_device, args=(device_data["ip"],))
             r_t.start()
             pos_reboot_thread.append(r_t)
 

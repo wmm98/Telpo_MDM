@@ -48,6 +48,7 @@ class GetLanIps:
             hostname = socket.gethostname()
             # get local host ip
             host_ip = socket.gethostbyname(hostname)
+            # socket.gethostbyname()
             return host_ip
         except:
             return 0
@@ -61,3 +62,10 @@ class GetLanIps:
             if "是" in alert.get_yes_or_no("有 %d 台设备在线，数目正确吗， 正确请按下”是“， 否则按下“否”重新进行扫描设备" % len(ips)):
                 break
             self.start_thread()
+
+
+if __name__ == '__main__':
+    wlan = GetLanIps()
+    print(wlan.get_local_ip())
+    wlan.start_thread()
+    print(wlan.get_ips_list())
