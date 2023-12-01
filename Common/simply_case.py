@@ -95,7 +95,7 @@ class Optimize_Case:
                     self.page.refresh_page()
                 # wait 20 min
             if self.page.get_current_time() > self.page.return_end_time(now_time, time_out):
-                assert False, "@@@@超过 %ss 还没有采集完 %s分钟的log！！！" % (time_out, duration)
+                assert False, "@@@@超过 %ss 还没有采集完 %d分钟的log！！！" % (time_out, duration)
             self.page.time_sleep(3)
 
         now_time = self.page.get_current_time()

@@ -174,7 +174,7 @@ class TestDevicesPage:
     def test_lock_and_unlock_single_device(self, go_to_and_return_device_page):
         while True:
             try:
-                log.info("***********************锁机和解锁用例开始********************")
+                log.info("*******************锁机和解锁用例开始********************")
                 self.android_mdm_page.screen_keep_on()
                 # case is stable
                 sn = self.device_sn
@@ -291,7 +291,9 @@ class TestDevicesPage:
                 if self.page.service_is_normal():
                     assert False, e
                 else:
+                    log.info("**********************检测到服务器503*************************")
                     self.page.recovery_after_service_unavailable("apps", case_pack.user_info)
+                    log.info("**********************服务器恢复正常*************************")
                     self.page.go_to_new_address("apps")
 
     @allure.feature('MDM_device_test')
@@ -299,27 +301,29 @@ class TestDevicesPage:
     @pytest.mark.filterwarnings("ignore")
     @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_cat_logs(self, go_to_and_return_device_page):
+        durations = [5, 10, 30]
         while True:
             try:
-                print("==================日志的抓取用例开始=======================")
-                log.info("==================日志的抓取用例开始=======================")
-                exp_log_msg = "Device Debug Command sent"
-                sn = self.device_sn
-                duration = 5
-                self.android_mdm_page.reboot_device(self.wifi_ip)
-                self.page.refresh_page()
-                send_time = case_pack.time.strftime('%Y-%m-%d %H:%M', case_pack.time.localtime(case_pack.time.time()))
-                opt_case.catch_logs(sn, duration)
-                # check if device log generates and upload to allure report
-                self.android_mdm_page.generate_and_upload_log(send_time, "捕捉的log")
-                print("==================日志的抓取用例结束=======================")
-                log.info("==================日志的抓取用例结束=======================")
+                log.info("*****************日志的抓取用例开始********************")
+                for duration in durations:
+                    exp_log_msg = "Device Debug Command sent"
+                    sn = self.device_sn
+                    # self.android_mdm_page.reboot_device(self.wifi_ip)
+                    self.page.refresh_page()
+                    send_time = case_pack.time.strftime('%Y-%m-%d %H:%M', case_pack.time.localtime(case_pack.time.time()))
+                    opt_case.catch_logs(sn, duration, time_out=duration * 100)
+                    log.info("捕捉%d 分钟日志指令下达" % duration)
+                    # check if device log generates and upload to allure report
+                    self.android_mdm_page.generate_and_upload_log(send_time, "捕捉的log_%d分钟" % duration)
+                    log.info("***************日志的抓取用例结束******************")
                 break
             except Exception as e:
                 if self.page.service_is_normal():
                     assert False, e
                 else:
+                    log.info("**********************检测到服务器503*************************")
                     self.page.recovery_after_service_unavailable("devices", case_pack.user_info)
+                    log.info("**********************服务器恢复正常*************************")
                     self.page.go_to_new_address("apps")
 
     @allure.feature('MDM_device_test')
@@ -332,24 +336,31 @@ class TestDevicesPage:
             tpui_path = conf.project_path + "\\Param\\Work_APP\\%s" % tpui_apk
             tpui_package_name = self.page.get_apk_package_name(tpui_path)
             try:
-                log.info("==================重置设备TPUI密码用例开始=======================")
+                log.info("***************重置设备TPUI密码用例开始*********************")
                 exp_psw_text = "Password changed"
                 sn = self.device_sn
                 password = ["123456", "000000", "999999"]
                 self.android_mdm_page.screen_keep_on()
                 self.android_mdm_page.confirm_app_installed(tpui_path)
+                log.info("确认已经安装好tpui软件")
                 self.page.refresh_page()
                 for psw in password:
-                    self.android_mdm_page.confirm_app_is_running(tpui_package_name)
                     opt_case.check_single_device(sn)
+                    log.info("检测到设备在线")
+                    self.android_mdm_page.confirm_app_is_running(tpui_package_name)
+                    log.info("tpui软件在运行中")
                     self.page.select_device(sn)
                     self.page.click_psw_btn()
                     self.page.change_TPUI_password(psw)
+                    log.info("平台修改tpui： %s 密码" % psw)
                     self.page.time_sleep(1)
                     self.android_mdm_page.input_tpui_password(psw)
+                    log.info("设备中输入密码提交成功登录")
                     self.android_mdm_page.stop_app(tpui_package_name)
+                    log.info("停止运行tpui软件")
                     self.page.refresh_page()
                 self.android_mdm_page.confirm_app_is_uninstalled(tpui_package_name)
+                log.info("确认已经卸载tpui软件")
                 log.info("==================重置设备TPUI密码用例结束=======================")
                 break
             except Exception as e:
