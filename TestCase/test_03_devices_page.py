@@ -361,14 +361,16 @@ class TestDevicesPage:
                     self.page.refresh_page()
                 self.android_mdm_page.confirm_app_is_uninstalled(tpui_package_name)
                 log.info("确认已经卸载tpui软件")
-                log.info("==================重置设备TPUI密码用例结束=======================")
+                log.info("********************重置设备TPUI密码用例结束********************")
                 break
             except Exception as e:
                 self.android_mdm_page.confirm_app_is_uninstalled(tpui_package_name)
                 if self.page.service_is_normal():
                     assert False, e
                 else:
+                    log.info("**********************检测到服务器503*************************")
                     self.page.recovery_after_service_unavailable("devices", case_pack.user_info)
+                    log.info("**********************服务器恢复正常*************************")
                     self.page.go_to_new_address("devices")
 
     @allure.feature('MDM_device_test')
@@ -387,35 +389,44 @@ class TestDevicesPage:
                 self.page.refresh_page()
                 for psw in password:
                     opt_case.check_single_device(sn)
+                    log.info("检测到设备： %s 在线" % sn)
                     self.page.select_device(sn)
                     self.page.click_psw_btn()
                     self.page.change_device_password(psw)
+                    log.info("平台修改设备的密码为： %s" % psw)
                     # lock device
                     self.page.select_device(sn)
                     self.page.click_lock()
+                    log.info("锁住设备: %s" % sn)
                     # input password in device
                     assert self.android_mdm_page.mdm_msg_alert_show(time_out=5), "@@@@180s后还没显示锁机，请检查！！！"
                     self.android_mdm_page.confirm_received_text(lock_tips)
+                    log.info("确认已经锁机")
                     # need to click confirm btn six times, device would disappear
                     self.android_mdm_page.manual_unlock()
+                    log.info("设备点击6次进入密码框")
                     try:
                         self.android_mdm_page.lock_psw_box_presence()
                         self.android_mdm_page.lock_psw_input(psw)
                     except:
                         self.page.time_sleep(1)
+                        log.info("再次解锁")
                         self.android_mdm_page.manual_unlock()
                         self.android_mdm_page.lock_psw_input(psw)
                     self.android_mdm_page.click_psw_confirm_btn()
+                    log.info("输入密码: %s提交" % psw)
                     assert self.android_mdm_page.confirm_psw_alert_fade(), "@@@@无法确认密码， 请检查！！！"
+                    log.info("设备： %s确认解锁" % sn)
                     self.page.refresh_page()
-                print("==================重置设备密码用例结束=======================")
-                log.info("==================重置设备密码用例结束=======================")
+                log.info("*****************重重置设备密码用例结束***************")
                 break
             except Exception as e:
                 if self.page.service_is_normal():
                     assert False, e
                 else:
+                    log.info("**********************检测到服务器503*************************")
                     self.page.recovery_after_service_unavailable("devices", case_pack.user_info)
+                    log.info("**********************服务器恢复正常*************************")
                     self.page.go_to_new_address("devices")
 
     @allure.feature('MDM_device_test--covered in below test case')
