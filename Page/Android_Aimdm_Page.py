@@ -123,12 +123,16 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
         self.click_cleat_recent_app_btn_USB(self.clear_all)
 
     def manual_unlock(self):
+        self.time_sleep(3)
         ele_lock = self.get_element_by_id(self.msg_confirm_id)
+        x, y = ele_lock.center()
         print(ele_lock.get_text())
+
         try:
             for i in range(6):
-                self.click_element(ele_lock)
-                # self.time_sleep(0.1)
+                self.client.long_click(x, y, duration=0.2)
+                # self.click_element(ele_lock)
+                # self.time_sleep(0.3)
                 # print(i)
         except Exception as e:
             print(e)

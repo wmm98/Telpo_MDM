@@ -374,11 +374,11 @@ class TestDevicesPage:
                     log.info("**********************服务器恢复正常*************************")
                     self.page.go_to_new_address("devices")
 
-    @allure.feature('MDM_device_test')
+    @allure.feature('MDM_device_test21313')
     @allure.title("Devices- 重置设备密码")
     @pytest.mark.filterwarnings("ignore")
-    @pytest.mark.flaky(reruns=1, reruns_delay=3)
-    def test_reset_device_password(self, unlock_screen, go_to_and_return_device_page):
+    # @pytest.mark.flaky(reruns=1, reruns_delay=3)
+    def test_reset_device_password(self, go_to_and_return_device_page):
         while True:
             try:
                 log.info("*****************重重置设备密码用例开始***************")

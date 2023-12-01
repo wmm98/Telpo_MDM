@@ -254,7 +254,7 @@ class TestStability:
                         device_page.time_sleep(5)
                         device_page.click_send_btn()
                         device_page.msg_input_and_send(message)
-                        log.info("平台发送消息给设备 %s" % sno)
+                        log.info("平台发送消息%s给设备 %s" % (message, sno))
 
                 def check_message_in_device(td_info):
                     # check message in device
@@ -265,6 +265,7 @@ class TestStability:
                         td_info["android_page"].confirm_received_text(td_info["message"], timeout=5)
                     except AttributeError:
                         assert AttributeError
+                    log.info("设备: %s 已经接收到消息：%s" % (td_info["sn"], td_info["message"]))
                     try:
                         td_info["android_page"].click_msg_confirm_btn()
                         td_info["android_page"].confirm_msg_alert_fade(td_info["message"])
@@ -273,6 +274,7 @@ class TestStability:
 
                 def test_reboot(td_info):
                     td_info["android_page"].reboot_device(td_info["ip"])
+                    log.info("设备：%s 重启成功")
 
                 online_flag = 0
                 times = 0
