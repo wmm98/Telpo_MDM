@@ -249,7 +249,7 @@ class TestDevicesPage:
                 sn = self.device_sn
                 self.page.refresh_page()
                 for i in range(5):
-                    print("*************第%d次重启****************" % (i + 1))
+                    log.info("*************第%d次重启****************" % (i + 1))
                     opt_case.check_single_device(sn)
                     self.page.select_device(sn)
                     self.android_mdm_page.disconnect_ip(self.wifi_ip)

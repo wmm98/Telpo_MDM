@@ -33,24 +33,24 @@ class TestPublicPage:
         self.android_mdm_page = case_pack.AndroidAimdmPage(case_pack.device_data, 5)
         self.content_page = case_pack.ContentPage(self.driver, 40)
         self.wifi_ip = case_pack.device_data["wifi_device_info"]["ip"]
-        # self.android_mdm_page.del_all_content_file()
+        self.android_mdm_page.del_all_content_file()
         self.device_sn = self.android_mdm_page.get_device_sn()
-        # self.app_page.delete_app_install_and_uninstall_logs()
-        # self.android_mdm_page.del_all_downloaded_apk()
-        # self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
-        # self.android_mdm_page.del_updated_zip()
-        # self.android_mdm_page.reboot_device(self.wifi_ip)
-        # self.content_page.refresh_page()
-        # self.silent_ota_upgrade_flag = 0
+        self.app_page.delete_app_install_and_uninstall_logs()
+        self.android_mdm_page.del_all_downloaded_apk()
+        self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
+        self.android_mdm_page.del_updated_zip()
+        self.android_mdm_page.reboot_device(self.wifi_ip)
+        self.content_page.refresh_page()
+        self.silent_ota_upgrade_flag = 0
 
     def teardown_class(self):
-        pass
-        # self.app_page.delete_app_install_and_uninstall_logs()
-        # self.android_mdm_page.del_all_downloaded_apk()
-        # self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
-        # self.android_mdm_page.del_all_content_file()
-        # self.app_page.refresh_page()
-        # self.android_mdm_page.reboot_device(self.wifi_ip)
+        # pass
+        self.app_page.delete_app_install_and_uninstall_logs()
+        self.android_mdm_page.del_all_downloaded_apk()
+        self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
+        self.android_mdm_page.del_all_content_file()
+        self.app_page.refresh_page()
+        self.android_mdm_page.reboot_device(self.wifi_ip)
 
     @allure.feature('MDM_public')
     @allure.title("public case-添加 content 种类--辅助测试用例")
@@ -250,7 +250,6 @@ class TestPublicPage:
                         "silent": 0, "category": "NO Limit", "network": "NO Limit"}
         while True:
             try:
-                print("*******************OTA重启5次断点续传用例开始***************************")
                 log.info("*******************OTA重启5次断点续传用例开始***************************")
                 # get release ota package version
                 times = 2
@@ -276,7 +275,6 @@ class TestPublicPage:
                 self.ota_page.search_device_by_pack_name(release_info["package_name"])
                 # ele = self.Page.get_package_ele(release_info["package_name"])
                 send_time = case_pack.time.strftime('%Y-%m-%d %H:%M', case_pack.time.localtime(self.ota_page.get_current_time()))
-                print("send_time", send_time)
                 self.ota_page.time_sleep(10)
                 # if device is existed, click
                 self.ota_page.click_release_btn()
@@ -338,7 +336,6 @@ class TestPublicPage:
                     if self.ota_page.get_current_time() > self.ota_page.return_end_time(now_time, 1200):
                         err_msg = "@@@@重启%d次， 20分钟后还没有下载完相应的ota package， 请检查！！！" % (times + 1)
                         log.error(err_msg)
-                        print(err_msg)
                         assert False, err_msg
                     self.ota_page.time_sleep(10)
                 log.info("***************终端下载完ota升级包*************************")
@@ -357,7 +354,6 @@ class TestPublicPage:
                         if self.ota_page.service_is_normal():
                             err_msg = "@@@@终端下载完升级包后， 平台3分钟还没有下载完相应的ota package， 请检查！！！"
                             log.error(err_msg)
-                            print(err_msg)
                             assert False, err_msg
                         else:
                             self.ota_page.recovery_after_service_unavailable("ota/log", case_pack.user_info)

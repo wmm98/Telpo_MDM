@@ -32,9 +32,9 @@ class TestStability:
         self.mdm_page = st.MDMPage(test_driver, 40)
         self.mdm_page.login_ok(st.yaml_data['website_info']['test_user'], st.yaml_data['website_info']['test_password'])
         self.mdm_page.time_sleep(5)
-        # self.app_page.delete_app_install_and_uninstall_logs()
-        # self.content_page.delete_all_content_release_log()
-        # self.ota_page.delete_all_ota_release_log()
+        self.app_page.delete_app_install_and_uninstall_logs()
+        self.content_page.delete_all_content_release_log()
+        self.ota_page.delete_all_ota_release_log()
         self.androids_page = []
         self.devices_sn = []
         self.devices_ip = []
@@ -127,7 +127,7 @@ class TestStability:
 
     @allure.feature('MDM_stability2222')
     @allure.title("stability case- 多设备添加--辅助测试用例")
-    # @pytest.mark.flaky(reruns=3, reruns_delay=3)
+    @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_add_multi_devices(self):
         while True:
             try:
@@ -215,13 +215,15 @@ class TestStability:
                     self.device_page.go_to_new_address("devices")
 
     @allure.feature('MDM_stability')
-    @allure.title("stability case- 重启在线成功率--请在报告右侧log文件查看在线率")
-    def test_reboot_online_stability_test(self, disable_android_warning):
+    @allure.title("stability case- 多设备重启在线成功率--请在报告右侧log文件查看在线率")
+    def test_reboot_online_stability_test(self):
+        # length 为重启次数
+        length = 1
         while True:
             try:
+                log.info("**********多设备重启在线成功率****************")
                 devices_sn = self.devices_sn
                 devices_ip = self.devices_ip
-                length = 1
                 device_page = self.device_page
                 device_page.go_to_new_address("devices")
                 # confirm if device is online and execute next step, if not, end the case execution
@@ -236,6 +238,7 @@ class TestStability:
                 def pre_test_clear(td_info):
                     if td_info["android_page"].public_alert_show(timeout=5):
                         td_info["android_page"].clear_download_and_upgrade_alert()
+                        log.info("设备： %s 清屏成功" % td_info["sn"])
 
                 def send_devices_message(sns, message):
                     # get thread lock
@@ -244,12 +247,14 @@ class TestStability:
                         if not device_page.upper_transfer("On") in device_page.remove_space_and_upper(
                                 res["Status"]):
                             assert AttributeError
+                        log.info("检测到所有设备都在线")
                         device_page.refresh_page()
                     for sno in sns:
                         device_page.select_device(sno)
-                    device_page.time_sleep(5)
-                    device_page.click_send_btn()
-                    device_page.msg_input_and_send(message)
+                        device_page.time_sleep(5)
+                        device_page.click_send_btn()
+                        device_page.msg_input_and_send(message)
+                        log.info("平台发送消息给设备 %s" % sno)
 
                 def check_message_in_device(td_info):
                     # check message in device
