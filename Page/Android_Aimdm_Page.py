@@ -126,7 +126,7 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
         ele_lock = self.get_element_by_id(self.msg_confirm_id)
         print(ele_lock.get_text())
         try:
-            for i in range(7):
+            for i in range(6):
                 self.click_element(ele_lock)
                 # self.time_sleep(0.1)
                 # print(i)
