@@ -50,7 +50,7 @@ class TestAppPage:
     @allure.title("Apps-添加APK包")
     # @pytest.mark.flaky(reruns=1, reruns_delay=3)
     # @pytest.mark.parametrize('package_info', package_infos)
-    def test_add_cate_and_apps(self, go_to_app_page):
+    def test_add_cate_and_apps_discard(self, go_to_app_page):
         exp_success_text = "Success"
         # package_info = {"package_name": "Bus_Recharge_System_1.0.1_20220615.apk", "file_category": "test",
         #                 "developer": "engineer", "description": "test"}

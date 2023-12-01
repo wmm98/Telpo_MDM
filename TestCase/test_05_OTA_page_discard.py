@@ -54,7 +54,7 @@ class TestOTAPage:
     @allure.feature('MDM_test02-11122231111')
     @allure.title("OTA-Add OTA package")
     # @pytest.mark.flaky(reruns=1, reruns_delay=3)
-    def test_add_OTA_package_and_cate(self, go_to_ota_page):
+    def test_add_OTA_package_and_cate_discard(self, go_to_ota_page):
         exp_existed_text = "ota already existed"
         exp_success_text = "success"
         package_info = {"package_name": test_yml['ota_packages_info']['package_name'], "file_category": "test",

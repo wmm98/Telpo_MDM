@@ -40,6 +40,60 @@ class TestNetworkCases:
         self.android_mdm_page.reboot_device(self.wifi_ip)
 
     @allure.feature('MDM_usb-test')
+    @allure.title("OTA-添加ota升级包-- 辅助测试用例")
+    @pytest.mark.flaky(reruns=1, reruns_delay=3)
+    def test_add_OTA_package_and_cate(self, go_to_ota_page):
+        exp_existed_text = "ota already existed"
+        exp_success_text = "success"
+        package_info = {"package_name": test_yml['ota_packages_info']['package_name'], "file_category": "test",
+                        "plat_form": test_yml['ota_packages_info']['platform']}
+        file_path = conf.project_path + "\\Param\\Package\\%s" % package_info["package_name"]
+        ota_info = {"file_name": file_path, "file_category": package_info["file_category"],
+                    "plat_form": package_info["plat_form"]}
+        # check if category is existed
+        try:
+            if len(self.ota_page.get_ota_categories_list()) == 0:
+                self.ota_page.add_ota_category("test")
+                self.ota_page.refresh_page()
+        except Exception as e:
+            print(e)
+        # check if ota package is existed, if not, add package, else skip
+        self.ota_page.search_device_by_pack_name(package_info["package_name"])
+        if len(self.ota_page.get_ota_package_list()) == 0:
+            self.page.click_add_btn()
+            self.ota_page.input_ota_package_info(ota_info)
+            self.ota_page.click_save_add_ota_pack()
+            self.ota_page.search_device_by_pack_name(package_info["package_name"])
+            assert len(self.ota_page.get_ota_package_list()) == 1, "@@@添加失败！！！"
+
+    @allure.feature('MDM_usb-test')
+    @allure.title("Apps-添加APK包--辅助测试用例")
+    @pytest.mark.flaky(reruns=1, reruns_delay=3)
+    # @pytest.mark.parametrize('package_info', package_infos)
+    def test_add_cate_and_apps(self, go_to_app_page):
+        exp_success_text = "Success"
+        # package_info = {"package_name": "Bus_Recharge_System_1.0.1_20220615.apk", "file_category": "test",
+        #                 "developer": "engineer", "description": "test"}
+        apks = test_yml["app_info"]
+        apks.update(test_yml["system_app"])
+        print(apks)
+        for apk in list(apks.values()):
+            file_path = conf.project_path + "\\Param\\Package\\%s" % apk
+            if self.page.get_app_categories_list() == 0:
+                self.page.add_app_category("test")
+            if len(self.page.get_apps_text_list()) == 0:
+                self.page.click_add_btn()
+                self.page.input_app_info(file_path)
+                self.page.refresh_page()
+            else:
+                self.page.search_app_by_name(apk)
+                search_list = self.page.get_apps_text_list()
+                if len(search_list) == 0:
+                    self.page.click_add_btn()
+                    self.page.input_app_info(file_path)
+                    self.page.refresh_page()
+
+    @allure.feature('MDM_usb-test')
     @allure.story('MDM-Show')
     @allure.title("Apps- 断网重连获取aimdm消耗的流量")
     @pytest.mark.flaky(reruns=1, reruns_delay=3)
