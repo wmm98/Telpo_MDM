@@ -301,7 +301,8 @@ class TestDevicesPage:
     @pytest.mark.filterwarnings("ignore")
     @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_cat_logs(self, go_to_and_return_device_page):
-        durations = [5, 10, 30]
+        # durations = [5, 10, 30]
+        durations = [5]
         while True:
             try:
                 log.info("*****************日志的抓取用例开始********************")
@@ -465,7 +466,7 @@ class TestDevicesPage:
     def test_pressure_send_message_to_single_device(self, unlock_screen, go_to_and_return_device_page):
         while True:
             # 设置发送消息的次数
-            length = 2
+            length = 5
             try:
                 log.info("***************AIMDM发消息压力测试用例开始*******************")
                 exp_success_send_text = "Message Sent"
@@ -488,8 +489,9 @@ class TestDevicesPage:
                 message_list = []
                 for i in range(length):
                     self.page.refresh_page()
-                    msg = "%s:#$*%d" % (now, i)
                     opt_case.check_single_device(sn)
+                    log.info("检测到设备：%s 在线" % sn)
+                    msg = "%s:#$*%d" % (now, i)
                     self.page.select_device(sn)
                     self.page.click_send_btn()
                     self.page.msg_input_and_send(msg)
@@ -505,12 +507,13 @@ class TestDevicesPage:
                             assert False, "@@@@%ss内无法接收到信息， 请检查设备是否在线！！！！" % wait_time
 
                     self.android_mdm_page.confirm_received_text(msg)
+                    log.info("设备：%s已经接收到消息" % msg)
                     try:
                         self.android_mdm_page.click_msg_confirm_btn()
                         self.android_mdm_page.confirm_msg_alert_fade(msg)
                     except Exception:
                         pass
-
+                log.info("去到Message模块查看设备接收信息的上报情况")
                 self.page.go_to_new_address("message")
                 # check if Page loaded completely
                 self.meg_page.page_load_complete()
@@ -525,26 +528,28 @@ class TestDevicesPage:
                         msg_list = [self.page.remove_space(m['message']) for m in receive_list[:length]]
                         for meg in message_list:
                             if self.page.remove_space(meg) not in msg_list:
+                                log.error("@@@@平台反馈终端接收的信息有误， 请检查！！！！")
                                 assert False, "@@@@平台反馈终端接收的信息有误， 请检查！！！！"
-                        print("msg_list", msg_list)
                         status_list = [i['status'].upper() for i in receive_list[:length]]
-                        print(status_list)
                         if len(msg_list) == length and status_list.count("Successed".upper()) == length:
+                            log.info("平台Message模块中设备接收所有发送的信息")
                             break
                     if self.page.get_current_time() > self.page.return_end_time(now_time):
+                        log.info("@@@终端收到信息后, 平台180s内无法收到相应的信息")
                         assert False, "@@@终端收到信息后, 平台180s内无法收到相应的信息"
                     self.page.time_sleep(1)
-                print("==================AIMDM发消息压力测试结束=======================")
-                log.info("==================AIMDM发消息压力测试用例结束=======================")
+                log.info("*******************AIMDM发消息压力测试用例结束************************")
                 break
             except Exception as e:
                 if self.page.service_is_normal():
                     assert False, e
                 else:
+                    log.info("**********************检测到服务器503*************************")
                     self.page.recovery_after_service_unavailable("devices", case_pack.user_info)
+                    log.info("**********************服务器恢复正常*************************")
                     self.page.go_to_new_address("devices")
 
-    @allure.feature('MDM_device_test02222')
+    @allure.feature('MDM_device_test--no test -now')
     @allure.title("Devices- 恢复出厂设置压测10次， 计算准备率")
     @pytest.mark.filterwarnings("ignore")
     @pytest.mark.flaky(reruns=1, reruns_delay=1)
@@ -563,7 +568,7 @@ class TestDevicesPage:
         # self.android_mdm_page.device_existed(self.wifi_ip)
         # self.android_mdm_page.device_boot_complete()
 
-    @allure.feature('MDM_device_test11111')
+    @allure.feature('MDM_device_test')
     @allure.story('MDM-Show')
     @allure.title("Devices- AIMDM 切换正式测试服服务api ")
     @pytest.mark.filterwarnings("ignore")
