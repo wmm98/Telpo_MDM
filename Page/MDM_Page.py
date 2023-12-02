@@ -65,10 +65,8 @@ class MDMPage(BasePage):
                     break
             if self.get_current_time() > self.return_end_time(now_time, 180):
                 assert False, "无法登录，请检查！！！"
-            self.time_sleep(10)
+            self.time_sleep(1)
             self.refresh_page()
-
-
 
 # if __name__ == '__main__':
 #     from selenium import webdriver

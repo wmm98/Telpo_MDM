@@ -296,7 +296,7 @@ class TestDevicesPage:
                     log.info("**********************服务器恢复正常*************************")
                     self.page.go_to_new_address("apps")
 
-    @allure.feature('MDM_device_test')
+    @allure.feature('MDM_device_test1111')
     @allure.title("Devices- 日志的抓取")
     @pytest.mark.filterwarnings("ignore")
     @pytest.mark.flaky(reruns=1, reruns_delay=3)
@@ -312,10 +312,10 @@ class TestDevicesPage:
                     # self.android_mdm_page.reboot_device(self.wifi_ip)
                     self.page.refresh_page()
                     send_time = case_pack.time.strftime('%Y-%m-%d %H:%M', case_pack.time.localtime(case_pack.time.time()))
-                    opt_case.catch_logs(sn, duration, time_out=duration * 100)
-                    log.info("捕捉%d 分钟日志指令下达" % duration)
+                    opt_case.catch_logs(sn, duration, time_out=700)
+                    log.info("捕捉%d分钟日志指令下达" % duration)
                     # check if device log generates and upload to allure report
-                    self.android_mdm_page.generate_and_upload_log(send_time, "捕捉的log_%d分钟" % duration)
+                    self.android_mdm_page.generate_and_upload_log(send_time, "%dmin_" % duration)
                     log.info("***************日志的抓取用例结束******************")
                 break
             except Exception as e:
@@ -374,10 +374,10 @@ class TestDevicesPage:
                     log.info("**********************服务器恢复正常*************************")
                     self.page.go_to_new_address("devices")
 
-    @allure.feature('MDM_device_test21313')
+    @allure.feature('MDM_device_test')
     @allure.title("Devices- 重置设备密码")
     @pytest.mark.filterwarnings("ignore")
-    # @pytest.mark.flaky(reruns=1, reruns_delay=3)
+    @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_reset_device_password(self, go_to_and_return_device_page):
         while True:
             try:
@@ -489,9 +489,9 @@ class TestDevicesPage:
                 message_list = []
                 for i in range(length):
                     self.page.refresh_page()
-                    opt_case.check_single_device(sn)
                     log.info("检测到设备：%s 在线" % sn)
                     msg = "%s:#$*%d" % (now, i)
+                    opt_case.check_single_device(sn)
                     self.page.select_device(sn)
                     self.page.click_send_btn()
                     self.page.msg_input_and_send(msg)
@@ -572,7 +572,7 @@ class TestDevicesPage:
     @allure.story('MDM-Show')
     @allure.title("Devices- AIMDM 切换正式测试服服务api ")
     @pytest.mark.filterwarnings("ignore")
-    # @pytest.mark.flaky(reruns=1, reruns_delay=3)
+    @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_transfer_api_server(self, push_test_api_to_device):
         while True:
             try:

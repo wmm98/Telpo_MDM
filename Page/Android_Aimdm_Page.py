@@ -193,11 +193,12 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
         tips.append(lock_tips)
         tips.append(download_tips)
         tips.append(upgrade_tips)
-        current_tip = self.remove_space_and_upper(self.get_msg_tips_text())
-        if download_tips in current_tip:
-            self.click_cancel_btn()
-        if upgrade_tips in current_tip:
-            self.click_cancel_btn()
+        if self.msg_alert_is_existed():
+            current_tip = self.remove_space_and_upper(self.get_msg_tips_text())
+            if download_tips in current_tip:
+                self.click_cancel_btn()
+            if upgrade_tips in current_tip:
+                self.click_cancel_btn()
 
     def confirm_wifi_btn_open(self, timeout=60):
         now = self.get_current_time()
@@ -272,7 +273,8 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
             file_path = config.project_path + "\\CatchLogs\\" + lo
             if not self.path_is_existed(file_path):
                 assert False, "@@@@无%s文件， 请检查！！！" % lo
-            public_pack.allure.attach.file(file_path, name=file_name,
+            upload_name = file_name + lo
+            public_pack.allure.attach.file(file_path, name=upload_name,
                                            attachment_type=public_pack.allure.attachment_type.TEXT)
 
     def upload_log(self, file, name):
@@ -332,6 +334,10 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
                 return True
             if self.get_current_time() > self.return_end_time(now_time):
                 return False
+
+    def msg_alert_is_existed(self):
+        flag = self.wait_ele_presence_by_id(self.msg_alert_id, 5)
+        return flag
 
     def confirm_alert_show(self, timeout=120):
         now_time = self.get_current_time()

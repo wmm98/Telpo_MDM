@@ -77,21 +77,27 @@ MDMTestData:
       - test_boot_logo_jpg.jpg
       - test_boot_logo_png.png
 
-    #  - test_stability_file
+
+    # 多台设备稳定性推送测试的文件，可根据需求添加或者减少文件名
     stability_test_file:
-#      - test_txt_file.txt
+      #      - test_txt_file.txt
       - test_stability_file_1.txt
       - test_stability_file_2.txt
       - test_stability_file_3.txt
+
+    #    无线休眠测试用例参数的填写
+    sleep_test_param:
+      #  秒
+      sleep_time:
+        - 10
+        - 20
+        - 30
 
   # 设备信息，需要修改
   android_device_info:
     # 设置永不休眠信息
     device_name: d
-    #  never_sleep_command: settings put system screen_off_timeout 0
-    # 休眠推送app的时候设置的时间， 默认10分钟， 有要求可修改
-    sleep_time: 20
-    battery: True
+
 
 
 

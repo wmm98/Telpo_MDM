@@ -204,8 +204,6 @@ class TestNetworkCases:
                     self.android_mdm_page.confirm_wifi_status_open()
                     self.page.go_to_new_address("devices")
 
-    # def test_conn_debug(self):
-
     @allure.feature('MDM_usb-test')
     @allure.story('MDM-Show111')
     @allure.title("Apps-限定4G网络推送app")
@@ -1112,7 +1110,7 @@ class TestNetworkCases:
                         conf.project_path + "\\Param\\Package\\%s" % test_yml['app_info']['low_version_app'])
                     self.page.go_to_new_address("apps")
 
-    @allure.feature('MDM_usb-test-no test now')
+    @allure.feature('MDM_usb-test---no need test now')
     @allure.title("public case-有线休眠推送app")
     def test_report_device_sleep_status_usb(self, del_app_install_uninstall_release_log, connected_wifi_adb,
                                             login_and_logout_serial, del_all_ota_release_log):

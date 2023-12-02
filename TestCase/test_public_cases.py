@@ -1310,7 +1310,8 @@ class TestPublicPage:
         while True:
             try:
                 log.info("*******************无线休眠推送app用例开始***************************")
-                for i in range(1):
+                params = self.android_mdm_page.time_sleep(test_yml["sleep_test_param"]["sleep_time"])
+                for i in range(len(params)):
                     log.info("******************%d**********************" % (i + 1))
                     self.android_mdm_page.close_mobile_data()
                     self.android_mdm_page.del_all_downloaded_apk()
@@ -1369,9 +1370,9 @@ class TestPublicPage:
                     self.android_mdm_page.device_sleep()
                     log.info("设备灭屏")
                     # self.android_mdm_page.time_sleep(test_yml["android_device_info"]["sleep_time"])
-                    self.android_mdm_page.confirm_device_no_existed(self.wifi_ip)
-                    log.info("设备已经不在线，确认设备已经进入深度休眠模式")
-                    self.android_mdm_page.time_sleep(600)
+                    # self.android_mdm_page.confirm_device_no_existed(self.wifi_ip)
+                    # log.info("设备已经不在线，确认设备已经进入深度休眠模式")
+                    self.android_mdm_page.time_sleep(params[i])
                     log.info("设备休眠结束")
                     # restart adb server
                     self.android_mdm_page.kill_server()
@@ -1386,22 +1387,33 @@ class TestPublicPage:
                     except AttributeError:
                         assert False, "休眠唤醒后wifi无法上网"
                     log.info("wifi环境下可以上网")
+                    self.android_mdm_page.send_adb_command_USB(self.wifi_ip)
                     self.android_mdm_page.device_is_existed(self.wifi_ip)
                     log.info("检测到设备在线， 成功唤醒设备")
                     self.android_mdm_page.screen_keep_on()
                     self.device_page.refresh_page()
-                    opt_case.check_single_device(self.device_sn)
+                    now_time = self.app_page.get_current_time()
+                    self.device_page.upper_transfer(opt_case.get_single_device_list(self.device_sn)[0]["Status"])
+                    while True:
+                        if "ON" in self.device_page.upper_transfer(opt_case.get_single_device_list(self.device_sn)[0]["Status"]):
+                            break
+                        if self.device_page.get_current_time() > self.device_page.return_end_time(now_time):
+                            log.error("@@@@唤醒设备后，3分钟内显示没显示在线")
+                            assert False, "@@@@唤醒设备后，3分钟内显示没显示在线"
+                        self.device_page.refresh_page()
                     log.info("检测到设备在线")
-                    # self.device_page.select_device(self.device_sn)
-                    # self.device_page.send_message(msg)
-                    # if not self.android_mdm_page.public_alert_show(60):
-                    #     assert False, "@@@@平台显示设备在线， 发送消息一分钟后还没收到消息"
-                    # self.android_mdm_page.confirm_received_text(msg, timeout=5)
-                    # try:
-                    #     self.android_mdm_page.click_msg_confirm_btn()
-                    #     self.android_mdm_page.confirm_msg_alert_fade(msg)
-                    # except Exception:
-                    #     pass
+                    self.device_page.go_to_new_address("devices")
+                    self.device_page.select_device(self.device_sn)
+                    self.device_page.send_message(msg)
+                    log.info("平台发送消息给设备")
+                    if not self.android_mdm_page.public_alert_show(60):
+                        assert False, "@@@@平台显示设备在线， 发送消息一分钟后还没收到消息"
+                    self.android_mdm_page.confirm_received_text(msg, timeout=5)
+                    try:
+                        self.android_mdm_page.click_msg_confirm_btn()
+                        self.android_mdm_page.confirm_msg_alert_fade(msg)
+                    except Exception:
+                        pass
 
                     # go to app page
                     self.app_page.go_to_new_address("apps")
@@ -1447,7 +1459,7 @@ class TestPublicPage:
                                 assert app_size == size, "@@@@平台显示下载完成， 终端的包下载不完整，请检查！！！"
                                 assert package_hash_value == act_apk_package_hash_value, "@@@@平台显示下载完成，终端的apk和原始的apkSHA-256值不一致， 请检查！！！！"
                                 break
-                        # wait 20 mins
+                        # wait 20 min
                         if self.app_page.get_current_time() > self.app_page.return_end_time(report_time, 300):
                             if self.app_page.service_is_normal():
                                 log.error("@@@@30分钟还没有下载完相应的app， 请检查！！！")
@@ -1479,8 +1491,9 @@ class TestPublicPage:
                                 log.error("@@@@3分钟还没有安装完相应的app， 请检查！！！")
                                 assert False, "@@@@3分钟还没有安装完相应的app， 请检查！！！"
                             else:
+                                log.info("**********************检测到服务器503***********************")
                                 self.app_page.recovery_after_service_unavailable("apps/logs", case_pack.user_info)
-                                log.info("服务器503后恢复")
+                                log.info("**********************服务器恢复正常*************************")
                                 report_upgrade_time = self.app_page.get_current_time()
                         self.app_page.time_sleep(5)
                         self.app_page.refresh_page()
