@@ -312,7 +312,7 @@ class TestDevicesPage:
                     # self.android_mdm_page.reboot_device(self.wifi_ip)
                     self.page.refresh_page()
                     send_time = case_pack.time.strftime('%Y-%m-%d %H:%M', case_pack.time.localtime(case_pack.time.time()))
-                    opt_case.catch_logs(sn, duration, time_out=700)
+                    opt_case.catch_logs(sn, duration, time_out=duration * 200)
                     log.info("捕捉%d分钟日志指令下达" % duration)
                     # check if device log generates and upload to allure report
                     self.android_mdm_page.generate_and_upload_log(send_time, "%dmin_" % duration)

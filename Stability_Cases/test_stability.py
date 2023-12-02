@@ -768,7 +768,6 @@ class TestStability:
                         if app_page.get_current_time() > app_page.return_end_time(now_time, 1800):
                             assert False, "@@@@%s中:应用推送中超过30分钟还没有完成%s的下载" % (device_msg["sn"], release_info["package_name"])
                         app_page.time_sleep(3)
-                    print("**********************%s: 下载完成检测完毕*************************************" % device_msg["ip"])
                     log.info(
                         "**********************%s: 下载完成检测完毕*************************************" % device_msg["ip"])
                     # check if app installed in settings time

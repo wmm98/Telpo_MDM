@@ -96,7 +96,7 @@ class Optimize_Case:
                 # wait 20 min
             if self.page.get_current_time() > self.page.return_end_time(now_time, time_out):
                 assert False, "@@@@超过 %ss 还没有采集完 %d分钟的log！！！" % (time_out, duration)
-            self.page.time_sleep(3)
+            self.page.time_sleep(20)
 
         now_time = self.page.get_current_time()
         while True:
@@ -113,7 +113,7 @@ class Optimize_Case:
             # wait 20 min
             if self.page.get_current_time() > self.page.return_end_time(now_time, time_out):
                 assert False, "@@@@超过 %s 还没有上传完 %s分钟的log！！！" % (time_out, duration)
-            self.page.time_sleep(3)
+            self.page.time_sleep(10)
 
     def check_alert_text(self, exp_text):
         try:
