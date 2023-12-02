@@ -296,13 +296,13 @@ class TestDevicesPage:
                     log.info("**********************服务器恢复正常*************************")
                     self.page.go_to_new_address("apps")
 
-    @allure.feature('MDM_device_test1111')
+    @allure.feature('MDM_device_test')
     @allure.title("Devices- 日志的抓取")
     @pytest.mark.filterwarnings("ignore")
     @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_cat_logs(self, go_to_and_return_device_page):
-        # durations = [5, 10, 30]
-        durations = [5]
+        durations = [5, 10, 30]
+        # durations = [5]
         while True:
             try:
                 log.info("*****************日志的抓取用例开始********************")

@@ -1303,15 +1303,16 @@ class TestPublicPage:
                     self.android_mdm_page.del_all_content_file()
                     self.android_mdm_page.screen_keep_on()
 
-    @allure.feature('MDM_public')
+    @allure.feature('MDM_public123456')
     @allure.title("public case-无线休眠推送app")
     @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_report_device_sleep_status(self, del_app_install_uninstall_release_log, go_to_device_page, uninstall_multi_apps):
         while True:
             try:
                 log.info("*******************无线休眠推送app用例开始***************************")
-                params = self.android_mdm_page.time_sleep(test_yml["sleep_test_param"]["sleep_time"])
-                for i in range(len(params)):
+                sleep_params = test_yml["Sleep_test_param"]["sleep_time"]
+                print(sleep_params)
+                for i in range(len(sleep_params)):
                     log.info("******************%d**********************" % (i + 1))
                     self.android_mdm_page.close_mobile_data()
                     self.android_mdm_page.del_all_downloaded_apk()

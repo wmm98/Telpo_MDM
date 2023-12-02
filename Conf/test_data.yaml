@@ -57,6 +57,14 @@ MDMTestData:
     # 有分android和linux两种系统  Android Linux
     platform: Android
 
+  #    无线休眠测试用例参数的填写
+  Sleep_test_param:
+    # txt 文件
+    sleep_time:
+      - 10
+      - 20
+      - 30
+
   # Content相关信息， 没有特殊要求不用填写
   Content_info:
     # txt 文件
@@ -85,13 +93,6 @@ MDMTestData:
       - test_stability_file_2.txt
       - test_stability_file_3.txt
 
-    #    无线休眠测试用例参数的填写
-    sleep_test_param:
-      #  秒
-      sleep_time:
-        - 10
-        - 20
-        - 30
 
   # 设备信息，需要修改
   android_device_info:

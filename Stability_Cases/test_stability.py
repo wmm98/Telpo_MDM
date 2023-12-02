@@ -221,7 +221,7 @@ class TestStability:
         length = 1
         while True:
             try:
-                log.info("**********多设备重启在线成功率****************")
+                log.info("**********多设备重启在线成功率用例开始****************")
                 devices_sn = self.devices_sn
                 devices_ip = self.devices_ip
                 device_page = self.device_page
@@ -346,18 +346,24 @@ class TestStability:
                 msg = "重启%d次1分钟内在线成功率为%s" % (length, str(online_flag / length))
                 log.info(msg)
                 print(msg)
+                log.info("**********多设备重启在线成功率用例结束****************")
                 break
             except Exception as e:
                 if self.app_page.service_is_normal():
                     assert False, e
                 else:
+                    log.info("**********************检测到服务器503***********************")
                     self.app_page.recovery_after_service_unavailable("devices", st.user_info)
+                    log.info("**********************服务器恢复正常*************************")
 
     @allure.feature('MDM_stability')
     @allure.title("stability case-文件文件推送成功率-请在报告右侧log文件查看文件文件推送成功率")
     def test_multi_release_content(self):
+        # 设置断电重启得次数
+        reboot_times = 1
         while True:
             try:
+                log.info("**********文件文件推送成功率用例开始****************")
                 # lock = st.threading.Lock()
                 lock = st.threading.Lock()
                 devices_sn = self.devices_sn
@@ -394,9 +400,9 @@ class TestStability:
                     self.content_page.go_to_new_address("content")
                     file_path = conf.project_path + "\\Param\\Content\\%s" % file
                     file_size = self.content_page.get_file_size_in_windows(file_path)
-                    print("获取到的文件 的size(bytes): ", file_size)
+                    log.info("获取到的文件 的size(bytes): %s" % str(file_size))
                     file_hash_value = self.android_mdm_page.calculate_sha256_in_windows(file, directory="Content")
-                    print("file_hash_value:", file_hash_value)
+                    log.info("获取到文件 的hash value: %s" % str(file_hash_value))
                     send_time = st.time.strftime('%Y-%m-%d %H:%M',
                                                  st.time.localtime(self.content_page.get_current_time()))
                     self.content_page.time_sleep(15)
@@ -405,6 +411,7 @@ class TestStability:
                     self.content_page.time_sleep(4)
                     assert len(self.content_page.get_content_list()) == 1, "@@@@平台上没有相关文件： %s, 请检查" % file
                     self.content_page.release_content_file(release_info["sn"], file_path=release_to_path)
+                    log.info("释放文件: %s 到 %s" % (file, ",".join(release_info["sn"])))
                     # check release log
                     self.content_page.go_to_new_address("content/release")
                     self.content_page.time_sleep(3)
@@ -420,11 +427,10 @@ class TestStability:
                             else:
                                 self.content_page.recovery_after_service_unavailable("content/release", st.user_info)
                                 now_time = self.content_page.get_current_time()
-                        self.content_page.time_sleep(3)
+                        self.content_page.time_sleep(5)
                         self.content_page.refresh_page()
 
-                    print("**********************释放log检测完毕*************************************")
-                    log.info("**********************释放log检测完毕*************************************")
+                    log.info("************释放log检测完毕*****************")
 
                     def check_devices_download_file(device_msg):
                         device_msg["android_page"].screen_keep_on()
@@ -436,21 +442,21 @@ class TestStability:
                             if content_page.get_current_time() > content_page.return_end_time(now_time, 900):
                                 assert False, "@@@@应用推送中超过30分钟还没有%s的下载记录" % file
                             content_page.time_sleep(3)
-                        print("**********************%s : %s下载记录检测完毕*************************************" % (
-                            device_msg["ip"], file))
-                        log.info("**********************%s : %s下载记录检测完毕*************************************" % (
+
+                        log.info("**********%s : %s下载记录检测完毕*************" % (
                             device_msg["ip"], file))
 
                         before_reboot_file_size = device_msg["android_page"].get_file_size_in_device(file)
-                        print("第一次下载的的file size: ", before_reboot_file_size)
-                        for i in range(1):
+                        log.info("%s: 第一次下载的的file size: %s" % (device_msg["sn"], before_reboot_file_size))
+                        for i in range(reboot_times):
                             device_msg["android_page"].reboot_device(device_msg["ip"])
+                            log.info("%s 完成第 %d 重启" % (device_msg["sn"], (i + 1)))
                             now_time = content_page.get_current_time()
                             while True:
                                 current_size = device_msg["android_page"].get_file_size_in_device(file)
-                                print("重启%s次之后当前file 的size: %s" % (str(i + 1), current_size))
-                                log.info("重启%s次之后当前file 的size: %s" % (str(i + 1), current_size))
+                                log.info("%s: 重启%s次之后当前file 的size: %s" % (device_msg["sn"], str(i + 1), current_size))
                                 if current_size == file_size:
+                                    log.error("文件附件太小， 请重新上传大附件！！！！")
                                     assert False, "@@@@文件太小，请上传大附件！！！！"
                                 if current_size > before_reboot_file_size:
                                     before_reboot_file_size = current_size
@@ -459,23 +465,19 @@ class TestStability:
                                     log.error("@@@@确认下载提示后， 2分钟内ota升级包没有大小没变， 没在下载")
                                     assert False, "@@@@确认下载提示后， 2分钟内ota升级包没有大小没变， 没在下载"
                                 content_page.time_sleep(1)
-                        print("*******************%s : %s完成5次重启断点续传*********************************" % (
-                            device_msg["ip"], file))
-                        log.info("*******************%s : %s完成5次重启断点续传*********************************" % (
-                            device_msg["ip"], file))
+                        log.info("************%s : %s完成%d次重启断点续传**************" % (device_msg["ip"], file, reboot_times))
                         # check if app download completed in the settings time
                         now_time_d = content_page.get_current_time()
                         while True:
                             shell_hash_value = device_msg["android_page"].calculate_sha256_in_device(file)
+                            log.info("设备 %s 中下载的文件：%s 的hash value为： %s" % (device_msg["sn"], file, shell_hash_value))
                             if file_hash_value == shell_hash_value:
                                 break
                             if content_page.get_current_time() > content_page.return_end_time(now_time_d, 1800):
                                 log.error("@@@@推送中超过30分钟还没有完成%s的下载" % file)
                                 assert False, "@@@@推送中超过30分钟还没有完成%s的下载" % file
-                            content_page.time_sleep(3)
-                        log.info("**********************%s : %s下载完成检测完毕*************************************" % (
-                            device_msg["ip"], file))
-                        print("**********************%s : %s下载完成检测完毕*************************************" % (
+                            content_page.time_sleep(20)
+                        log.info("***********%s : %s下载完成检测完毕**************" % (
                             device_msg["ip"], file))
                         setting_time = content_page.get_current_time()
                         while True:
@@ -484,12 +486,7 @@ class TestStability:
                             if content_page.get_current_time() > content_page.return_end_time(setting_time):
                                 assert False, "@@@@文件没有释放到设备指定的路径%s, 请检查！！！" % release_to_path
 
-                        print(
-                            "***************************************设备%s：指定的路径已存在%s*********************************" % (
-                                device_msg["ip"], file))
-                        log.info(
-                            "***************************************设备%s：指定的路径已存在%s*********************************" % (
-                                device_msg["ip"], file))
+                        log.info("*****************设备%s：指定的路径已存在%s**************" % (device_msg["ip"], file))
 
                         lock.acquire()
                         content_page.go_to_new_address("content/log")
@@ -497,10 +494,9 @@ class TestStability:
                         while True:
                             content_page.search_upgrade_log_by_sn(device_msg["sn"])
                             upgrade_list = content_page.get_content_latest_upgrade_log(send_time, device_msg)
-                            print("upgrade_list: ", upgrade_list)
                             if len(upgrade_list) != 0:
                                 action = upgrade_list[0]["Action"]
-                                print("action", action)
+                                log.info("设备： %s 平台显示的upgrade log为： %s" % (device_msg["sn"], action))
                                 if content_page.get_action_status(action) == 7:
                                     break
                             # wait upgrade 3 min at most
@@ -509,19 +505,17 @@ class TestStability:
                                     log.error("@@@@3分钟还没有上报设置完相应的文件， 请检查！！！")
                                     assert False, "@@@@3分钟还没有上报设置完相应的文件， 请检查！！！"
                                 else:
+                                    log.info("**********************检测到服务器503***********************")
                                     self.content_page.recovery_after_service_unavailable("content/log", st.user_info)
+                                    log.info("**********************服务器恢复正常*************************")
                                     report_now_time = self.content_page.get_current_time()
                             content_page.time_sleep(10)
                             content_page.refresh_page()
                         lock.release()
-                        # assert file in device_msg["android_page"].u2_send_command(
-                        #     grep_cmd), "@@@@文件没有释放到设备指定的路径%s, 请检查！！！" % release_to_path
-                        print(
-                            "***************************************设备%s完成文件%s的推送*********************************" % (
-                                device_msg["ip"], file))
-                        log.info(
-                            "***************************************设备%s完成文件%s的推送*********************************" % (
-                                device_msg["ip"], file))
+                        assert file in device_msg["android_page"].u2_send_command(
+                            grep_cmd), "@@@@文件没有释放到设备指定的路径%s, 请检查！！！" % release_to_path
+                        log.info("设备：%s 指定路径： %s中存在文件 %s" % (device_msg["sn"], release_to_path, file))
+                        log.info("**************设备%s完成文件%s的推送*****************" % (device_msg["ip"], file))
 
                     # release file to multi devices
                     contents_threads = []
@@ -533,10 +527,7 @@ class TestStability:
                         contents_threads.append(content_t)
                     for thread in contents_threads:
                         thread.join()
-                print(
-                    "************************************多设备推送文件用例断点续传结束**************************************************")
-                log.info(
-                    "************************************多设备推送文件用例断点续传结束**************************************************")
+                log.info("**************多设备推送文件用例断点续传结束************************")
                 break
 
                 # check_message_reboot_threads = []
