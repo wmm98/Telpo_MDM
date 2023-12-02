@@ -418,11 +418,11 @@ class TestStability:
                     now_time = self.content_page.get_current_time()
                     while True:
                         release_len = self.content_page.get_current_content_release_log_total()
-                        print("release_len", release_len)
                         if release_len == len(release_info["sn"]) + release_flag:
                             break
                         if self.content_page.get_current_time() > self.content_page.return_end_time(now_time):
                             if content_page.service_unavailable_list():
+                                log.error("@@@@没有相应的文件 release log， 请检查！！！")
                                 assert False, "@@@@没有相应的文件 release log， 请检查！！！"
                             else:
                                 self.content_page.recovery_after_service_unavailable("content/release", st.user_info)
@@ -443,8 +443,7 @@ class TestStability:
                                 assert False, "@@@@应用推送中超过30分钟还没有%s的下载记录" % file
                             content_page.time_sleep(3)
 
-                        log.info("**********%s : %s下载记录检测完毕*************" % (
-                            device_msg["ip"], file))
+                        log.info("*********%s : %s下载记录检测完毕**********" % (device_msg["ip"], file))
 
                         before_reboot_file_size = device_msg["android_page"].get_file_size_in_device(file)
                         log.info("%s: 第一次下载的的file size: %s" % (device_msg["sn"], before_reboot_file_size))
@@ -462,7 +461,7 @@ class TestStability:
                                     before_reboot_file_size = current_size
                                     break
                                 if content_page.get_current_time() > content_page.return_end_time(now_time, 300):
-                                    log.error("@@@@确认下载提示后， 2分钟内ota升级包没有大小没变， 没在下载")
+                                    log.error("@@@@%s: 确认下载文件： %s， 2分钟内ota升级包没有大小没变， 没在下载" % (device_msg["sn"], file))
                                     assert False, "@@@@确认下载提示后， 2分钟内ota升级包没有大小没变， 没在下载"
                                 content_page.time_sleep(1)
                         log.info("************%s : %s完成%d次重启断点续传**************" % (device_msg["ip"], file, reboot_times))
@@ -486,7 +485,7 @@ class TestStability:
                             if content_page.get_current_time() > content_page.return_end_time(setting_time):
                                 assert False, "@@@@文件没有释放到设备指定的路径%s, 请检查！！！" % release_to_path
 
-                        log.info("*****************设备%s：指定的路径已存在%s**************" % (device_msg["ip"], file))
+                        log.info("*************设备%s：指定的路径已存在%s**************" % (device_msg["ip"], file))
 
                         lock.acquire()
                         content_page.go_to_new_address("content/log")
@@ -512,9 +511,9 @@ class TestStability:
                             content_page.time_sleep(10)
                             content_page.refresh_page()
                         lock.release()
-                        assert file in device_msg["android_page"].u2_send_command(
-                            grep_cmd), "@@@@文件没有释放到设备指定的路径%s, 请检查！！！" % release_to_path
-                        log.info("设备：%s 指定路径： %s中存在文件 %s" % (device_msg["sn"], release_to_path, file))
+                        # assert file in device_msg["android_page"].u2_send_command(
+                        #     grep_cmd), "@@@@文件没有释放到设备指定的路径%s, 请检查！！！" % release_to_path
+                        # log.info("设备：%s 指定路径： %s中存在文件 %s" % (device_msg["sn"], release_to_path, file))
                         log.info("**************设备%s完成文件%s的推送*****************" % (device_msg["ip"], file))
 
                     # release file to multi devices
@@ -550,8 +549,15 @@ class TestStability:
     def test_online_long_test(self):
         release_info = {"package_name": test_yml['app_info']['other_app'], "sn": self.devices_sn,
                         "silent": "Yes", "download_network": "NO Limit"}
+        # 设置在线次数的查询
+        length = 2
         while True:
             try:
+                self.app_page.search_app_by_name(release_info["package_name"])
+                app_list = self.app_page.get_apps_text_list()
+                if len(app_list) == 0:
+                    assert False, "@@@@没有 %s, 请检查！！！" % release_info["package_name"]
+
                 # keep test environment clean
                 self.app_page.delete_app_install_and_uninstall_logs()
                 self.ota_page.delete_all_ota_release_log()
@@ -583,19 +589,18 @@ class TestStability:
                 file_path = self.app_page.get_apk_path(release_info["package_name"])
                 package = self.app_page.get_apk_package_name(file_path)
                 release_info["package"] = package
-                print("包名：", package)
                 version = self.app_page.get_apk_package_version(file_path)
                 release_info["version"] = version
                 devices_sn = self.devices_sn
                 devices_ip = self.devices_ip
-                length = 2
+
                 lock = st.threading.Lock()
                 app_page = self.app_page
                 device_page = self.device_page
 
                 reboot_threads = []
                 for android in self.androids_page:
-                    r_t = st.threading.Thread(target=android.reboot_device_no_root, args=(android.device_ip,))
+                    r_t = st.threading.Thread(target=android.reboot_device, args=(android.device_ip,))
                     r_t.start()
                     reboot_threads.append(r_t)
                 for r_thread in reboot_threads:
@@ -615,8 +620,7 @@ class TestStability:
                     if td_info["android_page"].public_alert_show(timeout=5):
                         td_info["android_page"].clear_download_and_upgrade_alert()
 
-                log.info("**********************************测试前清屏成功***********************************")
-                print("**********************************测试前清屏成功***********************************")
+                log.info("***********测试前清屏成功*******************")
 
                 # clear alert in device
                 now = st.time.strftime('%Y-%m-%d %H:%M', st.time.localtime(st.time.time()))
@@ -643,6 +647,7 @@ class TestStability:
                     device_page.time_sleep(5)
                     device_page.click_send_btn()
                     device_page.msg_input_and_send(message)
+                    log.info("平台已经发送信息: %s 到设备：%s" % (message, ",".join(sns)))
 
                 def check_message_in_device(td_info):
                     # check message in device
@@ -651,7 +656,9 @@ class TestStability:
                         assert AttributeError
                     try:
                         td_info["android_page"].confirm_received_text(td_info["message"], timeout=5)
+                        log.info("设备： %s 接收到信息：%s" % (td_info["sn"], td_info["message"]))
                     except AttributeError:
+                        log.error("设备1分钟内没接收到： %s 接收到信息：%s" % (td_info["sn"], td_info["message"]))
                         assert AttributeError
                     try:
                         td_info["android_page"].click_msg_confirm_btn()
@@ -662,9 +669,11 @@ class TestStability:
                 online_flag = 0
                 times = 0
                 for i in range(length):
+                    log.info("***********第%d次断网*****************" % (i + 1))
                     try:
                         now = st.time.strftime('%Y-%m-%d %H:%M', st.time.localtime(st.time.time()))
                         msg = "%s:test%d" % (now, times)
+                        log.info("message 为： %s" % msg)
                         pre_threads = []
                         for p_d in range(len(devices_data)):
                             p_msg = {"android_page": st.AndroidAimdmPageWiFi(devices_data[p_d], 5),
@@ -699,27 +708,24 @@ class TestStability:
                         continue
                     device_page.time_sleep(10)
 
-                print(online_flag)
                 msg = "%ds内在线成功率为%s" % (length * 60, str(online_flag / length))
                 log.info(msg)
-                print(msg)
 
-                print("================================在线状态测完===================================")
-                log.info("================================在线状态测完===================================")
-                print("****************************长时间挂机后静默安装测试*******************************")
-                log.info("****************************长时间挂机后静默安装测试*******************************")
+                log.info("****************在线状态测完*****************")
+
+                log.info("************长时间挂机后静默安装测试***************")
 
                 # release_app
                 send_time = st.time.strftime('%Y-%m-%d %H:%M', st.time.localtime(self.app_page.get_current_time()))
                 self.app_page.time_sleep(5)
                 self.app_page.go_to_new_address("apps")
                 self.app_page.search_app_by_name(release_info["package_name"])
-                app_list = self.app_page.get_apps_text_list()
-                if len(app_list) == 0:
-                    assert False, "@@@@没有 %s, 请检查！！！" % release_info["package_name"]
+                # app_list = self.app_page.get_apps_text_list()
+                # if len(app_list) == 0:
+                #     assert False, "@@@@没有 %s, 请检查！！！" % release_info["package_name"]
                 self.app_page.click_release_app_btn()
                 self.app_page.input_release_app_info(release_info)
-
+                log.info("推送apk：%s到设备：%s" % (release_info["package_name"], ",".join(release_info["sn"])))
                 # go to app release log
                 self.app_page.go_to_new_address("apps/releases")
                 now_time = self.app_page.get_current_time()
@@ -738,10 +744,7 @@ class TestStability:
                 def check_devices_install_app(device_msg):
                     # self.android_mdm_page.reboot_device(device_msg["ip"])
                     # self.app_page.refresh_page()
-
-                    print("**********************%s: 释放log检测完毕*************************************" % device_msg["ip"])
-                    log.info(
-                        "**********************%s: 释放log检测完毕*************************************" % device_msg["ip"])
+                    log.info("******************%s: 释放log检测完毕******************" % device_msg["ip"])
                     # check the app download record in device
                     original_hash_value = device_msg["android_page"].calculate_sha256_in_windows(
                         release_info["package_name"])
@@ -751,11 +754,10 @@ class TestStability:
                         if device_msg["android_page"].download_file_is_existed(shell_app_apk_name):
                             break
                         if app_page.get_current_time() > app_page.return_end_time(now_time, 1800):
-                            assert False, "@@@@应用推送中超过30分钟还没有%s的下载记录" % release_info["package_name"]
+                            log.error("@@@@%s中:应用推送中超过30分钟还没有%s的下载记录" % (device_msg["sn"], release_info["package_name"]))
+                            assert False, "@@@@%s中:应用推送中超过30分钟还没有%s的下载记录" % (device_msg["sn"], release_info["package_name"])
                         app_page.time_sleep(3)
-                    print("**********************%s: 下载记录检测完毕*************************************" % device_msg["ip"])
-                    log.info(
-                        "**********************%s: 下载记录检测完毕*************************************" % device_msg["ip"])
+                    log.info("*************%s: 下载记录检测完毕***********" % device_msg["ip"])
                     # check if app download completed in the settings time
                     # file_path = conf.project_path + "\\Param\\Package\\"
                     now_time = app_page.get_current_time()
@@ -764,7 +766,7 @@ class TestStability:
                         if original_hash_value == shell_hash_value:
                             break
                         if app_page.get_current_time() > app_page.return_end_time(now_time, 1800):
-                            assert False, "@@@@多应用推送中超过30分钟还没有完成%s的下载" % release_info["package_name"]
+                            assert False, "@@@@%s中:应用推送中超过30分钟还没有完成%s的下载" % (device_msg["sn"], release_info["package_name"])
                         app_page.time_sleep(3)
                     print("**********************%s: 下载完成检测完毕*************************************" % device_msg["ip"])
                     log.info(
@@ -776,10 +778,7 @@ class TestStability:
                             break
                         if app_page.get_current_time() > app_page.return_end_time(now_time, 180):
                             assert False, "@@@@多应用推送中超过3分钟还没有%s的安装记录" % release_info["package_name"]
-                    print("******************************%s: 安装app记录检测完毕****************************************" %
-                          device_msg["ip"])
-                    log.info("******************************%s: 安装app记录检测完毕****************************************" %
-                             device_msg["ip"])
+                    log.info("***********%s: 安装app记录检测完毕**********" %device_msg["ip"])
                     lock.acquire()
                     # check if all installed success logs in app upgrade logs
                     app_page.go_to_new_address("apps/logs")
@@ -789,21 +788,19 @@ class TestStability:
                         upgrade_list = app_page.get_app_latest_upgrade_log(send_time, device_msg)
                         if len(upgrade_list) != 0:
                             action = upgrade_list[0]["Action"]
-                            print(action)
+                            log.info("平台中显示设备：%s的upgrade action为：%s" % (device_msg["sn"], action))
                             if app_page.get_action_status(action) == 4:
                                 break
                         if app_page.get_current_time() > app_page.return_end_time(report_now_time, 300):
                             if self.app_page.service_is_normal():
-                                assert False, "@@@@多应用推送中设备已经安装完毕app, 平台超过5分钟还上报%s的安装记录" % release_info["package_name"]
+                                assert False, "@@@@应用推送中设备:%s已经安装完毕app, 平台超过5分钟还上报%s的安装记录" % (device_msg["sn"], release_info["package_name"])
                             else:
                                 self.app_page.recovery_after_service_unavailable("apps/logs", st.user_info)
                                 report_now_time = self.app_page.get_current_time()
                         app_page.time_sleep(5)
                         app_page.refresh_page()
-                    print("***************************************设备%s安装上报完成*********************************" %
-                          device_msg["ip"])
-                    log.info("***************************************设备%s安装上报完成*********************************" %
-                             device_msg["ip"])
+
+                    log.info("*********设备%s安装%s上报完成********" % (device_msg["sn"], release_info["package_name"]))
                     lock.release()
 
                 # multi threads install app
@@ -817,8 +814,7 @@ class TestStability:
                     install_threads.append(inst_t)
                 for i_thread in install_threads:
                     i_thread.join()
-                print("*****************************所有设备的静默安装完成*****************************")
-                log.info("**************************所有设备的静默安装完成************************")
+                log.info("*****************所有设备的静默安装%s完成*****************" % release_info["package_name"])
                 # multi threads upgrade ota package
                 download_tips = "Foundanewfirmware,whethertoupgrade?"
                 upgrade_tips = "whethertoupgradenow?"
@@ -980,11 +976,12 @@ class TestStability:
                     upgrade_threads.append(upgrade_t)
                 for upgrade_thread in upgrade_threads:
                     upgrade_thread.join()
-                log.info("***********************************用例结束**************************************************")
-                print("***********************************用例结束**************************************************")
+                log.info("*****************用例结束******************")
                 break
             except Exception as e:
                 if self.app_page.service_is_normal():
                     assert False, e
                 else:
+                    log.info("****************检测到服务器503******************")
                     self.app_page.recovery_after_service_unavailable("apps", st.user_info)
+                    log.info("****************服务器恢复正常********************")

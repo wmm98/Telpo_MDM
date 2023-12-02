@@ -618,7 +618,7 @@ class TestPublicPage:
                     self.android_mdm_page.del_all_content_file()
                     self.android_mdm_page.screen_keep_on()
 
-    @allure.feature('MDM_public')
+    @allure.feature('MDM_public1234')
     @allure.title("public case-多应用推送")
     @pytest.mark.filterwarnings("ignore")
     @pytest.mark.flaky(reruns=1, reruns_delay=3)
@@ -629,6 +629,7 @@ class TestPublicPage:
                 release_info = {"sn": self.device_sn, "silent": "Yes", "download_network": "NO Limit", "version": False}
                 apks = [test_yml["app_info"][apk_name] for apk_name in test_yml["app_info"] if
                         apk_name not in ["high_version_app", "low_version_app"]]
+                # apks = [test_yml["app_info"][apk_name] for apk_name in test_yml["app_info"]]
                 apks = list(set(apks))
                 log.info("推送到的应用： %s" % ",".join(apks))
                 self.app_page.go_to_new_address("apps/releases")
