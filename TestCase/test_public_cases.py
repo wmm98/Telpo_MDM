@@ -1391,9 +1391,15 @@ class TestPublicPage:
                     self.android_mdm_page.device_is_existed(self.wifi_ip)
                     log.info("检测到设备在线， 成功唤醒设备")
                     self.android_mdm_page.screen_keep_on()
-                    self.device_page.refresh_page()
+                    try:
+                        self.device_page.refresh_page()
+
+                        self.device_page.upper_transfer(opt_case.get_single_device_list(self.device_sn)[0]["Status"])
+                    except Exception as e:
+                        if not self.device_page.go_back_after_expired("devices", case_pack.user_info):
+                            assert False, e
+
                     now_time = self.app_page.get_current_time()
-                    self.device_page.upper_transfer(opt_case.get_single_device_list(self.device_sn)[0]["Status"])
                     while True:
                         if "ON" in self.device_page.upper_transfer(opt_case.get_single_device_list(self.device_sn)[0]["Status"]):
                             break
