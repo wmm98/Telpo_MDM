@@ -85,9 +85,15 @@ MDMTestData:
     stability_test_file:
       #      - test_txt_file.txt
       - test_stability_file_1.txt
-#      - test_stability_file_2.txt
-#      - test_stability_file_3.txt
+      - test_stability_file_2.txt
+      - test_stability_file_3.txt
 
+  #  设置多线程测试时间
+  Multi_devices_download_time_settings:
+    # 多台设备下载 ota 包的时间设置， 可根据设备的多少设置相应的时间, 单位为秒
+    stability_ota_download_time: 1800
+    stability_app_download_time: 1800
+    stability_file_download_time: 1800
 
   # 设备信息，需要修改
   android_device_info:
@@ -95,5 +101,6 @@ MDMTestData:
     device_name: d
 
 
+  duoduo
 
 
