@@ -239,22 +239,20 @@ class TestStability:
                     if td_info["android_page"].public_alert_show(timeout=5):
                         td_info["android_page"].clear_download_and_upgrade_alert()
                         log.info("设备： %s 清屏成功" % td_info["sn"])
-                    if 1 == 1:
-                        log.error("用于处理线程异常")
-                        try:
-                            assert False, "用于处理线程异常"
-                        except AssertionError:
-                            log.error("用于处理线程异常")
 
                 def send_devices_message(sns, message):
                     # get thread lock
+                    devices_list = []
                     for sn_ in sns:
                         res = opt_case.get_single_device_list(sn_)[0]
                         if not device_page.upper_transfer("On") in device_page.remove_space_and_upper(
                                 res["Status"]):
-                            assert AttributeError
-                        log.info("检测到所有设备都在线")
-                        device_page.refresh_page()
+                            devices_list.append(sn)
+                    if len(devices_list) != 0:
+                        log.error("@@@@检测到设备： %s 不在线， 请检查！！！" % ",".join(devices_list))
+                        assert False, "@@@@检测到设备： %s 不在线， 请检查！！！" % ",".join(devices_list)
+                    log.info("检测到所有设备都在线")
+                    device_page.refresh_page()
                     for sno in sns:
                         device_page.select_device(sno)
                         device_page.time_sleep(5)
@@ -482,10 +480,9 @@ class TestStability:
                                 break
                             if content_page.get_current_time() > content_page.return_end_time(now_time_d, expired_time):
                                 log.error("@@@@推送设备： %s中超过%d分钟还没有完成%s的下载" % (device_msg["sn"], expired_time, file))
-                                assert False, "@@@@推送中超过%d分钟还没有完成%s的下载" % (expired_time, file)
+                                assert False, "@@@@推送设备： %s中超过%d分钟还没有完成%s的下载" % (device_msg["sn"], expired_time, file)
                             content_page.time_sleep(20)
-                        log.info("***********%s : %s下载完成检测完毕**************" % (
-                            device_msg["ip"], file))
+                        log.info("***********%s : %s下载完成检测完毕**************" % (device_msg["sn"], file))
                         setting_time = content_page.get_current_time()
                         while True:
                             if file in device_msg["android_page"].u2_send_command(grep_cmd):
