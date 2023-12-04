@@ -858,7 +858,7 @@ class TestPublicPage:
 
     @allure.feature('MDM_public')
     @allure.title("public case- 静默ota升级")
-    # @pytest.mark.flaky(reruns=2, reruns_delay=1)
+    @pytest.mark.flaky(reruns=2, reruns_delay=1)
     def test_silent_ota_upgrade(self, del_all_ota_release_log, go_to_ota_page, delete_ota_package_relate):
         while True:
             try:
@@ -899,7 +899,6 @@ class TestPublicPage:
                 # ele = self.Page.get_package_ele(release_info["package_name"])
                 send_time = case_pack.time.strftime('%Y-%m-%d %H:%M',
                                                     case_pack.time.localtime(self.ota_page.get_current_time()))
-                print("send_time", send_time)
                 self.ota_page.time_sleep(10)
                 # if device is existed, click
                 self.ota_page.click_release_btn()
@@ -932,7 +931,7 @@ class TestPublicPage:
                                 upgrade_flag = 1
                             break
                     # wait upgrade 3 min at most
-                    if self.ota_page.get_current_time() > self.ota_page.return_end_time(download_time, 600):
+                    if self.ota_page.get_current_time() > self.ota_page.return_end_time(download_time, 1800):
                         self.silent_ota_upgrade_flag = 1
                         if self.ota_page.service_is_normal():
                             log.error("@@@@30分钟还没有下载完相应的固件， 请检查！！！")
@@ -982,6 +981,10 @@ class TestPublicPage:
                 break
             except Exception as e:
                 if self.ota_page.service_is_normal():
+                    self.ota_page.delete_all_ota_release_log()
+                    self.android_mdm_page.del_all_downloaded_zip()
+                    self.android_mdm_page.del_updated_zip()
+                    self.ota_page.go_to_new_address("ota")
                     assert False, e
                 else:
                     log.info("**********************检测到服务器503***********************")

@@ -553,6 +553,24 @@ class TestStability:
         length = 2
         while True:
             try:
+                # check firmware brefore testing
+                def check_current_upgrade_firmware(and_device):
+                    current_firmware_version = and_device.check_firmware_version()
+                    # compare current version and exp version
+                    assert ota_page.transfer_version_into_int(
+                        current_firmware_version) < ota_page.transfer_version_into_int(
+                        release_info["version"]), \
+                        "@@@@设备%s释放的ota升级包比当前固件版本版本低， 请检查！！！" % and_device.device_ip
+
+                check_firmware_thread = []
+                for android_p in self.androids_page:
+                    firm_t = st.threading.Thread(target=check_current_upgrade_firmware, args=(android_p,))
+                    firm_t.start()
+                    check_firmware_thread.append(firm_t)
+                for f_thread in check_firmware_thread:
+                    f_thread.join()
+
+                # check if exist the app
                 self.app_page.search_app_by_name(release_info["package_name"])
                 app_list = self.app_page.get_apps_text_list()
                 if len(app_list) == 0:
@@ -769,7 +787,7 @@ class TestStability:
                             assert False, "@@@@%s中:应用推送中超过30分钟还没有完成%s的下载" % (device_msg["sn"], release_info["package_name"])
                         app_page.time_sleep(3)
                     log.info(
-                        "**********************%s: 下载完成检测完毕*************************************" % device_msg["ip"])
+                        "**********************%s: 下载完成检测完毕*************************************" % device_msg["sn"])
                     # check if app installed in settings time
                     now_time = app_page.get_current_time()
                     while True:
@@ -777,7 +795,7 @@ class TestStability:
                             break
                         if app_page.get_current_time() > app_page.return_end_time(now_time, 180):
                             assert False, "@@@@多应用推送中超过3分钟还没有%s的安装记录" % release_info["package_name"]
-                    log.info("***********%s: 安装app记录检测完毕**********" %device_msg["ip"])
+                    log.info("***********%s: 安装app记录检测完毕**********" % device_msg["sn"])
                     lock.acquire()
                     # check if all installed success logs in app upgrade logs
                     app_page.go_to_new_address("apps/logs")
@@ -796,7 +814,7 @@ class TestStability:
                             else:
                                 self.app_page.recovery_after_service_unavailable("apps/logs", st.user_info)
                                 report_now_time = self.app_page.get_current_time()
-                        app_page.time_sleep(5)
+                        app_page.time_sleep(10)
                         app_page.refresh_page()
 
                     log.info("*********设备%s安装%s上报完成********" % (device_msg["sn"], release_info["package_name"]))
@@ -813,7 +831,8 @@ class TestStability:
                     install_threads.append(inst_t)
                 for i_thread in install_threads:
                     i_thread.join()
-                log.info("*****************所有设备的静默安装%s完成*****************" % release_info["package_name"])
+                log.info("**************所有设备的静默安装%s完成*************" % release_info["package_name"])
+                log.info("*****************所有设备的ota升级开始*****************")
                 # multi threads upgrade ota package
                 download_tips = "Foundanewfirmware,whethertoupgrade?"
                 upgrade_tips = "whethertoupgradenow?"
@@ -823,46 +842,30 @@ class TestStability:
                 ota_page = self.ota_page
                 release_info["version"] = self.ota_page.get_ota_package_version(release_info["package_name"])
 
-                def check_current_upgrade_firmware(and_device):
-                    current_firmware_version = and_device.check_firmware_version()
-                    # compare current version and exp version
-                    assert ota_page.transfer_version_into_int(
-                        current_firmware_version) < ota_page.transfer_version_into_int(
-                        release_info["version"]), \
-                        "@@@@%s释放的ota升级包比当前固件版本版本低， 请检查！！！" % and_device.device_ip
-
-                check_firmware_thread = []
-                for android_p in self.androids_page:
-                    firm_t = st.threading.Thread(target=check_current_upgrade_firmware, args=(android_p,))
-                    firm_t.start()
-                    check_firmware_thread.append(firm_t)
-                for f_thread in check_firmware_thread:
-                    f_thread.join()
-
                 # get ota size in windows and device
-                print("ota after upgrade version:", release_info["version"])
+                log.info("目标固件为： %s" % release_info["version"])
                 # check file size and hash value in directory Param/package
                 ota_package_path = self.ota_page.get_apk_path(release_info["package_name"])
                 act_ota_package_size = self.ota_page.get_zip_size(ota_package_path)
-                print("act_ota_package_size:", act_ota_package_size)
+                log.info("原压缩包的大小为： %s" % str(act_ota_package_size))
                 # check file hash value in directory Param/package
                 act_ota_package_hash_value = self.ota_page.calculate_sha256_in_windows(release_info["package_name"])
-                print("act_ota_package_hash_value:", act_ota_package_hash_value)
+                log.info("原文件的hash 值: %s" % str(act_ota_package_hash_value))
 
                 # release ota package
                 self.ota_page.go_to_new_address("ota")
                 self.ota_page.search_device_by_pack_name(release_info["package_name"])
                 # ele = self.Page.get_package_ele(release_info["package_name"])
                 send_time = st.time.strftime('%Y-%m-%d %H:%M', st.time.localtime(self.ota_page.get_current_time()))
-                print("send_time", send_time)
-                self.ota_page.time_sleep(5)
+                self.ota_page.time_sleep(105)
 
                 # if device is existed, click
                 self.ota_page.click_release_btn()
                 try:
                     self.ota_page.input_release_OTA_package(release_info)
+                    log.info("释放ota 升级包到设备：%s" % ",".join(release_info["sn"]))
                 except Exception as e:
-                    print(e)
+                    log.error(str(e))
                 self.ota_page.go_to_new_address("ota/release")
                 now_time = self.ota_page.get_current_time()
                 # check release logs
@@ -873,8 +876,6 @@ class TestStability:
                 #         assert False, "@@@@没有相应的 ota package release log， 请检查！！！"
                 #     self.ota_page.time_sleep(3)
                 #     self.ota_page.refresh_page()
-                print("*********************推送ota 安装包*************************************")
-                log.info("*********************推送ota 安装包*************************************")
 
                 def check_devices_upgrade_ota_package(device_msg):
                     device_msg["android_page"].screen_keep_on()
@@ -889,37 +890,29 @@ class TestStability:
                             log.error("@@@@应用推送中超过30分钟还没有%s的下载记录" % device_msg["package_name"])
                             assert False, "@@@@应用推送中超过30分钟还没有%s的下载记录" % device_msg["package_name"]
                         ota_page.time_sleep(3)
-                    print(
-                        "**********************%s: ota下载记录检测完毕*************************************" % device_msg["ip"])
-                    log.info(
-                        "**********************%s: ota下载记录检测完毕*************************************" % device_msg["ip"])
+                    log.info("*********设备：%s 中检测到ota 包的下载记录： %s**********" % (device_msg["sn"], release_info["package_name"])
                     # check if app download completed in the settings time
                     # file_path = conf.project_path + "\\Param\\Package\\"
                     now_time = ota_page.get_current_time()
                     while True:
                         shell_hash_value = device_msg["android_page"].calculate_sha256_in_device(
                             device_msg["package_name"])
+                        log.info("设备：%s中 ota包的hash 值为： %s" % (device_msg["sn"], str(shell_hash_value)))
                         if act_ota_package_hash_value == shell_hash_value:
                             break
                         if ota_page.get_current_time() > ota_page.return_end_time(now_time, 1800):
-                            log.error("@@@@多应用推送中超过30分钟还没有完成%s的下载" % release_info["package_name"])
-                            assert False, "@@@@多应用推送中超过30分钟还没有完成%s的下载" % release_info["package_name"]
-                        ota_page.time_sleep(3)
-                    print(
-                        "**********************%s: ota下载完成检测完毕*************************************" % device_msg["ip"])
-                    log.info(
-                        "**********************%s: ota下载完成检测完毕*************************************" % device_msg["ip"])
+                            log.error("@@@@设备： %s 中超过30分钟还没有完成 %s 的下载" % (device_msg["sn"] ,release_info["package_name"]))
+                            assert False, "@@@@设备： %s 中超过30分钟还没有完成 %s 的下载" % (device_msg["sn"] ,release_info["package_name"])
+                        ota_page.time_sleep(20)
+                    log.info("***********%s: ota： %s下载完成检测完毕********" % (device_msg["sn"], release_info["package_name"]))
                     device_msg["android_page"].device_unlock()
                     device_msg["android_page"].screen_keep_on()
                     device_msg["android_page"].confirm_alert_show()
-                    print(
-                        "*******************%s： 检测到有升级提示框******************************************" % device_msg["ip"])
-                    log.info(
-                        "*******************%s： 检测到有升级提示框******************************************" % device_msg["ip"])
-                    try:
-                        device_msg["android_page"].click_cancel_btn()
-                    except Exception as e:
-                        pass
+                    log.info("*************设备： %s 检测到有升级提示框******************" % device_msg["sn"])
+                    # try:
+                    #     device_msg["android_page"].click_cancel_btn()
+                    # except Exception as e:
+                    #     pass
                     device_msg["android_page"].confirm_received_alert(upgrade_tips)
                     device_msg["android_page"].device_boot(device_msg["ip"])
                     after_upgrade_version = device_msg["android_page"].check_firmware_version()
@@ -929,14 +922,10 @@ class TestStability:
                     assert ota_page.transfer_version_into_int(release_info["version"]) == \
                            ota_page.transfer_version_into_int(
                                after_upgrade_version), "@@@@升级后的固件版本为%s, ota升级失败， 请检查！！！" % after_upgrade_version
-                    print("***************************************设备%s ota 检测完成*********************************" %
-                          device_msg[
-                              "ip"])
+                    print("**************设备%s ota 检测完成***********************" %device_msg["ip"])
                     #
-                    print("**********************%s ota升级包在设备升级完成*************************************" % device_msg[
-                        "ip"])
-                    log.info("**********************%s ota升级包在设备升级完成*************************************" % device_msg[
-                        "ip"])
+                    print("******************%s ota升级包在设备升级完成******************" % device_msg["ip"])
+                    log.info("***********%s ota升级包在设备升级完成*************" % device_msg["ip"])
                     lock.acquire()
                     ota_page.go_to_new_address("ota/log")
                     report_now_time_ = ota_page.get_current_time()
