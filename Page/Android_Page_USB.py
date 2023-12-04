@@ -178,29 +178,28 @@ class AndroidBasePageUSB(interface):
         if "1" in self.get_cur_wifi_status():
             self.u2_send_command_USB("svc wifi disable")
             return self.wifi_close_status()
-        return True
+        else:
+            return True
 
     def confirm_wifi_status_open(self, timeout=120):
         now_time = self.get_current_time()
         while True:
             if self.wifi_open_status():
                 break
-            else:
-                self.time_sleep(3)
-                self.open_wifi_btn()
+            self.open_wifi_btn()
             if self.get_current_time() > self.return_end_time(now_time, timeout):
                 assert False, "@@@@超过2分钟打开wifi按钮， 请检查！！！"
+            self.time_sleep(3)
 
     def confirm_wifi_status_close(self, timeout=120):
         now_time = self.get_current_time()
         while True:
             if self.wifi_close_status():
                 break
-            else:
-                self.time_sleep(3)
-                self.close_wifi_btn()
+            self.close_wifi_btn()
             if self.get_current_time() > self.return_end_time(now_time, timeout):
                 assert False, "@@@@超过2分钟关闭wifi按钮， 请检查！！！"
+            self.time_sleep(3)
 
     def ping_network(self, times=5, timeout=120):
         # 每隔0.6秒ping一次，一共ping5次

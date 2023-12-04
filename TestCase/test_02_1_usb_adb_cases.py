@@ -75,7 +75,7 @@ class TestNetworkCases:
         # package_info = {"package_name": "Bus_Recharge_System_1.0.1_20220615.apk", "file_category": "test",
         #                 "developer": "engineer", "description": "test"}
         apks = test_yml["app_info"]
-        apks.update(test_yml["system_app"])
+        # apks.update(test_yml["system_app"])
         print(apks)
         for apk in list(apks.values()):
             file_path = conf.project_path + "\\Param\\Package\\%s" % apk
@@ -100,7 +100,7 @@ class TestNetworkCases:
     def test_reconnect_get_mobile_data(self, connect_wifi_adb_USB):
         while True:
             try:
-                log.info("***************************断网重连获取aimdm消耗的流量用例开始*********************")
+                log.info("********断网重连获取aimdm消耗的流量用例开始**********")
                 length = 1
                 self.android_mdm_page.back_to_home_USB()
                 self.android_mdm_page.confirm_wifi_btn_close()

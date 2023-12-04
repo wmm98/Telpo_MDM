@@ -14,7 +14,7 @@ class interface:
         if sub in string:
             return True
         else:
-            return True
+            return False
 
     def devices_list(self):
         return sub_shell.invoke("adb devices")

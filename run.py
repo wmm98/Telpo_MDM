@@ -23,7 +23,7 @@ from utils.base_web_driver import BaseWebDriver
 from utils.client_connect import ClientConnect
 from Common.check_yaml_file import CheckYaml
 from Common.Serial import Serial
-
+from Common.DealAlert import AlertData
 
 if __name__ == '__main__':
     # init config file
@@ -32,6 +32,7 @@ if __name__ == '__main__':
     CheckYaml().check_test_data()
     test_info = conf.get_yaml_data()['MDMTestData']
     log = Log.MyLog()
+    shell = Shell.Shell()
 
     # get COM port related
     usb_serial = Serial()
@@ -43,8 +44,14 @@ if __name__ == '__main__':
     device = ClientConnect()
     device.connect_device(test_info['android_device_info']['device_name'])
     # device.screen_keep_alive(test_info['android_device_info']['never_sleep_command'])
-
-    shell = Shell.Shell()
+    # check current firmware version
+    destination_version = test_info['ota_packages_info']['package_name'].split("-")[-1][:-4]
+    current_firmware_version = shell.invoke("adb -s %s shell getprop ro.product.version" % test_info['android_device_info']['device_name'])
+    alert_value = AlertData().get_yes_or_no("当前设备的固件为：%s,目标升级固件为：%s, 是否继续？" % (current_firmware_version, destination_version))
+    if "否" in alert_value:
+        sys.exit()
+        # raise Exception("用户终止执行")
+    AlertData().getAlert("请插上流量卡，请打开同一网段的wifi，茶上流量卡后请关掉弹框")
 
     log.info('initialize Config, path=' + conf.conf_path)
     # 先进行登录

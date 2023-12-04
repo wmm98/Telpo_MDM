@@ -890,7 +890,7 @@ class TestStability:
                             log.error("@@@@应用推送中超过30分钟还没有%s的下载记录" % device_msg["package_name"])
                             assert False, "@@@@应用推送中超过30分钟还没有%s的下载记录" % device_msg["package_name"]
                         ota_page.time_sleep(3)
-                    log.info("*********设备：%s 中检测到ota 包的下载记录： %s**********" % (device_msg["sn"], release_info["package_name"])
+                    log.info("****设备：%s 中检测到ota 包的下载记录： %s******" % (device_msg["sn"], release_info["package_name"]))
                     # check if app download completed in the settings time
                     # file_path = conf.project_path + "\\Param\\Package\\"
                     now_time = ota_page.get_current_time()
@@ -918,14 +918,12 @@ class TestStability:
                     after_upgrade_version = device_msg["android_page"].check_firmware_version()
                     assert ota_page.transfer_version_into_int(
                         device_current_firmware_version) != ota_page.transfer_version_into_int(after_upgrade_version), \
-                        "@@@@ota升级失败， 还是原来的版本%s！！" % device_current_firmware_version
+                        "@@@@设备：%s ota升级失败， 当前的固件版本为： %s！！" % (device_msg["sn"], device_current_firmware_version)
                     assert ota_page.transfer_version_into_int(release_info["version"]) == \
                            ota_page.transfer_version_into_int(
-                               after_upgrade_version), "@@@@升级后的固件版本为%s, ota升级失败， 请检查！！！" % after_upgrade_version
-                    print("**************设备%s ota 检测完成***********************" %device_msg["ip"])
-                    #
-                    print("******************%s ota升级包在设备升级完成******************" % device_msg["ip"])
-                    log.info("***********%s ota升级包在设备升级完成*************" % device_msg["ip"])
+                               after_upgrade_version), \
+                        "@@@@设备：%s ota升级失败， 当前的固件版本为： %s, 目标版本为： %s， 请检查！！" % (device_msg["sn"], device_current_firmware_version,after_upgrade_version)
+                    log.info("***********设备：%s中ota升级包设备升级完成*************" % device_msg["sn"])
                     lock.acquire()
                     ota_page.go_to_new_address("ota/log")
                     report_now_time_ = ota_page.get_current_time()
@@ -947,10 +945,7 @@ class TestStability:
                         ota_page.time_sleep(30)
                         ota_page.refresh_page()
                     lock.release()
-                    print("***************************************设备%s ota升级上报完成*********************************" %
-                          device_msg["ip"])
-                    log.info("***************************************设备%s ota升级上报完成*********************************" %
-                             device_msg["ip"])
+                    log.info("********设备:%s ota升级上报完成*********" % device_msg["sn"])
 
                 # multi threads upgrade ota package
                 upgrade_threads = []
@@ -964,6 +959,7 @@ class TestStability:
                     upgrade_threads.append(upgrade_t)
                 for upgrade_thread in upgrade_threads:
                     upgrade_thread.join()
+                log.info("所有设备升级完成")
                 log.info("*****************用例结束******************")
                 break
             except Exception as e:

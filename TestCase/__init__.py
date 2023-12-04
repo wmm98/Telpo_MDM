@@ -21,6 +21,8 @@ from Page.Catch_Log_Page import CatchLogPage
 from Page.Content_Page import ContentPage
 from utils.client_connect import ClientConnect
 from Common.Serial import Serial
+from Common.Shell import Shell
+from Page.Android_Page_USB import AndroidBasePageUSB
 
 yaml_data = Config().get_yaml_data()['MDMTestData']
 
@@ -38,8 +40,20 @@ device_data = {"usb_device_info": usb_device_info, "wifi_device_info": wifi_devi
 user_info = {"username": yaml_data['website_info']['test_user'],
              "password": yaml_data['website_info']['test_password']}
 
-
-
 #
 chrome_driver = BaseWebDriver()
 test_driver = chrome_driver.get_web_driver()
+
+# check if exist sim card
+# android_usb = AndroidBasePageUSB(client, 5, usb_device_info["serial"])
+# android_usb.open_mobile_data()
+# android_usb.confirm_wifi_status_close()
+# # time.sleep(5)
+# try:
+#     android_usb.ping_network(timeout=180)
+#
+# except AssertionError as e:
+#     raise Exception("没有流量卡，请插上流量卡！！！")
+# android_usb.confirm_wifi_status_open()
+
+
