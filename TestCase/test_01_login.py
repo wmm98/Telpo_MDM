@@ -29,43 +29,7 @@ class TestLogin:
         username = test_yaml['website_info']['test_user']
         password = test_yaml['website_info']['test_password']
 
-        login_ok_title = "Telpo MDM"
-        login_ok_url = test_yaml['website_info']['test_login_ok_url']
-        # try:
-        #     self.mdm_page.input_user_name(username)
-        #     self.mdm_page.input_pwd_value(password)
-        #     self.mdm_page.choose_agree_btn()
-        #     self.mdm_page.click_login_btn()
-        #     assert self.mdm_page.web_driver_wait_until(TestCase.EC.url_to_be(login_ok_url))
-        #     assert self.mdm_page.web_driver_wait_until(TestCase.EC.title_is(login_ok_title))
-        # except AssertionError:
-        #     e = "@@@登录失败， 请检查！！！"
-        #     log.error(e)
-        #     assert False, e
-        # except Exception:
-        #     e = "@@@用例失败， 请检查！！！"
-        #     log.error(e)
-        #     assert False, e
-
         self.mdm_page.login_ok(username, password)
-        # now_time = self.mdm_page.get_current_time()
-        # while True:
-        #     try:
-        #         if self.mdm_page.web_driver_wait_until(TestCase.EC.url_contains("device"), 10):
-        #             break
-        #     except Exception:
-        #         if "device" in self.mdm_page.get_current_window_url():
-        #             break
-        #     if self.mdm_page.get_current_time() > self.mdm_page.return_end_time(now_time):
-        #         assert False, "无法登录，请检查！！！"
-        #     self.mdm_page.refresh_page()
-        #     self.mdm_page.login_ok(username, password)
-
-        # 捕捉弹框提示内容,成功时候可以定位到，失败的时候定位不到, 留在后面解决
-        # loc = (By.CLASS_NAME, "toast-message")
-        # WebDriverWait(self.driver, 5).until(EC.visibility_of_element_located(loc))
-        # msg = self.driver.find_element(*loc)
-        # print(msg.text)
 
 
 if __name__ == '__main__':

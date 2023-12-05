@@ -21,32 +21,39 @@ class ReleaseDevicePage(DevicesPage, MDMPage):
 
         # login_ok_title = "Telpo MDM"
         # login_ok_url = "http://test.telpoai.com/device/map"
+        # now_time = self.get_current_time()
+        # while True:
+        #     self.input_user_name(user_info["username"])
+        #     self.input_pwd_value(user_info["password"])
+        #     self.choose_agree_btn()
+        #     self.click_login_btn()
+        #     text = self.get_alert_text()
+        #     if "success" in text:
+        #         break
+        #     else:
+        #         self.refresh_page()
+        #     if self.get_current_time() > self.return_end_time(now_time):
+        #         e = "@@@@ 3分钟内多次登录， 登录失败， 请检查！！！"
+        #         log.error(e)
+        #         assert False, e
+        #     self.refresh_page()
+        #     self.time_sleep(1)
         now_time = self.get_current_time()
         while True:
             self.input_user_name(user_info["username"])
             self.input_pwd_value(user_info["password"])
             self.choose_agree_btn()
             self.click_login_btn()
-            text = self.get_alert_text()
-            if "success" in text:
-                break
-            else:
-                self.refresh_page()
-            if self.get_current_time() > self.return_end_time(now_time):
-                e = "@@@@ 3分钟内多次登录， 登录失败， 请检查！！！"
-                log.error(e)
-                assert False, e
-            self.refresh_page()
+            try:
+                if self.web_driver_wait_until(public_pack.EC.url_contains("device"), 10):
+                    break
+            except Exception:
+                if "device" in self.get_current_window_url():
+                    break
+            if self.get_current_time() > self.return_end_time(now_time, 180):
+                assert False, "无法登录，请检查！！！"
             self.time_sleep(1)
-            # if login_ok_title in self.get_title():
-            #     break
-            # else:
-            #     self.refresh_page()
-            # if time.time() > self.return_end_time():
-            #     e = "@@@@ 3分钟内多次加载页面， 加载失败， 请检查！！！"
-            #     log.error(e)
-            #     assert False, e
-            # time.sleep(1)
+            self.refresh_page()
 
     def go_to_device_page(self, top_title):
         self.click_devices_btn()

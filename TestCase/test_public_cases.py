@@ -1377,7 +1377,7 @@ class TestPublicPage:
                     # self.android_mdm_page.time_sleep(test_yml["android_device_info"]["sleep_time"])
                     # self.android_mdm_page.confirm_device_no_existed(self.wifi_ip)
                     # log.info("设备已经不在线，确认设备已经进入深度休眠模式")
-                    self.android_mdm_page.time_sleep(params[i])
+                    self.android_mdm_page.time_sleep(sleep_params[i])
                     log.info("设备休眠结束")
                     # restart adb server
                     self.android_mdm_page.kill_server()

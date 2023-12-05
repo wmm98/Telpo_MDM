@@ -10,19 +10,18 @@ MDMTestData:
 
   #  一般只需填用户密码信息
   website_info:
-    # 测试服相关信息
-    test_url: http://test.telpoai.com/login
-    test_base_url: http://test.telpoai.com
-    test_login_ok_url: http://test.telpoai.com/device/map
+    # 当前测试的网址
+    test_url: http://test.telpoai.com
     test_user: mdm_automation
     test_password: mm17765602533
     test_api: http://test.telpopaas.com
-    # 正式服相关信息
-    release_url: https://mdm.telpoai.com/login
+    # 需要转换服务器api 的网址1
+    release_url: https://mdm.telpoai.com/
     release_user: ceshibu_automation
     release_password: automation
     release_api: https://www.telpopaas.com
 
+  #  普通app名字
   work_app:
     #  根据需求置换
     tpui_apk: TPUI_v1.1.9.apk
@@ -48,13 +47,14 @@ MDMTestData:
     # TPS900_msm8937_sv10_fv1.1.16_pv1.1.16-1.1.18.zip
     # TPS900_msm8937_sv10_fv1.1.19_pv1.1.19-1.2.20.zip
     # TPS900_msm8937_sv10_fv1.1.19_pv1.1.19-1.2.22.zip
-    package_name: TPS900_msm8937_sv10_fv1.1.19_pv1.1.19-1.2.20.zip
+    package_name: TPS900_msm8937_sv10_fv1.2.20_pv1.2.20-1.2.21.zip
     # 有分android和linux两种系统  Android Linux
     platform: Android
 
   #    无线休眠测试用例参数的填写
   Sleep_test_param:
-    # txt 文件
+    # 休眠时间， 时间单位为 秒，此处表明有3次进入休眠，分别休眠10s, 20s, 30s，可根据需求改
+    # 增加休眠次数可以回车填写时间
     sleep_time:
       - 10
       - 20
@@ -81,7 +81,7 @@ MDMTestData:
       - test_boot_logo_png.png
 
 
-    # 多台设备稳定性推送测试的文件，可根据需求添加或者减少文件名
+    # 多台设备稳定性推送测试的文件，可根据需求添加或者减少文件名， 回车输入文件名
     stability_test_file:
       #      - test_txt_file.txt
       - test_stability_file_1.txt
@@ -91,13 +91,16 @@ MDMTestData:
   #  设置多线程测试时间
   Multi_devices_download_time_settings:
     # 多台设备下载 ota 包的时间设置， 可根据设备的多少设置相应的时间, 单位为秒
+    # 多台设备ota包下载时间设置，根据设备数量设置
     stability_ota_download_time: 1800
+    # 多台设备apk包下载时间设置，根据设备数量设置
     stability_app_download_time: 1800
+    # 多台设备文件下载时间设置，根据设备数量设置
     stability_file_download_time: 1800
 
   # 设备信息，需要修改
   android_device_info:
-    # 设置永不休眠信息
+    # 设备名称， 可以根据adb devices 得到当前的设备名称
     device_name: d
 
 

@@ -87,45 +87,45 @@ class TestStability:
             pre_reboot_thread[i].join()
 
     def teardown_class(self):
-        pass
-        # self.app_page.delete_app_install_and_uninstall_logs()
-        # self.ota_page.delete_all_ota_release_log()
-        # pos_del_apk_thread = []
-        # uninstall_apps_thread = []
-        # pos_del_content_thread = []
-        # pos_reboot_thread = []
-        # for device_data in devices_data:
-        #     self.android_mdm_page = st.AndroidAimdmPageWiFi(device_data, 5)
-        #     pos_d_apk_t = st.threading.Thread(target=self.android_mdm_page.del_all_downloaded_apk(), args=())
-        #     pos_d_apk_t.start()
-        #     pos_del_apk_thread.append(pos_d_apk_t)
-        #
-        #     pos_uninstall_t = st.threading.Thread(target=self.android_mdm_page.uninstall_multi_apps,
-        #                                           args=(test_yml['app_info'],))
-        #     pos_uninstall_t.start()
-        #     uninstall_apps_thread.append(pos_uninstall_t)
-        #
-        #     pos_del_content_t = st.threading.Thread(target=self.android_mdm_page.del_all_content_file, args=())
-        #     pos_del_content_t.start()
-        #     pos_del_content_thread.append(pos_del_content_t)
-        #
-        #     self.android_mdm_page.del_all_downloaded_apk()
-        #     self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
-        #     self.android_mdm_page.del_all_content_file()
-        #     self.android_mdm_page.reboot_device(device_data["ip"])
-        #     r_t = st.threading.Thread(target=self.android_mdm_page.reboot_device, args=(device_data["ip"],))
-        #     r_t.start()
-        #     pos_reboot_thread.append(r_t)
-        #
-        # for j in range(len(pos_del_apk_thread)):
-        #     pos_del_apk_thread[j].join()
-        #     uninstall_apps_thread[j].join()
-        #     pos_del_content_thread[j].join()
-        #     pos_reboot_thread[j].join()
-        #
-        # self.app_page.refresh_page()
+        # pass
+        self.app_page.delete_app_install_and_uninstall_logs()
+        self.ota_page.delete_all_ota_release_log()
+        pos_del_apk_thread = []
+        uninstall_apps_thread = []
+        pos_del_content_thread = []
+        pos_reboot_thread = []
+        for device_data in devices_data:
+            self.android_mdm_page = st.AndroidAimdmPageWiFi(device_data, 5)
+            pos_d_apk_t = st.threading.Thread(target=self.android_mdm_page.del_all_downloaded_apk(), args=())
+            pos_d_apk_t.start()
+            pos_del_apk_thread.append(pos_d_apk_t)
 
-    @allure.feature('MDM_stability2222')
+            pos_uninstall_t = st.threading.Thread(target=self.android_mdm_page.uninstall_multi_apps,
+                                                  args=(test_yml['app_info'],))
+            pos_uninstall_t.start()
+            uninstall_apps_thread.append(pos_uninstall_t)
+
+            pos_del_content_t = st.threading.Thread(target=self.android_mdm_page.del_all_content_file, args=())
+            pos_del_content_t.start()
+            pos_del_content_thread.append(pos_del_content_t)
+
+            self.android_mdm_page.del_all_downloaded_apk()
+            self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
+            self.android_mdm_page.del_all_content_file()
+            self.android_mdm_page.reboot_device(device_data["ip"])
+            r_t = st.threading.Thread(target=self.android_mdm_page.reboot_device, args=(device_data["ip"],))
+            r_t.start()
+            pos_reboot_thread.append(r_t)
+
+        for j in range(len(pos_del_apk_thread)):
+            pos_del_apk_thread[j].join()
+            uninstall_apps_thread[j].join()
+            pos_del_content_thread[j].join()
+            pos_reboot_thread[j].join()
+
+        self.app_page.refresh_page()
+
+    @allure.feature('MDM_stability')
     @allure.title("stability case- 多设备添加--辅助测试用例")
     @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_add_multi_devices(self):
@@ -214,7 +214,7 @@ class TestStability:
                 else:
                     self.device_page.go_to_new_address("devices")
 
-    @allure.feature('MDM_stability1')
+    @allure.feature('MDM_stability')
     @allure.title("stability case- 多设备重启在线成功率--请在报告右侧log文件查看在线率")
     def test_reboot_online_stability_test(self):
         # length 为重启次数
@@ -363,7 +363,7 @@ class TestStability:
     @allure.feature('MDM_stability')
     @allure.title("stability case-文件文件推送成功率-请在报告右侧log文件查看文件文件推送成功率")
     def test_multi_release_content(self):
-        # 设置断电重启得次数
+        # 设置断店续传重启得次数
         reboot_times = 1
         while True:
             try:
@@ -916,8 +916,8 @@ class TestStability:
                     while True:
                         shell_hash_value = device_msg["android_page"].calculate_sha256_in_device(
                             device_msg["package_name"])
-                        log.info("设备：%s中 ota包的hash 值为： %s" % (device_msg["sn"], str(shell_hash_value)))
                         if act_ota_package_hash_value == shell_hash_value:
+                            log.info("设备：%s中 ota包的hash 值为： %s" % (device_msg["sn"], str(shell_hash_value)))
                             break
                         if ota_page.get_current_time() > ota_page.return_end_time(now_time, test_yml["Multi_devices_download_time_settings"]["stability_ota_download_time"]):
                             log.error(
@@ -925,8 +925,7 @@ class TestStability:
                             assert False, "@@@@设备： %s 中超过30分钟还没有完成 %s 的下载" % (
                                 device_msg["sn"], release_info["package_name"])
                         ota_page.time_sleep(20)
-                    log.info(
-                        "***********%s: ota： %s下载完成检测完毕********" % (device_msg["sn"], release_info["package_name"]))
+                    log.info("***********%s: ota： %s下载完成检测完毕********" % (device_msg["sn"], release_info["package_name"]))
                     device_msg["android_page"].device_unlock()
                     device_msg["android_page"].screen_keep_on()
                     device_msg["android_page"].confirm_alert_show()
@@ -946,7 +945,7 @@ class TestStability:
                             device_msg["sn"], device_current_firmware_version, after_upgrade_version))
                         assert False, "@@@@设备：%s ota升级失败， 当前的固件版本为： %s, 目标版本为： %s， 请检查！！" % (
                             device_msg["sn"], device_current_firmware_version, after_upgrade_version)
-                    log.error("@@@@设备：%s ota升级成功， 当前的固件版本为： %s, 目标版本为： %s" % (
+                    log.info("@@@@设备：%s ota升级成功， 当前的固件版本为： %s, 目标版本为： %s" % (
                         device_msg["sn"], device_current_firmware_version, after_upgrade_version))
                     # assert ota_page.remove_space(str(after_upgrade_version)) == ota_page.remove_space(
                     #     release_info["version"]), \

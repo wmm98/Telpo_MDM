@@ -24,7 +24,7 @@ class BasePage(interface):
         return text
 
     def go_to_new_address(self, url):
-        address = "%s/%s" % (test_yml["website_info"]["test_base_url"], url)
+        address = "%s/%s" % (test_yml["website_info"]["test_url"], url)
         self.driver.get(address)
         now_time = self.get_current_time()
         if self.driver.current_url != address:
