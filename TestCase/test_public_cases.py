@@ -108,7 +108,7 @@ class TestPublicPage:
                     log.info("**********************服务器恢复正常*************************")
                     self.content_page.go_to_new_address("content")
 
-    @allure.feature('MDM_public')
+    @allure.feature('MDM_public1234')
     @allure.story('MDM-Show')
     @allure.title("public case-推送壁纸--请在附件查看壁纸截图效果")
     # @pytest.mark.filterwarnings("ignore")

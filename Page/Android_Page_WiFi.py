@@ -187,16 +187,15 @@ class AndroidBasePageWiFi(interface):
     def confirm_usb_adb_connect(self, wlan_ip, timeout=180):
         now_time = self.get_current_time()
         # print(wlan_ip + 'device')
-        serial.confirm_relay_opened()
         while True:
-            # print('%sdevice' % wlan_ip)
-            # print(":", self.remove_space(self.devices_list()))
+            serial.confirm_relay_opened()
+            print('%sdevice' % wlan_ip)
+            print(":", self.remove_space(self.devices_list()))
             if self.remove_space('%sdevice' % wlan_ip) in self.remove_space(self.devices_list()):
                 break
             if self.get_current_time() > self.return_end_time(now_time, 60):
                 assert False, "@@@@USB ADB 无法起来， 请检查！！！"
-            serial.confirm_relay_opened()
-            self.time_sleep(3)
+            self.time_sleep(5)
 
     def kill_server(self, timeout=120):
         sub_shell.invoke('adb kill-server', runtime=timeout)
@@ -212,7 +211,6 @@ class AndroidBasePageWiFi(interface):
             pass
         self.confirm_wifi_adb_connected(wlan_ip)
         self.open_root_auth()
-
 
     def device_boot(self, wlan0_ip):
         self.time_sleep(60)

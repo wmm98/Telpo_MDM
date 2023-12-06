@@ -168,7 +168,7 @@ class interface:
             return False
 
     def remove_space(self, text):
-        return text.replace("\r", "").replace("\n", "").replace(" ", "").replace("\r", "").replace("\n", "").replace(" ", "")
+        return text.replace("\r", "").replace("\n", "").replace(" ", "").replace(" ", "").replace("\r", "").replace("\n", "").replace("\t", "")
 
     def upper_transfer(self, text):
         return text.upper()
