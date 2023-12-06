@@ -58,7 +58,8 @@ class AndroidBasePageWiFi(interface):
         self.u2_send_command("setprop persist.telpo.debug.mode 1")
 
     def push_file_to_device(self, orig, des):
-        self.client.push(orig, des)
+        self.send_adb_command("push %s %s" % orig, des)
+        # self.client.push(orig, des)
 
     def get_app_userid(self, package):
         id_info = self.u2_send_command("dumpsys package %s | grep userId" % package)
@@ -451,6 +452,7 @@ class AndroidBasePageWiFi(interface):
         log.info(str(ret))
         if not ret:
             assert False, "@@@@无法remount, 请检查！！！"
+        self.time_sleep(5)
 
     def ping_network_wifi(self, times=5, timeout=120):
         # 每隔0.6秒ping一次，一共ping5次

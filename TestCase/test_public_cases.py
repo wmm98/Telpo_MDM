@@ -35,22 +35,22 @@ class TestPublicPage:
         self.wifi_ip = case_pack.device_data["wifi_device_info"]["ip"]
         self.android_mdm_page.del_all_content_file()
         self.device_sn = self.android_mdm_page.get_device_sn()
-        self.app_page.delete_app_install_and_uninstall_logs()
+        # self.app_page.delete_app_install_and_uninstall_logs()
         self.android_mdm_page.del_all_downloaded_apk()
         self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
         self.android_mdm_page.del_updated_zip()
-        self.android_mdm_page.reboot_device(self.wifi_ip)
+        # self.android_mdm_page.reboot_device(self.wifi_ip)
         self.content_page.refresh_page()
         self.silent_ota_upgrade_flag = 0
 
     def teardown_class(self):
-        # pass
-        self.app_page.delete_app_install_and_uninstall_logs()
-        self.android_mdm_page.del_all_downloaded_apk()
-        self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
-        self.android_mdm_page.del_all_content_file()
-        self.app_page.refresh_page()
-        self.android_mdm_page.reboot_device(self.wifi_ip)
+        pass
+        # self.app_page.delete_app_install_and_uninstall_logs()
+        # self.android_mdm_page.del_all_downloaded_apk()
+        # self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
+        # self.android_mdm_page.del_all_content_file()
+        # self.app_page.refresh_page()
+        # self.android_mdm_page.reboot_device(self.wifi_ip)
 
     @allure.feature('MDM_public')
     @allure.title("public case-添加 content 种类--辅助测试用例")
@@ -108,7 +108,7 @@ class TestPublicPage:
                     log.info("**********************服务器恢复正常*************************")
                     self.content_page.go_to_new_address("content")
 
-    @allure.feature('MDM_public1234')
+    @allure.feature('MDM_public')
     @allure.story('MDM-Show')
     @allure.title("public case-推送壁纸--请在附件查看壁纸截图效果")
     # @pytest.mark.filterwarnings("ignore")
@@ -782,8 +782,7 @@ class TestPublicPage:
     @allure.title("public case-静默卸载正在运行中的app： 静默卸载/卸载正在运行的app")
     @pytest.mark.filterwarnings("ignore")
     @pytest.mark.flaky(reruns=1, reruns_delay=3)
-    def test_silent_uninstall_app(self, del_all_app_release_log, del_all_app_uninstall_release_log, uninstall_multi_apps,
-                           go_to_app_page):
+    def test_silent_uninstall_app(self, del_all_app_release_log, del_all_app_uninstall_release_log, uninstall_multi_apps, go_to_app_page):
         release_info = {"package_name": test_yml['app_info']['high_version_app'], "sn": self.device_sn,
                         "silent": "Yes"}
         while True:
@@ -995,10 +994,10 @@ class TestPublicPage:
                     self.android_mdm_page.del_all_downloaded_zip()
                     self.android_mdm_page.del_updated_zip()
 
-    @allure.feature('MDM_public')
+    @allure.feature('MDM_public1234')
     @allure.title("public case- 静默升级系统app/推送安装成功后自动运行app")
-    @pytest.mark.flaky(reruns=2, reruns_delay=3)
-    def test_upgrade_system_app(self, del_all_app_release_log, del_download_apk, uninstall_system_app):
+    # @pytest.mark.flaky(reruns=2, reruns_delay=3)
+    def test_upgrade_system_app(self, del_app_install_uninstall_release_log, del_download_apk, uninstall_system_app):
         while True:
             try:
                 log.info("*******************静默升级系统app用例开始/推送安装成功后自动运行app***************************")
@@ -1009,7 +1008,8 @@ class TestPublicPage:
                 # # install low version system application
                 # # set app as system app
                 # self.android_mdm_page.wifi_adb_root(self.wifi_ip)
-                self.android_mdm_page.open_root_auth()
+                self.android_mdm_page.open_root_auth_usb()
+                # self.android_mdm_page.open_root_auth()
                 assert not self.android_mdm_page.app_is_installed(
                     self.android_mdm_page.get_apk_package_name(file_path))
                 # push file to system/app
@@ -1149,6 +1149,7 @@ class TestPublicPage:
                 break
             except Exception as e:
                 if self.app_page.service_is_normal():
+                    print(e)
                     assert False, e
                 else:
                     log.info("**********************检测到服务器503***********************")

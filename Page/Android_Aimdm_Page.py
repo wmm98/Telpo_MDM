@@ -145,6 +145,8 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
         now_time = self.get_current_time()
         while True:
             # self.wifi_adb_root(self.device_ip)
+            # self.open_root_auth_usb()
+            self.open_root_auth_usb()
             self.open_root_auth()
             self.rm_file("system/app/%s" % apk_file)
             package_name = self.get_apk_package_name(self.get_apk_path(apk_file))
@@ -154,14 +156,6 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
             self.uninstall_app(package_name)
             if self.get_current_time() > self.return_end_time(now_time):
                 assert False, "@@@@system app--%s:%s仍然存在， 请检查！！！！" % (apk_file, package_name)
-
-    def confirm_unplug_usb_wire(self):
-        public_pack.AlertData().getAlert("请拔开USB线后点击确定!!!!!")
-        while True:
-            if not self.is_usb_power():
-                break
-            else:
-                public_pack.AlertData().getAlert("还没有拔开USB线， 请拨开后点击确定!!!!!")
 
     def check_firmware_version(self):
         return self.u2_send_command("getprop ro.product.version")

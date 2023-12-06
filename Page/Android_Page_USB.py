@@ -451,6 +451,7 @@ class AndroidBasePageUSB(interface):
         ret = self.open_remount_usb()
         if not ret:
             assert False, "@@@@无法remount, 请检查！！！"
+        self.time_sleep(5)
 
 
 if __name__ == '__main__':
