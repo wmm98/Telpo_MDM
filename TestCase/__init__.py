@@ -30,11 +30,13 @@ client = ClientConnect().get_device()
 usb_device_info = {"device": client, "serial": client.serial}
 # connect wifi adb
 connect = ClientConnect()
-connect.wifi_connect_device()
+# connect.wifi_connect_device()
 serial_no = client.serial
-wifi_client = connect.get_wifi_device()
-wifi_ip = connect.get_wifi_ip()
-wifi_device_info = {"device": wifi_client, "ip": wifi_ip}
+# wifi_client = connect.get_wifi_device()
+# wifi_ip = connect.get_wifi_ip()
+wifi_ip = serial_no
+# wifi_device_info = {"device": wifi_client, "ip": wifi_ip}
+wifi_device_info = {"device": client, "ip": wifi_ip}
 device_data = {"usb_device_info": usb_device_info, "wifi_device_info": wifi_device_info}
 
 user_info = {"username": yaml_data['website_info']['test_user'],

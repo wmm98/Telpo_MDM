@@ -549,15 +549,16 @@ class TestStability:
                 else:
                     self.app_page.recovery_after_service_unavailable("content", st.user_info)
 
-    @allure.feature('MDM_stability')
+    @allure.feature('MDM_stability111')
     @allure.title("stability case- 长时间连接测试--长时间连接测试，并且静默升级OTA升级")
     def test_online_long_test(self):
         # 设置在线次数的查询
         length = 2
-        release_info = {"package_name": test_yml['app_info']['other_app'], "sn": self.devices_sn,
-                        "silent": "Yes", "download_network": "NO Limit"}
         while True:
             try:
+                log.info("******长时间连接测试--长时间连接测试，并且静默升级OTA升级 用例开始********")
+                release_info = {"package_name": test_yml['app_info']['other_app'], "sn": self.devices_sn,
+                                "silent": "Yes", "download_network": "NO Limit"}
                 # check firmware before testing
                 devices_err = []
 
@@ -673,7 +674,7 @@ class TestStability:
                         device_page.refresh_page()
                     for sno in sns:
                         device_page.select_device(sno)
-                    device_page.time_sleep(5)
+                    device_page.time_sleep(3)
                     device_page.click_send_btn()
                     device_page.msg_input_and_send(message)
                     log.info("平台已经发送信息: %s 到设备：%s" % (message, ",".join(sns)))
@@ -698,7 +699,7 @@ class TestStability:
                 online_flag = 0
                 times = 0
                 for i in range(length):
-                    log.info("***********第%d次断网*****************" % (i + 1))
+                    log.info("***********第%d次查询在线状态*****************" % (i + 1))
                     try:
                         now = st.time.strftime('%Y-%m-%d %H:%M', st.time.localtime(st.time.time()))
                         msg = "%s:test%d" % (now, times)
@@ -716,6 +717,7 @@ class TestStability:
 
                         # send message
                         device_page.refresh_page()
+                        device_page.time_sleep(3)
                         send_devices_message(devices_sn, msg)
 
                         times += 1
@@ -955,8 +957,11 @@ class TestStability:
                     lock.acquire()
                     ota_page.go_to_new_address("ota/log")
                     report_now_time_ = ota_page.get_current_time()
+                    print(release_info)
                     while True:
+                        ota_page.search_ota_upgrade_logs(release_info["package_name"], device_msg["sn"])
                         info = ota_page.get_ota_latest_upgrade_log(send_time, release_info)
+                        print(info)
                         if len(info) != 0:
                             action = info[0]["Action"]
                             log.info("设备 %s 平台显示的upgrade action: %s" % (device_msg["sn"], action))

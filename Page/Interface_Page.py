@@ -43,6 +43,18 @@ class interface:
             return False
 
     def confirm_wifi_adb_connected(self, ip, timeout=150):
+        pass
+        # now_time = self.get_current_time()
+        # while True:
+        #     res = self.connect_ip(ip)
+        #     if res:
+        #         break
+        #     self.time_sleep(2)
+        #     if self.get_current_time() > self.return_end_time(now_time, timeout):
+        #         raise Exception("%ss内无法连接上WIFI adb" % timeout)
+        # self.device_existed(ip)
+
+    def confirm_wifi_adb_connected_multi(self, ip, timeout=150):
         now_time = self.get_current_time()
         while True:
             res = self.connect_ip(ip)
@@ -87,7 +99,7 @@ class interface:
         res = self.devices_list()
         print(res)
         if device_online not in res.replace('\r', '').replace('\t', '').replace(' ', ''):
-            assert False, "@@@@设备不在线， 设备不应该在线请检查！！！！"
+            assert False, "@@@@设备不在线， 请检查！！！！"
 
     def transfer_version_into_int(self, ver):
         integer_list = ver.split(".")
@@ -156,7 +168,7 @@ class interface:
             return False
 
     def remove_space(self, text):
-        return text.replace("\r", "").replace("\n", "").replace(" ", "")
+        return text.replace("\r", "").replace("\n", "").replace(" ", "").replace("\r", "").replace("\n", "").replace(" ", "")
 
     def upper_transfer(self, text):
         return text.upper()

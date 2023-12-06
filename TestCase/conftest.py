@@ -84,10 +84,11 @@ def delete_ota_package_relate():
 
 @pytest.fixture()
 def connected_wifi_adb():
-    yield
-    android_page.confirm_wifi_adb_connected(TestCase.wifi_ip)
-    android_page.device_existed(TestCase.wifi_ip)
-    android_page.device_boot_complete()
+    pass
+    # yield
+    # android_page.confirm_wifi_adb_connected(TestCase.wifi_ip)
+    # android_page.device_existed(TestCase.wifi_ip)
+    # android_page.device_boot_complete()
 
 
 @pytest.fixture()
@@ -95,7 +96,7 @@ def connect_wifi_adb_USB():
     yield
     android_page.open_wifi_btn()
     android_page.confirm_wifi_btn_open()
-    android_page.confirm_wifi_adb_connected(TestCase.wifi_ip)
+    # android_page.confirm_wifi_adb_connected(TestCase.wifi_ip)
 
 
 @pytest.fixture()

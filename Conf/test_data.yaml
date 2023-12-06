@@ -13,7 +13,7 @@ MDMTestData:
     # 当前测试的网址
     test_url: http://test.telpoai.com
     test_user: mdm_automation
-    test_password: mm17765602533
+    test_password: mmwu17765602533
     test_api: http://test.telpopaas.com
     # 需要转换服务器api 的网址1
     release_url: https://mdm.telpoai.com/
@@ -47,7 +47,7 @@ MDMTestData:
     # TPS900_msm8937_sv10_fv1.1.16_pv1.1.16-1.1.18.zip
     # TPS900_msm8937_sv10_fv1.1.19_pv1.1.19-1.2.20.zip
     # TPS900_msm8937_sv10_fv1.1.19_pv1.1.19-1.2.22.zip
-    package_name: TPS900_msm8937_sv10_fv1.2.20_pv1.2.20-1.2.21.zip
+    package_name: TPS900_msm8937_sv10_fv1.1.19_pv1.1.19-1.2.20.zip
     # 有分android和linux两种系统  Android Linux
     platform: Android
 

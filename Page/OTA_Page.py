@@ -86,6 +86,19 @@ class OTAPage(TelpoMDMPage):
     loc_cate_list = (By.CSS_SELECTOR, "[class = 'todo-list ui-sortable category-ul']")
     loc_single_cate = (By.CLASS_NAME, "listactive")
 
+    # upgrade logs search related
+    loc_package_name_box = (By.ID, "packagename")
+    loc_sn_input_box = (By.ID, "sn")
+    loc_upgrade_search_ensure = (By.CSS_SELECTOR, "[class = 'btn btn-primary btn-search']")
+
+    def search_ota_upgrade_logs(self, package_name, sn):
+        self.click(self.loc_search_btn)
+        self.confirm_alert_existed(self.loc_search_btn)
+        self.input_text(self.loc_package_name_box, package_name)
+        self.input_text(self.loc_sn_input_box, sn)
+        self.click(self.loc_upgrade_search_ensure)
+        self.confirm_alert_not_existed(self.loc_upgrade_search_ensure)
+
     # add category
     def add_ota_category(self, cate_name):
         self.click(self.loc_new_cate_btn)

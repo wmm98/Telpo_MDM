@@ -144,7 +144,8 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
         # self.reboot_device_root(self.device_ip)
         now_time = self.get_current_time()
         while True:
-            self.wifi_adb_root(self.device_ip)
+            # self.wifi_adb_root(self.device_ip)
+            self.open_root_auth()
             self.rm_file("system/app/%s" % apk_file)
             package_name = self.get_apk_package_name(self.get_apk_path(apk_file))
             if not self.app_is_installed(package_name):

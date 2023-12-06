@@ -20,6 +20,7 @@ class TestNetworkCases:
         self.system_page = case_pack.SystemPage(self.driver, 40)
         self.cat_log_page = case_pack.CatchLogPage(self.driver, 40)
         self.android_mdm_page = case_pack.AndroidAimdmPage(case_pack.device_data, 5)
+        # self.android_mdm_page.reboot_device(case_pack.device_data["wifi_device_info"]["ip"])
         self.page.delete_app_install_and_uninstall_logs()
         self.ota_page.delete_all_ota_release_log()
         self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
@@ -32,7 +33,7 @@ class TestNetworkCases:
 
     def teardown_class(self):
         # pass
-        self.android_mdm_page.confirm_wifi_adb_connected(self.wifi_ip)
+        # self.android_mdm_page.confirm_wifi_adb_connected(self.wifi_ip)
         self.page.delete_app_install_and_uninstall_logs()
         self.android_mdm_page.del_all_downloaded_apk()
         self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
@@ -204,7 +205,7 @@ class TestNetworkCases:
                     self.android_mdm_page.confirm_wifi_status_open()
                     self.page.go_to_new_address("devices")
 
-    @allure.feature('MDM_usb-test1111')
+    @allure.feature('MDM_usb-test')
     @allure.story('MDM-Show111')
     @allure.title("Apps-限定4G网络推送app")
     @pytest.mark.filterwarnings("ignore")
@@ -218,7 +219,8 @@ class TestNetworkCases:
         while True:
             try:
                 log.info("***********************************限定4G网络推送app用例开始**************************************")
-                self.android_mdm_page.confirm_wifi_adb_connected(self.wifi_ip)
+                # self.android_mdm_page.confirm_wifi_adb_connected(self.wifi_ip)
+                self.android_mdm_page.confirm_wifi_status_open()
                 log.info("成功连接wifi")
                 # file_path = conf.project_path + "\\Param\\Package\\%s" % release_info["package_name"]
                 file_path = self.page.get_apk_path(release_info["package_name"])
@@ -313,8 +315,8 @@ class TestNetworkCases:
                 self.android_mdm_page.open_wifi_btn()
                 log.info("打开wifi按钮")
                 self.android_mdm_page.confirm_wifi_status_open()
-                self.android_mdm_page.connect_ip(self.wifi_ip)
-                self.android_mdm_page.confirm_wifi_adb_connected(self.wifi_ip)
+                # self.android_mdm_page.connect_ip(self.wifi_ip)
+                # self.android_mdm_page.confirm_wifi_adb_connected(self.wifi_ip)
                 log.info("连接上wifi adb ")
 
                 self.page.go_to_new_address("apps/logs")
@@ -424,7 +426,7 @@ class TestNetworkCases:
                 self.android_mdm_page.close_mobile_data()
                 self.android_mdm_page.open_wifi_btn()
                 self.android_mdm_page.confirm_wifi_btn_open()
-                self.android_mdm_page.confirm_wifi_adb_connected(self.wifi_ip)
+                # self.android_mdm_page.confirm_wifi_adb_connected(self.wifi_ip)
                 log.info("成功连接到wifi")
 
                 # check download record in device

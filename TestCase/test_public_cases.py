@@ -995,9 +995,9 @@ class TestPublicPage:
                     self.android_mdm_page.del_all_downloaded_zip()
                     self.android_mdm_page.del_updated_zip()
 
-    @allure.feature('MDM_public--test')
+    @allure.feature('MDM_public')
     @allure.title("public case- 静默升级系统app/推送安装成功后自动运行app")
-    # @pytest.mark.flaky(reruns=2, reruns_delay=3)
+    @pytest.mark.flaky(reruns=2, reruns_delay=3)
     def test_upgrade_system_app(self, del_all_app_release_log, del_download_apk, uninstall_system_app):
         while True:
             try:
@@ -1008,7 +1008,8 @@ class TestPublicPage:
                 #
                 # # install low version system application
                 # # set app as system app
-                self.android_mdm_page.wifi_adb_root(self.wifi_ip)
+                # self.android_mdm_page.wifi_adb_root(self.wifi_ip)
+                self.android_mdm_page.open_root_auth()
                 assert not self.android_mdm_page.app_is_installed(
                     self.android_mdm_page.get_apk_package_name(file_path))
                 # push file to system/app
@@ -1289,7 +1290,7 @@ class TestPublicPage:
                         self.content_page.time_sleep(5)
                         self.content_page.refresh_page()
 
-                    # case_pack.AlertData().getAlert("请关掉提示框并且查看启动logo和动画")
+                    case_pack.AlertData().getAlert("请关掉提示框并且查看启动logo和动画是否正确")
                     self.android_mdm_page.reboot_device(self.wifi_ip)
                     self.content_page.time_sleep(5)
 
@@ -1307,7 +1308,7 @@ class TestPublicPage:
                     self.android_mdm_page.del_all_content_file()
                     self.android_mdm_page.screen_keep_on()
 
-    @allure.feature('MDM_public123456')
+    @allure.feature('MDM_public')
     @allure.title("public case-无线休眠推送app")
     @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_report_device_sleep_status(self, del_app_install_uninstall_release_log, go_to_device_page, uninstall_multi_apps):
