@@ -59,6 +59,51 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
         self.tpui_psw_confirm = "%s:id/text_confirm" % self.tpui_pakcage
         self.tpui_pasw_cancel = "%s:id/text_cancel" % self.tpui_pakcage
 
+        # wifi module relate
+        # switch btn
+        self.wifi_switch_btn = "%s:id/switch_widget" % self.android_settings_package
+        # wifi switch closed status-- ele(widget_frame) not existed and when open, ele is existed
+        self.wifi_settings_btn = "%s:id/widget_frame" % self.android_relatelayout_package
+        # wifi list
+        self.wifi_view = "%s:id/recycler_view" % self.android_settings_package
+        self.single_wifi_box = "android.widget.RelativeLayout"
+        self.wifi_name = "%s:id/title" % self.android_relatelayout_package
+        # if wifi is connected, "id/summary" would exist
+        self.wifi_status = "%s:id/summary" % self.android_relatelayout_package
+        self.input_wifi_box = "%s:id/password" % self.android_settings_package
+        self.conn_wifi_btn = "%s:id/button1" % self.android_relatelayout_package
+
+    def connect_available_wifi(self, wifi_list):
+        # open wlan page
+        self.confirm_open_wifi_page()
+        self.confirm_wifi_switch_open()
+
+
+    def get_wifi_list(self,):
+
+
+    def confirm_open_wifi_page(self):
+        now_time = self.get_current_time()
+        while True:
+            self.u2_send_command("am start -a android.settings.WIFI_SETTINGS")
+            switch_btn = self.ele_id_is_existed_USB(self.wifi_switch_btn, timeout=5)
+            if switch_btn:
+                break
+            if self.get_current_time() > self.return_end_time(now_time):
+                assert False, "@@@@无法打开wifi 页面， 请检查！！！"
+
+    def confirm_wifi_switch_open(self):
+        now_time = self.get_current_time()
+        switch_btn = self.get_element_by_id(self.wifi_switch_btn)
+        while True:
+            settings_btn = self.ele_id_is_existed_USB(self.wifi_settings_btn, timeout=10)
+            if settings_btn:
+                break
+            if self.get_current_time() > self.return_end_time(now_time):
+                assert False, "@@@@无法打开wifi 页面， 请检查！！！"
+            switch_btn.click()
+            self.wait_ele_presence_by_id(self.wifi_settings_btn, time_to_wait=15)
+
     def input_tpui_password(self, psw_text):
         if self.wait_ele_presence_by_id(self.tpui_main, 10):
             # click more btn

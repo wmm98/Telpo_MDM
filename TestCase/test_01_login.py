@@ -23,6 +23,13 @@ class TestLogin:
 
     @allure.feature('MDM_test02_login')
     @allure.story("MDM_test02_login")
+    @allure.title("连接上wifi--辅助测试用例")  # 设置case的名字
+    def test_connect_wifi_ok(self):
+        wifi_available = test_yaml["android_device_info"]["available_wifi"]
+
+
+    @allure.feature('MDM_test02_login--辅助测试用例')
+    @allure.story("MDM_test02_login")
     @allure.title("login is ok")  # 设置case的名字
     @pytest.mark.dependency(name="test_login_ok", scope='package')
     def test_login_ok(self):
@@ -30,6 +37,9 @@ class TestLogin:
         password = test_yaml['website_info']['test_password']
 
         self.mdm_page.login_ok(username, password)
+
+
+
 
 
 if __name__ == '__main__':
