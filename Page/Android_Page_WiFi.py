@@ -565,6 +565,13 @@ class AndroidBasePageWiFi(interface):
         # else:
         #     assert False, "@@@@查找元素超时！！！"
 
+    def ele_text_is_existed(self, text, time_to_wait):
+        flag = self.client(text=text).exists(timeout=time_to_wait)
+        return flag
+
+    def get_element_by_text(self, text):
+        return self.client(text=text)
+
     def wait_ele_presence_by_class_name(self, class_name, time_to_wait):
         flag = self.client(className=class_name).exists(timeout=time_to_wait)
         if flag:

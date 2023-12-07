@@ -4,7 +4,7 @@ from Page.Android_Page_WiFi import AndroidBasePageWiFi
 import time
 
 config = public_pack.Config()
-
+log = public_pack.MyLog()
 
 # aimdm_package = public_pack.yaml_data["work_app"]["aidmd_apk"]
 
@@ -77,14 +77,48 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
         # open wlan page
         self.confirm_open_wifi_page()
         self.confirm_wifi_switch_open()
+        self.connect_settings_wifi(wifi_list)
 
+    def connect_settings_wifi(self, test_wifi_list):
+        all_wifi_boxes = self.get_element_by_id(self.wifi_view).child(className=self.single_wifi_box)
+        device_wifi_list = []
+        # find available wifi
 
-    def get_wifi_list(self,):
+        for box in all_wifi_boxes:
+            for ava_wifi in test_wifi_list:
+                if self.remove_space(ava_wifi) in self.remove_space(box.child(resourceId=self.wifi_name).get_text()):
+                    device_wifi_list.append(ava_wifi)
+        # if len(device_wifi_list) != 0:
+        #     break
 
+        # connect wifi
+        if self.ele_text_is_existed(device_wifi_list[0], time_to_wait=3):
+            wifi_ele = self.get_element_by_text(device_wifi_list[0])
+            wifi_ele.click()
+            now_time = self.get_current_time()
+            while True:
+                if self.ele_id_is_existed_USB(self.input_wifi_box):
+                    break
+                if self.get_current_time() > self.return_end_time(now_time):
+                    assert False, "@@@@无法打开 %s wifi密码框， 请检查！！！！" % device_wifi_list[0]
+                wifi_ele.click()
+                self.time_sleep(1)
+
+        input_psw_box = self.get_element_by_id(self.input_wifi_box)
+        connect_btn = self.get_element_by_id(self.conn_wifi_btn)
+        now_time = self.get_current_time()
+        while True:
+            self.input_element_text(input_psw_box, "86337898")
+            connect_btn.click()
+            if not self.ele_id_is_existed_USB(self.input_wifi_box):
+                break
+            if self.get_current_time() > self.return_end_time(now_time):
+                assert False, "@@@@无法打开 %s wifi， 请检查！！！！" % device_wifi_list[0]
 
     def confirm_open_wifi_page(self):
         now_time = self.get_current_time()
         while True:
+            log.info("am start -a android.settings.WIFI_SETTINGS")
             self.u2_send_command("am start -a android.settings.WIFI_SETTINGS")
             switch_btn = self.ele_id_is_existed_USB(self.wifi_switch_btn, timeout=5)
             if switch_btn:
@@ -102,7 +136,10 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
             if self.get_current_time() > self.return_end_time(now_time):
                 assert False, "@@@@无法打开wifi 页面， 请检查！！！"
             switch_btn.click()
-            self.wait_ele_presence_by_id(self.wifi_settings_btn, time_to_wait=15)
+            try:
+                self.wait_ele_presence_by_id(self.wifi_settings_btn, time_to_wait=15)
+            except Exception:
+                pass
 
     def input_tpui_password(self, psw_text):
         if self.wait_ele_presence_by_id(self.tpui_main, 10):
