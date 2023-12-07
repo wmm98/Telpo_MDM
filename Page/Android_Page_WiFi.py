@@ -1,17 +1,24 @@
 import Page as public_pack
 from Page.Interface_Page import interface
 
-
 serial = public_pack.Serial()
 sub_shell = public_pack.Shell.Shell()
 conf = public_pack.Config()
 log = public_pack.MyLog()
+
 
 class AndroidBasePageWiFi(interface):
     def __init__(self, client, times, ip):
         self.client = client
         self.times = times
         self.device_ip = ip
+
+    def get_screen_size(self):
+        text = self.u2_send_command("wm size")
+        return self.extract_integers(text)
+
+    def swipe_screen(self, x1, y1, x2, y2, duration=0.5):
+        self.client.swipe(x1, y1, x2, y2, duration=duration)
 
     def click_cleat_recent_app_btn(self, id_no):
         # self.click_element(self.get_current_app() + ele)
@@ -43,13 +50,16 @@ class AndroidBasePageWiFi(interface):
                 assert False, "@@@无法打开最近应用页面， 请检查！！！！"
 
     def open_app_detail_info_page(self, package):
-        result = self.u2_send_command("am start -n com.android.settings/.applications.InstalledAppDetails -d package:%s" % package)
-        exp = self.remove_space(self.upper_transfer("package:%s cmp=com.android.settings/.applications.InstalledAppDetails" % package))
+        result = self.u2_send_command(
+            "am start -n com.android.settings/.applications.InstalledAppDetails -d package:%s" % package)
+        exp = self.remove_space(
+            self.upper_transfer("package:%s cmp=com.android.settings/.applications.InstalledAppDetails" % package))
         now_time = self.get_current_time()
         while True:
             if exp in self.remove_space(self.upper_transfer(result)):
                 break
-            result = self.u2_send_command("am start -n com.android.settings/.applications.InstalledAppDetails -d package:%s" % package)
+            result = self.u2_send_command(
+                "am start -n com.android.settings/.applications.InstalledAppDetails -d package:%s" % package)
             if self.get_current_time() > self.return_end_time(now_time):
                 assert "@@@@无法打开%s的详细页面， 请检查！！！" % package
             self.time_sleep(3)

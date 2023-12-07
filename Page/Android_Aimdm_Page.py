@@ -73,47 +73,63 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
         self.input_wifi_box = "%s:id/password" % self.android_settings_package
         self.conn_wifi_btn = "%s:id/button1" % self.android_relatelayout_package
 
-    def connect_available_wifi(self, wifi_list):
+    def connect_available_wifi(self, wifi_name_list, wifi_psw_list):
         # open wlan page
+        # self.open_wifi_btn()
         self.confirm_open_wifi_page()
         self.confirm_wifi_switch_open()
-        self.connect_settings_wifi(wifi_list)
+        self.time_sleep(5)
+        self.connect_settings_wifi(wifi_name_list, wifi_psw_list)
 
-    def connect_settings_wifi(self, test_wifi_list):
+    def connect_settings_wifi(self, wifi_name_list, wifi_psw_list):
+        # get swipe point, and set the swipe range
+        size = self.get_screen_size()
+        x1 = int(size[0]) / 2
+        y1 = int(size[1]) - 100
+        x2 = int(size[0]) / 2
+        y2 = int(size[1]) / 2 - 100
         all_wifi_boxes = self.get_element_by_id(self.wifi_view).child(className=self.single_wifi_box)
         device_wifi_list = []
         # find available wifi
+        for i in range(3):
+            for ava_wifi in wifi_name_list:
+                for box in all_wifi_boxes:
+                    print(box.child(resourceId=self.wifi_name).get_text())
+                    if self.remove_space(ava_wifi) in self.remove_space(box.child(resourceId=self.wifi_name).get_text()):
+                        if ava_wifi not in device_wifi_list:
+                            device_wifi_list.append(ava_wifi)
+            print("wifi列表: ", device_wifi_list)
+            if len(device_wifi_list) == 0:
+                # 滑动屏幕
+                self.swipe_screen(x1, y1, x2, y2)
+                continue
+            if len(device_wifi_list) == 0:
+                raise Exception("没有可用的wifi, 请检查！！！！")
+            # connect wifi
+            if self.ele_text_is_existed(device_wifi_list[0], time_to_wait=3):
+                wifi_ele = self.get_element_by_text(device_wifi_list[0])
+                wifi_ele.click()
+                now_time = self.get_current_time()
+                while True:
+                    if self.ele_id_is_existed_USB(self.input_wifi_box):
+                        break
+                    if self.get_current_time() > self.return_end_time(now_time):
+                        assert False, "@@@@无法打开 %s wifi密码框， 请检查！！！！" % device_wifi_list[0]
+                    wifi_ele.click()
+                    self.time_sleep(1)
 
-        for box in all_wifi_boxes:
-            for ava_wifi in test_wifi_list:
-                if self.remove_space(ava_wifi) in self.remove_space(box.child(resourceId=self.wifi_name).get_text()):
-                    device_wifi_list.append(ava_wifi)
-        # if len(device_wifi_list) != 0:
-        #     break
-
-        # connect wifi
-        if self.ele_text_is_existed(device_wifi_list[0], time_to_wait=3):
-            wifi_ele = self.get_element_by_text(device_wifi_list[0])
-            wifi_ele.click()
+            input_psw_box = self.get_element_by_id(self.input_wifi_box)
+            connect_btn = self.get_element_by_id(self.conn_wifi_btn)
             now_time = self.get_current_time()
+            print("22222222222222222222222")
             while True:
-                if self.ele_id_is_existed_USB(self.input_wifi_box):
+                self.input_element_text(input_psw_box, wifi_psw_list[0])
+                connect_btn.click()
+                if not self.ele_id_is_existed_USB(self.input_wifi_box):
                     break
                 if self.get_current_time() > self.return_end_time(now_time):
-                    assert False, "@@@@无法打开 %s wifi密码框， 请检查！！！！" % device_wifi_list[0]
-                wifi_ele.click()
-                self.time_sleep(1)
+                    assert False, "@@@@无法打开 %s wifi， 请检查！！！！" % device_wifi_list[0]
 
-        input_psw_box = self.get_element_by_id(self.input_wifi_box)
-        connect_btn = self.get_element_by_id(self.conn_wifi_btn)
-        now_time = self.get_current_time()
-        while True:
-            self.input_element_text(input_psw_box, "86337898")
-            connect_btn.click()
-            if not self.ele_id_is_existed_USB(self.input_wifi_box):
-                break
-            if self.get_current_time() > self.return_end_time(now_time):
-                assert False, "@@@@无法打开 %s wifi， 请检查！！！！" % device_wifi_list[0]
 
     def confirm_open_wifi_page(self):
         now_time = self.get_current_time()

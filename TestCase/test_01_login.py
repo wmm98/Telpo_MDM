@@ -25,8 +25,19 @@ class TestLogin:
     @allure.title("连接上wifi--辅助测试用例")  # 设置case的名字
     def test_connect_wifi_ok(self):
         print("&&&&&&&&&&&&&&")
+        print(self.android_mdm_page.get_screen_size())
+
         wifi_available = test_yaml["android_device_info"]["available_wifi"]
-        self.android_mdm_page.connect_available_wifi(wifi_available)
+        print(wifi_available)
+        wifi_name_list = []
+        wifi_psw_list = []
+        for wifi in wifi_available:
+            print(wifi_available[wifi])
+            wifi_name_list.append(wifi_available[wifi]["name"])
+            wifi_psw_list.append(wifi_available[wifi]["password"])
+        print(wifi_name_list)
+        print(wifi_psw_list)
+        self.android_mdm_page.connect_available_wifi(wifi_name_list, wifi_psw_list)
 
     @allure.feature('MDM_test02_login1111')
     @allure.story("MDM_test02_login")

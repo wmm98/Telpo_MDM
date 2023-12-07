@@ -347,7 +347,11 @@ class AndroidBasePageUSB(interface):
             assert False, "@@@@查找元素超时！！！"
 
     def ele_id_is_existed_USB(self, loc, timeout=5):
-        return self.USB_client(resourceId=loc).exists(timeout=timeout)
+        try:
+            if self.USB_client(resourceId=loc).exists(timeout=timeout):
+                return True
+        except Exception:
+            return False
 
     def confirm_ele_is_existed_USB(self, pre_ele, loc):
         now_time = self.get_current_time()
