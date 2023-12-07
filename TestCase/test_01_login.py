@@ -29,15 +29,14 @@ class TestLogin:
 
         wifi_available = test_yaml["android_device_info"]["available_wifi"]
         print(wifi_available)
-        wifi_name_list = []
-        wifi_psw_list = []
+        wifi_list = []
         for wifi in wifi_available:
             print(wifi_available[wifi])
-            wifi_name_list.append(wifi_available[wifi]["name"])
-            wifi_psw_list.append(wifi_available[wifi]["password"])
-        print(wifi_name_list)
-        print(wifi_psw_list)
-        self.android_mdm_page.connect_available_wifi(wifi_name_list, wifi_psw_list)
+            wifi_list.append(wifi_available[wifi])
+
+        print(wifi_list)
+        self.android_mdm_page.connect_available_wifi(wifi_list)
+        self.android_mdm_page.clear_recent_app_USB()
 
     @allure.feature('MDM_test02_login1111')
     @allure.story("MDM_test02_login")

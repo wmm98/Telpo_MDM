@@ -51,7 +51,7 @@ if __name__ == '__main__':
     if "否" in alert_value:
         sys.exit()
         # raise Exception("用户终止执行")
-    AlertData().getAlert("请插上流量卡，请打开同一网段的wifi，茶上流量卡后请关掉弹框")
+    # AlertData().getAlert("请插上流量卡，请打开同一网段的wifi，茶上流量卡后请关掉弹框")
 
     log.info('initialize Config, path=' + conf.conf_path)
     # 先进行登录
