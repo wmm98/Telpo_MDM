@@ -58,7 +58,9 @@ class AndroidBasePageWiFi(interface):
         self.u2_send_command("setprop persist.telpo.debug.mode 1")
 
     def push_file_to_device(self, orig, des):
-        self.send_adb_command("push %s %s" % orig, des)
+        cmd = "push %s %s" % (orig, des)
+        # sub_shell.invoke(cmd)
+        self.send_adb_command(cmd)
         # self.client.push(orig, des)
 
     def get_app_userid(self, package):

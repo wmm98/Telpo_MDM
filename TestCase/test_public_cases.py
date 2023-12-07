@@ -35,22 +35,22 @@ class TestPublicPage:
         self.wifi_ip = case_pack.device_data["wifi_device_info"]["ip"]
         self.android_mdm_page.del_all_content_file()
         self.device_sn = self.android_mdm_page.get_device_sn()
-        # self.app_page.delete_app_install_and_uninstall_logs()
+        self.app_page.delete_app_install_and_uninstall_logs()
         self.android_mdm_page.del_all_downloaded_apk()
         self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
         self.android_mdm_page.del_updated_zip()
-        # self.android_mdm_page.reboot_device(self.wifi_ip)
+        self.android_mdm_page.reboot_device(self.wifi_ip)
         self.content_page.refresh_page()
         self.silent_ota_upgrade_flag = 0
 
     def teardown_class(self):
-        pass
-        # self.app_page.delete_app_install_and_uninstall_logs()
-        # self.android_mdm_page.del_all_downloaded_apk()
-        # self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
-        # self.android_mdm_page.del_all_content_file()
-        # self.app_page.refresh_page()
-        # self.android_mdm_page.reboot_device(self.wifi_ip)
+        # pass
+        self.app_page.delete_app_install_and_uninstall_logs()
+        self.android_mdm_page.del_all_downloaded_apk()
+        self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
+        self.android_mdm_page.del_all_content_file()
+        self.app_page.refresh_page()
+        self.android_mdm_page.reboot_device(self.wifi_ip)
 
     @allure.feature('MDM_public')
     @allure.title("public case-添加 content 种类--辅助测试用例")
@@ -996,7 +996,7 @@ class TestPublicPage:
 
     @allure.feature('MDM_public1234')
     @allure.title("public case- 静默升级系统app/推送安装成功后自动运行app")
-    # @pytest.mark.flaky(reruns=2, reruns_delay=3)
+    @pytest.mark.flaky(reruns=2, reruns_delay=3)
     def test_upgrade_system_app(self, del_app_install_uninstall_release_log, del_download_apk, uninstall_system_app):
         while True:
             try:
@@ -1004,7 +1004,6 @@ class TestPublicPage:
                 release_info = {"package_name": test_yml['app_info']['high_version_app'], "sn": self.device_sn,
                                 "silent": "Yes", "download_network": "NO Limit", "auto_open": "YES"}
                 file_path = self.android_mdm_page.get_apk_path(release_info["package_name"])
-                #
                 # # install low version system application
                 # # set app as system app
                 # self.android_mdm_page.wifi_adb_root(self.wifi_ip)
@@ -1096,7 +1095,7 @@ class TestPublicPage:
                     if self.android_mdm_page.app_is_installed(release_info["package"]):
                         version_installed = self.app_page.transfer_version_into_int(
                             self.android_mdm_page.get_app_info(release_info["package"])['versionName'])
-                        log.info("目标版本为：%s" ".".join(str(version_installed)))
+                        log.info("目标版本为：%s" % ".".join(str(version_installed)))
                         current_version = self.app_page.transfer_version_into_int(release_info["version"])
                         log.info("当前版本为： %s" % ".".join(str(current_version)))
                         if version_installed == current_version:

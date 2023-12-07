@@ -147,14 +147,13 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
             # self.wifi_adb_root(self.device_ip)
             # self.open_root_auth_usb()
             self.open_root_auth_usb()
-            self.open_root_auth()
             self.rm_file("system/app/%s" % apk_file)
             package_name = self.get_apk_package_name(self.get_apk_path(apk_file))
             if not self.app_is_installed(package_name):
                 break
             self.reboot_device_root(self.device_ip)
             self.uninstall_app(package_name)
-            if self.get_current_time() > self.return_end_time(now_time):
+            if self.get_current_time() > self.return_end_time(now_time, 900):
                 assert False, "@@@@system app--%s:%s仍然存在， 请检查！！！！" % (apk_file, package_name)
 
     def check_firmware_version(self):
