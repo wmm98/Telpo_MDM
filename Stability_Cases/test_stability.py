@@ -75,7 +75,7 @@ class TestStability:
             pre_del_update_t.start()
             pre_del_updated_file_thread.append(pre_del_update_t)
 
-            pre_r_t = st.threading.Thread(target=android_.reboot_device, args=(android_.device_ip,))
+            pre_r_t = st.threading.Thread(target=android_.reboot_device_multi, args=(android_.device_ip,))
             pre_r_t.start()
             pre_reboot_thread.append(pre_r_t)
 
@@ -112,8 +112,8 @@ class TestStability:
             self.android_mdm_page.del_all_downloaded_apk()
             self.android_mdm_page.uninstall_multi_apps(test_yml['app_info'])
             self.android_mdm_page.del_all_content_file()
-            self.android_mdm_page.reboot_device(device_data["ip"])
-            r_t = st.threading.Thread(target=self.android_mdm_page.reboot_device, args=(device_data["ip"],))
+            # self.android_mdm_page.reboot_device_multi(device_data["ip"])
+            r_t = st.threading.Thread(target=self.android_mdm_page.reboot_device_multi, args=(device_data["ip"],))
             r_t.start()
             pos_reboot_thread.append(r_t)
 
@@ -195,7 +195,7 @@ class TestStability:
                     app_t.start()
                     mdm_app_installed_threads.append(app_t)
 
-                    reboot_t = st.threading.Thread(target=func.reboot_device, args=(t_device["ip"],))
+                    reboot_t = st.threading.Thread(target=func.reboot_device_multi, args=(t_device["ip"],))
                     reboot_t.start()
                     mdm_app_threads.append(reboot_t)
 
@@ -277,7 +277,7 @@ class TestStability:
                         pass
 
                 def test_reboot(td_info):
-                    td_info["android_page"].reboot_device(td_info["ip"])
+                    td_info["android_page"].reboot_device_multi(td_info["ip"])
                     log.info("设备：%s 重启成功")
 
                 online_flag = 0
@@ -360,7 +360,7 @@ class TestStability:
                     self.app_page.recovery_after_service_unavailable("devices", st.user_info)
                     log.info("**********************服务器恢复正常*************************")
 
-    @allure.feature('MDM_stability')
+    @allure.feature('MDM_stability111')
     @allure.title("stability case-文件文件推送成功率-请在报告右侧log文件查看文件文件推送成功率")
     def test_multi_release_content(self):
         # 设置断店续传重启得次数
@@ -452,7 +452,7 @@ class TestStability:
                         before_reboot_file_size = device_msg["android_page"].get_file_size_in_device(file)
                         log.info("%s: 第一次下载的的file size: %s" % (device_msg["sn"], before_reboot_file_size))
                         for i in range(reboot_times):
-                            device_msg["android_page"].reboot_device(device_msg["ip"])
+                            device_msg["android_page"].reboot_device_multi(device_msg["ip"])
                             log.info("%s 完成第 %d 重启" % (device_msg["sn"], (i + 1)))
                             now_time = content_page.get_current_time()
                             while True:
@@ -468,8 +468,7 @@ class TestStability:
                                     log.error("@@@@%s: 确认下载文件： %s， 5分钟内ota升级包没有大小没变， 没在下载" % (device_msg["sn"], file))
                                     assert False, "@@@@确认下载提示后， 5分钟内ota升级包没有大小没变， 没在下载"
                                 content_page.time_sleep(1)
-                        log.info(
-                            "************%s : %s完成%d次重启断点续传**************" % (device_msg["ip"], file, reboot_times))
+                        log.info("*****%s : %s完成%d次重启断点续传******" % (device_msg["ip"], file, reboot_times))
                         # check if app download completed in the settings time
                         now_time_d = content_page.get_current_time()
                         expired_time = test_yml["Multi_devices_download_time_settings"]["stability_file_download_time"]
@@ -630,7 +629,7 @@ class TestStability:
 
                 reboot_threads = []
                 for android in self.androids_page:
-                    r_t = st.threading.Thread(target=android.reboot_device, args=(android.device_ip,))
+                    r_t = st.threading.Thread(target=android.reboot_device_multi, args=(android.device_ip,))
                     r_t.start()
                     reboot_threads.append(r_t)
                 for r_thread in reboot_threads:

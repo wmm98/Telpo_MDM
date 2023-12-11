@@ -155,7 +155,7 @@ class AndroidBasePageWiFi(interface):
         self.time_sleep(5)
         self.kill_server()
         self.start_server()
-        self.confirm_wifi_adb_connected(wlan0_ip)
+        self.confirm_wifi_adb_connected_multi(wlan0_ip)
         self.device_existed(wlan0_ip)
         # self.confirm_usb_adb_connect(wlan0_ip)
         self.device_boot_complete()
@@ -166,7 +166,7 @@ class AndroidBasePageWiFi(interface):
         self.time_sleep(5)
         self.kill_server()
         self.start_server()
-        self.confirm_wifi_adb_connected(wlan0_ip)
+        self.confirm_wifi_adb_connected_multi(wlan0_ip)
         self.device_existed(wlan0_ip)
         self.device_boot_complete()
         self.wifi_adb_root(wlan0_ip)
@@ -547,6 +547,9 @@ class AndroidBasePageWiFi(interface):
     def input_element_text(self, ele, text):
         ele.clear_text()
         ele.send_keys(text)
+
+    def press_enter(self):
+        self.client.press("enter")
 
     def get_element_by_id(self, id_no, timeout=5):
         if timeout == 0:

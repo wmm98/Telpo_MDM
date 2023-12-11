@@ -124,7 +124,9 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
             now_time = self.get_current_time()
             while True:
                 self.input_element_text(input_psw_box,  device_wifi_list[0]["password"])
-                connect_btn.click()
+                self.time_sleep(1)
+                self.press_enter()
+                # connect_btn.click()
                 if not self.ele_id_is_existed_USB(self.input_wifi_box):
                     break
                 if self.get_current_time() > self.return_end_time(now_time):

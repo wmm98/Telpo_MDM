@@ -63,6 +63,7 @@ class GetLanIps:
             if "是" in alert.get_yes_or_no("有 %d 台设备在线，数目正确吗， 正确请按下”是“， 否则按下“否”重新进行扫描设备" % len(ips)):
                 break
 
+
 if __name__ == '__main__':
     wlan = GetLanIps()
     print(wlan.get_local_ip())
