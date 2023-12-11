@@ -90,14 +90,20 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
         x2 = int(size[0]) / 2
         y2 = int(size[1]) / 2 - 100
         all_wifi_boxes = self.get_element_by_id(self.wifi_view).child(className=self.single_wifi_box)
+        # print(all_wifi_boxes)
         device_wifi_list = []
         # find available wifi
         flag = 0
         for i in range(3):
             for box in all_wifi_boxes:
                 for ava_wifi in wifi_list:
-                    # print(box.child(resourceId=self.wifi_name).get_text())
-                    if self.remove_space(ava_wifi["name"]) in self.remove_space(box.child(resourceId=self.wifi_name).get_text()):
+                    text = '-+'
+                    try:
+                        text = self.remove_space(box.child(resourceId=self.wifi_name).get_text())
+                        # print(text)
+                    except Exception as e:
+                        pass
+                    if self.remove_space(ava_wifi["name"]) in text:
                         if ava_wifi not in device_wifi_list:
                             device_wifi_list.append(ava_wifi)
             print("wifi列表: ", device_wifi_list)
