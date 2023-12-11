@@ -12,6 +12,9 @@ class AndroidBasePageUSB(interface):
         self.times = times
         self.device_name = name
 
+    def get_current_wlan(self):
+        return self.USB_client.wlan_ip
+
     def click_cleat_recent_app_btn_USB(self, id_no):
         # self.click_element(self.get_current_app() + ele)
         # self.u2_send_command(self.get_current_app() + )

@@ -24,19 +24,21 @@ class TestLogin:
     @allure.feature('MDM_test02_login')
     @allure.title("连接上wifi--辅助测试用例")  # 设置case的名字
     def test_connect_wifi_ok(self):
-        print("&&&&&&&&&&&&&&")
-        print(self.android_mdm_page.get_screen_size())
+        if self.android_mdm_page.get_current_wlan() is None:
+            self.android_mdm_page.clear_recent_app_USB()
+            self.android_mdm_page.open_wifi_btn()
+            self.android_mdm_page.time_sleep(5)
+            self.android_mdm_page.confirm_open_wifi_page()
+            self.android_mdm_page.confirm_wifi_switch_open()
+            self.android_mdm_page.time_sleep(10)
+            if self.android_mdm_page.get_current_wlan() is None:
+                wifi_available = test_yaml["android_device_info"]["available_wifi"]
+                wifi_list = []
+                for wifi in wifi_available:
+                    wifi_list.append(wifi_available[wifi])
 
-        wifi_available = test_yaml["android_device_info"]["available_wifi"]
-        print(wifi_available)
-        wifi_list = []
-        for wifi in wifi_available:
-            print(wifi_available[wifi])
-            wifi_list.append(wifi_available[wifi])
-
-        print(wifi_list)
-        self.android_mdm_page.connect_available_wifi(wifi_list)
-        self.android_mdm_page.clear_recent_app_USB()
+                self.android_mdm_page.connect_available_wifi(wifi_list)
+                self.android_mdm_page.clear_recent_app_USB()
 
     @allure.feature('MDM_test02_login1111')
     @allure.story("MDM_test02_login")

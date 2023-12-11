@@ -75,11 +75,11 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
 
     def connect_available_wifi(self, wifi_list):
         # open wlan page
-        self.open_wifi_btn()
-        self.time_sleep(2)
-        self.confirm_open_wifi_page()
-        self.confirm_wifi_switch_open()
-        self.time_sleep(5)
+        # self.open_wifi_btn()
+        # self.time_sleep(2)
+        # self.confirm_open_wifi_page()
+        # self.confirm_wifi_switch_open()
+        # self.time_sleep(5)
         self.connect_settings_wifi(wifi_list)
 
     def connect_settings_wifi(self, wifi_list):
