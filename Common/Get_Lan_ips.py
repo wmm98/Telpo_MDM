@@ -58,11 +58,10 @@ class GetLanIps:
 
     def scan_devices(self):
         while True:
+            self.start_thread()
             ips = self.get_ips_list()
             if "是" in alert.get_yes_or_no("有 %d 台设备在线，数目正确吗， 正确请按下”是“， 否则按下“否”重新进行扫描设备" % len(ips)):
                 break
-            self.start_thread()
-
 
 if __name__ == '__main__':
     wlan = GetLanIps()

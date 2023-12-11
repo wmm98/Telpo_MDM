@@ -15,7 +15,7 @@ test_driver = web.get_web_driver()
 
 # 先扫描设备
 ips = st.lan_ips.get_ips_list()
-
+#
 devices = [wifi_adb.wifi_connect_device(ip_) for ip_ in ips]
 devices_data = []
 for device_obj in devices:
@@ -214,7 +214,7 @@ class TestStability:
                 else:
                     self.device_page.go_to_new_address("devices")
 
-    @allure.feature('MDM_stability')
+    @allure.feature('MDM_stability111')
     @allure.title("stability case- 多设备重启在线成功率--请在报告右侧log文件查看在线率")
     def test_reboot_online_stability_test(self):
         # length 为重启次数
@@ -255,10 +255,10 @@ class TestStability:
                     device_page.refresh_page()
                     for sno in sns:
                         device_page.select_device(sno)
-                        device_page.time_sleep(5)
-                        device_page.click_send_btn()
-                        device_page.msg_input_and_send(message)
-                        log.info("平台发送消息%s给设备 %s" % (message, sno))
+                        device_page.time_sleep(1)
+                    device_page.click_send_btn()
+                    device_page.msg_input_and_send(message)
+                    log.info("平台发送消息%s给设备 %s" % (message, ",".join(sns)))
 
                 def check_message_in_device(td_info):
                     # check message in device
@@ -549,7 +549,7 @@ class TestStability:
                 else:
                     self.app_page.recovery_after_service_unavailable("content", st.user_info)
 
-    @allure.feature('MDM_stability111')
+    @allure.feature('MDM_stability')
     @allure.title("stability case- 长时间连接测试--长时间连接测试，并且静默升级OTA升级")
     def test_online_long_test(self):
         # 设置在线次数的查询
