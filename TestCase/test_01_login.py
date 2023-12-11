@@ -40,7 +40,7 @@ class TestLogin:
                 self.android_mdm_page.connect_available_wifi(wifi_list)
                 self.android_mdm_page.clear_recent_app_USB()
 
-    @allure.feature('MDM_test02_login1111')
+    @allure.feature('MDM_test02_login')
     @allure.story("MDM_test02_login")
     @allure.title("login is ok--辅助测试用例")  # 设置case的名字
     @pytest.mark.dependency(name="test_login_ok", scope='package')
