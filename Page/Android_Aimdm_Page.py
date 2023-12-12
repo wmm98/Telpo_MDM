@@ -85,6 +85,80 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
     def connect_settings_wifi(self, wifi_list):
         # get swipe point, and set the swipe range
         size = self.get_screen_size()
+        x1 = int(size[0]) / 2 + 200
+        y1 = int(size[1]) / 2 + 400
+        x2 = x1
+        y2 = int(size[1]) / 2 - 400
+        all_wifi_boxes = self.get_element_by_id(self.wifi_view).child(className=self.single_wifi_box)
+        # print(all_wifi_boxes)
+        device_wifi_list = []
+        # find available wifi
+        flag = 0
+        for i in range(10):
+            for box in all_wifi_boxes:
+                for ava_wifi in wifi_list:
+                    text = '-+'
+                    try:
+                        text = self.remove_space(box.child(resourceId=self.wifi_name).get_text())
+                        # print(text)
+                    except Exception as e:
+                        pass
+                    if self.remove_space(ava_wifi["name"]) in text:
+                        if ava_wifi not in device_wifi_list:
+                            device_wifi_list.append(ava_wifi)
+            print("wifi列表: ", device_wifi_list)
+            if len(device_wifi_list) == 0:
+                # 滑动屏幕
+                if i <= 5:
+                    self.swipe_screen(x1, y1, x2, y2)
+                    continue
+                else:
+                    self.swipe_screen(x1, y2, x2, y1)
+                    continue
+
+            if self.ele_text_is_existed(device_wifi_list[0]["name"], time_to_wait=3):
+                print(device_wifi_list[0]["name"])
+                wifi_ele = self.get_element_by_text(device_wifi_list[0]["name"])
+                wifi_ele.click()
+                now_time = self.get_current_time()
+                while True:
+                    if self.ele_id_is_existed_USB(self.input_wifi_box):
+                        break
+                    if self.get_current_time() > self.return_end_time(now_time):
+                        assert False, "@@@@无法打开 %s wifi密码框， 请检查！！！！" % device_wifi_list[0]["name"]
+                    wifi_ele.click()
+                    self.time_sleep(1)
+
+            input_psw_box = self.get_element_by_id(self.input_wifi_box)
+            connect_btn = self.get_element_by_id(self.conn_wifi_btn)
+            now_time = self.get_current_time()
+            while True:
+                try:
+                    self.press_back()
+                    self.input_element_text(input_psw_box,  device_wifi_list[0]["password"])
+                except Exception as e:
+                    print(e)
+                    device_wifi_list = []
+                    self.swipe_screen(x1, y1, x2, y2)
+                    break
+                self.time_sleep(2)
+                self.press_enter()
+                # connect_btn.click()
+                if not self.ele_id_is_existed_USB(self.input_wifi_box):
+                    flag += 1
+                    break
+                if self.get_current_time() > self.return_end_time(now_time):
+                    assert False, "@@@@无法打开 %s wifi， 请检查！！！！" % device_wifi_list[0]["name"]
+
+            if flag == 1:
+                break
+
+        if len(device_wifi_list) == 0:
+            assert False, "@@@没连接上wifi, 请检擦！！！！"
+
+    def connect_settings_wifi_discard(self, wifi_list):
+        # get swipe point, and set the swipe range
+        size = self.get_screen_size()
         x1 = int(size[0]) / 2
         y1 = int(size[1]) - 100
         x2 = int(size[0]) / 2

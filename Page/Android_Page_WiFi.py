@@ -412,7 +412,15 @@ class AndroidBasePageWiFi(interface):
 
     def screen_keep_on(self):
         self.u2_send_command("settings put system screen_off_timeout 1800000")
-        self.device_unlock()
+        # self.device_unlock()
+        self.swipe_unlock_screen()
+
+    def swipe_unlock_screen(self, battery=True):
+        width, height = self.client.window_size()
+        self.client.screen_off()
+        self.client.screen_on()
+        # if battery:
+        self.send_shell_command("input swipe %d %d %d %d" % (width/2, height-10, width/2, height-500))
 
     def device_unlock(self):
         self.device_sleep()
@@ -547,6 +555,9 @@ class AndroidBasePageWiFi(interface):
     def input_element_text(self, ele, text):
         ele.clear_text()
         ele.send_keys(text)
+
+    def press_back(self):
+        self.client.press("back")
 
     def press_enter(self):
         self.client.press("enter")

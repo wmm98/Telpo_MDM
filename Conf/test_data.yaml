@@ -102,11 +102,9 @@ MDMTestData:
   android_device_info:
     # 设备名称， 可以根据adb devices 得到当前的设备名称
 #    m1k123
-    device_name: d
+    device_name: 25cc1b6f
     # 可用的wifi, 没有特别需求不需要改, 可添加
     available_wifi:
-#      - Telpo
-#      - Telpo_Guest
 
       wifi_00:
         name: TP-5G_888
@@ -119,6 +117,9 @@ MDMTestData:
       wifi_02:
         name: Telpo_Guest
         password: 86337898
+
+
+
 
 
 
