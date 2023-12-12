@@ -25,6 +25,7 @@ class TestLogin:
     @allure.title("连接上wifi--辅助测试用例")  # 设置case的名字
     def test_connect_wifi_ok(self):
         self.android_mdm_page.screen_keep_on()
+        self.android_mdm_page.device_unlock_USB()
         if self.android_mdm_page.get_current_wlan() is None:
             self.android_mdm_page.clear_recent_app_USB()
             self.android_mdm_page.open_wifi_btn()

@@ -147,6 +147,8 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
             log.info("am start -a android.settings.WIFI_SETTINGS")
             self.u2_send_command("am start -a android.settings.WIFI_SETTINGS")
             switch_btn = self.ele_id_is_existed_USB(self.wifi_switch_btn, timeout=5)
+            # print(switch_btn)
+            # switch_btn = 1
             if switch_btn:
                 break
             if self.get_current_time() > self.return_end_time(now_time):
