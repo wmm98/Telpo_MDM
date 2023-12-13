@@ -414,7 +414,7 @@ class OTAPage(TelpoMDMPage):
 
     def input_ota_package_info(self, info):
         self.input_text(self.loc_choose_package_btn, info["file_name"])
-        self.select_by_text(self.loc_file_category, info["file_category"])
+        # self.select_by_text(self.loc_file_category, info["file_category"])
         android_check_box = self.get_element(self.loc_android_checkbox)
         linux_check_box = self.get_element(self.loc_linux_checkbox)
         if info["plat_form"] == "Android":
@@ -424,7 +424,7 @@ class OTAPage(TelpoMDMPage):
             if not linux_check_box.is_selected():
                 linux_check_box.click()
 
-    def click_save_add_ota_pack(self):
+    def click_save_add_ota_pack(self, timeout=900):
         self.click(self.loc_save_package_info_btn)
         now_time = t_time.time()
         while True:
@@ -438,8 +438,8 @@ class OTAPage(TelpoMDMPage):
         # if not self.uploading_box_fade():
         #     print("333333333333333333333333333333333333")
         #     assert False, "@@@@上传OTA文件超过3分钟， 请检查！！！！"
-        if not self.get_tips_alert(180):
-            assert False, "@@@@上传OTA文件超过3分钟， 请检查！！！！"
+        if not self.get_tips_alert(timeout):
+            assert False, "@@@@上传OTA文件超过%d s， 请检查！！！！" % timeout
 
     def uploading_box_show(self):
         try:

@@ -104,7 +104,7 @@ MDMTestData:
 #    m1k123
     device_name: d
 #        是否需要用串口断开连接电源线， 是的： True, 反☞： False, 默认为False
-    is_serial: False
+    is_serial: True
     # 可用的wifi, 没有特别需求不需要改, 可添加
     available_wifi:
 
