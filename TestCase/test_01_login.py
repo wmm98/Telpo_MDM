@@ -10,7 +10,7 @@ conf = TestCase.Config()
 class TestLogin:
 
     def setup_class(self):
-        api_path = conf.project_path + "\\Param\\Work_APP\\%s" % test_yaml["work_app"]["api_txt"]
+        self.api_path = conf.project_path + "\\Param\\Work_APP\\%s" % test_yaml["work_app"]["api_txt"]
         self.driver = TestCase.test_driver
         self.mdm_page = TestCase.MDMPage(self.driver, 40)
         self.app_page = TestCase.APPSPage(self.driver, 40)
@@ -18,10 +18,10 @@ class TestLogin:
         self.device_page = TestCase.DevicesPage(self.driver, 40)
         self.android_mdm_page = TestCase.AndroidAimdmPage(TestCase.device_data, 5)
         self.android_mdm_page.open_usb_debug_btn()
-        self.android_mdm_page.confirm_app_installed(
-            conf.project_path + "\\Param\\Work_APP\\%s" % test_yaml["work_app"]["aidmd_apk"])
-        self.android_mdm_page.push_file_to_device(api_path,
-                                                  self.android_mdm_page.get_internal_storage_directory() + "/")
+        # self.android_mdm_page.confirm_app_installed(
+        #     conf.project_path + "\\Param\\Work_APP\\%s" % test_yaml["work_app"]["aidmd_apk"])
+        # self.android_mdm_page.push_file_to_device(self.api_path,
+        #                                           self.android_mdm_page.get_internal_storage_directory() + "/")
         self.android_mdm_page.screen_keep_on()
         self.wifi_ip = TestCase.device_data["wifi_device_info"]["ip"]
         self.android_mdm_page.back_to_home()
@@ -76,8 +76,12 @@ class TestLogin:
             self.device_page.click_new_btn()
             self.device_page.add_devices_info(devices_list, cate_model=False)
             self.device_page.refresh_page()
-            self.android_mdm_page.reboot_device(self.wifi_ip)
-            self.device_page.refresh_page()
+            self.android_mdm_page.confirm_app_installed(
+                conf.project_path + "\\Param\\Work_APP\\%s" % test_yaml["work_app"]["aidmd_apk"])
+            self.android_mdm_page.push_file_to_device(self.api_path,
+                                                      self.android_mdm_page.get_internal_storage_directory() + "/")
+        self.android_mdm_page.reboot_device(self.wifi_ip)
+        self.device_page.refresh_page()
 
     @allure.feature('MDM_test02_login')
     @allure.title("OTA-添加ota升级包-- 辅助测试用例")

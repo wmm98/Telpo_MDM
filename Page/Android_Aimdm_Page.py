@@ -86,7 +86,7 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
         # get swipe point, and set the swipe range
         size = self.get_screen_size()
         x1 = int(size[0]) / 2 + 200
-        y1 = int(size[1]) / 2 + 400
+        y1 = int(size[1]) / 2 + 300
         x2 = x1
         y2 = int(size[1]) / 2 - 400
         all_wifi_boxes = self.get_element_by_id(self.wifi_view).child(className=self.single_wifi_box)
