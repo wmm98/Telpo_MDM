@@ -102,7 +102,7 @@ MDMTestData:
   android_device_info:
     # 设备名称， 可以根据adb devices 得到当前的设备名称
 #    m1k123
-    device_name: 25cc1b6f
+    device_name: d
     # 可用的wifi, 没有特别需求不需要改, 可添加
     available_wifi:
 

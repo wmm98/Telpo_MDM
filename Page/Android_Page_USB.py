@@ -216,9 +216,9 @@ class AndroidBasePageUSB(interface):
             print(res)
             if exp not in res:
                 return True
-            if self.get_current_time() > self.return_end_time(now_time, timeout):
-                if exp in self.remove_space(self.send_shell_command_USB(cmd)):
-                    assert False, "@@@@超过2分钟无法上网,请检查网络"
+            if self.get_current_time() > self.return_end_time(now_time, timeout=timeout):
+                # if exp in self.remove_space(self.send_shell_command_USB(cmd)):
+                assert False, "@@@@超过%d s无法上网,请检查网络" % timeout
             public_pack.t_time.sleep(2)
 
     def no_network(self, times=5, timeout=30):

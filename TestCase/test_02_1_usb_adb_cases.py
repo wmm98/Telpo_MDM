@@ -40,7 +40,7 @@ class TestNetworkCases:
         self.android_mdm_page.del_updated_zip()
         self.android_mdm_page.reboot_device(self.wifi_ip)
 
-    @allure.feature('MDM_usb-test')
+    @allure.feature('MDM_usb-test-no test now')
     @allure.title("OTA-添加ota升级包-- 辅助测试用例")
     @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_add_OTA_package_and_cate(self, go_to_ota_page):
@@ -67,7 +67,7 @@ class TestNetworkCases:
             self.ota_page.search_device_by_pack_name(package_info["package_name"])
             assert len(self.ota_page.get_ota_package_list()) == 1, "@@@添加失败！！！"
 
-    @allure.feature('MDM_usb-test')
+    @allure.feature('MDM_usb-test-no test now')
     @allure.title("Apps-添加APK包--辅助测试用例")
     @pytest.mark.flaky(reruns=1, reruns_delay=3)
     # @pytest.mark.parametrize('package_info', package_infos)
