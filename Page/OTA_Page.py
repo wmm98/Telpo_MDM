@@ -49,6 +49,9 @@ class OTAPage(TelpoMDMPage):
     loc_sn_text = (By.TAG_NAME, "li")
     loc_label_selected = (By.CLASS_NAME, "label-selected")
 
+    # release version sns boxes relate
+    loc_release_sn_list = (By.ID, "sns")
+
     loc_ota_list = (By.ID, "otalist")
 
     # 提示框
@@ -349,32 +352,37 @@ class OTAPage(TelpoMDMPage):
         silent_update = self.get_element(self.loc_silent_update)
         if is_silent == 1:
             self.exc_js_click(silent_update)
-        # self.select_by_text(self.loc_dev_cate, release_info["category"])
-        # click show devices btn， check if device is show, if now, click it
-        btn = self.get_element(self.loc_show_device_btn)
-        if "block" in btn.get_attribute("style"):
-            btn.click()
-        sn_list = self.get_element(self.loc_sn_list)
-        eles_sn = sn_list.find_elements(*self.loc_sn_text)
-        if isinstance(release_info["sn"], list):
-            for sn in release_info["sn"]:
+
+        if "mdm2" in self.get_current_window_url():
+            if isinstance(release_info["sn"], list):
+                self.input_text(self.loc_release_sn_list, "|".join(release_info["sn"]))
+            else:
+                self.input_text(self.loc_release_sn_list, release_info["sn"])
+        else:
+            # self.select_by_text(self.loc_dev_cate, release_info["category"])
+            # click show devices btn， check if device is show, if now, click it
+            btn = self.get_element(self.loc_show_device_btn)
+            if "block" in btn.get_attribute("style"):
+                btn.click()
+            sn_list = self.get_element(self.loc_sn_list)
+            eles_sn = sn_list.find_elements(*self.loc_sn_text)
+            if isinstance(release_info["sn"], list):
+                for sn in release_info["sn"]:
+                    for ele_sn in eles_sn:
+                        if sn in ele_sn.text:
+                            if ele_sn.get_attribute("class") == "selected":
+                                break
+                            self.confirm_sn_is_selected(ele_sn)
+            else:
                 for ele_sn in eles_sn:
-                    if sn in ele_sn.text:
+                    if release_info["sn"] in ele_sn.text:
                         if ele_sn.get_attribute("class") == "selected":
                             break
                         self.confirm_sn_is_selected(ele_sn)
-        else:
-            for ele_sn in eles_sn:
-                if release_info["sn"] in ele_sn.text:
-                    if ele_sn.get_attribute("class") == "selected":
-                        break
-                    self.confirm_sn_is_selected(ele_sn)
         self.exc_js_click(self.get_element(self.loc_release_package_btn))
         self.confirm_tips_alert_show(self.loc_release_package_btn, ex_js=1)
         self.refresh_page()
         # self.confirm_alert_not_existed(self.loc_release_package_btn, ex_js=1)
-
-
 
     def click_alert_release_btn(self):
         # self.click(self.loc_release_package_btn)

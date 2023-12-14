@@ -56,6 +56,9 @@ class APPSPage(TelpoMDMPage):
     loc_device_list = (By.CLASS_NAME, "label-item")
     loc_single_device = (By.TAG_NAME, "li")
 
+    # release version sns box relate
+    loc_release_devices_list = (By.ID, "releaseSNS")
+
     loc_app_package_name = (By.ID, "release_apk_package")
     loc_app_release_confirm = (By.CSS_SELECTOR, "[class = 'btn btn-primary confirm_release']")
 
@@ -352,20 +355,26 @@ class APPSPage(TelpoMDMPage):
                 self.select_by_text(self.loc_set_auto_open, "YES")
         self.select_by_text(self.loc_silent_install, info["silent"].upper())
         self.select_by_text(self.loc_download_network, info["download_network"])
-        devices = release_box.find_element(*self.loc_device_list).find_elements(*self.loc_single_device)
-        if isinstance(info["sn"], list):
-            for sn in info["sn"]:
+        if "mdm2" in self.get_current_window_url():
+            if isinstance(info["sn"], list):
+                self.input_text(self.loc_release_devices_list, "|".join(info["sn"]))
+            else:
+                self.input_text(self.loc_release_devices_list, info["sn"])
+        else:
+            devices = release_box.find_element(*self.loc_device_list).find_elements(*self.loc_single_device)
+            if isinstance(info["sn"], list):
+                for sn in info["sn"]:
+                    for device in devices:
+                        if sn in device.get_attribute("data"):
+                            if device.get_attribute("class") == "selected":
+                                break
+                            self.confirm_sn_is_selected(device)
+            else:
                 for device in devices:
-                    if sn in device.get_attribute("data"):
+                    if info["sn"] in device.get_attribute("data"):
                         if device.get_attribute("class") == "selected":
                             break
                         self.confirm_sn_is_selected(device)
-        else:
-            for device in devices:
-                if info["sn"] in device.get_attribute("data"):
-                    if device.get_attribute("class") == "selected":
-                        break
-                    self.confirm_sn_is_selected(device)
         self.click(self.loc_app_release_confirm)
         self.confirm_tips_alert_show(self.loc_app_release_confirm)
         self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_app_release_confirm)
