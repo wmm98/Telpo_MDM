@@ -38,7 +38,7 @@ class TestLogin:
     def test_connect_wifi_and_login_ok(self):
         self.android_mdm_page.screen_keep_on()
         if self.android_mdm_page.get_current_wlan() is None:
-            # self.android_mdm_page.clear_recent_app_USB()
+            self.android_mdm_page.clear_recent_app_USB()
             self.android_mdm_page.open_wifi_btn()
             # self.android_mdm_page.time_sleep(5)
             self.android_mdm_page.confirm_open_wifi_page()
@@ -51,7 +51,7 @@ class TestLogin:
                     wifi_list.append(wifi_available[wifi])
 
                 self.android_mdm_page.connect_available_wifi(wifi_list)
-                # self.android_mdm_page.clear_recent_app_USB()
+                self.android_mdm_page.clear_recent_app_USB()
         self.android_mdm_page.ping_network(timeout=180)
 
         username = test_yaml['website_info']['test_user']
@@ -80,13 +80,13 @@ class TestLogin:
             conf.project_path + "\\Param\\Work_APP\\%s" % test_yaml["work_app"]["aidmd_apk"])
         self.android_mdm_page.push_file_to_device(self.api_path,
                                                   self.android_mdm_page.get_internal_storage_directory() + "/")
-        self.android_mdm_page.reboot_device(self.wifi_ip)
+        # self.android_mdm_page.reboot_device(self.wifi_ip)
         self.device_page.refresh_page()
 
     @allure.feature('MDM_test02_login')
     @allure.title("OTA-添加ota升级包-- 辅助测试用例")
     @pytest.mark.dependency(depends=["test_login_ok"], scope='package')
-    @pytest.mark.flaky(reruns=1, reruns_delay=3)
+    # @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_add_OTA_package_and_cate(self, go_to_ota_page):
         exp_existed_text = "ota already existed"
         exp_success_text = "success"
@@ -96,12 +96,11 @@ class TestLogin:
         ota_info = {"file_name": file_path, "file_category": package_info["file_category"],
                     "plat_form": package_info["plat_form"]}
         # check if category is existed
-        try:
-            if len(self.ota_page.get_ota_categories_list()) == 0:
-                self.ota_page.add_ota_category("test")
-                self.ota_page.refresh_page()
-        except Exception as e:
-            print(e)
+
+        if len(self.ota_page.get_ota_categories_list()) == 0:
+            self.ota_page.add_ota_category("test")
+            self.ota_page.refresh_page()
+
         # check if ota package is existed, if not, add package, else skip
         self.ota_page.search_device_by_pack_name(package_info["package_name"])
         if len(self.ota_page.get_ota_package_list()) == 0:
@@ -111,7 +110,7 @@ class TestLogin:
             self.ota_page.search_device_by_pack_name(package_info["package_name"])
             assert len(self.ota_page.get_ota_package_list()) == 1, "@@@添加失败！！！"
 
-    @allure.feature('MDM_test02_login')
+    @allure.feature('MDM_test02_login111')
     @allure.title("Apps-添加APK包--辅助测试用例")
     @pytest.mark.dependency(depends=["test_login_ok"], scope='package')
     @pytest.mark.flaky(reruns=1, reruns_delay=3)

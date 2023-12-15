@@ -85,7 +85,7 @@ class OTAPage(TelpoMDMPage):
     # category related
     loc_new_cate_btn = (By.LINK_TEXT, "Create New Category")
     loc_input_cate_box = (By.ID, "categoryname")
-    loc_save_btn_cate = (By.CSS_SELECTOR, "[class = 'btn btn-primary create_category_button']")
+    loc_save_btn_cate = (By.CSS_SELECTOR, "[class = 'btn btn-primary category_submit']")
     loc_cate_list = (By.CSS_SELECTOR, "[class = 'todo-list ui-sortable category-ul']")
     loc_single_cate = (By.CLASS_NAME, "listactive")
 
@@ -112,15 +112,19 @@ class OTAPage(TelpoMDMPage):
         self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_save_btn_cate)
 
     def get_ota_categories_list(self):
-        if self.ele_is_existed(self.loc_cate_list):
+        if self.remove_space_and_upper("NO Data") in self.remove_space_and_upper(self.get_element(self.loc_cate_list).text):
+            return []
+        else:
             if self.ele_is_existed(self.loc_cate_list):
-                eles = self.get_elements(self.loc_single_cate)
-                cates_list = [self.remove_space(ele.text) for ele in eles]
-                return cates_list
+                if self.ele_is_existed(self.loc_cate_list):
+                    eles = self.get_elements(self.loc_single_cate)
+                    cates_list = [self.remove_space(ele.text) for ele in eles]
+                    return cates_list
+                else:
+                    return []
             else:
                 return []
-        else:
-            return []
+
 
     def get_ota_latest_upgrade_log(self, send_time, release_info):
         self.page_load_complete()
