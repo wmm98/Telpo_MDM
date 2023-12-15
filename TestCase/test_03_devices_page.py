@@ -297,37 +297,6 @@ class TestDevicesPage:
                     self.page.go_to_new_address("apps")
 
     @allure.feature('MDM_device_test')
-    @allure.title("Devices- 日志的抓取")
-    @pytest.mark.dependency(depends=["test_login_ok"], scope='package')
-    @pytest.mark.flaky(reruns=1, reruns_delay=3)
-    def test_cat_logs(self, go_to_and_return_device_page):
-        durations = [5, 10, 30]
-        # durations = [5]
-        while True:
-            try:
-                log.info("*****************日志的抓取用例开始********************")
-                for duration in durations:
-                    exp_log_msg = "Device Debug Command sent"
-                    sn = self.device_sn
-                    # self.android_mdm_page.reboot_device(self.wifi_ip)
-                    self.page.refresh_page()
-                    send_time = case_pack.time.strftime('%Y-%m-%d %H:%M', case_pack.time.localtime(case_pack.time.time()))
-                    opt_case.catch_logs(sn, duration, time_out=duration * 200)
-                    log.info("捕捉%d分钟日志指令下达" % duration)
-                    # check if device log generates and upload to allure report
-                    self.android_mdm_page.generate_and_upload_log(send_time, "%dmin_" % duration)
-                    log.info("***************日志的抓取用例结束******************")
-                break
-            except Exception as e:
-                if self.page.service_is_normal():
-                    assert False, e
-                else:
-                    log.info("**********************检测到服务器503*************************")
-                    self.page.recovery_after_service_unavailable("devices", case_pack.user_info)
-                    log.info("**********************服务器恢复正常*************************")
-                    self.page.go_to_new_address("apps")
-
-    @allure.feature('MDM_device_test')
     @allure.title("Devices- 重置设备TPUI密码")
     @pytest.mark.dependency(depends=["test_login_ok"], scope='package')
     @pytest.mark.flaky(reruns=1, reruns_delay=3)
@@ -745,3 +714,34 @@ class TestDevicesPage:
                     log.info("**********************服务器恢复正常*************************")
                     self.page.go_to_new_address("devices")
 
+    @allure.feature('MDM_device_test')
+    @allure.title("Devices- 日志的抓取")
+    @pytest.mark.dependency(depends=["test_login_ok"], scope='package')
+    @pytest.mark.flaky(reruns=1, reruns_delay=3)
+    def test_cat_logs(self, go_to_and_return_device_page):
+        durations = [5, 10, 30]
+        # durations = [5]
+        while True:
+            try:
+                log.info("*****************日志的抓取用例开始********************")
+                for duration in durations:
+                    exp_log_msg = "Device Debug Command sent"
+                    sn = self.device_sn
+                    # self.android_mdm_page.reboot_device(self.wifi_ip)
+                    self.page.refresh_page()
+                    send_time = case_pack.time.strftime('%Y-%m-%d %H:%M',
+                                                        case_pack.time.localtime(case_pack.time.time()))
+                    opt_case.catch_logs(sn, duration, time_out=duration * 200)
+                    log.info("捕捉%d分钟日志指令下达" % duration)
+                    # check if device log generates and upload to allure report
+                    self.android_mdm_page.generate_and_upload_log(send_time, "%dmin_" % duration)
+                    log.info("***************日志的抓取用例结束******************")
+                break
+            except Exception as e:
+                if self.page.service_is_normal():
+                    assert False, e
+                else:
+                    log.info("**********************检测到服务器503*************************")
+                    self.page.recovery_after_service_unavailable("devices", case_pack.user_info)
+                    log.info("**********************服务器恢复正常*************************")
+                    self.page.go_to_new_address("apps")

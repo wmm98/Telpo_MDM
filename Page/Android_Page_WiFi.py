@@ -206,7 +206,7 @@ class AndroidBasePageWiFi(interface):
             print(":", self.remove_space(self.devices_list()))
             if self.remove_space('%sdevice' % wlan_ip) in self.remove_space(self.devices_list()):
                 break
-            if self.get_current_time() > self.return_end_time(now_time, 60):
+            if self.get_current_time() > self.return_end_time(now_time, timeout):
                 assert False, "@@@@USB ADB 无法起来， 请检查！！！"
             self.time_sleep(5)
 
@@ -227,11 +227,13 @@ class AndroidBasePageWiFi(interface):
 
     def device_boot(self, wlan0_ip):
         self.time_sleep(60)
-        self.confirm_wifi_adb_connected(wlan0_ip)
+        self.confirm_usb_adb_connect(wlan0_ip)
+        # self.confirm_wifi_adb_connected(wlan0_ip)
         self.device_existed(wlan0_ip)
         self.device_boot_complete()
         # self.wifi_adb_root(wlan0_ip)
-        self.device_unlock()
+        self.screen_keep_on()
+        # self.device_unlock()
 
     def device_boot_root(self, wlan0_ip):
         self.time_sleep(5)

@@ -139,7 +139,7 @@ class TestLogin:
                     self.app_page.input_app_info(file_path)
                     self.app_page.refresh_page()
 
-    @allure.feature('MDM_test02_login11111')
+    @allure.feature('MDM_test02_login--discard now')
     @allure.story("MDM_test02_login")
     @allure.title("login is ok--辅助测试用例")  # 设置case的名字
     @pytest.mark.dependency(depends=["test_login_ok"], scope='package')

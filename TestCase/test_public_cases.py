@@ -994,7 +994,7 @@ class TestPublicPage:
                     self.android_mdm_page.del_all_downloaded_zip()
                     self.android_mdm_page.del_updated_zip()
 
-    @allure.feature('MDM_public1234')
+    @allure.feature('MDM_public')
     @allure.title("public case- 静默升级系统app/推送安装成功后自动运行app")
     @pytest.mark.flaky(reruns=2, reruns_delay=3)
     def test_upgrade_system_app(self, del_app_install_uninstall_release_log, del_download_apk, uninstall_system_app):
