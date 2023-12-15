@@ -54,7 +54,7 @@ class TestPublicPage:
 
     @allure.feature('MDM_public')
     @allure.title("public case-添加 content 种类--辅助测试用例")
-    @pytest.mark.filterwarnings("ignore")
+    @pytest.mark.dependency(depends=["test_login_ok"], scope='package')
     @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_add_content_category(self, go_to_content_page):
         while True:
@@ -76,7 +76,7 @@ class TestPublicPage:
 
     @allure.feature('MDM_public')
     @allure.title("public case-添加 content 文件--辅助测试用例")
-    @pytest.mark.filterwarnings("ignore")
+    @pytest.mark.dependency(depends=["test_login_ok"], scope='package')
     @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_add_content_file(self, go_to_content_page):
         while True:
@@ -111,7 +111,7 @@ class TestPublicPage:
     @allure.feature('MDM_public')
     @allure.story('MDM-Show')
     @allure.title("public case-推送壁纸--请在附件查看壁纸截图效果")
-    # @pytest.mark.filterwarnings("ignore")
+    @pytest.mark.dependency(depends=["test_login_ok"], scope='package')
     @pytest.mark.flaky(reruns=2, reruns_delay=3)
     def test_release_wallpaper(self, unlock_screen, del_all_content_release_logs):
         while True:
@@ -240,7 +240,7 @@ class TestPublicPage:
     @allure.feature('MDM_public')
     @allure.story('MDM-Show')
     @allure.title("OTA-OTA重启5次断点续传")
-    @pytest.mark.filterwarnings("ignore")
+    @pytest.mark.dependency(depends=["test_login_ok"], scope='package')
     @pytest.mark.flaky(reruns=2, reruns_delay=3)
     def test_upgrade_OTA_package_reboot_5times(self, del_all_ota_release_log, go_to_ota_page,
                                                delete_ota_package_relate):
@@ -385,7 +385,7 @@ class TestPublicPage:
     @allure.feature('MDM_public')
     @allure.story('MDM-Show')
     @allure.title("public case-应用满屏推送--请在附件查看满屏截图效果")
-    @pytest.mark.filterwarnings("ignore")
+    @pytest.mark.dependency(depends=["test_login_ok"], scope='package')
     @pytest.mark.flaky(reruns=1, reruns_delay=3)
     def test_release_app_full_screen(self, del_all_app_release_log, del_all_app_uninstall_release_log, go_to_app_page,
                                      uninstall_multi_apps):
@@ -527,7 +527,7 @@ class TestPublicPage:
 
     @allure.feature('MDM_public')
     @allure.title("public case-推送text.zip文件")
-    @pytest.mark.filterwarnings("ignore")
+    @pytest.mark.dependency(depends=["test_login_ok"], scope='package')
     @pytest.mark.flaky(reruns=2, reruns_delay=3)
     def test_release_normal_files(self, del_all_content_release_logs):
         # "All Files" "Normal Files" "Boot Animations" "Wallpaper" "LOGO"

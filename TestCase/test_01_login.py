@@ -31,7 +31,7 @@ class TestLogin:
     def teardown_class(self):
         pass
 
-    @allure.feature('MDM_test02_login11')
+    @allure.feature('MDM_test02_login')
     @allure.title("连接上wifi/登录--辅助测试用例")  # 设置case的名字
     @pytest.mark.dependency(name="test_login_ok", scope='package')
     @pytest.mark.flaky(reruns=1, reruns_delay=3)

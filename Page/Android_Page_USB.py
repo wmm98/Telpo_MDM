@@ -455,13 +455,37 @@ class AndroidBasePageUSB(interface):
             assert False, "@@@remount出错， 请检查！！！"
 
     def open_root_auth_usb(self):
-        act = self.open_root_usb()
-        if not act:
-            assert False, "@@@@无法root, 请检查！！！"
-        # ret = self.open_remount_usb()
-        # if not ret:
-        #     assert False, "@@@@无法remount, 请检查！！！"
-        self.time_sleep(3)
+        if 'Qualcomm' in self.get_device_info()['cpu']['hardware']:
+            if self.get_device_info()['model'] in ['T20', 'T10']:
+                act = self.open_root_usb()
+                if not act:
+                    assert False, "@@@@无法root, 请检查！！！"
+                self.time_sleep(3)
+                ret = self.open_remount_usb()
+                if not ret:
+                    assert False, "@@@@无法remount, 请检查！！！"
+                self.time_sleep(3)
+
+                act1 = self.open_root_usb()
+                if not act1:
+                    assert False, "@@@@无法root, 请检查！！！"
+                self.time_sleep(3)
+                ret1 = self.open_remount_usb()
+                if not ret1:
+                    assert False, "@@@@无法remount, 请检查！！！"
+                self.time_sleep(3)
+        else:
+            act = self.open_root_usb()
+            if not act:
+                assert False, "@@@@无法root, 请检查！！！"
+            # ret = self.open_remount_usb()
+            # if not ret:
+            #     assert False, "@@@@无法remount, 请检查！！！"
+            self.time_sleep(3)
+
+    def get_device_info(self):
+        info = self.USB_client.device_info
+        return info
 
 
 if __name__ == '__main__':

@@ -41,12 +41,12 @@ class CheckYaml:
 
     def check_value_existed(self, data, dict_=True):
         if not dict_:
-            if not data:
+            if data is None:
                 msg = "%s的值为空, 请检查！！！！" % data
                 self.value_not_existed.append(msg)
         else:
             for key in data:
-                if not data[key]:
+                if data[key] is None:
                     msg = "%s的值为空, 请检查！！！！" % key
                     self.value_not_existed.append(msg)
 

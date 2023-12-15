@@ -73,6 +73,20 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
         self.input_wifi_box = "%s:id/password" % self.android_settings_package
         self.conn_wifi_btn = "%s:id/button1" % self.android_relatelayout_package
 
+        self.is_landscape = public_pack.yaml_data["android_device_info"]["is_landscape"]
+
+    def get_swipe_point(self):
+        if self.is_landscape:
+            point = self.get_screen_size()
+            size = [point[1], point[0]]
+        else:
+            size = self.get_screen_size()
+        x1 = int(size[0]) / 2 + 200
+        y1 = int(size[1]) / 2 + 300
+        x2 = x1
+        y2 = int(size[1]) / 2 - 400
+        return [x1, y1, x2, y2]
+
     def connect_available_wifi(self, wifi_list):
         # open wlan page
         # self.open_wifi_btn()
@@ -84,11 +98,11 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
 
     def connect_settings_wifi(self, wifi_list):
         # get swipe point, and set the swipe range
-        size = self.get_screen_size()
-        x1 = int(size[0]) / 2 + 200
-        y1 = int(size[1]) / 2 + 300
-        x2 = x1
-        y2 = int(size[1]) / 2 - 400
+        points = self.get_swipe_point()
+        x1 = points[0]
+        y1 = points[1]
+        x2 = points[2]
+        y2 = points[3]
         all_wifi_boxes = self.get_element_by_id(self.wifi_view).child(className=self.single_wifi_box)
         # print(all_wifi_boxes)
         device_wifi_list = []
@@ -135,7 +149,7 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
             while True:
                 try:
                     self.press_back()
-                    self.input_element_text(input_psw_box,  device_wifi_list[0]["password"])
+                    self.input_element_text(input_psw_box, device_wifi_list[0]["password"])
                 except Exception as e:
                     print(e)
                     device_wifi_list = []
@@ -323,9 +337,6 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
 
     def confirm_system_app_uninstalled(self):
         apk_file = public_pack.yaml_data['app_info']['low_version_app']
-        # self.wifi_adb_root(self.device_ip)
-        # self.rm_file("system/app/%s" % apk_file)
-        # self.reboot_device_root(self.device_ip)
         now_time = self.get_current_time()
         while True:
             # self.wifi_adb_root(self.device_ip)
@@ -335,7 +346,7 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
             package_name = self.get_apk_package_name(self.get_apk_path(apk_file))
             if not self.app_is_installed(package_name):
                 break
-            self.reboot_device_root(self.device_ip)
+            self.reboot_device(self.device_ip)
             self.uninstall_app(package_name)
             if self.get_current_time() > self.return_end_time(now_time, 900):
                 assert False, "@@@@system app--%s:%s仍然存在， 请检查！！！！" % (apk_file, package_name)

@@ -23,7 +23,7 @@ from Common.DealAlert import AlertData
 import socket
 from ping3 import ping
 import threading
-from bs4 import BeautifulSoup
+# from bs4 import BeautifulSoup
 # import warnings
 from Common.Serial import Serial
 

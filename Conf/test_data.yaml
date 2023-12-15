@@ -103,6 +103,8 @@ MDMTestData:
     # 设备名称， 可以根据adb devices 得到当前的设备名称
 #    m1k123
     device_name: d
+    #    设备是否为横屏
+    is_landscape: False
 #        是否需要用串口断开连接电源线， 是的： True, 反☞： False, 默认为False
     is_serial: True
     # 可用的wifi, 没有特别需求不需要改, 可添加
