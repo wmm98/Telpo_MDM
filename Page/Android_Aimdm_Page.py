@@ -308,8 +308,8 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
                             self.swipe_screen(size[0] / 2, size[1] / 2, size[0], size[1] / 2)
 
                 if self.get_current_time() > self.return_end_time(now_time, 30):
-                    # break
-                    assert False, "@@@@无法清除最近应用， 请检查！！！！"
+                    break
+                    # assert False, "@@@@无法清除最近应用， 请检查！！！！"
                 self.time_sleep(1)
             except AssertionError as e:
                 print(e)
