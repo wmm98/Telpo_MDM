@@ -112,7 +112,8 @@ class OTAPage(TelpoMDMPage):
         self.comm_confirm_alert_not_existed(self.loc_alert_show, self.loc_save_btn_cate)
 
     def get_ota_categories_list(self):
-        if self.remove_space_and_upper("NO Data") in self.remove_space_and_upper(self.get_element(self.loc_cate_list).text):
+        if self.remove_space_and_upper("NO Data") in self.remove_space_and_upper(
+                self.get_element(self.loc_cate_list).text):
             return []
         else:
             if self.ele_is_existed(self.loc_cate_list):
@@ -124,7 +125,6 @@ class OTAPage(TelpoMDMPage):
                     return []
             else:
                 return []
-
 
     def get_ota_latest_upgrade_log(self, send_time, release_info):
         self.page_load_complete()
