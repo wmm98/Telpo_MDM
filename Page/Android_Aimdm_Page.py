@@ -6,6 +6,7 @@ import time
 config = public_pack.Config()
 log = public_pack.MyLog()
 
+
 # aimdm_package = public_pack.yaml_data["work_app"]["aidmd_apk"]
 
 
@@ -17,9 +18,11 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
         self.device_ip = devices_data["wifi_device_info"]["ip"]
         AndroidBasePageUSB.__init__(self, self.client, times, self.serial)
         AndroidBasePageWiFi.__init__(self, self.wifi_client, times, self.device_ip)
+        self.is_landscape = public_pack.yaml_data["android_device_info"]["is_landscape"]
         aimdm_apk = public_pack.yaml_data["work_app"]["aidmd_apk"]
         tpui_apk = public_pack.yaml_data["work_app"]["tpui_apk"]
         self.aimdm_package = self.get_apk_package_name(config.project_path + "\\Param\\Work_APP\\%s" % aimdm_apk)
+        # self.aimdm_package = "com.tpos.aimdm"
         self.tpui_pakcage = self.get_apk_package_name(config.project_path + "\\Param\\Work_APP\\%s" % tpui_apk)
         self.android_settings_package = "com.android.settings"
         self.android_relatelayout_package = "android"
@@ -47,9 +50,13 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
         # aimdm more detail info
         self.spinner = "%s:id/cycles_spinner" % self.android_settings_package
         self.total_data_summary = "%s:id/summary" % self.android_relatelayout_package
+        self.data_used_title = "Mobile data & Wi‑Fi"
 
         # clear recent app btn
         self.clear_all = ":id/btn_remove_all"
+        self.clear_all_android13 = ":id/clear_all"
+        self.recent_panel = ":id/snapshot"
+        self.over_view_panel = ":id/overview_panel"
 
         # tpui relate
         self.tpui_main = "%s:id/layout_main" % self.tpui_pakcage
@@ -61,7 +68,8 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
 
         # wifi module relate
         # switch btn
-        self.wifi_switch_btn = "%s:id/switch_widget" % self.android_settings_package
+        self.wifi_switch_btn_org = "%s:id/switch_widget" % self.android_settings_package
+        self.wifi_switch_btn = "%s:id/switch_widget" % self.android_relatelayout_package  # ui change compare with android 10, and the same as android 12
         # wifi switch closed status-- ele(widget_frame) not existed and when open, ele is existed
         self.wifi_settings_btn = "%s:id/widget_frame" % self.android_relatelayout_package
         # wifi list
@@ -72,8 +80,6 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
         self.wifi_status = "%s:id/summary" % self.android_relatelayout_package
         self.input_wifi_box = "%s:id/password" % self.android_settings_package
         self.conn_wifi_btn = "%s:id/button1" % self.android_relatelayout_package
-
-        self.is_landscape = public_pack.yaml_data["android_device_info"]["is_landscape"]
 
     def get_swipe_point(self):
         if self.is_landscape:
@@ -170,74 +176,16 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
         if len(device_wifi_list) == 0:
             assert False, "@@@没连接上wifi, 请检擦！！！！"
 
-    def connect_settings_wifi_discard(self, wifi_list):
-        # get swipe point, and set the swipe range
-        size = self.get_screen_size()
-        x1 = int(size[0]) / 2
-        y1 = int(size[1]) - 100
-        x2 = int(size[0]) / 2
-        y2 = int(size[1]) / 2 - 100
-        all_wifi_boxes = self.get_element_by_id(self.wifi_view).child(className=self.single_wifi_box)
-        # print(all_wifi_boxes)
-        device_wifi_list = []
-        # find available wifi
-        flag = 0
-        for i in range(3):
-            for box in all_wifi_boxes:
-                for ava_wifi in wifi_list:
-                    text = '-+'
-                    try:
-                        text = self.remove_space(box.child(resourceId=self.wifi_name).get_text())
-                        # print(text)
-                    except Exception as e:
-                        pass
-                    if self.remove_space(ava_wifi["name"]) in text:
-                        if ava_wifi not in device_wifi_list:
-                            device_wifi_list.append(ava_wifi)
-            print("wifi列表: ", device_wifi_list)
-            if len(device_wifi_list) == 0:
-                # 滑动屏幕
-                self.swipe_screen(x1, y1, x2, y2)
-                continue
-            flag += 1
-            if self.ele_text_is_existed(device_wifi_list[0]["name"], time_to_wait=3):
-                print(device_wifi_list[0]["name"])
-                wifi_ele = self.get_element_by_text(device_wifi_list[0]["name"])
-                wifi_ele.click()
-                now_time = self.get_current_time()
-                while True:
-                    if self.ele_id_is_existed_USB(self.input_wifi_box):
-                        break
-                    if self.get_current_time() > self.return_end_time(now_time):
-                        assert False, "@@@@无法打开 %s wifi密码框， 请检查！！！！" % device_wifi_list[0]["name"]
-                    wifi_ele.click()
-                    self.time_sleep(1)
-
-            input_psw_box = self.get_element_by_id(self.input_wifi_box)
-            connect_btn = self.get_element_by_id(self.conn_wifi_btn)
-            now_time = self.get_current_time()
-            while True:
-                self.input_element_text(input_psw_box,  device_wifi_list[0]["password"])
-                self.time_sleep(1)
-                self.press_enter()
-                # connect_btn.click()
-                if not self.ele_id_is_existed_USB(self.input_wifi_box):
-                    break
-                if self.get_current_time() > self.return_end_time(now_time):
-                    assert False, "@@@@无法打开 %s wifi， 请检查！！！！" % device_wifi_list[0]["name"]
-
-            if flag == 1:
-                break
-
     def confirm_open_wifi_page(self):
         now_time = self.get_current_time()
         while True:
             log.info("am start -a android.settings.WIFI_SETTINGS")
             self.u2_send_command("am start -a android.settings.WIFI_SETTINGS")
-            switch_btn = self.ele_id_is_existed_USB(self.wifi_switch_btn, timeout=5)
+            switch_btn_org = self.ele_id_is_existed_USB(self.wifi_switch_btn_org, timeout=3)
+            switch_btn = self.ele_id_is_existed_USB(self.wifi_switch_btn, timeout=3)
             # print(switch_btn)
             # switch_btn = 1
-            if switch_btn:
+            if switch_btn or switch_btn_org:
                 break
             if self.get_current_time() > self.return_end_time(now_time):
                 assert False, "@@@@无法打开wifi 页面， 请检查！！！"
@@ -246,7 +194,7 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
         now_time = self.get_current_time()
         switch_btn = self.get_element_by_id(self.wifi_switch_btn)
         while True:
-            settings_btn = self.ele_id_is_existed_USB(self.wifi_settings_btn, timeout=10)
+            settings_btn = self.ele_id_is_existed_USB(self.wifi_settings_btn, timeout=5)
             if settings_btn:
                 break
             if self.get_current_time() > self.return_end_time(now_time):
@@ -286,6 +234,11 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
             assert False, "@@@@tpui主页无法打开，请检查！！！"
 
     def get_aimdm_mobile_data(self):
+        points = self.get_swipe_point()
+        x1 = points[0]
+        y1 = points[1]
+        x2 = points[2]
+        y2 = points[3]
         try:
             self.open_app_detail_info_page_USB(self.aimdm_package)
         except AssertionError:
@@ -296,8 +249,18 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
                 else:
                     assert False, "@@@@无法打开aimdm的app info 页面， 请检查！！！！"
         print(self.get_element_text_USB(self.get_element_by_id_USB(self.settings_title)))
-        pre_mobile_wifi_data_btn = self.get_element_by_id_USB(self.container).child(className=self.layout)[5]
+        for i in range(5):
+            btn = self.ele_text_is_existed(self.data_used_title, 5)
+            if btn:
+                break
+            if i < 2:
+                self.swipe_screen(x1, y1, x2, y2)
+            else:
+                self.swipe_screen(x1, y2, x2, y1)
+
+        # pre_mobile_wifi_data_btn = self.get_element_by_id_USB(self.container).child(className=self.layout)[5]
         # go to mobile data used detail page
+        pre_mobile_wifi_data_btn = self.get_element_by_text(self.data_used_title)
         pre_mobile_wifi_data_btn.click()
         self.confirm_ele_is_existed_USB(pre_mobile_wifi_data_btn, self.spinner)
         self.time_sleep(6)
@@ -315,6 +278,94 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
             return "kB"
         elif "MB" in data_used_info:
             return "MB"
+
+    def click_cleat_recent_app_btn_USB(self, id_no):
+        recent_app = self.get_current_app_USB()
+        now_time = self.get_current_time()
+        time.sleep(3)
+        while True:
+            try:
+                if self.ele_id_is_existed_USB(recent_app + id_no, 5):
+                    self.click_element_USB(self.get_element_by_id_USB(recent_app + id_no))
+                    if self.wait_ele_gone_by_id_USB(recent_app + id_no, 5):
+                        return True
+
+                if self.ele_id_is_existed_USB(recent_app + self.clear_all_android13):
+                    clear_btn = self.get_element_by_id_USB(recent_app + self.clear_all_android13)
+                    clear_btn.click()
+                    if self.wait_ele_gone_by_id_USB(recent_app + self.clear_all_android13, 5):
+                        return True
+
+                if self.ele_id_is_existed_USB(recent_app + self.recent_panel):
+                    panels = self.get_element_by_id_USB(recent_app + self.recent_panel)
+                    size = self.get_screen_size()
+                    size = [int(size[0]), int(size[1])]
+
+                    for i in range(len(panels)):
+                        if self.is_landscape:
+                            self.swipe_screen(size[1] / 2, size[0] / 2, size[1], size[0] / 2)
+                        else:
+                            self.swipe_screen(size[0] / 2, size[1] / 2, size[0], size[1] / 2)
+
+                if self.get_current_time() > self.return_end_time(now_time, 30):
+                    # break
+                    assert False, "@@@@无法清除最近应用， 请检查！！！！"
+                self.time_sleep(1)
+            except AssertionError as e:
+                print(e)
+                break
+
+    def click_cleat_recent_app_btn_USB_discard(self, id_no):
+        recent_app = self.get_current_app_USB()
+        now_time = self.get_current_time()
+        while True:
+            try:
+                if int(self.get_android_version()) >= 13:
+                    if self.ele_id_is_existed_USB(recent_app + self.clear_all_android13):
+                        clear_btn = self.get_element_by_id_USB(recent_app + self.clear_all_android13)
+                        clear_btn.click()
+                        if self.wait_ele_gone_by_id_USB(recent_app + self.clear_all_android13, 5):
+                            return True
+                    if self.ele_id_is_existed_USB(recent_app + self.recent_panel):
+                        panels = self.get_element_by_id_USB(recent_app + self.recent_panel)
+                        size = self.get_screen_size()
+                        size = [int(size[0]), int(size[1])]
+
+                        for i in range(len(panels)):
+                            if self.is_landscape:
+                                self.swipe_screen(size[1] / 2, size[0] / 2, size[1], size[0] / 2)
+                            else:
+                                self.swipe_screen(size[0] / 2, size[1] / 2, size[0], size[1] / 2)
+                    else:
+                        break
+                else:
+                    if self.wait_ele_presence_by_id_USB(recent_app + id_no, 5):
+                        self.click_element_USB(self.get_element_by_id_USB(recent_app + id_no))
+                        if self.wait_ele_gone_by_id_USB(recent_app + id_no, 5):
+                            return True
+                if self.get_current_time() > self.return_end_time(now_time, 60):
+                    assert False, "@@@@无法清除最近应用， 请检查！！！！"
+                self.time_sleep(1)
+            except AssertionError as e:
+                print(e)
+                break
+
+    def open_recent_page_USB(self):
+        self.back_to_home_USB()
+        self.u2_send_command_USB("input keyevent KEYCODE_APP_SWITCH")
+        self.time_sleep(2)
+        # first_app = self.get_current_app_USB()
+        # now_time = self.get_current_time()
+        # while True:
+        #     self.u2_send_command_USB("input keyevent KEYCODE_APP_SWITCH")
+        #     self.time_sleep(2)
+        #
+        #     if self.wait_ele_presence_by_id(self.get_current_app() + self.over_view_panel, 3):
+        #         break
+        #     next_app = self.get_current_app_USB()
+        #     if first_app != next_app:
+        #         break
+        #     break
 
     def clear_recent_app_USB(self):
         self.open_recent_page_USB()
@@ -337,6 +388,9 @@ class AndroidAimdmPage(AndroidBasePageUSB, AndroidBasePageWiFi):
 
     def confirm_system_app_uninstalled(self):
         apk_file = public_pack.yaml_data['app_info']['low_version_app']
+        # self.wifi_adb_root(self.device_ip)
+        # self.rm_file("system/app/%s" % apk_file)
+        # self.reboot_device_root(self.device_ip)
         now_time = self.get_current_time()
         while True:
             # self.wifi_adb_root(self.device_ip)

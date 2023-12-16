@@ -96,7 +96,7 @@ class TestNetworkCases:
                     self.page.input_app_info(file_path)
                     self.page.refresh_page()
 
-    @allure.feature('MDM_usb-test')
+    @allure.feature('MDM_usb-test1111')
     @allure.story('MDM-Show')
     @allure.title("Apps- 断网重连获取aimdm消耗的流量")
     @pytest.mark.dependency(depends=["test_login_ok"], scope='package')

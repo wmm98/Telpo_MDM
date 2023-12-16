@@ -69,6 +69,7 @@ class AndroidBasePageUSB(interface):
 
     def back_to_home_USB(self):
         self.USB_client.press("home")
+        self.USB_client.press("back")
 
     def calculate_sha256_in_device_USB(self, file_name):
         # sha256sum sdcard/aimdm/data/2023-10-12.txt
