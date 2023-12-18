@@ -241,7 +241,12 @@ class AndroidBasePageUSB(interface):
 
     def screen_keep_on_USB(self):
         self.u2_send_command_USB("settings put system screen_off_timeout 1800000")
-        self.swipe_unlock_screen_USB()
+        # self.device_unlock()
+        # self.swipe_unlock_screen()
+        self.USB_client.screen_off()
+        self.USB_client.press("power")
+        self.USB_client.swipe(0.1, 0.9, 0.9, 0.1)
+        self.USB_client.swipe(0.1, 0.9, 0.9, 0.1)
 
     def swipe_unlock_screen_USB(self, battery=True):
         width, height = self.USB_client.window_size()

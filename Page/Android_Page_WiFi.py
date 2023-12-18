@@ -413,9 +413,16 @@ class AndroidBasePageWiFi(interface):
         return self.client.device_info["battery"]["usbPowered"]
 
     def screen_keep_on(self):
+        # self.u2_send_command("settings put system screen_off_timeout 1800000")
+        # # self.device_unlock()
+        # self.swipe_unlock_screen()
         self.u2_send_command("settings put system screen_off_timeout 1800000")
         # self.device_unlock()
-        self.swipe_unlock_screen()
+        # self.swipe_unlock_screen()
+        self.client.screen_off()
+        self.client.press("power")
+        self.client.swipe(0.1, 0.9, 0.9, 0.1)
+        self.client.swipe(0.1, 0.9, 0.9, 0.1)
 
     def swipe_unlock_screen(self, battery=True):
         width, height = self.client.window_size()
