@@ -90,10 +90,12 @@ class Serial:
 
     def confirm_relay_opened(self, timeout=120):
         if self.is_serial:
-            self.confirm_relay_closed()
             now_time = time.time()
             while True:
+                self.confirm_relay_closed()
+                time.sleep(1)
                 self.send_ser_connect_cmd(conn=True)
+                time.sleep(2)
                 if self.send_status_cmd():
                     log.info("成功打开继电器")
                     break

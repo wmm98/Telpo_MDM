@@ -266,7 +266,8 @@ class TestDevicesPage:
                     assert "Off" in opt_case.get_single_device_list(sn)[0]["Status"]
                     log.info("设备重启下线， 指令在3s内触发")
                     self.page.time_sleep(4)
-                    self.android_mdm_page.confirm_wifi_adb_connected(self.wifi_ip)
+                    # self.android_mdm_page.confirm_wifi_adb_connected(self.wifi_ip)
+                    self.android_mdm_page.confirm_usb_adb_connect(self.wifi_ip)
                     self.android_mdm_page.device_existed(self.wifi_ip)
                     self.android_mdm_page.device_boot_complete()
                     log.info("设备启动完成")
