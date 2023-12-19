@@ -33,8 +33,9 @@ class interface:
             return False
 
     def disconnect_ip(self, ip):
-        res = sub_shell.invoke("adb disconnect %s" % ip)
-        print(res)
+        pass
+        # res = sub_shell.invoke("adb disconnect %s" % ip)
+        # print(res)
 
     def path_is_existed(self, path):
         if public_pack.os.path.exists(path):
